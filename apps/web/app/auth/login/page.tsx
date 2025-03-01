@@ -2,10 +2,11 @@
 
 // Import the necessary libraries
 import { LoginForm } from "@/components/auth/login/form"
+import { Logo } from "@/components/elements/logo";
 
 export default function LoginPage() {
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
+    <div className="grid min-h-svh lg:grid-cols-2 bg-muted md:bg-background">
 
 
       <div className="relative hidden bg-muted lg:block">
@@ -17,17 +18,15 @@ export default function LoginPage() {
 
 
       <div className="flex flex-col gap-4 p-6 md:p-6">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            {/* Texte en italique */}
-            <div className=" rounded-md bg-primary text-primary-foreground italic text-center h-6 w-6 flex items-center justify-center pr-0.5">
-              H
-            </div>
-            Hakim Fidjel
-          </a>
+
+
+        <div className="flex gap-2 justify-start">
+          <Logo />
         </div>
+
+
         <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
+          <div className="w-full max-w-sm">
             <LoginForm />
           </div>
         </div>
