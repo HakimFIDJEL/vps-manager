@@ -1,17 +1,17 @@
-import { Theme } from "@/components/elements/theme";
+import { AdminProvider } from "@/components/providers/admin";
 
-import { AdminPovider } from "@/components/providers/admin";
 
-export default function AuthLayout({
+export default function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactElement;
 }) {
+
   return (
-    <>
-      <div className="[--header-height:calc(theme(spacing.14))] bg-muted">
-        <AdminPovider className="bg-muted">{children}</AdminPovider>
-      </div>
-    </>
+    <div className="[--header-height:calc(theme(spacing.14))] bg-muted">
+      <AdminProvider className="bg-muted">
+        {children}
+      </AdminProvider>
+    </div>
   );
 }

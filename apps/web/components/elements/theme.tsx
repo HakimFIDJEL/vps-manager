@@ -2,6 +2,7 @@
 
 // Components
 import { Button } from "@workspace/ui/components/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
 
 // Icons
 import { Sun, Moon } from "lucide-react";
@@ -26,14 +27,25 @@ export function Theme({ classname }: ThemeProps) {
   if (!mounted) return null;
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className={`text-foreground z-50 ${classname}`}
-    >
-        {mounted && (theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
-
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className={`text-foreground z-50 ${classname}`}
+        >
+          {mounted &&
+            (theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            ))}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Toggle Theme</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
