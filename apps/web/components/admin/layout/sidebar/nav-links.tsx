@@ -19,9 +19,13 @@ import {
   SidebarMenuSubItem,
 } from "@workspace/ui/components/sidebar"
 
-export function NavMain({
+export function NavLinks({
+  title,
   items,
+  className,
 }: {
+  title?: string,
+  className?: string,
   items: {
     title: string
     url: string
@@ -34,8 +38,9 @@ export function NavMain({
   }[]
 }) {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+    <SidebarGroup className={className}>
+      {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
+      
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>

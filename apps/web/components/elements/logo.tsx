@@ -6,7 +6,7 @@ interface LogoProps {
   className?: string;
   href?: string;
   logo_size?: "5" | "8" | "10" | "12"; // Tailles autorisées
-  font_size?: "sm" | "md" | "lg" | "xl";
+  font_size?: "sm" | "base" | "lg" | "xl";
 }
 
 export function Logo({ className, href, logo_size = "5", font_size = "sm" }: LogoProps) {
@@ -17,7 +17,7 @@ export function Logo({ className, href, logo_size = "5", font_size = "sm" }: Log
     >
       <div
         className={cn(
-          "rounded-md bg-primary text-primary-foreground italic text-center flex items-center justify-center pr-0.5",
+          "rounded-md bg-primary text-primary-foreground italic text-center flex items-center justify-center pr-0.5 aspect-square",
           `h-${logo_size}`,
           `w-${logo_size}`,
           `text-${font_size}`

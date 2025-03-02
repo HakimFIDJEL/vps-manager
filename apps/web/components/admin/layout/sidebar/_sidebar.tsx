@@ -16,146 +16,168 @@ import {
 
 // Icons
 import {
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
+  Archive,
+  Container,
+  Database,
+  Folder,
+  LayoutDashboard,
+  LogOut,
+  Network,
   Settings2,
+  SquareActivity,
   SquareTerminal,
+  User,
 } from "lucide-react"
 
-import { NavMain } from "@/components/admin/layout/sidebar/nav-main"
-import { NavProjects } from "@/components/admin/layout/sidebar/nav-projects"
-import { NavSecondary } from "@/components/admin/layout/sidebar/nav-secondary"
+import { NavLinks } from "@/components/admin/layout/sidebar/nav-links"
 import { NavUser } from "@/components/admin/layout/sidebar/nav-user"
 import { Logo } from "@/components/elements/logo"
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+  
+  navigation: [
     {
-      title: "Playground",
+      title: "Dashboard",
+      url: "#",
+      icon: LayoutDashboard,
+      isActive: true,
+    },
+    {
+      title: "Projects",
+      url: "#",
+      icon: Folder,
+      items: [
+        {
+          title: "Project 1",
+          url: "#",
+        },
+        {
+          title: "Project 2",
+          url: "#",
+        },
+        {
+          title: "Project 3",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Docker",
+      url: "#",
+      icon: Container,
+      items: [
+        {
+          title: "Containers",
+          url: "#",
+        },
+        {
+          title: "Volumes",
+          url: "#",
+        },
+        {
+          title: "Networks",
+          url: "#",
+        },
+        {
+          title: "Images",
+          url: "#",
+        }
+      ],
+    },
+    {
+      title: "Network & Security",
+      url: "#",
+      icon: Network,
+      items: [
+        {
+          title: "SSH Keys",
+          url: "#",
+        },
+        {
+          title: "Traefik",
+          url: "#",
+        },
+        {
+          title: "Firewall",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Storage",
+      url: "#",
+      icon: Archive,
+      items: [
+        {
+          title: "Disk Usage",
+          url: "#",
+        },
+        {
+          title: "Backups",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Monitoring",
+      url: "#",
+      icon: SquareActivity,
+      items: [
+        {
+          title: "Processes",
+          url: "#",
+        },
+        {
+          title: "Resources",
+          url: "#",
+        },
+        {
+          title: "Containers",
+          url: "#",
+        },
+        {
+          title: "Logs",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  
+  quick_access: [
+    {
+      title: "Terminal",
       url: "#",
       icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Models",
+      title: "Database",
       url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      icon: Database,
     },
     {
       title: "Settings",
       url: "#",
       icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
     },
   ],
-  navSecondary: [
+
+  footer: [
     {
-      title: "Support",
+      title: "Account",
       url: "#",
-      icon: LifeBuoy,
+      icon: User,
     },
     {
-      title: "Feedback",
+      title: "Log out",
       url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      icon: LogOut,
     },
   ],
+
+  user: {
+    name: "Hakim Fidjel",
+    email: "m@example.com",
+  },
 }
 
 export function LayoutSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -180,10 +202,10 @@ export function LayoutSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       
       <SidebarContent>
 
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-
+        <NavLinks title="Navigation" items={data.navigation} />
+        <NavLinks title="Quick access" items={data.quick_access} />
+        
+        <NavLinks items={data.footer} className="mt-auto" />
 
       </SidebarContent>
       <SidebarFooter>
