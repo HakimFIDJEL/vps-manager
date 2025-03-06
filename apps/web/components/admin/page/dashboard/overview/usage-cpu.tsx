@@ -35,7 +35,7 @@ const chartConfig = {
 
 export function UsageCpu() {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>CPU Usage</CardTitle>
         <CardDescription>

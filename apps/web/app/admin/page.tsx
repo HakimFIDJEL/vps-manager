@@ -8,7 +8,7 @@ import {
 } from "@workspace/ui/components/tabs";
 import { BreadcrumbSetter } from "@/components/admin/layout/header/header-breadcrumb";
 import { Header } from "@/components/admin/page/header";
-import { Overview } from "@/components/admin/page/dashboard/overview";
+import { Monitoring } from "@/components/admin/page/dashboard/monitoring";
 
 export default function Page() {
   return (
@@ -21,15 +21,15 @@ export default function Page() {
       />
 
       {/* Contenu de la page */}
-      <Tabs defaultValue="overview" className="h-full w-full md:w-auto gap-4 flex flex-col">
+      <Tabs defaultValue="monitoring" className="h-full w-full md:w-auto gap-4 flex flex-col">
         <Header
           title="Dashboard"
           subtitle="Welcome to the dashboard"
         >
           <div className="h-full flex">
             <TabsList className="h-full flex gap-2">
-              <TabsTrigger value="overview" className="h-full md:px-4">
-                Overview
+              <TabsTrigger value="monitoring" className="h-full md:px-4">
+                Server
               </TabsTrigger>
               <TabsTrigger value="projects" className="h-full md:px-4">
                 Projects
@@ -45,8 +45,8 @@ export default function Page() {
         </Header>
 
         <div>
-          <TabsContent value="overview">
-            <Overview />
+          <TabsContent value="monitoring">
+            <Monitoring />
           </TabsContent>
           <TabsContent value="projects">Projects</TabsContent>
           <TabsContent value="containers">Containers</TabsContent>

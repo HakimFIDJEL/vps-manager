@@ -65,7 +65,7 @@ const invoices = [
 
 export function Network() {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Network</CardTitle>
         <CardDescription>

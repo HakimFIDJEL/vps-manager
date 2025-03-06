@@ -35,7 +35,7 @@ const chartConfig = {
 
 export function UsageRam() {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Ram Usage</CardTitle>
         <CardDescription>
