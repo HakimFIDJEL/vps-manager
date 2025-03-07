@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 // Icons
-import { TrendingUp, ArrowUpRight, Cpu } from "lucide-react";
+import { TrendingUp, MemoryStick, ArrowUpRight } from "lucide-react";
 
 // Shadcn Components
 import { Progress } from "@workspace/ui/components/progress";
@@ -24,21 +24,28 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@workspace/ui/components/chart";
+
 import { Button } from "@workspace/ui/components/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+
+import { Separator } from "@workspace/ui/components/separator";
 
 const FETCH_INTERVAL = 20000; // 20 secondes
 
-// Valeurs de test simulant l'utilisation du CPU
+// Valeurs de test
 const testData = [
-  { time: "12:00:00", usage: 15 },
-  { time: "12:00:05", usage: 25 },
-  { time: "12:00:10", usage: 40 },
-  { time: "12:00:15", usage: 55 },
-  { time: "12:00:20", usage: 65 },
+  { time: "12:00:00", usage: 30 },
+  { time: "12:00:05", usage: 45 },
+  { time: "12:00:10", usage: 50 },
+  { time: "12:00:15", usage: 60 },
+  { time: "12:00:20", usage: 55 },
 ];
 
-export function UsageCpu() {
+export function UsageRam() {
   const [chartData, setChartData] =
     useState<{ time: string; usage: number }[]>(testData);
   const [progress, setProgress] = useState(100);
@@ -50,10 +57,10 @@ export function UsageCpu() {
       //   const newData = {
       //     time: new Date().toLocaleTimeString(),
       //     usage: Math.floor(Math.random() * 100),
-      //   };
-      //   setChartData((prev) => [...prev.slice(-19), newData]); // Garde les 20 dernières entrées
+      //   }
+      //   setChartData((prev) => [...prev.slice(-19), newData]) // Garde les 20 dernières entrées
       // } catch (error) {
-      //   console.error("Error fetching CPU usage:", error);
+      //   console.error("Error fetching RAM usage:", error)
       // }
     };
 
@@ -74,39 +81,39 @@ export function UsageCpu() {
 
   const chartConfig = {
     usage: {
-      label: "CPU Usage (%)",
-      color: "hsl(var(--chart-1))",
+      label: "RAM Usage (%)",
+      color: "hsl(var(--primary))",
     },
   } satisfies ChartConfig;
 
   return (
     <Card>
+      <CardHeader className=" bg-muted/50 flex flex-row justify-between items-center">
+        <div>
+          <CardTitle className="flex items-center gap-2">
+            <MemoryStick className="h-5 w-5 text-primary" />
+            RAM Usage
+          </CardTitle>
+          <CardDescription>Real-time server RAM consumption</CardDescription>
+        </div>
 
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <Cpu />
-            CPU Usage
-          </span>
-
-          <Link href="">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" className="h-7 w-7">
-                  <ArrowUpRight />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>See details</p>
-              </TooltipContent>
-            </Tooltip>
-          </Link>
-        </CardTitle>
-        <CardDescription>Real-time server CPU consumption</CardDescription>
+        <Link href="">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" className="h-8 w-8  md:h-7 md:w-7">
+                <ArrowUpRight />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>See details</p>
+            </TooltipContent>
+          </Tooltip>
+        </Link>
       </CardHeader>
 
+      <Separator className="md:mb-6 mb-2" />
 
-      <CardContent>
+      <CardContent className="p-2 md:p-6">
         <ChartContainer
           config={chartConfig}
           className="w-full flex justify-center"
@@ -156,21 +163,27 @@ export function UsageCpu() {
             />
           </AreaChart>
         </ChartContainer>
-        <Progress value={progress} />
       </CardContent>
-      
-      <CardFooter>
+
+      <Separator className="md:mb-6 mb-2" />
+
+      <CardFooter className="pt-2 md:pt-0">
         <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
+          <div className="grid gap-2 w-full">
+            <h3 className="flex items-center gap-2 font-medium leading-none">
               Real-time tracking <TrendingUp className="h-4 w-4" />
-            </div>
+            </h3>
             <div className="flex items-center gap-2 leading-none text-muted-foreground">
               Updated every {FETCH_INTERVAL / 1000} seconds
             </div>
           </div>
         </div>
       </CardFooter>
+
+      <Progress
+        value={progress}
+        className="rounded-none rounded-b-xl h-2 md:h-3"
+      />
     </Card>
   );
 }

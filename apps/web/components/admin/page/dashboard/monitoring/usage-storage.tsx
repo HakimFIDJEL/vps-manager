@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
 
-import { Archive, ArrowUpRight, TrendingUp } from "lucide-react";
+// Necessary imports
+import { useState, useEffect, useMemo } from "react";
 import {
   Label,
   PolarGrid,
@@ -9,7 +9,12 @@ import {
   RadialBar,
   RadialBarChart,
 } from "recharts";
+import Link from "next/link";
 
+// Icons
+import { Archive, ArrowUpRight, TrendingUp } from "lucide-react";
+
+// Shadcn Components
 import {
   Card,
   CardContent,
@@ -22,7 +27,6 @@ import {
   type ChartConfig,
   ChartContainer,
 } from "@workspace/ui/components/chart";
-import Link from "next/link";
 import {
   Tooltip,
   TooltipContent,
@@ -30,15 +34,39 @@ import {
 } from "@workspace/ui/components/tooltip";
 import { Button } from "@workspace/ui/components/button";
 import { Progress } from "@workspace/ui/components/progress";
+import { Separator } from "@workspace/ui/components/separator";
+import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 
-const chartData = [
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-];
-
+// Constants
+const testData = [{ storageUsed: 120, storageTotal: 500 }];
 const FETCH_INTERVAL = 60000; // 60 secondes
 
 export function UsageStorage() {
   const [progress, setProgress] = useState(100);
+  const isMobile = useIsMobile();
+
+  const [storageData, setStorageData] =
+    useState<{ storageUsed: number; storageTotal: number }[]>(testData);
+
+  const chartData = useMemo(
+    () => [
+      {
+        storageUsed: storageData?.[0]?.storageUsed ?? 0,
+        storageTotal: storageData?.[0]?.storageTotal ?? 1,
+
+        fill: "hsl(var(--primary))",
+      },
+    ],
+    []
+  );
+
+  const polarRadius = useMemo(() => {
+    return isMobile ? [98, 80] : [120, 100]; // Version plus propre
+  }, [isMobile]); // 🔥 Ajout de `isMobile`
+
+  const storageUsed = storageData?.[0]?.storageUsed ?? 0;
+  const storageTotal = storageData?.[0]?.storageTotal ?? 1; // Évite la division par 0
+  const storagePercentage = Math.round((storageUsed / storageTotal) * 100);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,60 +98,58 @@ export function UsageStorage() {
   }, []);
 
   const chartConfig = {
-    visitors: {
-      label: "Visitors",
+    storageAvailable: {
+      label: "Storage Available",
     },
-    safari: {
-      label: "Safari",
-      color: "hsl(var(--chart-1))",
+    storageUsed: {
+      label: "Storage Used",
+      color: "hsl(var(--primary))",
     },
   } satisfies ChartConfig;
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <Archive />
-            Storage Usage
-          </span>
-
-          <Link href="">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" className="h-7 w-7">
-                  <ArrowUpRight />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>See details</p>
-              </TooltipContent>
-            </Tooltip>
-          </Link>
-        </CardTitle>
-        <CardDescription>Real-time server storage capacity</CardDescription>
+      <CardHeader className=" bg-muted/50 flex flex-row justify-between items-center">
+        <div>
+          <CardTitle className="flex items-center gap-2">
+            <Archive className="h-5 w-5 text-primary" />
+            Storage Capacity
+          </CardTitle>
+          <CardDescription>Real-time server storage capacity</CardDescription>
+        </div>
+        <Link href="">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" className="h-8 w-8  md:h-7 md:w-7">
+                <ArrowUpRight />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>See details</p>
+            </TooltipContent>
+          </Tooltip>
+        </Link>
       </CardHeader>
 
-      <CardContent>
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
+      <Separator className="md:mb-6 mb-2" />
+
+      <CardContent className="p-0 md:p-6">
+        <ChartContainer config={chartConfig} className="mx-auto w-full">
           <RadialBarChart
             data={chartData}
             startAngle={0}
-            endAngle={250}
-            innerRadius={80}
-            outerRadius={110}
+            endAngle={360 * (storagePercentage / 100)}
+            innerRadius="84%"
+            outerRadius="124%"
           >
             <PolarGrid
               gridType="circle"
               radialLines={false}
               stroke="none"
-              className="first:fill-muted last:fill-background"
-              polarRadius={[86, 74]}
+              className="first:fill-muted last:fill-background h-full"
+              polarRadius={polarRadius}
             />
-            <RadialBar dataKey="visitors" background cornerRadius={10} />
+            <RadialBar dataKey="storageUsed" background cornerRadius={10} />
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
                 content={({ viewBox }) => {
@@ -140,16 +166,14 @@ export function UsageStorage() {
                           y={viewBox.cy}
                           className="fill-foreground text-4xl font-bold"
                         >
-                          {chartData.length > 0
-                            ? chartData[0]?.visitors.toLocaleString()
-                            : "0"}
+                          {storageUsed}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Visitors
+                          / {storageTotal} GB
                         </tspan>
                       </text>
                     );
@@ -160,10 +184,11 @@ export function UsageStorage() {
             </PolarRadiusAxis>
           </RadialBarChart>
         </ChartContainer>
-        <Progress value={progress} />
       </CardContent>
 
-      <CardFooter>
+      <Separator className="md:mb-6 mb-2" />
+
+      <CardFooter className="pt-2 md:pt-0">
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
@@ -175,6 +200,11 @@ export function UsageStorage() {
           </div>
         </div>
       </CardFooter>
+
+      <Progress
+        value={progress}
+        className="rounded-none rounded-b-xl h-2 md:h-3"
+      />
     </Card>
   );
 }

@@ -8,10 +8,10 @@ import {
     CardTitle,
 } from "@workspace/ui/components/card"
 
-import { UsageCpu } from "@/components/admin/page/dashboard/overview/usage-cpu";
-import { UsageRam } from "@/components/admin/page/dashboard/overview/usage-ram";
-import { UsageStorage } from "@/components/admin/page/dashboard/overview/usage-storage";
-import { Network } from "@/components/admin/page/dashboard/overview/network";
+import { UsageCpu } from "@/components/admin/page/dashboard/monitoring/usage-cpu";
+import { UsageRam } from "@/components/admin/page/dashboard/monitoring/usage-ram";
+import { UsageStorage } from "@/components/admin/page/dashboard/monitoring/usage-storage";
+import { Network } from "@/components/admin/page/dashboard/monitoring/network";
 import { Separator } from "@workspace/ui/components/separator";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 
@@ -28,9 +28,7 @@ export function Monitoring({ ...props }) {
                 <UsageStorage />
             </div>
                 
-            <div>
-                <Network />
-            </div>
+            <Network />
 
 
         </div>

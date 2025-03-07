@@ -26,18 +26,18 @@ export default function Page() {
           title="Dashboard"
           subtitle="Welcome to the dashboard"
         >
-          <div className="h-full flex">
-            <TabsList className="h-full flex gap-2">
-              <TabsTrigger value="monitoring" className="h-full md:px-4">
-                Server
+          <div className="h-full flex  overflow-x-auto pb-2 md:pb-0 md:overflow-x-hidden w-full md:w-auto">
+            <TabsList className="h-full flex gap-2 w-full">
+              <TabsTrigger value="monitoring" className="h-full md:px-4 px-2">
+                Monitoring
               </TabsTrigger>
-              <TabsTrigger value="projects" className="h-full md:px-4">
+              <TabsTrigger value="projects" className="h-full md:px-4 px-2">
                 Projects
               </TabsTrigger>
-              <TabsTrigger value="containers" className="h-full md:px-4">
+              <TabsTrigger value="containers" className="h-full md:px-4 px-2">
                 Containers
               </TabsTrigger>
-              <TabsTrigger value="storage" className="h-full md:px-4">
+              <TabsTrigger value="storage" className="h-full md:px-4 px-2">
                 Storage
               </TabsTrigger>
             </TabsList>
