@@ -1,15 +1,15 @@
 "use client";
-
-// Necessay imports
 import { useState, useEffect } from "react";
-import Link from "next/link";
 
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-// Icons
-import { TrendingUp, ArrowUpRight, Cpu } from "lucide-react";
+import { Archive, ArrowUpRight, TrendingUp } from "lucide-react";
+import {
+  Label,
+  PolarGrid,
+  PolarRadiusAxis,
+  RadialBar,
+  RadialBarChart,
+} from "recharts";
 
-// Shadcn Components
-import { Progress } from "@workspace/ui/components/progress";
 import {
   Card,
   CardContent,
@@ -19,28 +19,25 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import {
-  ChartConfig,
+  type ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@workspace/ui/components/chart";
+import Link from "next/link";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
 import { Button } from "@workspace/ui/components/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
+import { Progress } from "@workspace/ui/components/progress";
 
-const FETCH_INTERVAL = 20000; // 20 secondes
-
-// Valeurs de test simulant l'utilisation du CPU
-const testData = [
-  { time: "12:00:00", usage: 15 },
-  { time: "12:00:05", usage: 25 },
-  { time: "12:00:10", usage: 40 },
-  { time: "12:00:15", usage: 55 },
-  { time: "12:00:20", usage: 65 },
+const chartData = [
+  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
 ];
 
-export function UsageCpu() {
-  const [chartData, setChartData] =
-    useState<{ time: string; usage: number }[]>(testData);
+const FETCH_INTERVAL = 60000; // 60 secondes
+
+export function UsageStorage() {
   const [progress, setProgress] = useState(100);
 
   useEffect(() => {
@@ -73,20 +70,22 @@ export function UsageCpu() {
   }, []);
 
   const chartConfig = {
-    usage: {
-      label: "CPU Usage (%)",
+    visitors: {
+      label: "Visitors",
+    },
+    safari: {
+      label: "Safari",
       color: "hsl(var(--chart-1))",
     },
   } satisfies ChartConfig;
 
   return (
     <Card>
-
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Cpu />
-            CPU Usage
+            <Archive />
+            Storage Usage
           </span>
 
           <Link href="">
@@ -102,63 +101,68 @@ export function UsageCpu() {
             </Tooltip>
           </Link>
         </CardTitle>
-        <CardDescription>Real-time server CPU consumption</CardDescription>
+        <CardDescription>Real-time server storage capacity</CardDescription>
       </CardHeader>
-
 
       <CardContent>
         <ChartContainer
           config={chartConfig}
-          className="w-full flex justify-center"
+          className="mx-auto aspect-square max-h-[250px]"
         >
-          <AreaChart
-            accessibilityLayer
+          <RadialBarChart
             data={chartData}
-            margin={{ top: 20, right: 10, left: -25, bottom: 20 }}
+            startAngle={0}
+            endAngle={250}
+            innerRadius={80}
+            outerRadius={110}
           >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="time"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
+            <PolarGrid
+              gridType="circle"
+              radialLines={false}
+              stroke="none"
+              className="first:fill-muted last:fill-background"
+              polarRadius={[86, 74]}
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickCount={5}
-              domain={[0, 100]}
-            />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-
-            <defs>
-              <linearGradient id="fillUsage" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-usage)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-usage)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
-            <Area
-              dataKey="usage"
-              type="natural"
-              fill="url(#fillUsage)"
-              fillOpacity={0.4}
-              stroke="var(--color-usage)"
-              stackId="a"
-            />
-          </AreaChart>
+            <RadialBar dataKey="visitors" background cornerRadius={10} />
+            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
+                        <tspan
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          className="fill-foreground text-4xl font-bold"
+                        >
+                          {chartData.length > 0
+                            ? chartData[0]?.visitors.toLocaleString()
+                            : "0"}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground"
+                        >
+                          Visitors
+                        </tspan>
+                      </text>
+                    );
+                  }
+                  return null;
+                }}
+              />
+            </PolarRadiusAxis>
+          </RadialBarChart>
         </ChartContainer>
         <Progress value={progress} />
       </CardContent>
-      
+
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">

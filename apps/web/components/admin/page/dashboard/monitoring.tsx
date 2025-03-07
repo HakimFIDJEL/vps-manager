@@ -10,7 +10,7 @@ import {
 
 import { UsageCpu } from "@/components/admin/page/dashboard/overview/usage-cpu";
 import { UsageRam } from "@/components/admin/page/dashboard/overview/usage-ram";
-import { Storage } from "@/components/admin/page/dashboard/overview/storage";
+import { UsageStorage } from "@/components/admin/page/dashboard/overview/usage-storage";
 import { Network } from "@/components/admin/page/dashboard/overview/network";
 import { Separator } from "@workspace/ui/components/separator";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
@@ -25,7 +25,7 @@ export function Monitoring({ ...props }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <UsageRam />
                 <UsageCpu />
-                <Storage />
+                <UsageStorage />
             </div>
                 
             <div>
