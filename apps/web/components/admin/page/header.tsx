@@ -1,27 +1,40 @@
-import type React from "react"
+import { Separator } from "@workspace/ui/components/separator";
+import type React from "react";
+
 interface HeaderProps {
-  title: string
-  subtitle?: string
-  children?: React.ReactNode
+  title: string;
+  subtitle?: string;
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
-export function Header({ title, subtitle, children, ...props }: HeaderProps) {
+export function Header({
+  title,
+  subtitle,
+  children,
+  icon,
+  ...props
+}: HeaderProps) {
   return (
-    <section className="bg-background py-4 rounded-xl shadow-sm border border-sidebar-border md:h-20 h-auto " {...props}>
-      <div className="mx-auto px-6 h-full">
-        <div className="flex flex-col md:flex-row md:justify-between h-full md:gap-2 gap-4 ">
-          <div className="flex items-center">
-            <div>
-              <h1 className="text-xl tracking-tight font-semibold">{title}</h1>
-              {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-            </div>
+    <section
+      className=" rounded-xl shadow-sm border border-sidebar-border 
+             bg-background flex justify-between items-center flex-col md:flex-row"
+      {...props}
+    >
+      <div
+        className="flex flex-col flex-1 items-center md:flex-row md:justify-between mx-auto px-6 py-4 h-full md:gap-2 gap-4 w-full md:w-auto border-b md:border-b-0 md:border-r border-border bg-muted/50">
+        <div>
+          <div className="flex items-center gap-2">
+            {icon}
+            <h1 className="text-xl tracking-tight font-semibold">{title}</h1>
           </div>
-
-
-          <div className="h-full flex items-stretch">{children}</div>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          )}
         </div>
       </div>
-    </section>
-  )
-}
 
+      <div className="gap-2 px-6 py-4 flex items-center">{children}</div>
+    </section>
+  );
+}

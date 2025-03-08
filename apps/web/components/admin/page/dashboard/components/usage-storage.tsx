@@ -61,8 +61,8 @@ export function UsageStorage() {
   );
 
   const polarRadius = useMemo(() => {
-    return isMobile ? [98, 80] : [120, 100]; // Version plus propre
-  }, [isMobile]); // 🔥 Ajout de `isMobile`
+    return [90, 80];
+  }, [isMobile]); 
 
   const storageUsed = storageData?.[0]?.storageUsed ?? 0;
   const storageTotal = storageData?.[0]?.storageTotal ?? 1; // Évite la division par 0
@@ -113,7 +113,7 @@ export function UsageStorage() {
         <div>
           <CardTitle className="flex items-center gap-2">
             <Archive className="h-5 w-5 text-primary" />
-            Storage Capacity
+            Disk usage
           </CardTitle>
           <CardDescription>Real-time server storage capacity</CardDescription>
         </div>
@@ -139,8 +139,10 @@ export function UsageStorage() {
             data={chartData}
             startAngle={0}
             endAngle={360 * (storagePercentage / 100)}
-            innerRadius="84%"
-            outerRadius="124%"
+            // innerRadius="84%"
+            // outerRadius="124%"
+            innerRadius={84}
+            outerRadius={124}
           >
             <PolarGrid
               gridType="circle"

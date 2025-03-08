@@ -8,14 +8,14 @@ import {
     CardTitle,
 } from "@workspace/ui/components/card"
 
-import { UsageCpu } from "@/components/admin/page/dashboard/monitoring/usage-cpu";
-import { UsageRam } from "@/components/admin/page/dashboard/monitoring/usage-ram";
-import { UsageStorage } from "@/components/admin/page/dashboard/monitoring/usage-storage";
-import { Network } from "@/components/admin/page/dashboard/monitoring/network";
+import { UsageCpu } from "@/components/admin/page/dashboard/components/usage-cpu";
+import { UsageRam } from "@/components/admin/page/dashboard/components/usage-ram";
+import { UsageStorage } from "@/components/admin/page/dashboard/components/usage-storage";
+import { Network } from "@/components/admin/page/dashboard/components/network";
 import { Separator } from "@workspace/ui/components/separator";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 
-export function Monitoring({ ...props }) {
+export function Dashboard({ ...props }) {
 
     const isMobile = useIsMobile();
 

@@ -90,6 +90,10 @@ const data = {
       icon: Network,
       items: [
         {
+          title: "Activity",
+          url: "#",
+        },
+        {
           title: "SSH Keys",
           url: "#",
         },

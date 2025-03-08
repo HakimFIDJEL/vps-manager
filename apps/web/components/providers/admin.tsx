@@ -5,7 +5,7 @@ import { LayoutSidebar } from "@/components/admin/layout/sidebar/_sidebar";
 import { LayoutHeader } from "@/components/admin/layout/header/_header";
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar";
 import { BreadcrumbProvider } from "@/components/providers/breadcrumb/provider";
-import { TooltipProvider } from "@workspace/ui/components/tooltip";
+import { ConfirmDialogProvider } from '@omit/react-confirm-dialog'
 
 export function AdminProvider({
   children,
@@ -15,6 +15,7 @@ export function AdminProvider({
   className?: string;
 }) {
   return (
+    <ConfirmDialogProvider>
       <SidebarProvider className="flex flex-col">
         <BreadcrumbProvider>
           <LayoutHeader />
@@ -24,5 +25,6 @@ export function AdminProvider({
           </div>
         </BreadcrumbProvider>
       </SidebarProvider>
+    </ConfirmDialogProvider>
   );
 }

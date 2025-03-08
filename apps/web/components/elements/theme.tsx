@@ -30,10 +30,10 @@ export function Theme({ classname }: ThemeProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className={`text-foreground z-50 ${classname}`}
+          className={`text-foreground z-50 ${classname} h-8 w-8`}
         >
           {mounted &&
             (theme === "dark" ? (
