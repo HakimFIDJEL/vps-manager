@@ -16,7 +16,7 @@ import {
 } from "@workspace/ui/components/card";
 
 // Icons
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
 
 // Hooks
@@ -69,9 +69,9 @@ export function ResetForm({
     let score = 0;
 
     if (password.length >= 8) score += 30;
-    if (/[A-Z]/.test(password)) score += 20;
-    if (/[a-z]/.test(password)) score += 20;
-    if (/\d/.test(password)) score += 20;
+    if (/[A-Z]/.test(password)) score += 20; // Lettre majuscule
+    if (/[a-z]/.test(password)) score += 20; // Lettre minuscule
+    if (/\d/.test(password)) score += 20; // Chiffre
     if (/[\W_]/.test(password)) score += 10; // Caractère spécial
 
     return Math.min(score, 100);
@@ -114,6 +114,12 @@ export function ResetForm({
                       onChange={onChangeConfirmation}
                       className={isMatching ? "" : "border-red-500"}
                     />
+                    {!isMatching && (
+                      <p className="text-sm text-destructive flex gap-1 items-center">
+                        <X />
+                        The passwords do not match.
+                      </p>
+                    )}
                   </div>
 
                   {/* Security rules for the password */}
@@ -129,7 +135,12 @@ export function ResetForm({
                         <li className="flex items-center">
                           - One uppercase letter
                         </li>
-                        <li className="flex items-center">- One number</li>
+                        <li className="flex items-center">
+                          - One number
+                        </li>
+                        <li className="flex items-center">
+                          - One special character
+                        </li>
                       </ul>
                     </>
                   )}
