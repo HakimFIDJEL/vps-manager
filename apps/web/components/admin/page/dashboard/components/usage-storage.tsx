@@ -41,7 +41,7 @@ import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 const testData = [{ storageUsed: 120, storageTotal: 500 }];
 const FETCH_INTERVAL = 60000; // 60 secondes
 
-export function UsageStorage() {
+export function UsageStorage({ className }: { className?: string }) {
   const [progress, setProgress] = useState(100);
   const isMobile = useIsMobile();
 
@@ -108,7 +108,7 @@ export function UsageStorage() {
   } satisfies ChartConfig;
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className=" bg-muted/50 flex flex-row justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">

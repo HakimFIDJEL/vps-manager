@@ -45,7 +45,7 @@ const testData = [
   { time: "12:00:20", usage: 55 },
 ];
 
-export function UsageRam() {
+export function UsageRam({ className }: { className?: string }) {
   const [chartData, setChartData] =
     useState<{ time: string; usage: number }[]>(testData);
   const [progress, setProgress] = useState(100);
@@ -87,7 +87,7 @@ export function UsageRam() {
   } satisfies ChartConfig;
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader className=" bg-muted/50 flex flex-row justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">
