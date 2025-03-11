@@ -19,7 +19,7 @@ import { Theme } from "@/components/elements/theme";
 import { HeaderBreadcrumb } from "@/components/admin/layout/header/header-breadcrumb";
 
 // Hook pour récupérer les breadcrumbs
-import { useBreadcrumbContext } from "@/components/providers/breadcrumb/provider";
+import { useBreadcrumbContext } from "@/providers/breadcrumb/provider";
 
 export function LayoutHeader() {
   const { toggleSidebar } = useSidebar();

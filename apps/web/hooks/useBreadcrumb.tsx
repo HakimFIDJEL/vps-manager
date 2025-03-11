@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useBreadcrumbContext } from "@/components/providers/breadcrumb/provider";
+import { useBreadcrumbContext } from "@/providers/breadcrumb/provider";
 
 interface BreadcrumbItem {
   title: string;

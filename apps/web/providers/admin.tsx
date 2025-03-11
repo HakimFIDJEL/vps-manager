@@ -4,7 +4,7 @@ import * as React from "react";
 import { LayoutSidebar } from "@/components/admin/layout/sidebar/_sidebar";
 import { LayoutHeader } from "@/components/admin/layout/header/_header";
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar";
-import { BreadcrumbProvider } from "@/components/providers/breadcrumb/provider";
+import { BreadcrumbProvider } from "@/providers/breadcrumb/provider";
 import { ConfirmDialogProvider } from '@omit/react-confirm-dialog'
 
 export function AdminProvider({

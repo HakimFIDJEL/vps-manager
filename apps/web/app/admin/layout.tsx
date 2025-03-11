@@ -1,4 +1,4 @@
-import { AdminProvider } from "@/components/providers/admin";
+import { AdminProvider } from "@/providers/admin";
 
 
 export default function AdminLayout({

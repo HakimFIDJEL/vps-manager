@@ -3,6 +3,7 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
+import { LoaderProvider } from "@/providers/loader/provider"
 
 export function MainProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -13,9 +14,11 @@ export function MainProvider({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
       enableColorScheme
     >
-      <TooltipProvider>
-        {children}
-      </TooltipProvider>
+      <LoaderProvider>
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
+      </LoaderProvider>
     </NextThemesProvider>
   )
 }

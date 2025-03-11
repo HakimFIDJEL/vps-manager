@@ -33,14 +33,15 @@ export function Dashboard({ ...props }) {
             </div>
             
             <div className="grid grid-cols-12 gap-4">
+                <Network className="col-span-12" />
+            </div>
+            
+            <div className="grid grid-cols-12 gap-4">
                 <ProjectsTracker className="md:col-span-8 col-span-12" />
                 <Summary className="md:col-span-4 col-span-12" />
              </div>
                 
                 
-            <div className="grid grid-cols-12 gap-4">
-                <Network className="col-span-12" />
-            </div>
 
 
         </div>
