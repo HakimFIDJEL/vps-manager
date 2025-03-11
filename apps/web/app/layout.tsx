@@ -27,7 +27,7 @@ export default function RootLayout({
       
       </head>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
+        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased overflow-x-hidden`}
       >
         <MainProvider>
 

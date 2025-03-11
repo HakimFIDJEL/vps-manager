@@ -150,7 +150,7 @@ const data = {
   quick_access: [
     {
       title: "Terminal",
-      url: "#",
+      url: "/admin/terminal",
       icon: SquareTerminal,
     },
     {
