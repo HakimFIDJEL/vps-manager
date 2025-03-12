@@ -168,12 +168,12 @@ const data = {
   footer: [
     {
       title: "Account",
-      url: "#",
+      url: "/admin/account",
       icon: User,
     },
     {
       title: "Log out",
-      url: "#",
+      url: "/auth/login",
       icon: LogOut,
     },
   ],
