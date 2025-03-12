@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
 import { RefreshCcw, TerminalSquare } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
-import { Terminal } from "@/components/admin/page/terminal/main";
+import { TerminalComponent } from "@/components/admin/page/terminal/main";
 
 export default function Page() {
   return (
@@ -36,7 +36,7 @@ export default function Page() {
           </Link>
         </Header>
 
-        <Terminal />
+        <TerminalComponent />
 
 
 

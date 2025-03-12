@@ -1,35 +1,35 @@
-'use client'
+"use client";
 
-import { useEffect, useRef } from 'react'
-import { Terminal as T } from 'xterm'
-import { FitAddon } from 'xterm-addon-fit'
-import 'xterm/css/xterm.css'
+import React, { useEffect, useRef, useState } from "react";
+import { createTerminal } from "@/lib/page/terminal";
+import { useLoader } from "@/lib/loader";
 
-export function Terminal() {
-  const terminalRef = useRef<HTMLDivElement>(null)
-  const term = useRef<T | null>(null)
+
+
+export function TerminalComponent() {
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const { showLoader, hideLoader } = useLoader();
+
+ 
+  
 
   useEffect(() => {
-    if (!terminalRef.current) return
+    if (!terminalRef.current) return;
 
-    const fitAddon = new FitAddon()
-    const xterm = new T({ cursorBlink: true })
-    xterm.loadAddon(fitAddon)
-    xterm.open(terminalRef.current)
-    fitAddon.fit()
-    xterm.write('Bienvenue dans le terminal web !\r\n')
+    const { terminal, fitAddon } = createTerminal(terminalRef.current);
 
-    // Exemple d’interaction simple
-    xterm.onData(data => {
-      xterm.write(data) // echo
-    })
+    const handleResize = () => fitAddon.fit();
+    window.addEventListener("resize", handleResize);
 
-    term.current = xterm
+    return () => {
+      terminal.dispose();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
-    return () => xterm.dispose()
-  }, [])
-
-//   return <div ref={terminalRef} className="w-full h-96 bg-black overflow-hidden rounded-md shadow-sm p-4" />
-
-  return <></>
+  return (
+    <div className="w-full bg-black h-96 rounded-lg shadow-sm p-4 overflow-hidden">
+      <div ref={terminalRef} className="w-full h-full" />
+    </div>
+  );
 }
