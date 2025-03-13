@@ -13,7 +13,7 @@ import { UsageRam } from "@/components/admin/page/dashboard/components/usage-ram
 import { UsageStorage } from "@/components/admin/page/dashboard/components/usage-storage";
 import { Network } from "@/components/admin/page/dashboard/components/network";
 import { Summary } from "@/components/admin/page/dashboard/components/summary";
-import { ProjectsTracker } from "@/components/admin/page/dashboard/components/projectstracker";
+import { ProjectsTracker } from "@/components/admin/page/dashboard/components/projects-tracker";
 import { Separator } from "@workspace/ui/components/separator";
 import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 

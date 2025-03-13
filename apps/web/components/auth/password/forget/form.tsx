@@ -1,59 +1,105 @@
 "use client";
 
-// Components
+// Necessary imports
+import * as z from "zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Shadcn Components
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
-import { cn } from "@workspace/ui/lib/utils";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@workspace/ui/components/card"
+} from "@workspace/ui/components/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
 
 // Icons
 import { Loader2, SendHorizonal } from "lucide-react";
 import Link from "next/link";
 
-// Hooks
-import { useState } from "react";
+const ForgetFormSchema = z.object({
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+});
+
+type ForgetFormValues = z.infer<typeof ForgetFormSchema>;
 
 export function ForgetForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const defaultValues: Partial<ForgetFormValues> = {
+    email: "",
+  };
+
+  const form = useForm<ForgetFormValues>({
+    resolver: zodResolver(ForgetFormSchema),
+    defaultValues,
+  });
+
+  function onSubmit(data: ForgetFormValues) {
+    setIsLoading(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      //   toast({
+      //     title: "Profile updated",
+      //     description: "Your profile information has been updated successfully.",
+      //   })
+      console.log(data);
+    }, 1000);
+  }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={`flex flex-col gap-6 ${className}`} {...props}>
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Password forgotten</CardTitle>
           <CardDescription>
-          Enter your email address and we will send you a link to reset your
-          password
+            Enter your email address and we will send you a link to reset your
+            password
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
-            <div className="flex flex-col gap-4">
-              
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col gap-4"
+            >
               <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="m@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   Send reset link
-                  {loading && <Loader2 className="animate-spin" />}
-                  {!loading && <SendHorizonal />}
+                  {isLoading && <Loader2 className="animate-spin" />}
+                  {!isLoading && <SendHorizonal />}
                 </Button>
               </div>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
@@ -66,8 +112,8 @@ export function ForgetForm({
                   Go back to login
                 </Button>
               </Link>
-            </div>
-          </form>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

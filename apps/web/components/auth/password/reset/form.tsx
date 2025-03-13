@@ -1,11 +1,14 @@
 "use client";
 
-// Components
+// Necessary Imports
+import * as z from "zod";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+// Shadcn COmponents
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
-import { cn } from "@workspace/ui/lib/utils";
-import { Progress } from "@workspace/ui/components/progress";
 import { PasswordInput } from "@workspace/ui/components/passwordinput";
 import {
   Card,
@@ -14,71 +17,65 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
 
 // Icons
 import { Loader2, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
 
-// Hooks
-import { useState } from "react";
+// Custom components
+import { PasswordStrengthChecker } from "@/components/elements/password-strength-checker"
+
+const ResetFormSchema = z
+  .object({
+    password: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
+    password_confirmation: z.string(),
+  })
+  .refine((data) => data.password === data.password_confirmation, {
+    message: "Passwords do not match.",
+    path: ["password_confirmation"],
+  });
+
+type ResetFormValues = z.infer<typeof ResetFormSchema>;
+
+
 
 export function ResetForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [passwordValid, setPasswordValid] = useState(false);
 
-  const [password, setPassword] = useState("");
-  const [confirmation, setConfirmation] = useState("");
-  const [isMatching, setIsMatching] = useState(true);
-  const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const form = useForm<ResetFormValues>({
+    resolver: zodResolver(ResetFormSchema),
+    defaultValues: {
+      password: "",
+      password_confirmation: "",
+    },
+  });
 
-  function onChangePassword(event: React.ChangeEvent<HTMLInputElement>) {
-    const newPassword = event.target.value;
-    setPassword(newPassword);
+  const passwordValue = form.watch("password");
 
-    if (newPassword === "") {
-      setIsPasswordValid(false);
-      setProgress(0);
-    } else {
-      const strength = calculatePasswordStrength(newPassword);
-      setIsPasswordValid(strength === 100);
-      setProgress(strength);
-    }
-  }
-
-  function onChangeConfirmation(event: React.ChangeEvent<HTMLInputElement>) {
-    const newConfirmation = event.target.value;
-    setConfirmation(newConfirmation);
-
-    if (newConfirmation === "" || password === "") {
-      setIsMatching(true);
-    } else {
-      setIsMatching(newConfirmation === password);
-    }
-  }
-
-  function validatePassword(password: string) {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    return passwordRegex.test(password);
-  }
-
-  // Calculate the password strength
-  function calculatePasswordStrength(password: string) {
-    let score = 0;
-
-    if (password.length >= 8) score += 30;
-    if (/[A-Z]/.test(password)) score += 20; // Lettre majuscule
-    if (/[a-z]/.test(password)) score += 20; // Lettre minuscule
-    if (/\d/.test(password)) score += 20; // Chiffre
-    if (/[\W_]/.test(password)) score += 10; // Caractère spécial
-
-    return Math.min(score, 100);
+  function onSubmit(data: ResetFormValues) {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      console.log(data);
+    }, 1000);
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={`flex flex-col gap-6 ${className}`} {...props}>
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Reset password</CardTitle>
@@ -87,89 +84,72 @@ export function ResetForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
-            <div className="grid gap-4">
+          <Form {...form}>
+            <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
               <div className="grid gap-6">
                 <div className="grid gap-2">
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">New password</Label>
-                    <PasswordInput
-                      id="password"
-                      name="password"
-                      required
-                      value={password}
-                      onChange={onChangePassword}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password_confirmation">
-                      Password confirmation
-                    </Label>
-                    <Input
-                      id="password_confirmation"
-                      name="password_confirmation"
-                      type="password"
-                      required
-                      value={confirmation}
-                      onChange={onChangeConfirmation}
-                      className={isMatching ? "" : "border-red-500"}
-                    />
-                    {!isMatching && (
-                      <p className="text-sm text-destructive flex gap-1 items-center">
-                        <X />
-                        The passwords do not match.
-                      </p>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <PasswordInput {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </div>
+                  />
 
-                  {/* Security rules for the password */}
-                  {!isPasswordValid && password.length > 0 && (
-                    <>
-                      <p className="text-sm text-muted-foreground">
-                        Your password must contain:
-                      </p>
-                      <ul className="text-sm text-muted-foreground">
-                        <li className="flex items-center">
-                          - At least 8 characters
-                        </li>
-                        <li className="flex items-center">
-                          - One uppercase letter
-                        </li>
-                        <li className="flex items-center">
-                          - One number
-                        </li>
-                        <li className="flex items-center">
-                          - One special character
-                        </li>
-                      </ul>
-                    </>
-                  )}
+                  <PasswordStrengthChecker
+                    password={passwordValue}
+                    onPasswordChange={(password, isValid) => {
+                      setPasswordValid(isValid)
+                    }}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="password_confirmation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password confirmation</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                 
                 </div>
-                {progress > 0 && (
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Password strength</Label>
-                    <Progress value={progress} />
-                  </div>
-                  
-                )}
-                <Button type="submit" className="w-full">
+
+               
+                <Button type="submit" className="w-full" disabled={isLoading || !passwordValid}>
                   Reset password
-                  {loading && <Loader2 className="animate-spin" />}
-                  {!loading && <RotateCcw />}
+                  {isLoading ? (
+                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RotateCcw className="ml-2 h-4 w-4" />
+                  )}
                 </Button>
               </div>
+
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                 <span className="relative z-10 bg-background px-2 text-muted-foreground">
                   Or
                 </span>
               </div>
+
               <Link href="/auth/login">
                 <Button variant="outline" className="w-full">
                   Go back to login
                 </Button>
               </Link>
-            </div>
-          </form>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

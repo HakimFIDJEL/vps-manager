@@ -39,7 +39,7 @@ export function ProjectsTracker({ className }: { className?: string }) {
   }, []);
 
   return (
-    <Card className={`shadow-sm  overflow-hidden ${className}`}>
+    <Card className={`shadow-sm  overflow-hidden ${className}  h-max`}>
       <CardHeader className="bg-muted/50 flex flex-row justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">
@@ -56,7 +56,7 @@ export function ProjectsTracker({ className }: { className?: string }) {
 
       <Separator className="md:mb-6 mb-2" />
 
-      <CardDescription className="pt-4">
+      <CardDescription className="p-6 pt-0">
         <Tracker serverName="example.com" segments={segments} />
         <Separator className="mb-4" />
         <Tracker serverName="example.com" segments={segments} />

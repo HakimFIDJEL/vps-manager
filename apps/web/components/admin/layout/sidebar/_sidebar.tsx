@@ -38,7 +38,7 @@ const data = {
   navigation: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/admin",
       icon: LayoutDashboard,
       isActive: true,
     },

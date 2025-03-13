@@ -15,10 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-
 import {
   Form,
   FormControl,
@@ -27,8 +25,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
-import { Edit, Loader2, UserCircle } from "lucide-react";
 import { Separator } from "@workspace/ui/components/separator";
+
+// Icons
+import { Edit, Loader2, UserCircle } from "lucide-react";
 
 const profileFormSchema = z.object({
   firstName: z.string().min(2, {
