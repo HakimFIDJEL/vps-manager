@@ -3,12 +3,12 @@
 // Shadcn Components
 import { BreadcrumbSetter } from "@/components/admin/layout/header/header-breadcrumb";
 import { Header } from "@/components/admin/page/header";
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
 
 // Icons
-import { RefreshCcw, TerminalSquare, User } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
-import Link from "next/link";
+import { User } from "lucide-react";
+
+// Other Components
+import { Account } from "@/components/admin/page/account/main";
 
 export default function Page() {
   return (
@@ -25,8 +25,11 @@ export default function Page() {
         <Header 
           title="Account" 
           subtitle="Manage your account informations"
-          icon={<User className="h-5 w-5 text-primary" />}/>
-
+          icon={<User className="h-5 w-5 text-primary" />}
+        />
+        
+        
+        <Account />
 
 
 
