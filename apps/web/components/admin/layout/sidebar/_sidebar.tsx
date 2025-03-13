@@ -1,6 +1,7 @@
 "use client"
 
-import * as React from "react"
+// Necessary imports
+
 
 // Shadcn components
 import {
@@ -32,6 +33,8 @@ import {
 import { NavLinks } from "@/components/admin/layout/sidebar/nav-links"
 import { NavUser } from "@/components/admin/layout/sidebar/nav-user"
 import { Logo } from "@/components/elements/logo"
+
+
 
 const data = {
   
@@ -185,6 +188,8 @@ const data = {
 }
 
 export function LayoutSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+
   return (
     <Sidebar
       className="top-[--header-height] !h-[calc(100svh-var(--header-height))]"

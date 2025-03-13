@@ -29,7 +29,7 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 
 // Icons
-import { Edit, Loader2, UserCircle } from "lucide-react";
+import { Edit, Loader2, Lock, UserCircle } from "lucide-react";
 
 // Custom components
 import { PasswordStrengthChecker } from "@/components/elements/password-strength-checker";
@@ -74,10 +74,12 @@ export function Password() {
     <Card>
       <CardHeader className="bg-muted/50">
         <CardTitle className="flex items-center gap-2">
-          <UserCircle className="h-5 w-5 text-primary" />
-          Profile
+          <Lock className="h-5 w-5 text-primary" />
+          Password
         </CardTitle>
-        <CardDescription>Manage your profile information</CardDescription>
+        <CardDescription>
+          Update your password to keep your account secure.
+        </CardDescription>
       </CardHeader>
 
       <Separator className="md:mb-6 mb-2" />
