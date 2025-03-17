@@ -72,11 +72,11 @@ export function PasswordStrengthChecker({
 
     // Calculate password strength
     let score = 0
-    if (password.length >= 8) score += 30
-    if (/[A-Z]/.test(password)) score += 20
-    if (/[a-z]/.test(password)) score += 20
-    if (/\d/.test(password)) score += 20
-    if (/[\W_]/.test(password)) score += 10
+    if (password.length >= 8) score += 20 // 8 characters
+    if (/[A-Z]/.test(password)) score += 20 // Uppercase
+    if (/[a-z]/.test(password)) score += 20 // Lowercase
+    if (/\d/.test(password)) score += 20 // Number
+    if (/[\W_]/.test(password)) score += 20 // Special character
 
     const finalScore = Math.min(score, 100)
     setStrength(finalScore)
