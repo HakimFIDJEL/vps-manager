@@ -41,8 +41,7 @@ const profilePictureFormSchema = z.object({
     .refine(
         (file) => file.type.startsWith("image/"),
         "Only images are allowed"
-    )
-    .nullable(),
+    ),
 });
 
 type ProfilePictureFormValues = z.infer<typeof profilePictureFormSchema>;
@@ -53,7 +52,7 @@ export function ProfilePicture({}) {
 
   // This would typically come from your database or auth provider
   const defaultValues: Partial<ProfilePictureFormValues> = {
-    profilePicture: null,
+    profilePicture: undefined,
   };
 
   const form = useForm<ProfilePictureFormValues>({
@@ -61,9 +60,10 @@ export function ProfilePicture({}) {
     defaultValues,
   });
 
-  function onSubmit() {
+  function onSubmit(data: ProfilePictureFormValues) {
     setIsLoading(true);
     setTimeout(() => {
+      console.log(data);
       setIsLoading(false);
     }, 1000);
   }
@@ -83,23 +83,18 @@ export function ProfilePicture({}) {
       <Separator className="md:mb-6 mb-2" />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} encType="multipart/form-data">
           <CardContent className="grid gap-6">
             <div className="flex flex-col md:flex-row justify-between gap-6">
               <div className="flex flex-col gap-3 flex-1">
-                <FormField
+              <FormField
                   control={form.control}
                   name="profilePicture"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Profile Picture</FormLabel>
                       <FormControl>
-
-                        <ImageUploader
-                            {...field}
-                        />
-
-                        {/* <Input placeholder="Enter your last name" {...field} /> */}
+                        <ImageUploader onChange={field.onChange} croppable={true}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -107,9 +102,8 @@ export function ProfilePicture({}) {
                 />
               </div>
 
-              <Separator orientation="vertical" className="md:block hidden" />
             </div>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !form.formState.isValid}>
               {isLoading ? "Uploading..." : "Upload"}
               {isLoading && <Loader2 className="animate-spin" />}
               {!isLoading && <Upload />}
