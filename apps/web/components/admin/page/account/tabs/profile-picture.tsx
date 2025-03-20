@@ -5,7 +5,6 @@ import * as z from "zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileWithPath } from "react-dropzone";
 
 // Shadcn Components
 import {
@@ -33,6 +32,7 @@ import { Image, Loader2, Upload } from "lucide-react";
 // Custom components
 import { ImageUploader } from "@workspace/ui/components/image-uploader";
 import { Input } from "@workspace/ui/components/input";
+// import { ImageUploadFile, ImageUploadInit } from "@/lib/image";
 
 const profilePictureFormSchema = z.object({
   profilePicture: z
@@ -46,13 +46,11 @@ const profilePictureFormSchema = z.object({
 
 type ProfilePictureFormValues = z.infer<typeof profilePictureFormSchema>;
 
-export type FileWithPreview = FileWithPath & {
-  preview: string;
-};
+export function ProfilePicture({ imagePath }: { imagePath?: string }) {
 
 
-export function ProfilePicture() {
   const [isLoading, setIsLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
 
   const form = useForm<ProfilePictureFormValues>({
@@ -60,10 +58,14 @@ export function ProfilePicture() {
   });
 
 
+  useEffect(() => {
 
+    if(imagePath) {
+      const file = new File([], imagePath);
+      setFile(file);
+    }
 
-
-
+  }, [imagePath]);
 
 
   function onSubmit(data: ProfilePictureFormValues) {
@@ -97,14 +99,20 @@ export function ProfilePicture() {
                   control={form.control}
                   name="profilePicture"
                   render={({ field }) => {
-                    const { value, ...fieldWithoutValue } = field;
+                    // It is not possible to pass the `value` prop to a input type="file"
+                    const { value, ...myField } = field;
                     return (
                       <FormItem>
                         <FormLabel>Profile Picture</FormLabel>
                         <FormControl>
-                          <ImageUploader onChange={field.onChange} croppable={false}>
-                            <Input {...fieldWithoutValue} />
-                          </ImageUploader>
+                          <ImageUploader 
+                            accept={[".jpeg", ".jpg", ".png"]}
+                            maxSize={5 * 1024 * 1024}
+                            file={file}
+                            setFile={setFile}
+                            zodField={myField}
+                            croppable={false}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

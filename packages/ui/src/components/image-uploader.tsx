@@ -5,55 +5,61 @@ import { FileWithPath, useDropzone } from "react-dropzone";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
 import { Upload } from "lucide-react";
-import { ImageCropper, FileWithPreview } from "@workspace/ui/components/image-cropper";
+import { ImageCropper } from "@workspace/ui/components/image-cropper";
 
-const accept = {
-  "image/*": [],
-};
+import { ImageUploadFile, ImageUploadInit } from "@workspace/ui/lib/image.js";
 
-interface ImageUploaderProps extends Omit<React.ComponentProps<"input">, "onChange"> {
-  onChange?: (file: File) => void;
+
+interface ImageUploaderProps {
+  accept?: Array<string>;
+  maxSize?: number;
+  file : File | null;
+  setFile: (file: File) => void;
+  zodField: any;
   croppable?: boolean;
-  children?: React.ReactNode;
 }
 
 
-export function ImageUploader({ onChange, croppable=true, children, ...props }: ImageUploaderProps) {
-  const [selectedFile, setSelectedFile] = React.useState<FileWithPreview | null>(null);
+export function ImageUploader({ 
+  accept = [".jpeg", ".jpg", ".png"],
+  maxSize = 5 * 1024 * 1024,
+  file, 
+  setFile, 
+  zodField, 
+  croppable=true, 
+}: ImageUploaderProps) {
+  const [FileWithPreview, setFileWithPreview] = React.useState<ImageUploadFile | null>(null);
   const [isDialogOpen, setDialogOpen] = React.useState(false);
 
   const onDrop = React.useCallback(
     (acceptedFiles: FileWithPath[]) => {
       const file = acceptedFiles[0];
-      if (!file) {
+      if (!file || !file.path) {
         alert("Selected image is too large!");
         return;
       }
-      const fileWithPreview = Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      });
-      setSelectedFile(fileWithPreview);
+
+      
+      // const fileWithPreview = Object.assign(file, {
+      //   preview: URL.createObjectURL(file),
+      // });
+      // setFile(fileWithPreview);
   
-      // Si vous souhaitez mettre à jour le formulaire dès le drop, appelez onChange
-      if (onChange) {
-        onChange(file);
-      }
+      setFileWithPreview(ImageUploadInit(file.path));    
+      setFile(file);
   
-      // Si vous voulez aussi laisser la possibilité de cropper, vous pouvez ouvrir le dialogue
+  
       if (croppable) {
         setDialogOpen(true);
       }
     },
-    [croppable, onChange]
+    [croppable, setFile]
   );
   
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      "image/*": [".jpeg", ".jpg", ".png"],
-    },
-    maxSize: 5242880, // 5MB
+    accept: { "image/*": accept },
+    maxSize: maxSize,
     multiple: false,
   });
 
