@@ -57,6 +57,8 @@ export function ImageUploader({ onChange, croppable=true, children, ...props }: 
     multiple: false,
   });
 
+  console.log('input props', {...getInputProps()})
+
   return (
     <div className="relative md:grid md:grid-cols-12 flex flex-col gap-4 md:gap-0">
       <div
@@ -69,7 +71,8 @@ export function ImageUploader({ onChange, croppable=true, children, ...props }: 
           ${selectedFile ? "md:col-span-7" : "md:col-span-12"}
           hover:border-primary hover:bg-primary/5`}
       >
-        <input {...getInputProps()} />
+        
+        {/* <input {...getInputProps()} /> */}
         <Upload className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
         <p className="text-sm font-medium mb-1">
           Drag & drop your image here

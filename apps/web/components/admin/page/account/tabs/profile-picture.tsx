@@ -32,6 +32,7 @@ import { Image, Loader2, Upload } from "lucide-react";
 
 // Custom components
 import { ImageUploader } from "@workspace/ui/components/image-uploader";
+import { Input } from "@workspace/ui/components/input";
 
 const profilePictureFormSchema = z.object({
   profilePicture: z
@@ -49,41 +50,21 @@ export type FileWithPreview = FileWithPath & {
   preview: string;
 };
 
-interface ProfilePictureProps {
-  src?: string;
-}
 
-export function ProfilePicture({src}: ProfilePictureProps) {
+export function ProfilePicture() {
   const [isLoading, setIsLoading] = useState(false);
-  const [image, setImage] = useState<FileWithPreview | null>(null);
 
-  useEffect(() => {
-    if (src) {
-      const file = new File([], src);
-      const fileWithPreview = Object.assign(file, {
-        preview: src,
-      });
-      setImage(fileWithPreview);
-    }
-
-    return () => {
-      if (image) {
-        URL.revokeObjectURL(image.preview);
-      }
-    };
-  }, [src]);
-
-
-
-  // This would typically come from your database or auth provider
-  const defaultValues: Partial<ProfilePictureFormValues> = {
-    profilePicture: undefined,
-  };
 
   const form = useForm<ProfilePictureFormValues>({
     resolver: zodResolver(profilePictureFormSchema),
-    defaultValues,
   });
+
+
+
+
+
+
+
 
   function onSubmit(data: ProfilePictureFormValues) {
     setIsLoading(true);
@@ -115,15 +96,20 @@ export function ProfilePicture({src}: ProfilePictureProps) {
               <FormField
                   control={form.control}
                   name="profilePicture"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Profile Picture</FormLabel>
-                      <FormControl>
-                        <ImageUploader onChange={field.onChange} croppable={true}/>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const { value, ...fieldWithoutValue } = field;
+                    return (
+                      <FormItem>
+                        <FormLabel>Profile Picture</FormLabel>
+                        <FormControl>
+                          <ImageUploader onChange={field.onChange} croppable={false}>
+                            <Input {...fieldWithoutValue} />
+                          </ImageUploader>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
 

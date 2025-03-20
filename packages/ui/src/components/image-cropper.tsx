@@ -125,6 +125,7 @@ export function ImageCropper({
     }
   }
 
+  // Fonction utilitaire pour cropper l'image
   function getCroppedImg(image: HTMLImageElement, crop: PixelCrop): string {
     const canvas = document.createElement("canvas");
     const scaleX = image.naturalWidth / image.width;
