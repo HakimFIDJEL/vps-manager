@@ -1,14 +1,18 @@
 "use client";
 
+// Necessary Imports
 import React, { useEffect } from "react";
 import { FileWithPath, useDropzone } from "react-dropzone";
+
+// Shadcn Components
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
+
+// Icons
 import { CropIcon, Trash2, Upload } from "lucide-react";
 
-import { ImageUploadFile, ImageUploadInit } from "@workspace/ui/lib/image.js";
-
-
+// Custom components
+import { ImageUploadFile, ImageUploadInit } from "@workspace/ui/lib/image";
 import { ImageCropper } from "@workspace/ui/components/image-cropper"
 
 
@@ -62,7 +66,7 @@ export function ImageUploader({
       zodField.onChange(newFile);
 
       if (croppable) {
-        // setDialogOpen(true);
+        handleCrop();
       }
     },
     [croppable]
@@ -77,7 +81,7 @@ export function ImageUploader({
 
   return (
     <>
-      <div className="relative md:flex-row flex flex-col gap-6">
+      <div className="relative md:flex-row flex flex-col md:gap-6 gap-4">
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors w-full ${

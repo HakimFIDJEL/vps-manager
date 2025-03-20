@@ -129,7 +129,7 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
               type="submit"
               disabled={isLoading || !profilePicture}
             >
-              {isLoading ? "Uploading..." : "Upload"}
+              {isLoading ? "Uploading..." : "Upload profile picture"}
               {isLoading && <Loader2 className="animate-spin" />}
               {!isLoading && <Upload />}
             </Button>

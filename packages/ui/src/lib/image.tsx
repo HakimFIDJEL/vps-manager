@@ -1,4 +1,5 @@
-import { ImageUp } from "lucide-react";
+
+// Necessary imports
 import { FileWithPath } from "react-dropzone";
 
 /**

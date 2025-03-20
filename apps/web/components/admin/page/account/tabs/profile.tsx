@@ -59,6 +59,10 @@ export function Profile() {
     defaultValues,
   });
 
+  const allFilled = Object.values(form.watch()).every((value) => {
+    return value !== null && value !== undefined && value !== "";
+  });
+
   function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
 
@@ -135,10 +139,10 @@ export function Profile() {
                 )}
               />
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save changes"}
+            <Button type="submit" disabled={isLoading || !allFilled}>
+              {isLoading ? "Updating..." : "Update profile"}
               {isLoading && <Loader2 className="animate-spin" />}
-              {!isLoading && <Edit />}
+              {!isLoading && <UserCircle />}
             </Button>
           </CardContent>
         </form>

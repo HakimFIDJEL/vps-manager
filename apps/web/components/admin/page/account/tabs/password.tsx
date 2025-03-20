@@ -29,13 +29,16 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 
 // Icons
-import { Edit, Loader2, Lock, UserCircle } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 
 // Custom components
 import { PasswordStrengthChecker } from "@/components/elements/password-strength-checker";
 
 const PasswordFormSchema = z
   .object({
+    current_password: z.string().min(8, {
+      message: "Password must be at least 8 characters.",
+    }),
     password: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
@@ -44,6 +47,10 @@ const PasswordFormSchema = z
   .refine((data) => data.password === data.password_confirmation, {
     message: "Passwords do not match.",
     path: ["password_confirmation"],
+  })
+  .refine((data) => data.current_password !== data.password, {
+    message: "New password must be different from the current password.",
+    path: ["password"],
   });
 
 type PasswordFormValues = z.infer<typeof PasswordFormSchema>;
@@ -55,6 +62,7 @@ export function Password() {
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(PasswordFormSchema),
     defaultValues: {
+      current_password : "",
       password: "",
       password_confirmation: "",
     },
@@ -62,7 +70,13 @@ export function Password() {
 
   const passwordValue = form.watch("password");
 
+  const allFilled = Object.values(form.watch()).every((value) => {
+    return value !== null && value !== undefined && value !== "";
+  });
+  
+
   function onSubmit(data: PasswordFormValues) {
+
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
@@ -89,6 +103,19 @@ export function Password() {
           <CardContent className="grid gap-6">
             <div className="flex flex-col md:flex-row justify-between gap-6">
               <div className="flex flex-col gap-3 flex-1">
+                <FormField
+                  control={form.control}
+                  name="current_password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <PasswordInput {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="password"
@@ -127,10 +154,10 @@ export function Password() {
                     className="flex-1"
                 />
             </div>
-            <Button type="submit" disabled={isLoading || !passwordValid}>
-              {isLoading ? "Saving..." : "Save changes"}
+            <Button type="submit" disabled={isLoading || !allFilled}>
+              {isLoading ? "Updating..." : "Update password"}
               {isLoading && <Loader2 className="animate-spin" />}
-              {!isLoading && <Edit />}
+              {!isLoading && <Lock />}
             </Button>
           </CardContent>
         </form>

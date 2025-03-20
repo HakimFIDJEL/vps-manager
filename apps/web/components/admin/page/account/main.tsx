@@ -27,7 +27,7 @@ import { Activity, Image, Lock, UserCircle } from "lucide-react";
 
 export function Account() {
   return (
-    <Tabs defaultValue="profile-picture">
+    <Tabs defaultValue="profile">
       <div className="flex flex-col md:flex-row gap-2 justify-between align-start">
         <Card className="h-max">
 
@@ -79,7 +79,7 @@ export function Account() {
           </TabsContent>
 
           <TabsContent value="profile-picture" className="mt-0">
-            <ProfilePicture imagePath="/img/placeholder.svg"/>
+            <ProfilePicture />
           </TabsContent>
 
           <TabsContent value="account-stats" className="mt-0">
