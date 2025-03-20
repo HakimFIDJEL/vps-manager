@@ -1,3 +1,4 @@
+import { ImageUp } from "lucide-react";
 import { FileWithPath } from "react-dropzone";
 
 /**
@@ -18,14 +19,23 @@ export type ImageUploadFile = FileWithPath & {
   preview: string;
 };
 
-export function ImageUploadInit(path: string): ImageUploadFile {
-    
-    // Create a new file object
-    const file = new File([], path);
-
+export function ImageUploadInit(file: File): ImageUploadFile {
+  
     // Create a preview URL
     const preview = URL.createObjectURL(file);
 
     // Return the file with the preview URL
     return Object.assign(file, { preview });
 }
+
+export async function FileCreate(imagePath: string): Promise<ImageUploadFile> {
+  const res = await fetch(imagePath);
+  const blob = await res.blob();
+  const file = new File([blob], imagePath, { type: blob.type });
+  return ImageUploadInit(file);
+}
+
+export function convertFile(file: ImageUploadFile): File {
+  return file as File;
+}
+  

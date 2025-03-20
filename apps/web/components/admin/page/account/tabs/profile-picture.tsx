@@ -31,42 +31,35 @@ import { Image, Loader2, Upload } from "lucide-react";
 
 // Custom components
 import { ImageUploader } from "@workspace/ui/components/image-uploader";
-import { Input } from "@workspace/ui/components/input";
-// import { ImageUploadFile, ImageUploadInit } from "@/lib/image";
+import { ImageUploadFile, FileCreate } from "@workspace/ui/lib/image";
 
 const profilePictureFormSchema = z.object({
   profilePicture: z
     .instanceof(File)
     .refine((file) => file.size <= 5 * 1024 * 1024, "Max file size is 5MB")
     .refine(
-        (file) => file.type.startsWith("image/"),
-        "Only images are allowed"
+      (file) => file.type.startsWith("image/"),
+      "Only images are allowed"
     ),
 });
 
 type ProfilePictureFormValues = z.infer<typeof profilePictureFormSchema>;
 
 export function ProfilePicture({ imagePath }: { imagePath?: string }) {
-
-
   const [isLoading, setIsLoading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-
+  const [file, setFile] = useState<ImageUploadFile | null>(null);
 
   const form = useForm<ProfilePictureFormValues>({
     resolver: zodResolver(profilePictureFormSchema),
   });
 
-
   useEffect(() => {
+    if (!imagePath) return;
 
-    if(imagePath) {
-      const file = new File([], imagePath);
-      setFile(file);
-    }
-
+    FileCreate(imagePath).then(setFile);
+    // form.setValue("profilePicture", file as File);
+    
   }, [imagePath]);
-
 
   function onSubmit(data: ProfilePictureFormValues) {
     setIsLoading(true);
@@ -84,18 +77,21 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
           Profile picture
         </CardTitle>
         <CardDescription>
-          Update your profile picture and edit your profile picture.
+          Update your profile picture and crop it to the desired size.
         </CardDescription>
       </CardHeader>
 
       <Separator className="md:mb-6 mb-2" />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} encType="multipart/form-data">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          encType="multipart/form-data"
+        >
           <CardContent className="grid gap-6">
             <div className="flex flex-col md:flex-row justify-between gap-6">
               <div className="flex flex-col gap-3 flex-1">
-              <FormField
+                <FormField
                   control={form.control}
                   name="profilePicture"
                   render={({ field }) => {
@@ -105,13 +101,12 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
                       <FormItem>
                         <FormLabel>Profile Picture</FormLabel>
                         <FormControl>
-                          <ImageUploader 
+                          <ImageUploader
                             accept={[".jpeg", ".jpg", ".png"]}
                             maxSize={5 * 1024 * 1024}
                             file={file}
-                            setFile={setFile}
                             zodField={myField}
-                            croppable={false}
+                            croppable={true}
                           />
                         </FormControl>
                         <FormMessage />
@@ -120,9 +115,11 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
                   }}
                 />
               </div>
-
             </div>
-            <Button type="submit" disabled={isLoading || !form.formState.isValid}>
+            <Button
+              type="submit"
+              disabled={isLoading || !form.formState.isValid}
+            >
               {isLoading ? "Uploading..." : "Upload"}
               {isLoading && <Loader2 className="animate-spin" />}
               {!isLoading && <Upload />}
