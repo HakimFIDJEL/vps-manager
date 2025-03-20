@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type SyntheticEvent } from "react";
+import React, { useEffect, type SyntheticEvent } from "react";
 import ReactCrop, {
   centerCrop,
   makeAspectCrop,
@@ -34,83 +34,36 @@ export type FileWithPreview = FileWithPath & {
 };
 
 interface ImageCropperProps {
-  croppable?: boolean;
+  file: FileWithPreview | null;
+  setFile: (file: FileWithPreview | null) => void;
   dialogOpen: boolean;
-  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  selectedFile: FileWithPreview | null;
-  setSelectedFile: React.Dispatch<React.SetStateAction<FileWithPreview | null>>;
-  className?: string;
-  onCropped?: (file: File) => void;
+  setDialogOpen: (open: boolean) => void;
 }
 
-export function ImagePreview({
-  croppable = true,
-  src,
-  className,
-  handleDelete,
-  handleCrop,
-}: {
-  croppable?: boolean;
-  src: string | undefined;
-  className?: string;
-  handleDelete?: () => void;
-  handleCrop?: () => void;
-}) {
-  return (
-    <div
-      className={`flex gap-4 h-full items-start justify-between ${className} flex-col md:flex-row`}
-    >
-      <Separator className="block md:hidden mb-4"/>
-      <div className="relative md:w-64 md:h-64 rounded-xl overflow-hidden flex-shrink-0 w-full">
-        <img
-          src={`${src ? src : "/placeholder.svg?height=256&width=256"}`}
-          alt="Background image"
-          className="object-cover w-full h-full"
-        />
-      </div>
-      {croppable && (
-        <>
-          <div className="flex md:flex-col flex-row gap-2 w-full">
-            <Button
-              variant="outline"
-              className="w-full"
-              type="button"
-              onClick={handleCrop}
-            >
-              <span>Crop</span>
-              <CropIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="destructive"
-              className="w-full"
-              type="button"
-              onClick={handleDelete}
-            >
-              <span>Delete</span>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-          <Separator className="block md:hidden"/>
-        </>
-      )}
-    </div>
-  );
-}
+
+
+
 
 export function ImageCropper({
-  croppable = true,
-  dialogOpen,
+  file,
+  setFile,
+  dialogOpen=false,
   setDialogOpen,
-  selectedFile,
-  setSelectedFile,
-  className,
-  onCropped, // callback pour renvoyer le fichier cropé
 }: ImageCropperProps) {
+
   const aspect = 1;
   const imgRef = React.useRef<HTMLImageElement | null>(null);
   const [crop, setCrop] = React.useState<Crop>();
   const [croppedImageUrl, setCroppedImageUrl] = React.useState<string>("");
+  const [originalFile, setOriginalFile] = React.useState<FileWithPreview | null>(file);
 
+  useEffect(() => {
+    if (file) {
+      setOriginalFile(file);
+    }
+  }, [file]);
+
+  // 
   function onImageLoad(e: SyntheticEvent<HTMLImageElement>) {
     if (aspect) {
       const { width, height } = e.currentTarget;
@@ -125,7 +78,7 @@ export function ImageCropper({
     }
   }
 
-  // Fonction utilitaire pour cropper l'image
+  // // Fonction utilitaire pour cropper l'image
   function getCroppedImg(image: HTMLImageElement, crop: PixelCrop): string {
     const canvas = document.createElement("canvas");
     const scaleX = image.naturalWidth / image.width;
@@ -153,7 +106,7 @@ export function ImageCropper({
     return canvas.toDataURL("image/png", 1.0);
   }
 
-  // Fonction utilitaire pour convertir un dataURL en File
+  // // Fonction utilitaire pour convertir un dataURL en File
   function dataURLtoFile(dataUrl: string, filename: string): File {
     const arr = dataUrl.split(",");
     const mimeMatch = arr[0]?.match(/:(.*?);/);
@@ -173,15 +126,17 @@ export function ImageCropper({
   async function onCrop() {
     try {
       if (!croppedImageUrl) return;
-      const fileName = selectedFile?.name || "cropped_image.png";
-      const croppedFile = dataURLtoFile(croppedImageUrl, fileName);
-      // On met à jour le fichier sélectionné avec la preview du crop
-      setSelectedFile(Object.assign(croppedFile, { preview: croppedImageUrl }));
-      // On renvoie le fichier cropé via le callback pour mettre à jour le formulaire
-      if (onCropped) {
-        onCropped(croppedFile);
-      }
-      setDialogOpen(false);
+
+
+      // const fileName = file?.name || "cropped_image.png";
+      // const croppedFile = dataURLtoFile(croppedImageUrl, fileName);
+      // // On met à jour le fichier sélectionné avec la preview du crop
+      // setSelectedFile(Object.assign(croppedFile, { preview: croppedImageUrl }));
+      // // On renvoie le fichier cropé via le callback pour mettre à jour le formulaire
+      // if (onCropped) {
+      //   onCropped(croppedFile);
+      // }
+      // setDialogOpen(false);
     } catch (error) {
       alert("Something went wrong!");
     }
@@ -189,19 +144,6 @@ export function ImageCropper({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild>
-        <ImagePreview
-          croppable={croppable}
-          src={croppedImageUrl ? croppedImageUrl : selectedFile?.preview}
-          className={className}
-          handleDelete={() => {
-            setSelectedFile(null);
-          }}
-          handleCrop={() => {
-            setDialogOpen(true);
-          }}
-        />
-      </DialogTrigger>
       <DialogContent className="gap-0">
         <DialogHeader>
           <DialogTitle>Crop Image</DialogTitle>
@@ -212,7 +154,6 @@ export function ImageCropper({
         <div className="py-6 size-full">
           <ReactCrop
             crop={crop}
-            onChange={(_, percentCrop) => setCrop(percentCrop)}
             onComplete={(c) => onCropComplete(c)}
             aspect={aspect}
             className="w-full"
@@ -221,8 +162,7 @@ export function ImageCropper({
               ref={imgRef}
               className="size-full rounded-none"
               alt="Image Cropper Shell"
-              src={selectedFile?.preview}
-              onLoad={onImageLoad}
+              src={originalFile?.preview}
             />
           </ReactCrop>
         </div>

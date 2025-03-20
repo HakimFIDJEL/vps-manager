@@ -34,8 +34,3 @@ export async function FileCreate(imagePath: string): Promise<ImageUploadFile> {
   const file = new File([blob], imagePath, { type: blob.type });
   return ImageUploadInit(file);
 }
-
-export function convertFile(file: ImageUploadFile): File {
-  return file as File;
-}
-  

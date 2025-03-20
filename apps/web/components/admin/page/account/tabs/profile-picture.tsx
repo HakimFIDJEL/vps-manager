@@ -38,8 +38,9 @@ const profilePictureFormSchema = z.object({
     .instanceof(File)
     .refine((file) => file.size <= 5 * 1024 * 1024, "Max file size is 5MB")
     .refine(
-      (file) => file.type.startsWith("image/"),
-      "Only images are allowed"
+      (file) =>
+        file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/jpg",
+      "File must be a JPEG or PNG"
     ),
 });
 
@@ -52,14 +53,22 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
   const form = useForm<ProfilePictureFormValues>({
     resolver: zodResolver(profilePictureFormSchema),
   });
+  
+  const profilePicture = form.watch("profilePicture");
 
+  // Function called if we already have an image via its path
   useEffect(() => {
     if (!imagePath) return;
-
-    FileCreate(imagePath).then(setFile);
-    // form.setValue("profilePicture", file as File);
-    
+  
+    const load = async () => {
+      const myFile = await FileCreate(imagePath);
+      setFile(myFile);
+      form.setValue("profilePicture", myFile);
+    };
+  
+    load();
   }, [imagePath]);
+  
 
   function onSubmit(data: ProfilePictureFormValues) {
     setIsLoading(true);
@@ -118,7 +127,7 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
             </div>
             <Button
               type="submit"
-              disabled={isLoading || !form.formState.isValid}
+              disabled={isLoading || !profilePicture}
             >
               {isLoading ? "Uploading..." : "Upload"}
               {isLoading && <Loader2 className="animate-spin" />}
