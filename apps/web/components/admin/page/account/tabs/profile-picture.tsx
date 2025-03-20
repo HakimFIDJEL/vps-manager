@@ -2,9 +2,10 @@
 
 // Necessary imports
 import * as z from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FileWithPath } from "react-dropzone";
 
 // Shadcn Components
 import {
@@ -16,8 +17,6 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { PasswordInput } from "@workspace/ui/components/passwordinput";
 import {
   Form,
   FormControl,
@@ -46,9 +45,35 @@ const profilePictureFormSchema = z.object({
 
 type ProfilePictureFormValues = z.infer<typeof profilePictureFormSchema>;
 
-export function ProfilePicture({}) {
+export type FileWithPreview = FileWithPath & {
+  preview: string;
+};
+
+interface ProfilePictureProps {
+  src?: string;
+}
+
+export function ProfilePicture({src}: ProfilePictureProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
+  const [image, setImage] = useState<FileWithPreview | null>(null);
+
+  useEffect(() => {
+    if (src) {
+      const file = new File([], src);
+      const fileWithPreview = Object.assign(file, {
+        preview: src,
+      });
+      setImage(fileWithPreview);
+    }
+
+    return () => {
+      if (image) {
+        URL.revokeObjectURL(image.preview);
+      }
+    };
+  }, [src]);
+
+
 
   // This would typically come from your database or auth provider
   const defaultValues: Partial<ProfilePictureFormValues> = {

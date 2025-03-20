@@ -79,7 +79,7 @@ export function Account() {
           </TabsContent>
 
           <TabsContent value="profile-picture" className="mt-0">
-            <ProfilePicture />
+            <ProfilePicture src="/img/placeholder.svg"/>
           </TabsContent>
 
           <TabsContent value="account-stats" className="mt-0">
