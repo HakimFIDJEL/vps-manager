@@ -1,15 +1,25 @@
 "use strict";
 
+// Necessary imports
+import type { Metadata } from 'next'
+import Link from "next/link";
+
 // Shadcn Components
+import { Button } from "@workspace/ui/components/button";
+
+// Custom Components
 import { BreadcrumbSetter } from "@/components/admin/layout/header/header-breadcrumb";
 import { Header } from "@/components/admin/page/header";
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
+import { TerminalComponent } from "@/components/admin/page/terminal/main";
 
 // Icons
 import { RefreshCcw, TerminalSquare } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
-import Link from "next/link";
-import { TerminalComponent } from "@/components/admin/page/terminal/main";
+
+
+
+export const metadata: Metadata = {
+  title: "Terminal",
+}
 
 export default function Page() {
   return (

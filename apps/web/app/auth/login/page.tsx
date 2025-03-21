@@ -4,6 +4,14 @@
 import { LoginForm } from "@/components/auth/login/form"
 import { Logo } from "@/components/elements/logo";
 
+
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Login",
+}
+
+
 export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2 bg-muted md:bg-background">

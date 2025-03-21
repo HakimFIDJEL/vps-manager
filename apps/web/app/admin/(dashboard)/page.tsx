@@ -1,6 +1,9 @@
 "use strict";
 
-// Shadcn Components
+// Necessary Imports
+import type { Metadata } from 'next'
+
+// Custom Components
 import { BreadcrumbSetter } from "@/components/admin/layout/header/header-breadcrumb";
 import { Header } from "@/components/admin/page/header";
 import { Dashboard } from "@/components/admin/page/dashboard/main";
@@ -9,6 +12,11 @@ import { Dashboard } from "@/components/admin/page/dashboard/main";
 import { LayoutDashboard, RefreshCcw } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
+
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+}
 
 export default function Page() {
   return (

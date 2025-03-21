@@ -84,7 +84,7 @@ export function ImageUploader({
       <div className="relative md:flex-row flex flex-col md:gap-6 gap-4">
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors w-full ${
+          className={`border-2 border-dashed rounded-lg px-8 py-6 flex flex-col items-center justify-center  text-center cursor-pointer transition-colors w-full ${
             isDragActive
               ? "border-primary bg-primary/5"
               : "border-muted-foreground/20"
@@ -95,11 +95,11 @@ export function ImageUploader({
           <input {...zodField} {...getInputProps()} />
           <Upload className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
           <p className="text-sm font-medium mb-1">Drag & drop your image here</p>
-          <p className="text-xs text-muted-foreground mb-4">or</p>
+          <p className="text-xs text-muted-foreground mb-2">or</p>
           <Button variant="secondary" type="button">
             Browse files
           </Button>
-          <p className="text-xs text-muted-foreground mt-4">
+          <p className="text-xs text-muted-foreground mt-2">
 
             Accepted formats:
             {accept.map((format, i) => (

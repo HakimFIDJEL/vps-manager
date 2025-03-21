@@ -1,6 +1,9 @@
 
 import { Theme } from "@/components/elements/theme"
 
+
+
+
 export default function AuthLayout({
   children,
 }: {
