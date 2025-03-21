@@ -101,6 +101,9 @@ export function AccountStats() {
     alertDialogContent: {
       className: "max-w-xl",
     },
+    alertDialogFooter: {
+      className: 'gap-2'
+    },
   });
 
   const handleDelete = async () => {
@@ -175,7 +178,7 @@ export function AccountStats() {
         </div>
 
         {/* Account deletion section */}
-        <Separator className="my-6 border-red-200 dark:border-red-800" />
+        <Separator className="my-4 md:my-6 border-red-200 dark:border-red-800" />
         <div className="">
           <div className="rounded-lg border border-destructive/40 p-4 bg-destructive/10 dark:bg-muted/50">
             <h3 className="text-lg font-semibold text-destructive mb-2 flex items-center gap-2 ">
