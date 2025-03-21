@@ -142,7 +142,7 @@ export function Profile() {
             <Button type="submit" disabled={isLoading || !allFilled}>
               {isLoading ? "Updating..." : "Update profile"}
               {isLoading && <Loader2 className="animate-spin" />}
-              {!isLoading && <UserCircle />}
+              {!isLoading && <Edit />}
             </Button>
           </CardContent>
         </form>

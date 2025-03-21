@@ -27,7 +27,7 @@ import { Activity, Image, Lock, UserCircle } from "lucide-react";
 
 export function Account() {
   return (
-    <Tabs defaultValue="profile">
+    <Tabs defaultValue="account-stats">
       <div className="flex flex-col md:flex-row gap-2 justify-between align-start">
         <Card className="h-max">
 

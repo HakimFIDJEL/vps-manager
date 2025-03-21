@@ -143,7 +143,7 @@ export function ImageCropper({
           </ReactCrop>
         </div>
         <DialogFooter className="flex flex-row gap-2">
-          <Button type="submit" onClick={onCrop}>
+          <Button type="submit" onClick={onCrop} disabled={(croppedFile == file) || !crop}>
             Crop
             <CropIcon />
           </Button>

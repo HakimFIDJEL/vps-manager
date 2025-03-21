@@ -29,7 +29,7 @@ import {
 import { Separator } from "@workspace/ui/components/separator";
 
 // Icons
-import { Loader2, Lock } from "lucide-react";
+import { Edit, Loader2, Lock } from "lucide-react";
 
 // Custom components
 import { PasswordStrengthChecker } from "@/components/elements/password-strength-checker";
@@ -39,18 +39,18 @@ const PasswordFormSchema = z
     current_password: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
-    password: z.string().min(8, {
+    new_password: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
     password_confirmation: z.string(),
   })
-  .refine((data) => data.password === data.password_confirmation, {
+  .refine((data) => data.new_password === data.password_confirmation, {
     message: "Passwords do not match.",
     path: ["password_confirmation"],
   })
-  .refine((data) => data.current_password !== data.password, {
+  .refine((data) => data.current_password !== data.new_password, {
     message: "New password must be different from the current password.",
-    path: ["password"],
+    path: ["new_password"],
   });
 
 type PasswordFormValues = z.infer<typeof PasswordFormSchema>;
@@ -63,12 +63,12 @@ export function Password() {
     resolver: zodResolver(PasswordFormSchema),
     defaultValues: {
       current_password : "",
-      password: "",
+      new_password: "",
       password_confirmation: "",
     },
   });
 
-  const passwordValue = form.watch("password");
+  const passwordValue = form.watch("new_password");
 
   const allFilled = Object.values(form.watch()).every((value) => {
     return value !== null && value !== undefined && value !== "";
@@ -118,7 +118,7 @@ export function Password() {
                 />
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="new_password"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>New Password</FormLabel>
@@ -157,7 +157,7 @@ export function Password() {
             <Button type="submit" disabled={isLoading || !allFilled}>
               {isLoading ? "Updating..." : "Update password"}
               {isLoading && <Loader2 className="animate-spin" />}
-              {!isLoading && <Lock />}
+              {!isLoading && <Edit />}
             </Button>
           </CardContent>
         </form>
