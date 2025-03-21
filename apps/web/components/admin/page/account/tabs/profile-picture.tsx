@@ -90,7 +90,7 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
         </CardDescription>
       </CardHeader>
 
-      <Separator className="md:mb-6 mb-2" />
+      <Separator className="mb-6" />
 
       <Form {...form}>
         <form

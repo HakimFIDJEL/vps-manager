@@ -96,7 +96,7 @@ export function Password() {
         </CardDescription>
       </CardHeader>
 
-      <Separator className="md:mb-6 mb-2" />
+      <Separator className="mb-6" />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>

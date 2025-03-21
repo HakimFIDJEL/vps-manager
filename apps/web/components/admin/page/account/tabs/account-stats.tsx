@@ -144,7 +144,7 @@ export function AccountStats() {
         <CardDescription>Have a look at your account stats</CardDescription>
       </CardHeader>
 
-      <Separator className="md:mb-6 mb-2" />
+      <Separator className="mb-6" />
 
       <CardContent className="grid gap-2">
         {/* Stats widgets grid */}
