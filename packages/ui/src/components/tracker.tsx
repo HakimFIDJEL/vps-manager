@@ -71,7 +71,7 @@ export function Tracker({
               <div
                 className={cn(
                   "h-8 flex-1 rounded-sm transition-all",
-                  segment.online ? "bg-primary" : "bg-secondary"
+                  segment.online ? "bg-primary" : "bg-muted-foreground"
                 )}
               />
             </TooltipTrigger>

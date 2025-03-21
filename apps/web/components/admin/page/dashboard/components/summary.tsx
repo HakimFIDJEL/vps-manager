@@ -49,7 +49,7 @@ function WidgetServer({ title, value, icon }: WidgetServerProps) {
 
 export function Summary({ className }: { className?: string }) {
     return (
-        <Card className={`shadow-sm  overflow-hidden ${className}`}>
+        <Card className={`shadow-sm  overflow-hidden ${className}`} gradient>
         <CardHeader className="bg-muted/50 flex flex-row justify-between items-center">
           <div>
             <CardTitle className="flex items-center gap-2">

@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
 // Necessary imports
-
 
 // Shadcn components
 import {
@@ -12,8 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@workspace/ui/components/sidebar"
-
+} from "@workspace/ui/components/sidebar";
 
 // Icons
 import {
@@ -28,16 +26,13 @@ import {
   SquareActivity,
   SquareTerminal,
   User,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavLinks } from "@/components/admin/layout/sidebar/nav-links"
-import { NavUser } from "@/components/admin/layout/sidebar/nav-user"
-import { Logo } from "@/components/elements/logo"
-
-
+import { NavLinks } from "@/components/admin/layout/sidebar/nav-links";
+import { NavUser } from "@/components/admin/layout/sidebar/nav-user";
+import { Logo } from "@/components/elements/logo";
 
 const data = {
-  
   navigation: [
     {
       title: "Dashboard",
@@ -71,7 +66,7 @@ const data = {
       items: [
         {
           title: "Containers",
-          url: "#",
+          url: "/admin/docker/containers",
         },
         {
           title: "Volumes",
@@ -84,7 +79,7 @@ const data = {
         {
           title: "Images",
           url: "#",
-        }
+        },
       ],
     },
     {
@@ -149,26 +144,13 @@ const data = {
       ],
     },
   ],
-  
-  quick_access: [
+
+  footer: [
     {
       title: "Terminal",
       url: "/admin/terminal",
       icon: SquareTerminal,
     },
-    {
-      title: "Database",
-      url: "#",
-      icon: Database,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-    },
-  ],
-
-  footer: [
     {
       title: "Account",
       url: "/admin/account",
@@ -185,45 +167,41 @@ const data = {
     name: "Hakim Fidjel",
     email: "m@example.com",
   },
-}
+};
 
-export function LayoutSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-
-
+export function LayoutSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
       className="top-[--header-height] !h-[calc(100svh-var(--header-height))]"
       {...props}
       variant="floating"
       collapsible="icon"
-      
     >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Logo href="/admin" className="leading-tight" font_size="base" logo_size="8" />
+              <Logo
+                href="/admin"
+                className="leading-tight"
+                font_size="base"
+                logo_size="8"
+              />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      
       <SidebarContent>
-
         <NavLinks title="Navigation" items={data.navigation} />
-        <NavLinks title="Quick access" items={data.quick_access} />
-        
-        <NavLinks items={data.footer} className="mt-auto" />
 
+        <NavLinks title="Quick access"  items={data.footer} />
       </SidebarContent>
       <SidebarFooter>
-
-
         <NavUser user={data.user} />
-
-        
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

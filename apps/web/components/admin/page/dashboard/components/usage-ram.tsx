@@ -87,7 +87,7 @@ export function UsageRam({ className }: { className?: string }) {
   } satisfies ChartConfig;
 
   return (
-    <Card className={className}>
+    <Card className={className} gradient>
       <CardHeader className=" bg-muted/50 flex flex-row justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">

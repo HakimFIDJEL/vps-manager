@@ -3,20 +3,28 @@ import { FitAddon } from "xterm-addon-fit";
 import "xterm/css/xterm.css";
 
 
+
 export interface TerminalWithAddons {
   terminal: Terminal;
   fitAddon: FitAddon;
 }
 
-export function createTerminal(container: HTMLElement): TerminalWithAddons {
+export function createTerminal(container: HTMLElement, theme: string): TerminalWithAddons {
+
+
   const terminal = new Terminal({
     cursorBlink: true,
     fontSize: 14,
     scrollback: 1000,
-    theme: {
-      background: "#000000",
-      foreground: "#ffffff",
-    },
+    theme: theme === "dark"
+    ? {
+        background: "#000000",
+        foreground: "#ffffff",
+      }
+    : {
+        background: "#ffffff",
+        foreground: "#000000",
+      },
   });
 
   const fitAddon = new FitAddon();

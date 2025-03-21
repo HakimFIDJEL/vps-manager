@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 
+import { useTheme } from "next-themes";
+
 export function TerminalComponent() {
   const terminalRef = useRef<HTMLDivElement>(null);
   const { showLoader, hideLoader } = useLoader();
@@ -18,11 +20,12 @@ export function TerminalComponent() {
 
   const [user, setUser] = useState("user");
   const [ip, setIp] = useState("192.168.0.0");
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!terminalRef.current) return;
 
-    const { terminal, fitAddon } = createTerminal(terminalRef.current);
+    const { terminal, fitAddon } = createTerminal(terminalRef.current, theme ?? "light");
 
     const handleResize = () => fitAddon.fit();
     window.addEventListener("resize", handleResize);
@@ -45,7 +48,7 @@ export function TerminalComponent() {
       window.removeEventListener("resize", handleResize);
       clearInterval(timeInterval);
     };
-  }, []);
+  }, [theme]);
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -54,7 +57,7 @@ export function TerminalComponent() {
   return (
     <div className="w-full mx-auto">
       <div
-        className={`terminal-window bg-black rounded-lg shadow-xl overflow-hidden border border-border transition-all ${
+        className={`terminal-window bg-white dark:bg-black rounded-lg shadow-xl overflow-hidden border border-border transition-all ${
           isFullscreen
             ? "fixed inset-0 z-50 m-0 rounded-none max-w-none"
             : "relative"
