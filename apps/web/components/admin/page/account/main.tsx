@@ -1,9 +1,9 @@
 "use client";
 // Necessary imports
-import { Profile } from "@/components/admin/page/account/tabs/profile";
-import { Password } from "@/components/admin/page/account/tabs/password";
-import { ProfilePicture } from "@/components/admin/page/account/tabs/profile-picture";
-import { AccountStats } from "@/components/admin/page/account/tabs/account-stats";
+import { Profile } from "@/components/admin/page/account/_profile";
+import { Password } from "@/components/admin/page/account/_password";
+import { ProfilePicture } from "@/components/admin/page/account/_profile-picture";
+import { AccountStats } from "@/components/admin/page/account/_account-stats";
 
 // Shadcn Components
 import {

@@ -189,7 +189,7 @@ export function Network({ className }: { className?: string }) {
         defaultValue="requests"
         className={`h-full w-full md:w-auto gap-4 flex flex-col ${className}`}
       >
-        <Card className="shadow-sm" gradient>
+        <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between bg-muted/50">
             <div>
               <CardTitle className="flex items-center gap-2">

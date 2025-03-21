@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 // Icons
-import { TrendingUp, ArrowUpRight, Cpu } from "lucide-react";
+import { TrendingUp, MemoryStick, ArrowUpRight } from "lucide-react";
 
 // Shadcn Components
 import { Progress } from "@workspace/ui/components/progress";
@@ -24,6 +24,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@workspace/ui/components/chart";
+
 import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
@@ -35,16 +36,16 @@ import { Separator } from "@workspace/ui/components/separator";
 
 const FETCH_INTERVAL = 20000; // 20 secondes
 
-// Valeurs de test simulant l'utilisation du CPU
+// Valeurs de test
 const testData = [
-  { time: "12:00:00", usage: 15 },
-  { time: "12:00:05", usage: 25 },
-  { time: "12:00:10", usage: 40 },
-  { time: "12:00:15", usage: 55 },
-  { time: "12:00:20", usage: 65 },
+  { time: "12:00:00", usage: 30 },
+  { time: "12:00:05", usage: 45 },
+  { time: "12:00:10", usage: 50 },
+  { time: "12:00:15", usage: 60 },
+  { time: "12:00:20", usage: 55 },
 ];
 
-export function UsageCpu({ className }: { className?: string }) {
+export function UsageRam({ className }: { className?: string }) {
   const [chartData, setChartData] =
     useState<{ time: string; usage: number }[]>(testData);
   const [progress, setProgress] = useState(100);
@@ -56,10 +57,10 @@ export function UsageCpu({ className }: { className?: string }) {
       //   const newData = {
       //     time: new Date().toLocaleTimeString(),
       //     usage: Math.floor(Math.random() * 100),
-      //   };
-      //   setChartData((prev) => [...prev.slice(-19), newData]); // Garde les 20 dernières entrées
+      //   }
+      //   setChartData((prev) => [...prev.slice(-19), newData]) // Garde les 20 dernières entrées
       // } catch (error) {
-      //   console.error("Error fetching CPU usage:", error);
+      //   console.error("Error fetching RAM usage:", error)
       // }
     };
 
@@ -80,20 +81,20 @@ export function UsageCpu({ className }: { className?: string }) {
 
   const chartConfig = {
     usage: {
-      label: "CPU Usage (%)",
+      label: "RAM Usage (%)",
       color: "hsl(var(--primary))",
     },
   } satisfies ChartConfig;
 
   return (
-    <Card className={className} gradient>
+    <Card className={className}>
       <CardHeader className=" bg-muted/50 flex flex-row justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Cpu className="h-5 w-5 text-primary" />
-            CPU Usage
+            <MemoryStick className="h-5 w-5 text-primary" />
+            RAM Usage
           </CardTitle>
-          <CardDescription>Real-time server CPU consumption</CardDescription>
+          <CardDescription>Real-time server RAM consumption</CardDescription>
         </div>
 
         <Link href="">

@@ -108,7 +108,7 @@ export function UsageStorage({ className }: { className?: string }) {
   } satisfies ChartConfig;
 
   return (
-    <Card className={className} gradient>
+    <Card className={className}>
       <CardHeader className=" bg-muted/50 flex flex-row justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">

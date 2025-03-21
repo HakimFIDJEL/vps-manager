@@ -39,7 +39,7 @@ export function ProjectsTracker({ className }: { className?: string }) {
   }, []);
 
   return (
-    <Card className={`shadow-sm  overflow-hidden ${className}  h-max`} gradient>
+    <Card className={`shadow-sm  overflow-hidden ${className}  h-max`}>
       <CardHeader className="bg-muted/50 flex flex-row justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">

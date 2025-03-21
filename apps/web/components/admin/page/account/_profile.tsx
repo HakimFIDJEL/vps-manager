@@ -78,7 +78,7 @@ export function Profile() {
   }
 
   return (
-    <Card gradient>
+    <Card>
       <CardHeader className="bg-muted/50">
         <CardTitle className="flex items-center gap-2">
           <UserCircle className="h-5 w-5 text-primary" />

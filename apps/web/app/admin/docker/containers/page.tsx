@@ -7,6 +7,8 @@ import { Header } from "@/components/admin/page/header";
 // Icons
 import { Container } from "lucide-react";
 
+import { Containers } from "@/components/admin/page/docker/containers/main";
+
 export default function Page() {
   return (
     <>
@@ -20,14 +22,14 @@ export default function Page() {
 
 
       <div className="flex flex-col gap-4">
-        <Header 
+        {/* <Header 
           title="Containers" 
           subtitle="Manage your containers"
           icon={<Container className="h-5 w-5 text-primary" />}
-        />
+        /> */}
         
         
-        {/* <Account /> */}
+        <Containers />
 
 
 

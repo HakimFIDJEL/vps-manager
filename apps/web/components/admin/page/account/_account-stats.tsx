@@ -48,7 +48,7 @@ export function AccountStats() {
   }
 
   return (
-    <Card gradient>
+    <Card>
       <CardHeader className="bg-muted/50">
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
@@ -66,18 +66,21 @@ export function AccountStats() {
             icon={<Clock />}
             title="Last Login"
             description={formatDate(accountData.lastLogin)}
+            gradient
           />
 
           <Widget
             icon={<Calendar />}
             title="Creation Date"
             description={formatDate(accountData.creationDate)}
+            gradient
           />
 
           <Widget
             icon={<UserCircle />}
             title="Total Logins"
             description={accountData.totalLogins.toString()}
+            gradient
           />
         </div>
 

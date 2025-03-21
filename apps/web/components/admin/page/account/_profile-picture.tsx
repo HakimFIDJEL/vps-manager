@@ -79,7 +79,7 @@ export function ProfilePicture({ imagePath }: { imagePath?: string }) {
   }
 
   return (
-    <Card gradient>
+    <Card>
       <CardHeader className="bg-muted/50">
         <CardTitle className="flex items-center gap-2">
           <Image className="h-5 w-5 text-primary" />
