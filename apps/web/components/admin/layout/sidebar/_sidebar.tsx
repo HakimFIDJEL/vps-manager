@@ -1,6 +1,7 @@
 "use client";
 
 // Necessary imports
+import * as React from "react";
 
 // Shadcn components
 import {
@@ -172,11 +173,15 @@ const data = {
 export function LayoutSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+
+  const [openMenu, setOpenMenu] = React.useState<string | null>(null)
+
+
   return (
     <Sidebar
       className="top-[--header-height] !h-[calc(100svh-var(--header-height))]"
       {...props}
-      variant="floating"
+      variant="inset"
       collapsible="icon"
     >
       <SidebarHeader>
@@ -195,9 +200,9 @@ export function LayoutSidebar({
       </SidebarHeader>
 
       <SidebarContent>
-        <NavLinks title="Navigation" items={data.navigation} />
+        <NavLinks title="Navigation" items={data.navigation} openMenu={openMenu} setOpenMenu={setOpenMenu}/>
 
-        <NavLinks title="Quick access"  items={data.footer} />
+        <NavLinks title="Quick access"  items={data.footer} openMenu={openMenu} setOpenMenu={setOpenMenu}/>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
