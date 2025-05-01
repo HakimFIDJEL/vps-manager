@@ -1,41 +1,47 @@
-# Portfolio
+# lri-starter-kit
 
 ## Description
-Ce projet est un portfolio personnel développé avec **Next.js** et **Tailwind CSS**. Il met en avant mes compétences, mes projets et mon parcours professionnel.
+lri-starter-kit est une base de projet vierge intégrant :
+- **Laravel 12**
+- **React 18**
+- **Inertia.js 2**
+- **Tailwind CSS v4**
+- **shadcn/ui**
 
-## Technologies
-- **Next.js** - Framework React pour le rendu côté serveur et statique
-- **Tailwind CSS** - Framework CSS pour une conception rapide et responsive
-- **Docker** - Conteneurisation de l'application pour un déploiement simplifié
-- **Traefik** - Reverse proxy pour la gestion des certificats SSL et des routes
-- **GitHub Actions** - CI/CD pour l'automatisation des déploiements
+Cette base reprend la structure officielle de Laravel 12, en allégeant les composants :
+- Suppression des pages et logiques d’authentification multiples
+- Un seul `AuthController` et `AuthMiddleware`
+- Un ensemble minimal de routes (accueil, erreurs, authentification)
+
+La gestion des erreurs est centralisée via Inertia et `abort(...)`; toutes les erreurs HTTP renvoient vos pages React épurées dans `resources/js/pages/errors/errorPage.tsx`.
+
+L’interface de démarrage fournit une page `welcome` servant de squelette de dashboard avec :
+- Une barre latérale réactive (sidebar)
+- Un en‑tête (header)
 
 ## Installation
-```sh
+```bash
 # Cloner le dépôt
-git clone https://github.com/HakimFIDJEL/portfolio.git
-cd portfolio
+git clone git@github.com:hakimfidjel/lri-starter-kit.git
+cd lri-starter-kit
 
-# Installer les dépendances
-npm install 
+# Installer les dépendances PHP et JS
+composer install
+npm install
 
-# Lancer le serveur de développement (scss, php artisan & vite)
-npm run start
+# Configuration
+cp .env.example .env
+php artisan key:generate
+
+# Préparer la base de données
+php artisan migrate
+
+# Lancer le serveur backend
+php artisan serve
+
+# Lancer le serveur de développement Frontend
+npm run dev
 ```
 
-## Docker
-```sh
-# Construire et exécuter le conteneur Docker
-docker build -t hakimfidjel/portfolio:latest .
-docker run -d -p 3000:3000 hakimfidjel/portfolio:latest
-```
-
-## Déploiement sur VPS
-Le projet est déployé sur mon vps personnel grâce à **Docker** & **Docker Compose**.
-
-## CI/CD avec GitHub Actions
-Le déploiement est automatisé via **GitHub Actions**, qui construit et déploie l'image Docker à chaque push sur la branche `prod`.
-
-## Liens
-- [Portfolio en ligne](https://hakimfidjel.fr)
-- [Repository GitHub](https://github.com/HakimFIDJEL/portfolio)
+## Contributions
+Ce projet est pensé comme une base vierge. N’hésitez pas à forker et à l’adapter selon vos besoins.
