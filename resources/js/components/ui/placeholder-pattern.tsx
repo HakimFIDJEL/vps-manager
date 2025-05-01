@@ -44,7 +44,7 @@ export function PlaceholderPattern({ className, statusCode }: PlaceholderPattern
       </svg>
 
       <div className="relative z-10 flex items-center justify-center w-full h-full">
-        {content && (
+        {content && statusCode && (
 
           <Card className="relative">
             <CardContent>
