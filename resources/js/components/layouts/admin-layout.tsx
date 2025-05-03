@@ -1,5 +1,6 @@
 // Providers
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 import { AppSidebar } from "@/components/layouts/sidebar/_sidebar"
 import { AppHeader } from "@/components/layouts/header/_header"
@@ -18,23 +19,25 @@ export function AdminLayout({
 }: AdminLayoutProps) {
 
   return (
-    <SidebarProvider>
-      <AppSidebar variant="floating" />
-      <SidebarInset>
-        <AppHeader breadcrumbs={breadcrumbs} />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2 relative py-6">
+    <TooltipProvider>
+      <SidebarProvider>
+        <AppSidebar variant="floating" />
+        <SidebarInset>
+          <AppHeader breadcrumbs={breadcrumbs} />
+          <div className="flex flex-1 flex-col">
+            <div className="@container/main flex flex-1 flex-col gap-4 relative py-6 px-2">
 
-              { children }
+                { children }
 
-              {/* <SectionCards />
-              <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
-              </div>
-              <DataTable data={data} /> */}
+                {/* <SectionCards />
+                <div className="px-4 lg:px-6">
+                  <ChartAreaInteractive />
+                </div>
+                <DataTable data={data} /> */}
+            </div>
           </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   )
 }

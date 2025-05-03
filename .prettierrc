@@ -1,3 +1,6 @@
 {
+    "useTabs": true,   
+    "tabWidth": 1,   
     "proseWrap": "never"
-}
+  }
+  

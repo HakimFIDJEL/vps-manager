@@ -37,13 +37,13 @@ const data = {
   navigation: [
     {
       title: "Dashboard",
-      url: "/admin",
+      url: route('dashboard'),
       icon: LayoutDashboard,
       isActive: true,
     },
     {
       title: "Projects",
-      url: "#",
+      url: route('projects.index'),
       icon: Folder,
       items: [
         {
@@ -62,85 +62,85 @@ const data = {
     },
     {
       title: "Docker",
-      url: route('errors', {any: 'docker'}),
+      url: route('not-implemented'),
       icon: Container,
       items: [
         {
           title: "Containers",
-          url: "/admin/docker/containers",
+          url: route('not-implemented'),
         },
         {
           title: "Volumes",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Networks",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Images",
-          url: "#",
+          url: route('not-implemented'),
         },
       ],
     },
     {
       title: "Network & Security",
-      url: "#",
+      url: route('not-implemented'),
       icon: Network,
       items: [
         {
           title: "Activity",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "SSH Keys",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Traefik",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Firewall",
-          url: "#",
+          url: route('not-implemented'),
         },
       ],
     },
     {
       title: "Storage",
-      url: "#",
+      url: route('not-implemented'),
       icon: Archive,
       items: [
         {
           title: "Disk Usage",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Backups",
-          url: "#",
+          url: route('not-implemented'),
         },
       ],
     },
     {
       title: "Monitoring",
-      url: "#",
+      url: route('not-implemented'),
       icon: SquareActivity,
       items: [
         {
           title: "Processes",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Resources",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Containers",
-          url: "#",
+          url: route('not-implemented'),
         },
         {
           title: "Logs",
-          url: "#",
+          url: route('not-implemented'),
         },
       ],
     },
@@ -149,17 +149,17 @@ const data = {
   footer: [
     {
       title: "Terminal",
-      url: "/admin/terminal",
+      url: route('not-implemented'),
       icon: SquareTerminal,
     },
     {
       title: "Account",
-      url: "/admin/account",
+      url: route('not-implemented'),
       icon: User,
     },
     {
       title: "Log out",
-      url: "/auth/login",
+      url: route('not-implemented'),
       icon: LogOut,
     },
   ],

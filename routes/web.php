@@ -5,6 +5,7 @@ use Inertia\Inertia;
 
 // Controllers
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProjectController;
 
 
 // Middlewares
@@ -13,7 +14,15 @@ use App\Http\Middleware\AuthMiddleware;
 
 // Welcome Route
 Route::get('/', function() {
-    return Inertia::render('welcome');
+    return Inertia::render('dashboard');
+})->name('dashboard');
+
+// PROJECT Routes
+Route::prefix('/projects')->name('projects.')->controller(ProjectController::class)->group(function()
+{
+    Route::get('/', 'index')->name('index');
+    Route::get('/create', 'create')->name('create');
+    Route::get('/show/{inode}', 'show')->name('show');
 });
 
 // AUTH ROUTES
@@ -35,6 +44,11 @@ Route::prefix('/auth')->name('auth.')->controller(AuthController::class)->group(
         Route::post('/reset', 'resetPost')->name('toReset');
     });
 });
+
+
+Route::get('/not-implemented', function() {
+    abort(501);
+})->name('not-implemented');
 
 // ERRORS ROUTES
 // abort() is also supported by Inertia and will redirect to the error page
