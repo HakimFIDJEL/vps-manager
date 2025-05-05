@@ -1,6 +1,7 @@
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
+import { Link } from '@inertiajs/react';
 
 // Components
 import { AdminLayout } from "@/components/layouts/admin-layout";
@@ -188,11 +189,11 @@ export default function Page() {
 		return (
 			<Tooltip>
 				<TooltipTrigger asChild>
-					<a href={route("projects.show", { inode })}>
+					<Link href={route("projects.show", { inode })}>
 						<Button variant="outline" size="sm">
 							<ArrowUpRight className="h-4 w-4" />
 						</Button>
-					</a>
+					</Link>
 				</TooltipTrigger>
 				<TooltipContent>Show project</TooltipContent>
 			</Tooltip>
@@ -221,17 +222,17 @@ export default function Page() {
 						</CardTitle>
 						<CardDescription>List of all projects</CardDescription>
 						<CardAction className="flex items-center gap-2">
-							<a href={route("projects.index")}>
+							<Link href={route("projects.index")}>
 								<Button variant={"secondary"}>
 									<RefreshCcw />
 								</Button>
-							</a>
-							<a href={route("projects.create")}>
+							</Link>
+							<Link href={route("projects.create")}>
 								<Button variant={"outline"}>
 									Create a new project
 									<Plus />
 								</Button>
-							</a>
+							</Link>
 						</CardAction>
 					</CardHeader>
 					<Separator />
@@ -318,3 +319,4 @@ export default function Page() {
 		</AdminLayout>
 	);
 }
+
