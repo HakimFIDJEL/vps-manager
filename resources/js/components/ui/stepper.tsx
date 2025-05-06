@@ -1,10 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { createContext, useContext } from "react"
+import { createContext, useContext, useEffect } from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { ArrowLeft, ArrowRight, CheckIcon, LoaderCircleIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -14,6 +15,7 @@ type StepperContextValue = {
   setActiveStep: (step: number) => void
   totalSteps: number
   orientation: "horizontal" | "vertical"
+  previousStep: number | null
 }
 
 type StepItemContextValue = {
@@ -64,17 +66,18 @@ function Stepper({
   ...props
 }: StepperProps) {
   const [activeStep, setInternalStep] = React.useState(defaultValue)
+  const [previousStep, setPreviousStep] = React.useState<number | null>(null)
 
   const setActiveStep = React.useCallback(
     (step: number) => {
+      setPreviousStep(activeStep)
       if (value === undefined) {
         setInternalStep(step)
       }
       onValueChange?.(step)
     },
-    [value, onValueChange],
+    [value, onValueChange, activeStep],
   )
-
 
   const currentStep = value ?? activeStep
 
@@ -85,6 +88,7 @@ function Stepper({
         setActiveStep,
         orientation,
         totalSteps,
+        previousStep,
       }}
     >
       <div
@@ -246,28 +250,42 @@ interface StepperContentProps extends React.HTMLAttributes<HTMLDivElement> {
   value: number
 }
 
-// Ajouter le composant StepperContent
+// Ajouter le composant StepperContent avec animation
 function StepperContent({ value, className, children, ...props }: StepperContentProps) {
-  const { activeStep } = useStepper()
+  const { activeStep, previousStep } = useStepper()
   const isActive = activeStep === value
+
+  const [isMounted, setIsMounted] = React.useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const direction = previousStep !== null ? (activeStep > previousStep ? 1 : -1) : 1
 
   if (!isActive) return null
 
   return (
-    <div
-      data-slot="stepper-content"
-      data-state={isActive ? "active" : "inactive"}
-      className={cn("mt-4", className)}
-      {...props}
-    >
-      {children}
-    </div>
+    <AnimatePresence>
+      <motion.div
+        data-slot="stepper-content"
+        data-state={isActive ? "active" : "inactive"}
+        className={cn(className)}
+        initial={isMounted ? { opacity: 0, x: 50 * direction } : { opacity: 1, x: 0 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -50 * direction }}
+        transition={{ duration: 0.3 }}
+        key={value}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   )
 }
 
 // Ajouter le composant StepperList
 function StepperList({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-
   const { orientation } = useStepper()
 
   return (
@@ -287,7 +305,6 @@ function StepperNavigation({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-
   const { activeStep, setActiveStep, totalSteps } = useStepper()
 
   console.log('totalSteps', totalSteps)

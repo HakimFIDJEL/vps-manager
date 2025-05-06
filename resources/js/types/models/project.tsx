@@ -15,3 +15,8 @@ export type Container = {
     updated_at: string;
     created_at: string;
 }
+
+export type Variable = {
+    key: string;
+    value: string;
+}

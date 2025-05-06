@@ -6,6 +6,13 @@ import { Link } from '@inertiajs/react';
 // Components
 import { AdminLayout } from "@/components/layouts/admin-layout";
 
+import { AppProject } from "@/components/page/projects/create/app-project";
+import { AppVariables } from "@/components/page/projects/create/app-variables";
+import { AppDocker } from "@/components/page/projects/create/app-docker";
+import { AppMakefile } from "@/components/page/projects/create/app-makefile";
+import { AppDone } from "@/components/page/projects/create/app-done";
+
+
 // Shadcn UI components
 import {
 	Stepper,
@@ -25,43 +32,15 @@ import {
 	CardDescription,
 	CardHeader,
 	CardContent,
-	CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Icons
 import {
 	ArrowLeft,
-	ArrowUpRight,
-	Check,
-	Folder,
-	LayoutGrid,
-	Plus,
-	RefreshCcw,
-	TableProperties,
-	TriangleAlert,
-	X,
 } from "lucide-react";
 
-// Types
-import { type Project, type Container } from "@/types/models/project";
 
 
 
@@ -128,7 +107,7 @@ export default function Page() {
 			</Card>
 
 			<Stepper defaultValue={1} totalSteps={steps.length}>
-				<Card className="bg-background border-0 shadow-none">
+				<Card className="bg-background border-0 shadow-none mb-4">
 					<CardContent>
 						<div className="space-y-8 text-center">
 							<StepperList>
@@ -165,6 +144,10 @@ export default function Page() {
 								<StepperNavigation />
 							</CardAction>
 						</CardHeader>
+						<Separator />
+						<CardContent>
+							<AppProject />
+						</CardContent>
 					</Card>
 				</StepperContent>
 				<StepperContent value={2}>
@@ -178,6 +161,10 @@ export default function Page() {
 								<StepperNavigation />
 							</CardAction>
 						</CardHeader>
+						<Separator />
+						<CardContent>
+							<AppVariables />
+						</CardContent>
 					</Card>
 				</StepperContent>
 				<StepperContent value={3}>
@@ -191,6 +178,10 @@ export default function Page() {
 								<StepperNavigation />
 							</CardAction>
 						</CardHeader>
+						<Separator />
+						<CardContent>
+							<AppDocker />
+						</CardContent>
 					</Card>
 				</StepperContent>
 				<StepperContent value={4}>
@@ -204,6 +195,10 @@ export default function Page() {
 								<StepperNavigation />
 							</CardAction>
 						</CardHeader>
+						<Separator />
+						<CardContent>
+							<AppMakefile />
+						</CardContent>
 					</Card>
 				</StepperContent>
 				<StepperContent value={5}>
@@ -217,6 +212,10 @@ export default function Page() {
 								<StepperNavigation />
 							</CardAction>
 						</CardHeader>
+						<Separator />
+						<CardContent>
+							<AppDone />
+						</CardContent>
 					</Card>
 				</StepperContent>
 			</Stepper>
