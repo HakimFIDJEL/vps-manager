@@ -20,8 +20,8 @@ export function formatDate(date: string): string {
 
 export function formatTraefik(traefik_enabled: boolean) {
   return traefik_enabled
-    ? <Badge variant="outline" className="flex items-center gap-2">Enabled<Check/></Badge>
-    : <Badge variant="secondary">Disabled<X/></Badge>;
+    ? <Badge variant="outline" className="flex items-center gap-2"><Check/>Enabled</Badge>
+    : <Badge variant="secondary"><X/>Disabled</Badge>;
 }
 
 export function formatContainers(containers: Container[]) {

@@ -149,8 +149,8 @@ export default function Page() {
 							</Link>
 							<Link href={route("projects.create")}>
 								<Button variant={"outline"}>
-									Create a new project
 									<Plus />
+									Create a new project
 								</Button>
 							</Link>
 						</CardAction>

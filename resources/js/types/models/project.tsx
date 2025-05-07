@@ -28,5 +28,5 @@ export type Variable = {
 // Schemas
 export const VariableSchema = z.object({
     key: z.string().regex(/^[A-Z_]+$/, { message: "Key must be uppercase and separated by an underscore" }),
-    value: z.string().regex(/^[A-Z_]+$/, { message: "Value must be uppercase and separated by an underscore" }),
+    value: z.string().regex(/^\S+$/, { message: "Value must not contain spaces" }),
   })

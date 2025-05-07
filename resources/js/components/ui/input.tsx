@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   showPasswordToggle?: boolean
-  addonText?: string
+  addonText?: string | React.ReactNode
   addonPosition?: "start" | "end"
 }
 
