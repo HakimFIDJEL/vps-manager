@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 import { statusData, type StatusEntry } from "@/pages/errors/errorData"
+import { Link } from "@inertiajs/react"
 
 interface PlaceholderPatternProps {
   className?: string
@@ -55,12 +56,12 @@ export function PlaceholderPattern({ className, statusCode }: PlaceholderPattern
                 <div className="flex justify-center mb-4">{content.icon}</div>
                 <h3 className="text-xl font-bold mb-2">{content.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-3   ">{content.description}</p>
-                  <a href="/">
+                  <Link href={route('welcome') ?? "/"}>
                       <Button variant={'outline'}>
                           Go to Home 
                           <ArrowRight className="h-4 w-4" />
                       </Button>
-                  </a>
+                  </Link>
               </div>
             </CardContent>
           </Card>

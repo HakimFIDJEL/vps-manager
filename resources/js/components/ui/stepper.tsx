@@ -307,8 +307,6 @@ function StepperNavigation({
 }: React.HTMLAttributes<HTMLDivElement>) {
   const { activeStep, setActiveStep, totalSteps } = useStepper()
 
-  console.log('totalSteps', totalSteps)
-
   return (
     <div
       data-slot="stepper-navigation"

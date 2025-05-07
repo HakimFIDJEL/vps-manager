@@ -9,12 +9,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   showPasswordToggle?: boolean
   addonText?: string
   addonPosition?: "start" | "end"
-  comment?: string | null
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, type, showPasswordToggle, addonText, addonPosition = "start", comment = null, readOnly, ...props },
+    { className, type, showPasswordToggle, addonText, addonPosition = "start", readOnly, ...props },
     ref,
   ) => {
     const [showPassword, setShowPassword] = React.useState(false)
@@ -136,8 +135,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </div>
         )}
 
-        {/* Commentaire */}
-        {comment && <p className="text-xs text-muted-foreground mt-1 font-light">{comment}</p>}
       </div>
     )
   },

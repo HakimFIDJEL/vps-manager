@@ -1,3 +1,7 @@
+import { z } from "zod"
+
+
+// Types
 export type Project = {
     inode: number;
     name: string;
@@ -20,3 +24,9 @@ export type Variable = {
     key: string;
     value: string;
 }
+
+// Schemas
+export const VariableSchema = z.object({
+    key: z.string().regex(/^[A-Z_]+$/, { message: "Key must be uppercase and separated by an underscore" }),
+    value: z.string().regex(/^[A-Z_]+$/, { message: "Value must be uppercase and separated by an underscore" }),
+  })

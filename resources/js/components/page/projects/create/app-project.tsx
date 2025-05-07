@@ -17,7 +17,7 @@ export function AppProject() {
         // Wrapper
         <div className="grid gap-4">
             {/* Form row */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
                 {/* Form bloc */}
                 <div className="grid gap-2">
                     <Label htmlFor="name">Project name</Label>
@@ -26,7 +26,7 @@ export function AppProject() {
                         placeholder="eg: My project" 
                         name="name" 
                         required
-                        comment="The project name will not be stored, but be displayed from the folder path."
+                        // comment="The project name will not be stored, but be displayed from the folder path."
                         value={name}
                         autoFocus
                         onChange={(e) => {
@@ -45,7 +45,7 @@ export function AppProject() {
                         required 
                         addonText="/projects/" 
                         addonPosition="start"
-                        comment="The folder path needs to be unique and slugified."
+                        // comment="The folder path needs to be unique and slugified."
                         value={folderPath}
                         readOnly
                     />
