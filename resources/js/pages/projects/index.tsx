@@ -1,7 +1,7 @@
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
-import { Link } from '@inertiajs/react';
+import { Link } from "@inertiajs/react";
 
 // Components
 import { AdminLayout } from "@/components/layouts/admin-layout";
@@ -118,8 +118,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Page() {
-	
-
 	return (
 		<AdminLayout breadcrumbs={breadcrumbs}>
 			<Head title="Projects" />
@@ -156,25 +154,27 @@ export default function Page() {
 						</CardAction>
 					</CardHeader>
 					<Separator />
+
 					<CardContent>
 						<TabsContent value="grid">
-							{/* Cards */}
-							<AppGrid projects={projects} />
+								{/* Cards */}
+								<AppGrid projects={projects} />
 						</TabsContent>
 						<TabsContent value="list">
-							{/* Table */}
-							<AppTable projects={projects} />
+								{/* Table */}
+								<AppTable projects={projects} />
 						</TabsContent>
 					</CardContent>
+
 					<Separator />
 					<CardFooter className="text-sm text-muted-foreground flex items-center gap-2">
 						<TriangleAlert />
 						All projects are fetched from the server itself without a database, if a
-						project is not found, try reloading the page, check the server logs or access the sever via SSH.
+						project is not found, try reloading the page, check the server logs or
+						access the sever via SSH.
 					</CardFooter>
 				</Card>
 			</Tabs>
 		</AdminLayout>
 	);
 }
-

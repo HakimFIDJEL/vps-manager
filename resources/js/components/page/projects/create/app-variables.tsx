@@ -220,6 +220,7 @@ function VariablesList({
 								</div>
 							</TableCell>
 						</TableRow>
+						
 					))}
 				{variables.filter((variable) =>
 					variable.key.toLowerCase().includes(search.toLowerCase()),
