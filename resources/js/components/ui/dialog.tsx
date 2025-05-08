@@ -4,10 +4,12 @@ import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 import { Slot } from "@radix-ui/react-slot"
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 import { cn } from "@/lib/utils"
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 

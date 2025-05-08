@@ -1,10 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { createSwapy } from "swapy";
-
-export interface SwapyType {
-  animation: "dynamic" | "spring" | "none";
-}
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -66,14 +62,18 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+  
+  const [ref] = useAutoAnimate<HTMLDivElement>();
   return (
     <div
+      ref={ref}
       data-slot="card-content"
-      className={cn("px-6", className)}
+      className={cn("px-6")}
       {...props}
     />
   );
 }
+
 
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
