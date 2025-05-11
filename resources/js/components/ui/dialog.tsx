@@ -101,6 +101,19 @@ const DialogContent = React.forwardRef<
 ))
 DialogContent.displayName = "DialogContent"
 
+const DialogBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => {
+    const [autoRef] = useAutoAnimate<HTMLDivElement>()
+    return (
+      <div
+        ref={autoRef}
+        className={cn("relative overflow-hidden", className)}
+        {...props}
+      />
+    )
+  }
+)
+
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -149,6 +162,7 @@ DialogDescription.displayName = "DialogDescription"
 
 export {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogDescription,

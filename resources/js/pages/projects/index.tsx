@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsBody, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Icons
 import {
@@ -156,14 +156,16 @@ export default function Page() {
 					<Separator />
 
 					<CardContent>
-						<TabsContent value="grid">
-								{/* Cards */}
-								<AppGrid projects={projects} />
-						</TabsContent>
-						<TabsContent value="list">
-								{/* Table */}
-								<AppTable projects={projects} />
-						</TabsContent>
+						<TabsBody>
+							<TabsContent value="grid">
+									{/* Cards */}
+									<AppGrid projects={projects} />
+							</TabsContent>
+							<TabsContent value="list">
+									{/* Table */}
+									<AppTable projects={projects} />
+							</TabsContent>
+						</TabsBody>
 					</CardContent>
 
 					<Separator />

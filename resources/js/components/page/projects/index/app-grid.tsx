@@ -55,6 +55,13 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 					</CardContent>
 				</Card>
 			))}
+			{projects.length === 0 && (
+				<Card className="col-span-1 md:col-span-2 lg:col-span-3 h-24 text-center">
+					<CardContent className="text-muted-foreground">
+						No projects found.
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 }

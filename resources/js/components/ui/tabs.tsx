@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
-import { AnimatePresence, motion } from "framer-motion"
+import { useAutoAnimate } from "@formkit/auto-animate/react"
+
 
 import { cn } from "@/lib/utils"
 
@@ -91,6 +92,11 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
 }
 TabsList.displayName = "TabsList"
 
+function TabsBody({ className, ...props }: React.ComponentProps<"div">) {
+  const [ref] = useAutoAnimate<HTMLDivElement>();
+  return <div ref={ref} data-slot="tabs-body" className={cn("relative", className)} {...props} />
+}
+
 function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
@@ -112,40 +118,19 @@ export interface TabsContentProps extends React.ComponentProps<typeof TabsPrimit
 function TabsContent({ className, children, ...props }: TabsContentProps) {
   const context = React.useContext(TabsAnimateContext)
   if (!context) return null
-  const { animate, currentValue, previousValue, triggerOrder, isFirstRender } = context
+  const { currentValue } = context
   const thisValue = (props as any).value as string
   const isActive = thisValue === currentValue
+
+  // Only render the active tab content
   if (!isActive) return null
 
-  // Determine direction based on index in triggerOrder
-  const fromIndex = previousValue ? triggerOrder.indexOf(previousValue) : 0
-  const toIndex = triggerOrder.indexOf(thisValue)
-  const direction = toIndex > fromIndex ? 1 : -1
-
   return (
-    <TabsPrimitive.Content
-      data-slot="tabs-content"
-      className={cn("relative flex-1 outline-none", className)}
-      {...props}
-    >
-      {animate ? (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={thisValue}
-            initial={isFirstRender ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 * direction }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 * direction }}
-            transition={{ duration: 0.25 }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
-      ) : (
-        children
-      )}
+    <TabsPrimitive.Content data-slot="tabs-content" className={cn("relative w-full", className)} {...props}>
+      <div className="w-full relative">{children}</div>
     </TabsPrimitive.Content>
   )
 }
 TabsContent.displayName = "TabsContent"
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsBody }

@@ -31,6 +31,7 @@ import {
 	DialogTrigger,
 	DialogClose,
 	DialogSubmit,
+	DialogBody,
 } from "@/components/ui/dialog";
 import {
 	Form,
@@ -40,16 +41,17 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { 
-	Tabs, 
-	TabsContent, 
-	TabsList, 
-	TabsTrigger 
+import {
+	Tabs,
+	TabsBody,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
 } from "@/components/ui/tabs";
 
 // Icons
-import { 
-	Search, 
+import {
+	Search,
 	Lock,
 	Trash,
 	Eye,
@@ -57,7 +59,8 @@ import {
 	Pen,
 	Plus,
 	Download,
-	Copy
+	Copy,
+	Loader2,
 } from "lucide-react";
 
 // Types
@@ -68,10 +71,27 @@ import {
 	VariableEnvSchema,
 } from "@/types/models/project";
 import { set } from "date-fns";
+import { SmoothResize } from "@/components/ui/smooth-resized";
+import { Label } from "@/components/ui/label";
 
 export function AppVariables() {
 	const [variables, setVariables] = useState<Variable[]>([]);
 	const [search, setSearch] = useState<string>("");
+
+	function handleDeleteAll() {
+		setVariables([]);
+		toast.success(`All variables deleted successfully!`);
+	}
+
+	const [envPreview, setEnvPreview] = useState<string>("");
+
+	const VariableTextForm = useForm<z.infer<typeof VariableTextSchema>>({
+		resolver: zodResolver(VariableTextSchema),
+	});
+
+	const VariableEnvForm = useForm<z.infer<typeof VariableEnvSchema>>({
+		resolver: zodResolver(VariableEnvSchema),
+	});
 
 	return (
 		// Wrapper
@@ -95,7 +115,7 @@ export function AppVariables() {
 						readOnly={variables.length == 0}
 					/>
 					{variables.length > 0 && (
-						<AnimatePresence mode="wait" >
+						<AnimatePresence mode="wait">
 							<motion.div
 								key="preview"
 								initial={{ opacity: 0, x: 20 }}
@@ -103,7 +123,7 @@ export function AppVariables() {
 								exit={{ opacity: 0, x: -20 }}
 								transition={{ duration: 0.25 }}
 							>
-								<Button variant="destructive" onClick={() => setVariables([])}>
+								<Button variant="destructive" onClick={handleDeleteAll}>
 									<Trash className="h-4 w-4" />
 									Delete variables
 								</Button>
@@ -113,19 +133,13 @@ export function AppVariables() {
 				</div>
 			</div>
 
-			{variables.length > 0 ? (
-				// Variables list
-				<VariablesList
-					variables={variables}
-					setVariables={setVariables}
-					search={search}
-				/>
-			) : (
-				// No variables message
-				<div className="flex items-center justify-center w-full text-sm text-muted-foreground border border-dashed border-border rounded-md py-6">
-					No variables added yet. Click on "Add Variable" to create one.
-				</div>
-			)}
+			<VariablesList
+				variables={variables}
+				setVariables={setVariables}
+				search={search}
+			/>
+
+					
 		</div>
 	);
 }
@@ -220,14 +234,13 @@ function VariablesList({
 								</div>
 							</TableCell>
 						</TableRow>
-						
 					))}
 				{variables.filter((variable) =>
 					variable.key.toLowerCase().includes(search.toLowerCase()),
 				).length === 0 && (
 					<TableRow>
-						<TableCell colSpan={2} className="text-center py-4 bg-muted/50">
-							No variables found
+						<TableCell colSpan={3} className="text-center py-4 bg-muted/50">
+							No variables added yet. Click on "Add Variable" to create one.
 						</TableCell>
 					</TableRow>
 				)}
@@ -296,7 +309,7 @@ function CreateVariable({
 									<FormItem>
 										<FormLabel>Key</FormLabel>
 										<FormControl>
-											<Input id="key" placeholder="eg: MY_KEY" {...field} />
+											<Input id="key" placeholder="eg: MY_KEY" {...field} comment="Must be in uppercase and not contain spaces." />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -309,7 +322,7 @@ function CreateVariable({
 									<FormItem>
 										<FormLabel>Value</FormLabel>
 										<FormControl>
-											<Input id="value" placeholder="eg: MY_VALUE" {...field} />
+											<Input id="value" placeholder="eg: MY_VALUE" {...field} comment="Must not contain spaces." />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -323,7 +336,7 @@ function CreateVariable({
 								</Button>
 							</DialogClose>
 							<DialogSubmit onSubmit={onSubmit} asChild>
-								<Button type="submit" variant={"outline"}>
+								<Button type="submit" variant={"outline"} disabled={!VariableForm.formState.isValid}>
 									<Plus />
 									Add variable
 								</Button>
@@ -345,9 +358,6 @@ function EditVariable({
 	variables: Variable[];
 	setVariables: (variables: Variable[]) => void;
 }) {
-
-	
-	
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
 		resolver: zodResolver(VariableSchema),
 		defaultValues: {
@@ -358,10 +368,10 @@ function EditVariable({
 
 	useEffect(() => {
 		VariableForm.reset({
-		  key: variable.key,
-		  value: variable.value,
+			key: variable.key,
+			value: variable.value,
 		});
-	  }, [variable, VariableForm]);
+	}, [variable, VariableForm]);
 
 	async function onSubmit() {
 		const isValid = await VariableForm.trigger();
@@ -374,7 +384,7 @@ function EditVariable({
 					return { ...v, value: data.value };
 				}
 				return v;
-			})
+			}),
 		);
 		toast.success(`Variable ${data.key} updated successfully!`);
 		VariableForm.reset();
@@ -392,8 +402,8 @@ function EditVariable({
 				<DialogHeader>
 					<DialogTitle>Edit variable</DialogTitle>
 					<DialogDescription>
-						Edit an environnement variable of your project. 
-						You can only change the value.
+						Edit an environnement variable of your project. You can only change the
+						value.
 					</DialogDescription>
 				</DialogHeader>
 				<Form {...VariableForm}>
@@ -406,11 +416,12 @@ function EditVariable({
 									<FormItem>
 										<FormLabel>Key</FormLabel>
 										<FormControl>
-											<Input 
-												id="key" 
-												placeholder="eg: MY_KEY" 
+											<Input
+												id="key"
+												placeholder="eg: MY_KEY"
 												readOnly={true}
-												{...field} 
+												comment="You can't change the key."
+												{...field}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -424,12 +435,13 @@ function EditVariable({
 									<FormItem>
 										<FormLabel>Value</FormLabel>
 										<FormControl>
-											<Input 
-												id="value" 
+											<Input
+												id="value"
 												type="password"
-												placeholder="eg: MY_VALUE" 
+												placeholder="eg: MY_VALUE"
 												showPasswordToggle={true}
-												{...field} 
+												comment="Must not contain spaces."
+												{...field}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -444,7 +456,7 @@ function EditVariable({
 								</Button>
 							</DialogClose>
 							<DialogSubmit onSubmit={onSubmit} asChild>
-								<Button type="submit" variant={"outline"}>
+								<Button type="submit" variant={"outline"} disabled={!VariableForm.formState.isValid}>
 									<Pen />
 									Edit variable
 								</Button>
@@ -464,8 +476,8 @@ export function ImportEnv({
 	variables: Variable[];
 	setVariables: (variables: Variable[]) => void;
 }) {
-
 	const [envPreview, setEnvPreview] = useState<string>("");
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const VariableTextForm = useForm<z.infer<typeof VariableTextSchema>>({
 		resolver: zodResolver(VariableTextSchema),
@@ -479,18 +491,22 @@ export function ImportEnv({
 		const isValid = await VariableEnvForm.trigger();
 		if (!isValid) return false;
 
+		setLoading(true);
+
 		const data = VariableEnvForm.getValues();
 
 		// On récupère le contenu du fichier
 		const file = data.file as File;
 		if (!file) {
-			VariableEnvForm.setError("file", { message: "An error occured importing the file." });
+			VariableEnvForm.setError("file", {
+				message: "An error occured importing the file.",
+			});
+			setLoading(false);
 			return false;
 		}
-		const text = await file.text(); 
+		const text = await file.text();
 
 		return handleUpdate(text, "file");
-		
 	}
 
 	async function onSubmitText() {
@@ -499,12 +515,10 @@ export function ImportEnv({
 
 		const data = VariableTextForm.getValues();
 
-		console.log(data.textarea);
-
 		return handleUpdate(data.textarea, "text");
 	}
 
-	function handleUpdate( text: string, form : "file" | "text" = "text") {
+	function handleUpdate(text: string, form: "file" | "text" = "text") {
 		// On parse le contenu du fichier
 		const parsedVariables = parseVariablesFromEnv({
 			content: text,
@@ -512,15 +526,23 @@ export function ImportEnv({
 		});
 
 		if (parsedVariables.length === 0) {
-			if(form === "file") {
-				VariableEnvForm.setError("file", { message: "No valid variables found in the file." });
+			if (form === "file") {
+				VariableEnvForm.setError("file", {
+					message: "No valid variables found in the file.",
+				});
 			} else {
-				VariableTextForm.setError("textarea", { message: "No valid variables found in the text." });
+				VariableTextForm.setError("textarea", {
+					message: "No valid variables found in the text.",
+				});
 			}
+			setLoading(false);
 			return false;
 		} else {
-			if(form === "file") {
+			if (form === "file") {
 				setEnvPreview("");
+				VariableEnvForm.reset();
+			} else {
+				VariableTextForm.reset();
 			}
 		}
 
@@ -528,10 +550,10 @@ export function ImportEnv({
 
 		setVariables([...parsedVariables, ...variables]);
 
-		VariableEnvForm.reset();
+		setLoading(false);
+
 		return true; // Retourne true pour fermer le Dialog
 	}
-	
 
 	return (
 		<Dialog>
@@ -548,7 +570,8 @@ export function ImportEnv({
 						Either import your .env file or paste the content in a text area.
 					</DialogDescription>
 				</DialogHeader>
-				<Tabs defaultValue="file" className="w-full" animate={true}>
+
+				<Tabs defaultValue="file" className="w-full relative">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="file">
 							<Download />
@@ -560,126 +583,157 @@ export function ImportEnv({
 						</TabsTrigger>
 					</TabsList>
 
+					<TabsBody>
+						<TabsContent value="file">
+							<Form {...VariableTextForm}>
+								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+									<SmoothResize>
+										{!envPreview ? (
+											<FormField
+												control={VariableEnvForm.control}
+												name="file"
+												render={({ field }) => {
+													// Mandatory for a file input that cant take a value
+													const { value, ...rest } = field;
 
-					<TabsContent value="file">
-						<Form {...VariableEnvForm}>
-							<form onSubmit={(e) => e.preventDefault()} className="mt-4" encType="multipart/form-data">
-								<FormField
-									control={VariableEnvForm.control}
-									name="file"
-									render={({ field }) => {
-										// Mandatory for a file input that cant take a value
-										const { value, ...rest } = field;
-
-										return (
-											<FormItem>
-												<FormLabel>File</FormLabel>
-												<FormControl>
-													<Input 
-														id="file" 
-														type="file" 
-														accept=".env"
-														{...rest} 
-														onChange={e => {
-															const file = e.target.files?.[0] ?? null
-															field.onChange(file)    
-															if (file) {
-																const reader = new FileReader()
-																reader.onload = (e) => {
-																	setEnvPreview(e.target?.result as string)
-																}
-																reader.readAsText(file)
-															} else {
-																setEnvPreview('')
-															}
-														}}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										);
-									}}
-								/>
-								{envPreview && (
-									<AnimatePresence mode="wait" >
-										<motion.div
-											key="preview"
-											initial={{ opacity: 0, y: 20 }}
-											animate={{ opacity: 1, y: 0 }}
-											exit={{ opacity: 0, y: -20 }}
-											transition={{ duration: 0.25 }}
-										>
-											<div className="mt-4 grid gap-2 ">
-												<FormLabel>Preview</FormLabel>
-												<Textarea 
-													id="preview" 
-													value={envPreview} 
-													disabled={true} 
-													className="min-h-32 max-h-64" 
+													return (
+														<FormItem className="gap-0">
+															<FormLabel
+																htmlFor="file"
+																className="flex items-center gap-2 flex-col border border-dashed border-border rounded-md p-4"
+															>
+																<span>Upload .env file</span>
+																<span className="text-sm text-muted-foreground">
+																	Drag and drop your .env file here or click to select it.
+																</span>
+															</FormLabel>
+															<FormControl>
+																<Input
+																	id="file"
+																	type="file"
+																	accept=".env"
+																	className="hidden"
+																	{...rest}
+																	onChange={(e) => {
+																		const file = e.target.files?.[0] ?? null;
+																		field.onChange(file);
+																		if (file) {
+																			const reader = new FileReader();
+																			reader.onload = (e) => {
+																				setEnvPreview(e.target?.result as string);
+																			};
+																			reader.readAsText(file);
+																		} else {
+																			setEnvPreview("");
+																		}
+																	}}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													);
+												}}
+											/>
+										) : (
+											<div className="grid gap-2">
+												<Label>Preview</Label>
+												<Textarea
+													id="preview"
+													value={envPreview}
+													disabled={true}
+													className="min-h-32 max-h-64"
 												/>
 											</div>
-										</motion.div>
-									</AnimatePresence>
-								)}
-								<DialogFooter className="mt-4">
-									<DialogClose asChild>
-										<Button type="button" variant={"secondary"}>
-											Close
-										</Button>
-									</DialogClose>
-									<DialogSubmit asChild onSubmit={onSubmitEnv}>
-										<Button type="submit" variant={"outline"}>
-											<Download />
-											Import file
-										</Button>
-									</DialogSubmit>
-								</DialogFooter>
-							</form>
-						</Form>
-					</TabsContent>
-					<TabsContent value="text">
-						<Form {...VariableTextForm}>
-							<form onSubmit={(e) => e.preventDefault()} className="mt-4">
-								<FormField
-									control={VariableTextForm.control}
-									name="textarea"
-									render={({ field }) => {
-										return (
-											<FormItem>
-												<FormLabel>Content</FormLabel>
-												<FormControl>
-													<Textarea 
-														id="textarea" 
-														placeholder="KEY=VALUE" 
-														className="min-h-32 max-h-64"
-														{...field} 
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										);
-									}}
-								/>
+										)}
+									</SmoothResize>
 
-								<DialogFooter className="mt-4">
-									<DialogClose asChild>
-										<Button type="button" variant={"secondary"}>
-											Close
-										</Button>
-									</DialogClose>
-									<DialogSubmit asChild onSubmit={onSubmitText}>
-										<Button type="submit" variant={"outline"}>
-											<Download />
-											Import content
-										</Button>
-									</DialogSubmit>
-								</DialogFooter>
-							</form>
-						</Form>
-					</TabsContent>
+									<DialogFooter className="mt-4">
+										<DialogClose asChild>
+											<Button type="button" variant={"secondary"}>
+												Close
+											</Button>
+										</DialogClose>
+										{envPreview && (
+											<AnimatePresence mode="wait">
+												<motion.div
+													initial={{ opacity: 0 }}
+													animate={{ opacity: 1 }}
+													exit={{ opacity: 0 }}
+													transition={{ duration: 0.3 }}
+												>
+													<Button
+														type="button"
+														variant={"destructive"}
+														onClick={() => setEnvPreview("")}
+													>
+														<Trash />
+														Remove file
+													</Button>
+												</motion.div>
+											</AnimatePresence>
+										)}
+
+										<DialogSubmit asChild onSubmit={onSubmitEnv}>
+											<Button type="submit" variant={"outline"} disabled={!envPreview || loading}>
+												{loading ? (
+													<Loader2 className="animate-spin" />	
+												) : (
+													<Download />
+												)}
+												Import file
+											</Button>
+										</DialogSubmit>
+									</DialogFooter>
+								</form>
+							</Form>
+						</TabsContent>
+						<TabsContent value="text">
+							<Form {...VariableTextForm}>
+								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+									<FormField
+										control={VariableTextForm.control}
+										name="textarea"
+										render={({ field }) => {
+											return (
+												<FormItem>
+													<FormLabel>Content</FormLabel>
+													<FormControl>
+														<Textarea
+															id="textarea"
+															placeholder="KEY=VALUE"
+															className="min-h-32 max-h-64"
+															comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											);
+										}}
+									/>
+
+									<DialogFooter className="mt-4">
+										<DialogClose asChild>
+											<Button type="button" variant={"secondary"}>
+												Close
+											</Button>
+										</DialogClose>
+										<DialogSubmit asChild onSubmit={onSubmitText}>
+											<Button
+												type="submit"
+												variant={"outline"}
+												disabled={!VariableTextForm.formState.isValid}
+											>
+												<Download />
+												Import content
+											</Button>
+										</DialogSubmit>
+									</DialogFooter>
+								</form>
+							</Form>
+						</TabsContent>
+					</TabsBody>
 				</Tabs>
-
-				
 			</DialogContent>
 		</Dialog>
 	);

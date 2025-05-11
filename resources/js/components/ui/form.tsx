@@ -10,6 +10,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form"
+import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
@@ -142,14 +143,24 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   }
 
   return (
-    <p
-      data-slot="form-message"
-      id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
-      {...props}
-    >
-      {body}
-    </p>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="preview"
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: "auto" }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <p
+          data-slot="form-message"
+          id={formMessageId}
+          className={cn("text-destructive text-sm", className)}
+          {...props}
+        >
+          {body}
+        </p>
+      </motion.div>
+    </AnimatePresence>
   )
 }
 

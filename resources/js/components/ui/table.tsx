@@ -1,8 +1,10 @@
 import * as React from "react"
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 import { cn } from "@/lib/utils"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+
   return (
     <div
       data-slot="table-container"
@@ -28,6 +30,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+
   return (
     <tbody
       data-slot="table-body"
