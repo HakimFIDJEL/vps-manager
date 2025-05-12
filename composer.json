@@ -1,7 +1,7 @@
 {
-    "name": "hakimfidjel/lri-starter-kit",
+    "name": "hakimfidjel/vps-manager",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework using react and inertia.",
+    "description": "Application to manage a VPS server.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
