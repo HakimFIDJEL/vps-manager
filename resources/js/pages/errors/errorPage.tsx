@@ -12,6 +12,7 @@ export default function Page({ statusCode }: { statusCode: number }) {
             <PlaceholderPattern
                 className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20 top-0 bottom-0"
                 statusCode={statusCode}
+                displayButton={true}
             />
         </>
     );

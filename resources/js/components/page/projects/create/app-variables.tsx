@@ -8,8 +8,10 @@ import { AnimatePresence, motion } from "framer-motion";
 
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/projects/parser";
+import { SmoothResize } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -70,9 +72,6 @@ import {
 	VariableTextSchema,
 	VariableEnvSchema,
 } from "@/types/models/project";
-import { set } from "date-fns";
-import { SmoothResize } from "@/components/ui/smooth-resized";
-import { Label } from "@/components/ui/label";
 
 export function AppVariables() {
 	const [variables, setVariables] = useState<Variable[]>([]);
@@ -82,16 +81,6 @@ export function AppVariables() {
 		setVariables([]);
 		toast.success(`All variables deleted successfully!`);
 	}
-
-	const [envPreview, setEnvPreview] = useState<string>("");
-
-	const VariableTextForm = useForm<z.infer<typeof VariableTextSchema>>({
-		resolver: zodResolver(VariableTextSchema),
-	});
-
-	const VariableEnvForm = useForm<z.infer<typeof VariableEnvSchema>>({
-		resolver: zodResolver(VariableEnvSchema),
-	});
 
 	return (
 		// Wrapper
@@ -121,7 +110,7 @@ export function AppVariables() {
 								initial={{ opacity: 0, x: 20 }}
 								animate={{ opacity: 1, x: 0 }}
 								exit={{ opacity: 0, x: -20 }}
-								transition={{ duration: 0.25 }}
+								transition={{ duration: 0.3 }}
 							>
 								<Button variant="destructive" onClick={handleDeleteAll}>
 									<Trash className="h-4 w-4" />
@@ -138,8 +127,6 @@ export function AppVariables() {
 				setVariables={setVariables}
 				search={search}
 			/>
-
-					
 		</div>
 	);
 }
@@ -309,7 +296,12 @@ function CreateVariable({
 									<FormItem>
 										<FormLabel>Key</FormLabel>
 										<FormControl>
-											<Input id="key" placeholder="eg: MY_KEY" {...field} comment="Must be in uppercase and not contain spaces." />
+											<Input
+												id="key"
+												placeholder="eg: MY_KEY"
+												{...field}
+												comment="Must be in uppercase and not contain spaces."
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -322,7 +314,12 @@ function CreateVariable({
 									<FormItem>
 										<FormLabel>Value</FormLabel>
 										<FormControl>
-											<Input id="value" placeholder="eg: MY_VALUE" {...field} comment="Must not contain spaces." />
+											<Input
+												id="value"
+												placeholder="eg: MY_VALUE"
+												{...field}
+												comment="Must not contain spaces."
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -336,7 +333,11 @@ function CreateVariable({
 								</Button>
 							</DialogClose>
 							<DialogSubmit onSubmit={onSubmit} asChild>
-								<Button type="submit" variant={"outline"} disabled={!VariableForm.formState.isValid}>
+								<Button
+									type="submit"
+									variant={"outline"}
+									disabled={!VariableForm.formState.isValid}
+								>
 									<Plus />
 									Add variable
 								</Button>
@@ -456,7 +457,11 @@ function EditVariable({
 								</Button>
 							</DialogClose>
 							<DialogSubmit onSubmit={onSubmit} asChild>
-								<Button type="submit" variant={"outline"} disabled={!VariableForm.formState.isValid}>
+								<Button
+									type="submit"
+									variant={"outline"}
+									disabled={!VariableForm.formState.isValid}
+								>
 									<Pen />
 									Edit variable
 								</Button>
@@ -674,12 +679,12 @@ export function ImportEnv({
 										)}
 
 										<DialogSubmit asChild onSubmit={onSubmitEnv}>
-											<Button type="submit" variant={"outline"} disabled={!envPreview || loading}>
-												{loading ? (
-													<Loader2 className="animate-spin" />	
-												) : (
-													<Download />
-												)}
+											<Button
+												type="submit"
+												variant={"outline"}
+												disabled={!envPreview || loading}
+											>
+												{loading ? <Loader2 className="animate-spin" /> : <Download />}
 												Import file
 											</Button>
 										</DialogSubmit>

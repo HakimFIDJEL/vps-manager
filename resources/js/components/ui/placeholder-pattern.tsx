@@ -14,6 +14,7 @@ import { Link } from "@inertiajs/react"
 interface PlaceholderPatternProps {
   className?: string
   statusCode?: number | null
+  displayButton?: boolean
 }
 
 function getStatusContent(code: number | null): StatusEntry {
@@ -28,7 +29,7 @@ export function getStatusTitle(statusCode: number | null): string {
   return getStatusContent(statusCode).title
 }
 
-export function PlaceholderPattern({ className, statusCode }: PlaceholderPatternProps) {
+export function PlaceholderPattern({ className, statusCode, displayButton = false }: PlaceholderPatternProps) {
   const patternId = useId()
 
   const content = getStatusContent(statusCode ?? null)
@@ -48,20 +49,22 @@ export function PlaceholderPattern({ className, statusCode }: PlaceholderPattern
         {content && statusCode && (
 
           <Card className="relative">
-            <CardContent>
-              <div className="text-center p-6 max-w-md">
                 <div className="text-gray-500 dark:text-gray-400 absolute bottom-2 right-2 text-xs font-medium">
                   Status code: {statusCode ?? 'N/A'}
                 </div>
+            <CardContent>
+              <div className="text-center p-6 max-w-md">
                 <div className="flex justify-center mb-4">{content.icon}</div>
                 <h3 className="text-xl font-bold mb-2">{content.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-3   ">{content.description}</p>
-                  <Link href={route('welcome') ?? "/"}>
+                {displayButton && (
+                  <Link href={route('dashboard') ?? "/"}>
                       <Button variant={'outline'}>
                           Go to Home 
                           <ArrowRight className="h-4 w-4" />
                       </Button>
                   </Link>
+                )}
               </div>
             </CardContent>
           </Card>

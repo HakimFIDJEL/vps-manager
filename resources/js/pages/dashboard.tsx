@@ -14,7 +14,7 @@ export default function Page() {
   return (
     <AdminLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-    </AdminLayout>
+      <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" statusCode={501} displayButton={false} />
+     </AdminLayout>
   )
 }
