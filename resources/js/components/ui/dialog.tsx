@@ -102,12 +102,12 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = "DialogContent"
 
 const DialogBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
-    const [autoRef] = useAutoAnimate<HTMLDivElement>()
+  ({ className, ...props }) => {
+    const [ref] = useAutoAnimate<HTMLDivElement>({duration: 300});
     return (
       <div
-        ref={autoRef}
-        className={cn("relative overflow-hidden", className)}
+        ref={ref}
+        className={cn("flex flex-col", className)}
         {...props}
       />
     )

@@ -63,7 +63,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
 
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   
-  const [ref] = useAutoAnimate<HTMLDivElement>();
+  const [ref] = useAutoAnimate<HTMLDivElement>({duration: 300});
   return (
     <div
       ref={ref}
