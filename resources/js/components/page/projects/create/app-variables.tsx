@@ -2,13 +2,13 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/projects/parser";
-import { SmoothResize } from "@/components/ui/smooth-resized";
+import { SmoothItem, SmoothResize } from "@/components/ui/smooth-resized";
 import { AppGrid } from "@/components/page/projects/index/app-grid";
 import { AppTable } from "@/components/page/projects/index/app-table";
 
@@ -89,9 +89,12 @@ export function AppVariables() {
 	const [variables, setVariables] = useState<Variable[]>([]);
 	const [search, setSearch] = useState<string>("");
 
+	const inputRef = useRef<HTMLInputElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
+
 	function handleDeleteAll() {
 		setVariables([]);
-		toast.success(`All variables deleted successfully!`);
+		// toast.success(`All variables deleted successfully!`);
 	}
 
 	return (
@@ -106,31 +109,38 @@ export function AppVariables() {
 					<CreateVariable variables={variables} setVariables={setVariables} />
 				</div>
 
-				<SmoothResize className="flex items-center gap-2">
-					
+				<SmoothResize className="flex items-center gap-2 relative">
+					<AnimatePresence mode={"sync"}>
 						<Input
+							ref={inputRef}
 							name="search"
 							placeholder="Filter variables..."
+							className="z-100 relative"
 							addonText={<Search className="h-4 w-4" />}
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							readOnly={variables.length == 0}
+							readOnly={variables.length === 0}
 						/>
-						{/* <AnimatePresence mode={"wait"}> */}
-							{/* {variables.length > 0 && ( */}
-								{/* <motion.div
-									initial={{ opacity: 0, x: 20 }}
-									animate={{ opacity: 1, x: 0 }}
-									exit={{ opacity: 0, x: 20 }}
-									transition={{ duration: 0.3 }}
-								> */}
-									<Button variant="destructive" onClick={handleDeleteAll} size={"default"}>
-										<Trash className="h-4 w-4" />
-										Delete variables
-									</Button>
-								{/* </motion.div>
-							)}
-						</AnimatePresence> */}
+
+						{variables.length > 0 && (
+							<SmoothItem
+								key={"delete"}
+								initial={{ opacity: 0, scale: 0.95, width: 0 }}
+								animate={{ opacity: 1, scale: 1, width: "auto" }}
+								exit={{ opacity: 0, scale: 0.95, width: 0 }}
+							>
+								<Button
+									ref={buttonRef}
+									variant="destructive"
+									onClick={handleDeleteAll}
+									size={"default"}
+								>
+									<Trash className="h-4 w-4" />
+									Delete variables
+								</Button>
+							</SmoothItem>
+						)}
+					</AnimatePresence>
 				</SmoothResize>
 			</div>
 
@@ -154,7 +164,7 @@ function VariablesList({
 }) {
 	function handleDelete(key: string) {
 		setVariables(variables.filter((variable) => variable.key !== key));
-		toast.success(`Variable ${key} deleted successfully!`);
+		// toast.success(`Variable ${key} deleted successfully!`);
 	}
 
 	function toggleVisibility(variable: Variable) {
@@ -256,6 +266,7 @@ function CreateVariable({
 	setVariables: (variables: Variable[]) => void;
 }) {
 	const [variable, setVariable] = useState<Variable>({ key: "", value: "" });
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
 		resolver: zodResolver(VariableSchema),
@@ -269,16 +280,21 @@ function CreateVariable({
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
+		setLoading(true);
+
 		const data = VariableForm.getValues();
 		const keyExists = variables.some((variable) => variable.key === data.key);
 		if (keyExists) {
 			VariableForm.setError("key", { message: "Key already exists" });
+			setLoading(false);
 			return false;
 		}
+
 		setVariables([...variables, data]);
 		setVariable({ key: "", value: "" });
-		toast.success(`Variable ${data.key} created successfully!`);
+		// toast.success(`Variable ${data.key} created successfully!`);
 		VariableForm.reset();
+		setLoading(false);
 		return true; // Retourne true pour fermer le Dialog
 	}
 
@@ -348,9 +364,9 @@ function CreateVariable({
 								<Button
 									type="submit"
 									variant={"outline"}
-									disabled={!VariableForm.formState.isValid}
+									disabled={!VariableForm.formState.isValid || loading}
 								>
-									<Plus />
+									{loading ? <Loader2 className="animate-spin" /> : <Plus />}
 									Add variable
 								</Button>
 							</DialogSubmit>
@@ -371,6 +387,8 @@ function EditVariable({
 	variables: Variable[];
 	setVariables: (variables: Variable[]) => void;
 }) {
+	const [loading, setLoading] = useState<boolean>(false);
+
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
 		resolver: zodResolver(VariableSchema),
 		defaultValues: {
@@ -390,6 +408,8 @@ function EditVariable({
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
+		setLoading(true);
+
 		const data = VariableForm.getValues();
 		setVariables(
 			variables.map((v) => {
@@ -399,8 +419,9 @@ function EditVariable({
 				return v;
 			}),
 		);
-		toast.success(`Variable ${data.key} updated successfully!`);
+		// toast.success(`Variable ${data.key} updated successfully!`);
 		VariableForm.reset();
+		setLoading(false);
 		return true; // Retourne true pour fermer le Dialog
 	}
 
@@ -472,9 +493,9 @@ function EditVariable({
 								<Button
 									type="submit"
 									variant={"outline"}
-									disabled={!VariableForm.formState.isValid}
+									disabled={!VariableForm.formState.isValid || loading}
 								>
-									<Pen />
+									{loading ? <Loader2 className="animate-spin" /> : <Pen />}
 									Edit variable
 								</Button>
 							</DialogSubmit>
@@ -486,7 +507,7 @@ function EditVariable({
 	);
 }
 
-export function ImportEnv({
+function ImportEnv({
 	variables,
 	setVariables,
 }: {
@@ -563,7 +584,7 @@ export function ImportEnv({
 			}
 		}
 
-		toast.success(`${parsedVariables.length} variables imported successfully!`);
+		// toast.success(`${parsedVariables.length} variables imported successfully!`);
 
 		setVariables([...parsedVariables, ...variables]);
 
@@ -666,30 +687,32 @@ export function ImportEnv({
 										</SmoothResize>
 
 										<DialogFooter className="mt-4">
+											<div className="flex self-start mr-auto">
+												<AnimatePresence mode="sync">
+													{envPreview && (
+														<motion.div
+															initial={{ opacity: 0, x: 20 }}
+															animate={{ opacity: 1, x: 0 }}
+															exit={{ opacity: 0, x: 20 }}
+															transition={{ duration: 0.3 }}
+														>
+															<Button
+																type="button"
+																variant={"destructive"}
+																onClick={() => setEnvPreview("")}
+															>
+																<Trash />
+																Remove file
+															</Button>
+														</motion.div>
+													)}
+												</AnimatePresence>
+											</div>
 											<DialogClose asChild>
 												<Button type="button" variant={"secondary"}>
 													Close
 												</Button>
 											</DialogClose>
-											{envPreview && (
-												<AnimatePresence mode="wait">
-													<motion.div
-														initial={{ opacity: 0 }}
-														animate={{ opacity: 1 }}
-														exit={{ opacity: 0 }}
-														transition={{ duration: 0.3 }}
-													>
-														<Button
-															type="button"
-															variant={"destructive"}
-															onClick={() => setEnvPreview("")}
-														>
-															<Trash />
-															Remove file
-														</Button>
-													</motion.div>
-												</AnimatePresence>
-											)}
 
 											<DialogSubmit asChild onSubmit={onSubmitEnv}>
 												<Button

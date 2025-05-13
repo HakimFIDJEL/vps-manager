@@ -107,7 +107,7 @@ const DialogBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
     return (
       <div
         ref={ref}
-        className={cn("flex flex-col", className)}
+        className={cn("flex flex-col overflow-hidden", className)}
         {...props}
       />
     )

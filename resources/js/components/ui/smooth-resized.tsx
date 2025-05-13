@@ -1,29 +1,64 @@
+// import * as React from "react";
+// import { cn } from "@/lib/utils";
+// import autoAnimate from "@formkit/auto-animate";
+// import { useState, useRef, useEffect } from 'react'
+
+// function SmoothResize({ className, ...props }: React.ComponentProps<"div">) {
+// 	const parent = useRef<HTMLDivElement>(null);
+
+// 	useEffect(() => {
+// 		parent.current && autoAnimate(parent.current, { duration: 300, easing: "ease-in-out" });
+// 	}, [parent])
+
+// 	return <div ref={parent} className={className} {...props} />;
+// }
+
+// export { SmoothResize };
+
 import * as React from "react";
+import { motion, AnimatePresence, TargetAndTransition, VariantLabels, LayoutGroup } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { MagicMotion } from "react-magic-motion";
 
 function SmoothResize({
-	children,
 	className,
+	children,
 	...props
 }: React.ComponentProps<"div">) {
-	// const [ref] = useAutoAnimate<HTMLDivElement>({
-	//   duration: 300,
-	// });
-
 	return (
-
-		<MagicMotion  
-      transition={{ 
-        // type d’animation : "tween" (par défaut), "spring", "keyframes", "inertia" ou false (instantané)
-        type: "tween",
-        duration: 0.3,
-      }}
-    >
-			<div className={cn("overflow-hidden", className)} {...props}>{children}</div>
-		</MagicMotion>
+		<motion.div
+			layout
+			className={cn("overflow-hidden", className)}
+			transition={{ duration: 0.3, ease: "easeInOut" }}
+			{...props}
+		>
+			<AnimatePresence mode={"sync"}>{children}</AnimatePresence>
+		</motion.div>
 	);
 }
 
-export { SmoothResize };
+type SmoothItemProps = React.ComponentProps<"div"> & {
+	initial?: boolean | TargetAndTransition | VariantLabels | undefined;
+	animate?: boolean | TargetAndTransition | VariantLabels | undefined;
+	exit?: TargetAndTransition | VariantLabels | undefined;
+}
+
+function SmoothItem({ className, initial, animate, exit, ...props }: SmoothItemProps) {
+	return (
+		<motion.div
+			layout
+			className={className}
+			transition={{
+				duration: 0.3,
+				ease: "easeInOut",
+			}}
+			initial={initial || { opacity: 0, scale: 0.95 }}
+			animate={animate || { opacity: 1, scale: 1 }}
+			exit={exit || { opacity: 0, scale: 0.95 }}
+			{...props}
+		/>
+	);
+}
+
+
+
+export { SmoothResize, SmoothItem };

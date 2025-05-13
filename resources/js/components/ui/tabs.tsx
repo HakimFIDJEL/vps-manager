@@ -2,11 +2,9 @@
 
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { MagicMotion } from "react-magic-motion";
-
-
 import { cn } from "@/lib/utils";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+
 
 // Context to provide animation settings and tab order
 interface TabsContextProps {
@@ -17,8 +15,11 @@ interface TabsContextProps {
 }
 const TabsAnimateContext = React.createContext<TabsContextProps | null>(null);
 
-
-function Tabs({ className, children, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
+function Tabs({
+	className,
+	children,
+	...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>) {
 	// Extract triggers order from TabsList child
 	const triggerOrder: string[] = [];
 	React.Children.forEach(children, (child) => {
@@ -66,10 +67,7 @@ function Tabs({ className, children, ...props }: React.ComponentProps<typeof Tab
 				value={currentValue}
 				onValueChange={handleValueChange}
 				data-slot="tabs"
-				className={cn(
-					"flex flex-col gap-2 overflow-hidden relative",
-					className,
-				)}
+				className={cn("flex flex-col gap-2 overflow-hidden relative", className)}
 				{...props}
 			>
 				{children}
@@ -86,7 +84,7 @@ function TabsList({
 		<TabsPrimitive.List
 			data-slot="tabs-list"
 			className={cn(
-				"bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] relative",
+				"bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] relative z-1",
 				className,
 			)}
 			{...props}
@@ -95,12 +93,22 @@ function TabsList({
 }
 TabsList.displayName = "TabsList";
 
+function TabsBody({
+	className,
+	children,
+	...props
+}: React.ComponentProps<"div">) {
+	const [ref] = useAutoAnimate<HTMLDivElement>({
+		duration: 300,
+		easing: "ease-in-out",
+	});
 
-function TabsBody({ className, children, ...props }: React.ComponentProps<"div">) {
-	const [ref] = useAutoAnimate<HTMLDivElement>({duration: 300});
-	return <div ref={ref} className={cn("flex flex-col overflow-hidden", className)} {...props}>
-    {children}
-  </div>;
+
+	return (
+		<div className={cn("relative", className)} {...props} ref={ref}>
+			{children}
+		</div>
+	);
 }
 
 function TabsTrigger({
@@ -125,7 +133,6 @@ export interface TabsContentProps
 	className?: string;
 }
 
-
 function TabsContent({ className, children, ...props }: TabsContentProps) {
 	const context = React.useContext(TabsAnimateContext);
 	if (!context) return null;
@@ -137,16 +144,13 @@ function TabsContent({ className, children, ...props }: TabsContentProps) {
 	if (!isActive) return null;
 
 	return (
-		 <TabsPrimitive.Content
-      data-slot="tabs-content"
-      {...props}
-      className={cn(
-        'relative w-full flex flex-col',
-        className,
-      )}
-    >
-      {children}
-    </TabsPrimitive.Content>
+		<TabsPrimitive.Content
+			data-slot="tabs-content"
+			{...props}
+			className={cn("w-full flex flex-col", className)}
+		>
+			{children}
+		</TabsPrimitive.Content>
 	);
 }
 TabsContent.displayName = "TabsContent";
