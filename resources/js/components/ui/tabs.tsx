@@ -4,6 +4,8 @@ import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { SmoothAnimate } from "@/components/ui/smooth-resized";
 
 
 // Context to provide animation settings and tab order
@@ -84,7 +86,7 @@ function TabsList({
 		<TabsPrimitive.List
 			data-slot="tabs-list"
 			className={cn(
-				"bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] relative z-1",
+				"dark:bg-muted bg-background text-muted-foreground border-border border inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px] relative z-1",
 				className,
 			)}
 			{...props}
@@ -100,12 +102,17 @@ function TabsBody({
 }: React.ComponentProps<"div">) {
 	const [ref] = useAutoAnimate<HTMLDivElement>({
 		duration: 300,
-		easing: "ease-in-out",
 	});
 
-
 	return (
-		<div className={cn("relative", className)} {...props} ref={ref}>
+		<div 
+			className={cn(
+				"relative overflow-hidden",
+				className
+			)} 
+			{...props} 
+			ref={ref}
+		>
 			{children}
 		</div>
 	);
@@ -119,7 +126,7 @@ function TabsTrigger({
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
-				"cursor-pointer data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+				"cursor-pointer data-[state=active]:bg-primary focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring  text-foreground dark:text-primary-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow,background] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm data-[state=active]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 duration-300",
 				className,
 			)}
 			{...props}
@@ -140,16 +147,34 @@ function TabsContent({ className, children, ...props }: TabsContentProps) {
 	const thisValue = (props as any).value as string;
 	const isActive = thisValue === currentValue;
 
-	// Only render the active tab content
-	if (!isActive) return null;
+	if(!isActive) {
+		return null 
+	} 
 
 	return (
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
 			{...props}
-			className={cn("w-full flex flex-col", className)}
+			className={cn(
+				"w-full flex flex-col",
+				// "data-[state=inactive]:hidden",
+				// "data-[state=active]:block",
+				className
+			)}
 		>
-			{children}
+			{/* <AnimatePresence mode="wait">
+				{isActive && (
+					<motion.div
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -10 }}
+						transition={{ duration: 0.2 }}
+						className="relative w-full"
+					> */}
+						{children}
+					{/* </motion.div>
+				)}
+			</AnimatePresence> */}
 		</TabsPrimitive.Content>
 	);
 }

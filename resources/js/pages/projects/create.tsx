@@ -107,7 +107,7 @@ export default function Page() {
 			</Card>
 
 			<Stepper defaultValue={2} totalSteps={steps.length}>
-				<Card className="bg-background border-0 shadow-none mb-4">
+				<Card className="bg-muted/50 dark:bg-background  border-0 shadow-none mb-4">
 					<CardContent>
 						<div className="space-y-8 text-center">
 							<StepperList>

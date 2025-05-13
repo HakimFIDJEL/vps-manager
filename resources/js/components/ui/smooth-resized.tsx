@@ -1,21 +1,6 @@
-// import * as React from "react";
-// import { cn } from "@/lib/utils";
-// import autoAnimate from "@formkit/auto-animate";
-// import { useState, useRef, useEffect } from 'react'
-
-// function SmoothResize({ className, ...props }: React.ComponentProps<"div">) {
-// 	const parent = useRef<HTMLDivElement>(null);
-
-// 	useEffect(() => {
-// 		parent.current && autoAnimate(parent.current, { duration: 300, easing: "ease-in-out" });
-// 	}, [parent])
-
-// 	return <div ref={parent} className={className} {...props} />;
-// }
-
-// export { SmoothResize };
-
 import * as React from "react";
+import { useState, useRef, useEffect } from 'react'
+import autoAnimate from "@formkit/auto-animate";
 import { motion, AnimatePresence, TargetAndTransition, VariantLabels, LayoutGroup } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +44,15 @@ function SmoothItem({ className, initial, animate, exit, ...props }: SmoothItemP
 	);
 }
 
+function SmoothAnimate({ className, ...props }: React.ComponentProps<"div">) {
+	const parent = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		parent.current && autoAnimate(parent.current, { duration: 300, easing: "ease-in-out" });
+	}, [parent])
+
+	return <div ref={parent} className={className} {...props} />;
+}
 
 
-export { SmoothResize, SmoothItem };
+export { SmoothResize, SmoothItem, SmoothAnimate };

@@ -25,9 +25,9 @@ export function AdminLayout({
 
   return (
     <TooltipProvider>
-      <SidebarProvider>
-        <AppSidebar variant="floating" />
-        <SidebarInset>
+      <SidebarProvider className="bg-muted/50 dark:bg-background">
+        <AppSidebar variant="floating" className="bg-muted/50 dark:bg-background" />
+        <SidebarInset className="bg-muted/50 dark:bg-background">
           <AppHeader breadcrumbs={breadcrumbs} />
           <div className="flex flex-1 flex-col">
             <div className="@container/main flex flex-1 flex-col gap-4 relative py-6 px-2">
