@@ -56,15 +56,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {addonText ? (
           <div
             className={cn(
-              "flex items-center w-full rounded-md border border-input overflow-hidden",
+              "flex items-center w-full rounded-md border border-input overflow-hidden h-9",
               !readOnly && "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] transition-[color,box-shadow]",
               "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-              // readOnly && "opacity-50",
             )}
           >
             {/* Addon au début */}
             {addonPosition === "start" && (
-              <div className="flex items-center justify-center px-3 h-9 bg-card text-muted-foreground border-r border-input">
+              <div className="flex items-center justify-center px-3 h-full bg-card text-muted-foreground border-r border-input shrink-0">
                 {addonText}
               </div>
             )}
@@ -73,7 +72,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <input
               type={inputType}
               data-slot="input"
-              className={inputStyles}
+              className={cn(
+                inputStyles,
+                "h-full"
+              )}
               readOnly={readOnly}
               tabIndex={readOnly ? -1 : undefined}
               ref={ref}
@@ -82,7 +84,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
             {/* Addon à la fin */}
             {addonPosition === "end" && (
-              <div className="flex items-center justify-center px-3 h-9 bg-card text-muted-foreground border-l border-input">
+              <div className="flex items-center justify-center px-3 h-full bg-card text-muted-foreground border-l border-input shrink-0">
                 {addonText}
               </div>
             )}
@@ -138,7 +140,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         {/* Commentaire sous l'input */}
         {comment && (
-          <p className="mt-1 text-xs text-muted-foreground font-light">
+          <p className="mt-1 text-xs text-muted-foreground">
             {comment}
           </p>
         )}

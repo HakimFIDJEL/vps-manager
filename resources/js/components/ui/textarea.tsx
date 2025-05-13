@@ -24,7 +24,7 @@ export const Textarea = React.forwardRef<
         {...props}  // ici, on étale les props *sur* la balise
       />
       {comment && (
-        <p className="mt-1 text-xs text-muted-foreground font-light">
+        <p className="mt-1 text-xs text-muted-foreground">
           {comment}
         </p>
       )}

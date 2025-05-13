@@ -84,5 +84,11 @@ export const VariableEnvSchema = z.object({
 			{
 				message: "The file must not be empty",
 			},
+		)
+		.refine(
+			(file) => file.size <= 1024 * 1024,
+			{
+				message: "The file must not exceed 1 MB",
+			},
 		),
 });

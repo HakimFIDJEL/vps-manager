@@ -26,7 +26,7 @@ export function AppProject() {
                         placeholder="eg: My project" 
                         name="name" 
                         required
-                        // comment="The project name will not be stored, but be displayed from the folder path."
+                        comment="The project name will not be stored, but be displayed from the folder path."
                         value={name}
                         autoFocus
                         onChange={(e) => {
@@ -45,7 +45,7 @@ export function AppProject() {
                         required 
                         addonText="/projects/" 
                         addonPosition="start"
-                        // comment="The folder path needs to be unique and slugified."
+                        comment="The folder path needs to be unique and slugified."
                         value={folderPath}
                         readOnly
                     />

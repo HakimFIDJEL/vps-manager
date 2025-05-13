@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/projects/parser";
@@ -90,6 +91,7 @@ import {
 	Download,
 	Copy,
 	Loader2,
+	Upload,
 } from "lucide-react";
 
 // Types
@@ -428,12 +430,9 @@ function EditVariable({
 
 		const data = VariableForm.getValues();
 		setVariables(
-			variables.map((v) => {
-				if (v.key === variable.key) {
-					return { ...v, value: data.value };
-				}
-				return v;
-			}),
+			variables.map((v) =>
+				v.key === variable.key ? { ...v, value: data.value } : v,
+			),
 		);
 		toast.success(`Variable ${data.key} updated successfully!`);
 		VariableForm.reset();
@@ -532,6 +531,8 @@ function ImportEnv({
 }) {
 	const [envPreview, setEnvPreview] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
+	const [isDragActive, setIsDragActive] = useState(false);
+	const inputFileRef = useRef<HTMLInputElement>(null);
 
 	const VariableTextForm = useForm<z.infer<typeof VariableTextSchema>>({
 		resolver: zodResolver(VariableTextSchema),
@@ -610,63 +611,212 @@ function ImportEnv({
 	}
 
 	return (
-		<>
-			{/* <Tabs defaultValue="file" className="w-full">
-				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="file">
-						<Download />
-						Import file
-					</TabsTrigger>
-					<TabsTrigger value="text">
-						<Copy />
-						Paste content
-					</TabsTrigger>
-				</TabsList>
+		<Dialog>
+			<DialogTrigger asChild>
+				<Button variant={"secondary"}>
+					<Upload />
+					Import variables
+				</Button>
+			</DialogTrigger>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>Import variables</DialogTitle>
+					<DialogDescription>
+						Either import your .env file or paste the content in a text area.
+					</DialogDescription>
+				</DialogHeader>
 
-				<TabsBody>
-					<TabsContent value="file">
-						<Form {...VariableTextForm}>
-							<form onSubmit={(e) => e.preventDefault()} className="mt-4">
-								<SmoothAnimate>
-									{!envPreview ? (
-										<FormField
-											control={VariableEnvForm.control}
-											name="file"
-											render={({ field }) => {
-												// Mandatory for a file input that cant take a value
-												const { value, ...rest } = field;
+				<DialogBody>
+					<Tabs defaultValue="file" className="w-full">
+						<TabsList className="w-full gap-2">
+							<TabsTrigger value="file">
+								<Upload />
+								Import file
+							</TabsTrigger>
+							<TabsTrigger value="text">
+								<Copy />
+								Paste content
+							</TabsTrigger>
+						</TabsList>
 
-												return (
-													<FormItem className="gap-0">
-														<FormLabel
-															htmlFor="file"
-															className="flex items-center gap-2 flex-col border border-dashed border-border rounded-md p-4"
-														>
-															<span>Upload .env file</span>
-															<span className="text-sm text-muted-foreground">
-																Drag and drop your .env file here or click to select it.
-															</span>
-														</FormLabel>
-														<FormControl>
-															<Input
-																id="file"
-																type="file"
-																accept=".env"
-																className="hidden"
-																{...rest}
-																onChange={(e) => {
-																	const file = e.target.files?.[0] ?? null;
-																	field.onChange(file);
-																	if (file) {
+						<TabsBody>
+							<TabsContent value="file">
+								<Form {...VariableTextForm}>
+									<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+										<SmoothAnimate>
+											{!envPreview ? (
+												<FormField
+													control={VariableEnvForm.control}
+													name="file"
+													render={({ field }) => {
+														// Mandatory for a file input that cant take a value
+														const { value, ...rest } = field;
+
+														return (
+															<FormItem className="gap-0">
+																<FormLabel
+																	htmlFor="file"
+																	className={cn(
+																		"cursor-pointer flex items-center gap-2 flex-col border border-dashed border-border rounded-md p-4 transition-colors",
+																		isDragActive && "border-primary bg-primary/10",
+																	)}
+																	onDragOver={(e) => {
+																		e.preventDefault();
+																		setIsDragActive(true);
+																	}}
+																	onDragLeave={(e) => {
+																		e.preventDefault();
+																		setIsDragActive(false);
+																	}}
+																	onDrop={async (e) => {
+																		e.preventDefault();
+																		setIsDragActive(false);
+																		const file = e.dataTransfer.files?.[0];
+																		if (!file) {
+																			toast.error("An error occured importing the file.");
+																			return;
+																		}
+
+																		// Vérification JS côté client
+																		if (!file.name.endsWith(".env")) {
+																			toast.error("The file must have the .env extension.");
+																			return;
+																		}
+																		if (file.size > 1024 * 1024) {
+																			toast.error("The file must not exceed 1 MB.");
+																			return;
+																		}
+
+																		field.onChange(file);
+																		if (inputFileRef.current) inputFileRef.current.value = "";
+
+																		// Lecture du fichier pour l'aperçu
 																		const reader = new FileReader();
 																		reader.onload = (e) => {
 																			setEnvPreview(e.target?.result as string);
 																		};
 																		reader.readAsText(file);
-																	} else {
-																		setEnvPreview("");
-																	}
-																}}
+																	}}
+																>
+																	<span>Upload .env file</span>
+																	<span className="text-sm text-muted-foreground">
+																		Drag and drop your .env file here or click to select it.
+																	</span>
+																</FormLabel>
+																<FormControl>
+																	<Input
+																		id="file"
+																		type="file"
+																		accept=".env"
+																		className="hidden"
+																		ref={inputFileRef}
+																		{...Object.fromEntries(
+																			Object.entries(rest).filter(([k]) => k !== "ref"),
+																		)}
+																		onChange={(e) => {
+																			const file = e.target.files?.[0] ?? null;
+																			if (file) {
+																				if (!file.name.endsWith(".env")) {
+																					VariableEnvForm.setError("file", {
+																						message: "Le fichier doit avoir l'extension .env.",
+																					});
+																					return;
+																				}
+																				if (file.size > 1024 * 1024) {
+																					VariableEnvForm.setError("file", {
+																						message: "Le fichier ne doit pas dépasser 1 Mo.",
+																					});
+																					return;
+																				}
+																				VariableEnvForm.clearErrors("file");
+																				const reader = new FileReader();
+																				reader.onload = (e) => {
+																					setEnvPreview(e.target?.result as string);
+																				};
+																				reader.readAsText(file);
+																			} else {
+																				setEnvPreview("");
+																			}
+																		}}
+																	/>
+																</FormControl>
+																<FormMessage />
+															</FormItem>
+														);
+													}}
+												/>
+											) : (
+												<div className="grid gap-2">
+													<Label>Preview</Label>
+													<Textarea
+														id="preview"
+														value={envPreview}
+														disabled={true}
+														className="min-h-32 max-h-64"
+													/>
+												</div>
+											)}
+										</SmoothAnimate>
+
+										<DialogFooter className="mt-4">
+											<div className="flex self-start mr-auto">
+												<AnimatePresence mode="sync">
+													{envPreview && (
+														<motion.div
+															initial={{ opacity: 0, y: -20 }}
+															animate={{ opacity: 1, y: 0 }}
+															exit={{ opacity: 0, y: -20 }}
+															transition={{ duration: 0.3 }}
+														>
+															<Button
+																type="button"
+																variant={"outline"}
+																onClick={() => setEnvPreview("")}
+															>
+																<Trash />
+																Remove file
+															</Button>
+														</motion.div>
+													)}
+												</AnimatePresence>
+											</div>
+											<DialogClose asChild>
+												<Button type="button" variant={"secondary"}>
+													Close
+												</Button>
+											</DialogClose>
+
+											<DialogSubmit asChild onSubmit={onSubmitEnv}>
+												<Button
+													type="submit"
+													variant={"default"}
+													disabled={!envPreview || loading}
+												>
+													{loading ? <Loader2 className="animate-spin" /> : <Download />}
+													Import file
+												</Button>
+											</DialogSubmit>
+										</DialogFooter>
+									</form>
+								</Form>
+							</TabsContent>
+							<TabsContent value="text">
+								<Form {...VariableTextForm}>
+									<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+										<FormField
+											control={VariableTextForm.control}
+											name="textarea"
+											render={({ field }) => {
+												return (
+													<FormItem>
+														<FormLabel>Content</FormLabel>
+														<FormControl>
+															<Textarea
+																id="textarea"
+																placeholder="KEY=VALUE"
+																className="min-h-32 max-h-64"
+																comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
+																{...field}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -674,291 +824,31 @@ function ImportEnv({
 												);
 											}}
 										/>
-									) : (
-										<div className="grid gap-2">
-											<Label>Preview</Label>
-											<Textarea
-												id="preview"
-												value={envPreview}
-												disabled={true}
-												className="min-h-32 max-h-64"
-											/>
-										</div>
-									)}
-								</SmoothAnimate>
 
-								<div className="mt-4 flex items-center gap-2 justify-end">
-									<div className="flex self-start mr-auto">
-										<AnimatePresence mode="sync">
-											{envPreview && (
-												<motion.div
-													initial={{ opacity: 0, y: -20 }}
-													animate={{ opacity: 1, y: 0 }}
-													exit={{ opacity: 0, y: -20 }}
-													transition={{ duration: 0.3 }}
+										<DialogFooter className="mt-4">
+											<DialogClose asChild>
+												<Button type="button" variant={"secondary"}>
+													Close
+												</Button>
+											</DialogClose>
+											<DialogSubmit asChild onSubmit={onSubmitText}>
+												<Button
+													type="submit"
+													variant={"default"}
+													disabled={!VariableTextForm.formState.isValid}
 												>
-													<Button
-														type="button"
-														variant={"destructive"}
-														onClick={() => setEnvPreview("")}
-													>
-														<Trash />
-														Remove file
-													</Button>
-												</motion.div>
-											)}
-										</AnimatePresence>
-									</div>
-
-									<Button type="button" variant={"secondary"}>
-										Close
-									</Button>
-
-									<Button
-										type="submit"
-										variant={"outline"}
-										disabled={!envPreview || loading}
-									>
-										{loading ? <Loader2 className="animate-spin" /> : <Download />}
-										Import file
-									</Button>
-								</div>
-							</form>
-						</Form>
-					</TabsContent>
-					<TabsContent value="text">
-						<Form {...VariableTextForm}>
-							<form onSubmit={(e) => e.preventDefault()} className="mt-4">
-								<FormField
-									control={VariableTextForm.control}
-									name="textarea"
-									render={({ field }) => {
-										return (
-											<FormItem>
-												<FormLabel>Content</FormLabel>
-												<FormControl>
-													<Textarea
-														id="textarea"
-														placeholder="KEY=VALUE"
-														className="min-h-32 max-h-64"
-														comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										);
-									}}
-								/>
-
-								<div className="mt-4 flex items-center gap-2 justify-end">
-									<Button type="button" variant={"secondary"}>
-										Close
-									</Button>
-									<Button
-										type="submit"
-										variant={"outline"}
-										disabled={!VariableTextForm.formState.isValid}
-									>
-										<Download />
-										Import content
-									</Button>
-								</div>
-							</form>
-						</Form>
-					</TabsContent>
-				</TabsBody>
-			</Tabs> */}
-
-
-			{/* <br />
-			<Separator />
-			<br /> */}
-
-			<Dialog>
-				<DialogTrigger asChild>
-					<Button variant={"secondary"}>
-						<Download />
-						Import .env
-					</Button>
-				</DialogTrigger>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Import .env</DialogTitle>
-						<DialogDescription>
-							Either import your .env file or paste the content in a text area.
-						</DialogDescription>
-					</DialogHeader>
-
-					<DialogBody>
-						<Tabs defaultValue="file" className="w-full">
-							<TabsList className="grid w-full grid-cols-2 gap-2">
-								<TabsTrigger value="file">
-									<Download />
-									Import file
-								</TabsTrigger>
-								<TabsTrigger value="text">
-									<Copy />
-									Paste content
-								</TabsTrigger>
-							</TabsList>
-
-							<TabsBody>
-								<TabsContent value="file">
-									<Form {...VariableTextForm}>
-										<form onSubmit={(e) => e.preventDefault()} className="mt-4">
-											<SmoothAnimate>
-												{!envPreview ? (
-													<FormField
-														control={VariableEnvForm.control}
-														name="file"
-														render={({ field }) => {
-															// Mandatory for a file input that cant take a value
-															const { value, ...rest } = field;
-
-															return (
-																<FormItem className="gap-0">
-																	<FormLabel
-																		htmlFor="file"
-																		className="flex items-center gap-2 flex-col border border-dashed border-border rounded-md p-4"
-																	>
-																		<span>Upload .env file</span>
-																		<span className="text-sm text-muted-foreground">
-																			Drag and drop your .env file here or click to select it.
-																		</span>
-																	</FormLabel>
-																	<FormControl>
-																		<Input
-																			id="file"
-																			type="file"
-																			accept=".env"
-																			className="hidden"
-																			{...rest}
-																			onChange={(e) => {
-																				const file = e.target.files?.[0] ?? null;
-																				field.onChange(file);
-																				if (file) {
-																					const reader = new FileReader();
-																					reader.onload = (e) => {
-																						setEnvPreview(e.target?.result as string);
-																					};
-																					reader.readAsText(file);
-																				} else {
-																					setEnvPreview("");
-																				}
-																			}}
-																		/>
-																	</FormControl>
-																	<FormMessage />
-																</FormItem>
-															);
-														}}
-													/>
-												) : (
-													<div className="grid gap-2">
-														<Label>Preview</Label>
-														<Textarea
-															id="preview"
-															value={envPreview}
-															disabled={true}
-															className="min-h-32 max-h-64"
-														/>
-													</div>
-												)}
-											</SmoothAnimate>
-
-											<DialogFooter className="mt-4">
-												<div className="flex self-start mr-auto">
-													<AnimatePresence mode="sync">
-														{envPreview && (
-															<motion.div
-																initial={{ opacity: 0, y: -20 }}
-																animate={{ opacity: 1, y: 0 }}
-																exit={{ opacity: 0, y: -20 }}
-																transition={{ duration: 0.3 }}
-															>
-																<Button
-																	type="button"
-																	variant={"outline"}
-																	onClick={() => setEnvPreview("")}
-																>
-																	<Trash />
-																	Remove file
-																</Button>
-															</motion.div>
-														)}
-													</AnimatePresence>
-												</div>
-												<DialogClose asChild>
-													<Button type="button" variant={"secondary"}>
-														Close
-													</Button>
-												</DialogClose>
-
-												<DialogSubmit asChild onSubmit={onSubmitEnv}>
-													<Button
-														type="submit"
-														variant={"default"}
-														disabled={!envPreview || loading}
-													>
-														{loading ? <Loader2 className="animate-spin" /> : <Download />}
-														Import file
-													</Button>
-												</DialogSubmit>
-											</DialogFooter>
-										</form>
-									</Form>
-								</TabsContent>
-								<TabsContent value="text">
-									<Form {...VariableTextForm}>
-										<form onSubmit={(e) => e.preventDefault()} className="mt-4">
-											<FormField
-												control={VariableTextForm.control}
-												name="textarea"
-												render={({ field }) => {
-													return (
-														<FormItem>
-															<FormLabel>Content</FormLabel>
-															<FormControl>
-																<Textarea
-																	id="textarea"
-																	placeholder="KEY=VALUE"
-																	className="min-h-32 max-h-64"
-																	comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													);
-												}}
-											/>
-
-											<DialogFooter className="mt-4">
-												<DialogClose asChild>
-													<Button type="button" variant={"secondary"}>
-														Close
-													</Button>
-												</DialogClose>
-												<DialogSubmit asChild onSubmit={onSubmitText}>
-													<Button
-														type="submit"
-														variant={"default"}
-														disabled={!VariableTextForm.formState.isValid}
-													>
-														<Download />
-														Import content
-													</Button>
-												</DialogSubmit>
-											</DialogFooter>
-										</form>
-									</Form>
-								</TabsContent>
-							</TabsBody>
-						</Tabs>
-					</DialogBody>
-				</DialogContent>
-			</Dialog>
-		</>
+													<Download />
+													Import content
+												</Button>
+											</DialogSubmit>
+										</DialogFooter>
+									</form>
+								</Form>
+							</TabsContent>
+						</TabsBody>
+					</Tabs>
+				</DialogBody>
+			</DialogContent>
+		</Dialog>
 	);
 }
