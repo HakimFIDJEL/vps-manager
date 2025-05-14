@@ -24,14 +24,14 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 	return (
 		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{projects.map((project) => (
-				<Card key={project.inode}>
-					<CardHeader>
+				<Card key={project.inode} className="gap-0 pt-0">
+					<CardHeader className="p-6 bg-muted/50">
 						<CardTitle>{project.name}</CardTitle>
 						<CardDescription>{project.folder}</CardDescription>
 						<CardAction>{formatActions(project.inode)}</CardAction>
 					</CardHeader>
 					<Separator />
-					<CardContent className="grid gap-2">
+					<CardContent className="grid gap-2 pt-6">
 						<div className="flex items-center justify-between">
 							<p>Inode</p>
 							<p className="font-mono">#{project.inode}</p>

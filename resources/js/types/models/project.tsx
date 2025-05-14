@@ -74,21 +74,26 @@ export const VariableEnvSchema = z.object({
 	file: z
 		.instanceof(File)
 		.refine((file) => file.name.endsWith(".env"), {
-			message: "The file must be a .env file",
+			message: "Le fichier doit avoir l'extension .env",
 		})
-		.refine(
-			async (file) => {
-				const text = await file.text();
-				return text.trim().length > 0;
-			},
-			{
-				message: "The file must not be empty",
-			},
-		)
 		.refine(
 			(file) => file.size <= 1024 * 1024,
 			{
-				message: "The file must not exceed 1 MB",
+				message: "Le fichier ne doit pas dépasser 1 Mo",
+			},
+		)
+		.refine(
+			async (file) => {
+				try {
+					const text = await file.text();
+					return text.trim().length > 0;
+				} catch (error) {
+					return false;
+				}
+			},
+			{
+				message: "Le fichier ne doit pas être vide",
 			},
 		),
 });
+

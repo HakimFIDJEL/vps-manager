@@ -499,11 +499,11 @@ function EditVariable({
 							/>
 						</div>
 						<DialogFooter>
-							{/* <DialogClose asChild>
+							<DialogClose asChild>
 								<Button type="button" variant={"secondary"}>
 									Close
 								</Button>
-							</DialogClose> */}
+							</DialogClose>
 							<DialogSubmit onSubmit={onSubmit} asChild>
 								<Button
 									type="submit"
@@ -641,54 +641,119 @@ function ImportEnv({
 
 						<TabsBody>
 							<TabsContent value="file">
-								<Form {...VariableTextForm}>
+								<Form {...VariableEnvForm}>
 									<form onSubmit={(e) => e.preventDefault()} className="mt-4">
-										<SmoothAnimate>
-											{!envPreview ? (
-												<FormField
-													control={VariableEnvForm.control}
-													name="file"
-													render={({ field }) => {
-														// Mandatory for a file input that cant take a value
-														const { value, ...rest } = field;
+										<FormField
+											control={VariableEnvForm.control}
+											name="file"
+											render={({ field }) => {
+												// Mandatory for a file input that cant take a value
+												const { value, ...rest } = field;
 
-														return (
-															<FormItem className="gap-0">
-																<FormLabel
-																	htmlFor="file"
-																	className={cn(
-																		"cursor-pointer flex items-center gap-2 flex-col border border-dashed border-border rounded-md p-4 transition-colors",
-																		isDragActive && "border-primary bg-primary/10",
-																	)}
-																	onDragOver={(e) => {
-																		e.preventDefault();
-																		setIsDragActive(true);
-																	}}
-																	onDragLeave={(e) => {
-																		e.preventDefault();
-																		setIsDragActive(false);
-																	}}
-																	onDrop={async (e) => {
-																		e.preventDefault();
-																		setIsDragActive(false);
-																		const file = e.dataTransfer.files?.[0];
-																		if (!file) {
-																			toast.error("An error occured importing the file.");
-																			return;
-																		}
+												return (
+													<FormItem className="gap-0">
+														<SmoothAnimate>
+															{!envPreview ? (
+																<>
+																	<FormLabel
+																		htmlFor="file"
+																		className={cn(
+																			"cursor-pointer flex items-center gap-2 flex-col border border-dashed border-border rounded-md p-4 transition-colors",
+																			isDragActive && "border-primary bg-primary/10",
+																		)}
+																		onDragOver={(e) => {
+																			e.preventDefault();
+																			setIsDragActive(true);
+																		}}
+																		onDragLeave={(e) => {
+																			e.preventDefault();
+																			setIsDragActive(false);
+																		}}
+																		onDrop={async (e) => {
+																			e.preventDefault();
+																			setIsDragActive(false);
+																			const file = e.dataTransfer.files?.[0];
+																			if (!file) {
+																				VariableEnvForm.setError("file", {
+																					message: "An error occured while importing the file.",
+																				});
+																				return;
+																			}
 
-																		// Vérification JS côté client
+																			// Vérification JS côté client
+																			if (!file.name.endsWith(".env")) {
+																				VariableEnvForm.setError("file", {
+																					message: "The file must have the .env extension.",
+																				});
+																				return;
+																			}
+																			if (file.size > 1024 * 1024) {
+																				VariableEnvForm.setError("file", {
+																					message: "The file must not exceed 1 MB.",
+																				});
+																				return;
+																			}
+
+																			// Si tout est bon, on clear les erreurs et on passe au form
+																			VariableEnvForm.clearErrors("file");
+																			field.onChange(file);
+																			if (inputFileRef.current) inputFileRef.current.value = "";
+
+																			// Lecture du fichier pour l'aperçu
+																			const reader = new FileReader();
+																			reader.onload = (e) => {
+																				setEnvPreview(e.target?.result as string);
+																			};
+																			reader.readAsText(file);
+																		}}
+																	>
+																		<span>Upload .env file</span>
+																		<span className="text-sm text-muted-foreground">
+																			Drag and drop your .env file here or click to select it.
+																		</span>
+																	</FormLabel>
+																</>
+															) : (
+																<div className="grid gap-2">
+																	<Label>Preview</Label>
+																	<Textarea
+																		id="preview"
+																		value={envPreview}
+																		disabled={true}
+																		className="min-h-32 max-h-64"
+																	/>
+																</div>
+															)}
+														</SmoothAnimate>
+														<FormControl>
+															<Input
+																id="file"
+																type="file"
+																accept=".env"
+																className="hidden"
+																ref={inputFileRef}
+																{...Object.fromEntries(
+																	Object.entries(rest).filter(([k]) => k !== "ref"),
+																)}
+																onChange={(e) => {
+																	const file = e.target.files?.[0] ?? null;
+																	if (file) {
 																		if (!file.name.endsWith(".env")) {
-																			toast.error("The file must have the .env extension.");
+																			VariableEnvForm.setError("file", {
+																				message: "Le fichier doit avoir l'extension .env.",
+																			});
 																			return;
 																		}
 																		if (file.size > 1024 * 1024) {
-																			toast.error("The file must not exceed 1 MB.");
+																			VariableEnvForm.setError("file", {
+																				message: "Le fichier ne doit pas dépasser 1 Mo.",
+																			});
 																			return;
 																		}
 
+																		// Si tout est bon, on clear les erreurs et on passe au form
+																		VariableEnvForm.clearErrors("file");
 																		field.onChange(file);
-																		if (inputFileRef.current) inputFileRef.current.value = "";
 
 																		// Lecture du fichier pour l'aperçu
 																		const reader = new FileReader();
@@ -696,67 +761,17 @@ function ImportEnv({
 																			setEnvPreview(e.target?.result as string);
 																		};
 																		reader.readAsText(file);
-																	}}
-																>
-																	<span>Upload .env file</span>
-																	<span className="text-sm text-muted-foreground">
-																		Drag and drop your .env file here or click to select it.
-																	</span>
-																</FormLabel>
-																<FormControl>
-																	<Input
-																		id="file"
-																		type="file"
-																		accept=".env"
-																		className="hidden"
-																		ref={inputFileRef}
-																		{...Object.fromEntries(
-																			Object.entries(rest).filter(([k]) => k !== "ref"),
-																		)}
-																		onChange={(e) => {
-																			const file = e.target.files?.[0] ?? null;
-																			if (file) {
-																				if (!file.name.endsWith(".env")) {
-																					VariableEnvForm.setError("file", {
-																						message: "Le fichier doit avoir l'extension .env.",
-																					});
-																					return;
-																				}
-																				if (file.size > 1024 * 1024) {
-																					VariableEnvForm.setError("file", {
-																						message: "Le fichier ne doit pas dépasser 1 Mo.",
-																					});
-																					return;
-																				}
-																				VariableEnvForm.clearErrors("file");
-																				const reader = new FileReader();
-																				reader.onload = (e) => {
-																					setEnvPreview(e.target?.result as string);
-																				};
-																				reader.readAsText(file);
-																			} else {
-																				setEnvPreview("");
-																			}
-																		}}
-																	/>
-																</FormControl>
-																<FormMessage />
-															</FormItem>
-														);
-													}}
-												/>
-											) : (
-												<div className="grid gap-2">
-													<Label>Preview</Label>
-													<Textarea
-														id="preview"
-														value={envPreview}
-														disabled={true}
-														className="min-h-32 max-h-64"
-													/>
-												</div>
-											)}
-										</SmoothAnimate>
+																	} else {
+																		setEnvPreview("");
+																	}
+																}}
+															/>
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												);
+											}}
+										/>
 
 										<DialogFooter className="mt-4">
 											<div className="flex self-start mr-auto">
@@ -792,7 +807,7 @@ function ImportEnv({
 													variant={"default"}
 													disabled={!envPreview || loading}
 												>
-													{loading ? <Loader2 className="animate-spin" /> : <Download />}
+													{loading ? <Loader2 className="animate-spin" /> : <Upload />}
 													Import file
 												</Button>
 											</DialogSubmit>
@@ -837,7 +852,7 @@ function ImportEnv({
 													variant={"default"}
 													disabled={!VariableTextForm.formState.isValid}
 												>
-													<Download />
+													<Copy />
 													Import content
 												</Button>
 											</DialogSubmit>
