@@ -156,25 +156,11 @@ function TabsContent({ className, children, ...props }: TabsContentProps) {
 			data-slot="tabs-content"
 			{...props}
 			className={cn(
-				"w-full flex flex-col",
-				// "data-[state=inactive]:hidden",
-				// "data-[state=active]:block",
+				"w-full flex flex-col !top-0 !left-0 !transform-x-0 !transform-y-0",
 				className
 			)}
 		>
-			{/* <AnimatePresence mode="wait">
-				{isActive && (
-					<motion.div
-						initial={{ opacity: 0, y: 10 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -10 }}
-						transition={{ duration: 0.2 }}
-						className="relative w-full"
-					> */}
 						{children}
-					{/* </motion.div>
-				)}
-			</AnimatePresence> */}
 		</TabsPrimitive.Content>
 	);
 }

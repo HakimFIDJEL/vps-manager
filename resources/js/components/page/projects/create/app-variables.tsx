@@ -14,15 +14,12 @@ import {
 	SmoothItem,
 	SmoothResize,
 } from "@/components/ui/smooth-resized";
-import { AppGrid } from "@/components/page/projects/index/app-grid";
-import { AppTable } from "@/components/page/projects/index/app-table";
 
 // Shadcn UI components
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import {
 	Table,
 	TableBody,
@@ -31,18 +28,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-	DialogClose,
-	DialogSubmit,
-	DialogBody,
-} from "@/components/ui/dialog";
 import {
 	Form,
 	FormControl,
@@ -59,17 +44,9 @@ import {
 	TabsTrigger,
 } from "@/components/ui/tabs";
 import {
-	Card,
-	CardTitle,
-	CardDescription,
-	CardContent,
-	CardFooter,
-	CardAction,
-	CardHeader,
-} from "@/components/ui/card";
-import {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -88,7 +65,6 @@ import {
 	EyeOff,
 	Pen,
 	Plus,
-	Download,
 	Copy,
 	Loader2,
 	Upload,
@@ -117,7 +93,6 @@ export function AppVariables() {
 	return (
 		// Wrapper
 		<div className="grid gap-4">
-			{/* <ImportEnv variables={variables} setVariables={setVariables} /> */}
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import .env */}
@@ -317,24 +292,24 @@ function CreateVariable({
 	}
 
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
+		<AlertDialog>
+			<AlertDialogTrigger asChild>
 				<Button variant={"default"}>
 					<Plus />
 					Add Variable
 				</Button>
-			</DialogTrigger>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Add variable</DialogTitle>
-					<DialogDescription>
-						Add an environnement variable to your project. They must be written in
-						uppercase and separated by an underscore.
-					</DialogDescription>
-				</DialogHeader>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
 				<Form {...VariableForm}>
 					<form onSubmit={(e) => e.preventDefault()}>
-						<div className="grid gap-4 items-start py-4 grid-cols-2">
+						<AlertDialogHeader>
+							<AlertDialogTitle>Add variable</AlertDialogTitle>
+							<AlertDialogDescription>
+								Add an environnement variable to your project. They must be written in
+								uppercase and separated by an underscore.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogBody className="grid gap-4 items-start py-4 grid-cols-2">
 							<FormField
 								control={VariableForm.control}
 								name="key"
@@ -345,6 +320,7 @@ function CreateVariable({
 											<Input
 												id="key"
 												placeholder="eg: MY_KEY"
+												autoFocus={true}
 												{...field}
 												comment="Must be in uppercase and not contain spaces."
 											/>
@@ -371,28 +347,22 @@ function CreateVariable({
 									</FormItem>
 								)}
 							/>
-						</div>
-						<DialogFooter>
-							<DialogClose asChild>
-								<Button type="button" variant={"secondary"}>
-									Close
-								</Button>
-							</DialogClose>
-							<DialogSubmit onSubmit={onSubmit} asChild>
-								<Button
-									type="submit"
-									variant={"default"}
-									disabled={!VariableForm.formState.isValid || loading}
-								>
-									{loading ? <Loader2 className="animate-spin" /> : <Plus />}
-									Add variable
-								</Button>
-							</DialogSubmit>
-						</DialogFooter>
+						</AlertDialogBody>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogAction
+								onAction={onSubmit}
+								disabled={!VariableForm.formState.isValid || loading}
+								type="submit"
+							>
+								{loading ? <Loader2 className="animate-spin" /> : <Plus />}
+								Add variable
+							</AlertDialogAction>
+						</AlertDialogFooter>
 					</form>
 				</Form>
-			</DialogContent>
-		</Dialog>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
 
@@ -437,27 +407,27 @@ function EditVariable({
 		toast.success(`Variable ${data.key} updated successfully!`);
 		VariableForm.reset();
 		setLoading(false);
-		return true; // Retourne true pour fermer le Dialog
+		return true;
 	}
 
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
+		<AlertDialog>
+			<AlertDialogTrigger asChild>
 				<Button variant={"ghost"} size={"icon"}>
 					<Pen />
 				</Button>
-			</DialogTrigger>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Edit variable</DialogTitle>
-					<DialogDescription>
-						Edit an environnement variable of your project. You can only change the
-						value.
-					</DialogDescription>
-				</DialogHeader>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
 				<Form {...VariableForm}>
 					<form onSubmit={(e) => e.preventDefault()}>
-						<div className="grid gap-4 items-start py-4 grid-cols-2">
+						<AlertDialogHeader>
+							<AlertDialogTitle>Edit variable</AlertDialogTitle>
+							<AlertDialogDescription>
+								Edit an environnement variable of your project. You can only change the
+								value.
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogBody className="grid gap-4 items-start py-4 grid-cols-2">
 							<FormField
 								control={VariableForm.control}
 								name="key"
@@ -487,6 +457,7 @@ function EditVariable({
 											<Input
 												id="value"
 												type="password"
+												autoFocus={true}
 												placeholder="eg: MY_VALUE"
 												showPasswordToggle={true}
 												comment="Must not contain spaces."
@@ -497,28 +468,22 @@ function EditVariable({
 									</FormItem>
 								)}
 							/>
-						</div>
-						<DialogFooter>
-							<DialogClose asChild>
-								<Button type="button" variant={"secondary"}>
-									Close
-								</Button>
-							</DialogClose>
-							<DialogSubmit onSubmit={onSubmit} asChild>
-								<Button
-									type="submit"
-									variant={"default"}
-									disabled={!VariableForm.formState.isValid || loading}
-								>
-									{loading ? <Loader2 className="animate-spin" /> : <Pen />}
-									Edit variable
-								</Button>
-							</DialogSubmit>
-						</DialogFooter>
+						</AlertDialogBody>
+						<AlertDialogFooter>
+							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogAction
+								onAction={onSubmit}
+								disabled={!VariableForm.formState.isValid || loading}
+								type="submit"
+							>
+								{loading ? <Loader2 className="animate-spin" /> : <Pen />}
+								Edit variable
+							</AlertDialogAction>
+						</AlertDialogFooter>
 					</form>
 				</Form>
-			</DialogContent>
-		</Dialog>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }
 
@@ -533,14 +498,24 @@ function ImportEnv({
 	const [loading, setLoading] = useState<boolean>(false);
 	const [isDragActive, setIsDragActive] = useState(false);
 	const inputFileRef = useRef<HTMLInputElement>(null);
+	const closeRef = useRef<HTMLButtonElement>(null);
+
+	const VariableEnvForm = useForm<z.infer<typeof VariableEnvSchema>>({
+		resolver: zodResolver(VariableEnvSchema),
+	});
 
 	const VariableTextForm = useForm<z.infer<typeof VariableTextSchema>>({
 		resolver: zodResolver(VariableTextSchema),
 	});
 
-	const VariableEnvForm = useForm<z.infer<typeof VariableEnvSchema>>({
-		resolver: zodResolver(VariableEnvSchema),
-	});
+	async function onSubmitText() {
+		const isValid = await VariableTextForm.trigger();
+		if (!isValid) return false;
+
+		const data = VariableTextForm.getValues();
+
+		return handleUpdate(data.textarea);
+	}
 
 	async function onSubmitEnv() {
 		const isValid = await VariableEnvForm.trigger();
@@ -561,19 +536,10 @@ function ImportEnv({
 		}
 		const text = await file.text();
 
-		return handleUpdate(text, "file");
+		return handleUpdate(text);
 	}
 
-	async function onSubmitText() {
-		const isValid = await VariableTextForm.trigger();
-		if (!isValid) return false;
-
-		const data = VariableTextForm.getValues();
-
-		return handleUpdate(data.textarea, "text");
-	}
-
-	function handleUpdate(text: string, form: "file" | "text" = "text") {
+	function handleUpdate(text: string) {
 		// On parse le contenu du fichier
 		const parsedVariables = parseVariablesFromEnv({
 			content: text,
@@ -581,24 +547,14 @@ function ImportEnv({
 		});
 
 		if (parsedVariables.length === 0) {
-			if (form === "file") {
-				VariableEnvForm.setError("file", {
-					message: "No valid variables found in the file.",
-				});
-			} else {
-				VariableTextForm.setError("textarea", {
-					message: "No valid variables found in the text.",
-				});
-			}
+			VariableEnvForm.setError("file", {
+				message: "No valid variables found in the file.",
+			});
 			setLoading(false);
 			return false;
 		} else {
-			if (form === "file") {
-				setEnvPreview("");
-				VariableEnvForm.reset();
-			} else {
-				VariableTextForm.reset();
-			}
+			setEnvPreview("");
+			VariableEnvForm.reset();
 		}
 
 		toast.success(`${parsedVariables.length} variables imported successfully!`);
@@ -607,42 +563,42 @@ function ImportEnv({
 
 		setLoading(false);
 
-		return true; // Retourne true pour fermer le Dialog
+		closeRef.current?.click();
+		return true;
 	}
 
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant={"secondary"}>
+		<AlertDialog>
+			<AlertDialogTrigger asChild>
+				<Button variant={"outline"}>
 					<Upload />
 					Import variables
 				</Button>
-			</DialogTrigger>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Import variables</DialogTitle>
-					<DialogDescription>
-						Either import your .env file or paste the content in a text area.
-					</DialogDescription>
-				</DialogHeader>
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Import variables</AlertDialogTitle>
+					<AlertDialogDescription>
+						Either import a .env file or paste variables in the textarea.
+					</AlertDialogDescription>
+				</AlertDialogHeader>
 
-				<DialogBody>
-					<Tabs defaultValue="file" className="w-full">
-						<TabsList className="w-full gap-2">
-							<TabsTrigger value="file">
-								<Upload />
-								Import file
-							</TabsTrigger>
-							<TabsTrigger value="text">
-								<Copy />
-								Paste content
-							</TabsTrigger>
-						</TabsList>
-
-						<TabsBody>
-							<TabsContent value="file">
-								<Form {...VariableEnvForm}>
-									<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+				<Tabs defaultValue="file">
+					<TabsList className="w-full gap-4">
+						<TabsTrigger value="file" className="flex items-center gap-2">
+							<Upload />
+							Import file
+						</TabsTrigger>
+						<TabsTrigger value="text" className="flex items-center gap-2">
+							<Copy />
+							Paste content
+						</TabsTrigger>
+					</TabsList>
+					<TabsBody>
+						<TabsContent value="file">
+							<Form {...VariableEnvForm}>
+								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+									<AlertDialogBody>
 										<FormField
 											control={VariableEnvForm.control}
 											name="file"
@@ -654,65 +610,63 @@ function ImportEnv({
 													<FormItem className="gap-0">
 														<SmoothAnimate>
 															{!envPreview ? (
-																<>
-																	<FormLabel
-																		htmlFor="file"
-																		className={cn(
-																			"cursor-pointer flex items-center gap-2 flex-col border border-dashed border-border rounded-md p-4 transition-colors",
-																			isDragActive && "border-primary bg-primary/10",
-																		)}
-																		onDragOver={(e) => {
-																			e.preventDefault();
-																			setIsDragActive(true);
-																		}}
-																		onDragLeave={(e) => {
-																			e.preventDefault();
-																			setIsDragActive(false);
-																		}}
-																		onDrop={async (e) => {
-																			e.preventDefault();
-																			setIsDragActive(false);
-																			const file = e.dataTransfer.files?.[0];
-																			if (!file) {
-																				VariableEnvForm.setError("file", {
-																					message: "An error occured while importing the file.",
-																				});
-																				return;
-																			}
+																<FormLabel
+																	htmlFor="file"
+																	className={cn(
+																		"cursor-pointer flex justify-center items-center gap-2 flex-col border border-dashed border-border rounded-md p-4 transition-colors",
+																		isDragActive && "border-primary bg-primary/10",
+																	)}
+																	onDragOver={(e) => {
+																		e.preventDefault();
+																		setIsDragActive(true);
+																	}}
+																	onDragLeave={(e) => {
+																		e.preventDefault();
+																		setIsDragActive(false);
+																	}}
+																	onDrop={async (e) => {
+																		e.preventDefault();
+																		setIsDragActive(false);
+																		const file = e.dataTransfer.files?.[0];
+																		if (!file) {
+																			VariableEnvForm.setError("file", {
+																				message: "An error occured while importing the file.",
+																			});
+																			return;
+																		}
 
-																			// Vérification JS côté client
-																			if (!file.name.endsWith(".env")) {
-																				VariableEnvForm.setError("file", {
-																					message: "The file must have the .env extension.",
-																				});
-																				return;
-																			}
-																			if (file.size > 1024 * 1024) {
-																				VariableEnvForm.setError("file", {
-																					message: "The file must not exceed 1 MB.",
-																				});
-																				return;
-																			}
+																		// Vérification JS côté client
+																		if (!file.name.endsWith(".env")) {
+																			VariableEnvForm.setError("file", {
+																				message: "The file must have the .env extension.",
+																			});
+																			return;
+																		}
+																		if (file.size > 1024 * 1024) {
+																			VariableEnvForm.setError("file", {
+																				message: "The file must not exceed 1 MB.",
+																			});
+																			return;
+																		}
 
-																			// Si tout est bon, on clear les erreurs et on passe au form
-																			VariableEnvForm.clearErrors("file");
-																			field.onChange(file);
-																			if (inputFileRef.current) inputFileRef.current.value = "";
+																		// Si tout est bon, on clear les erreurs et on passe au form
+																		VariableEnvForm.clearErrors("file");
+																		field.onChange(file);
+																		if (inputFileRef.current) inputFileRef.current.value = "";
 
-																			// Lecture du fichier pour l'aperçu
-																			const reader = new FileReader();
-																			reader.onload = (e) => {
-																				setEnvPreview(e.target?.result as string);
-																			};
-																			reader.readAsText(file);
-																		}}
-																	>
-																		<span>Upload .env file</span>
-																		<span className="text-sm text-muted-foreground">
-																			Drag and drop your .env file here or click to select it.
-																		</span>
-																	</FormLabel>
-																</>
+																		// Lecture du fichier pour l'aperçu
+																		const reader = new FileReader();
+																		reader.onload = (e) => {
+																			setEnvPreview(e.target?.result as string);
+																		};
+																		reader.readAsText(file);
+																	}}
+																>
+																	<span>Upload .env file</span>
+																	<span className="text-sm text-muted-foreground">
+																		Drag and drop your .env file here or click to select it.
+																	</span>
+																</FormLabel>
 															) : (
 																<div className="grid gap-2">
 																	<Label>Preview</Label>
@@ -772,52 +726,47 @@ function ImportEnv({
 												);
 											}}
 										/>
-
-										<DialogFooter className="mt-4">
-											<div className="flex self-start mr-auto">
-												<AnimatePresence mode="sync">
-													{envPreview && (
-														<motion.div
-															initial={{ opacity: 0, y: -20 }}
-															animate={{ opacity: 1, y: 0 }}
-															exit={{ opacity: 0, y: -20 }}
-															transition={{ duration: 0.3 }}
+									</AlertDialogBody>
+									<AlertDialogFooter className="mt-4">
+										<div className="flex self-start mr-auto">
+											<AnimatePresence mode="sync">
+												{envPreview && (
+													<motion.div
+														initial={{ opacity: 0, y: -20 }}
+														animate={{ opacity: 1, y: 0 }}
+														exit={{ opacity: 0, y: -20 }}
+														transition={{ duration: 0.3 }}
+													>
+														<Button
+															type="button"
+															variant={"outline"}
+															onClick={() => setEnvPreview("")}
 														>
-															<Button
-																type="button"
-																variant={"outline"}
-																onClick={() => setEnvPreview("")}
-															>
-																<Trash />
-																Remove file
-															</Button>
-														</motion.div>
-													)}
-												</AnimatePresence>
-											</div>
-											<DialogClose asChild>
-												<Button type="button" variant={"secondary"}>
-													Close
-												</Button>
-											</DialogClose>
+															<Trash />
+															Remove file
+														</Button>
+													</motion.div>
+												)}
+											</AnimatePresence>
+										</div>
+										<AlertDialogCancel ref={closeRef}>Close</AlertDialogCancel>
+										<AlertDialogAction
+											onAction={onSubmitEnv}
+											disabled={!envPreview || loading}
+											type="submit"
+										>
+											{loading ? <Loader2 className="animate-spin" /> : <Upload />}
+											Import file
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</form>
+							</Form>
+						</TabsContent>
 
-											<DialogSubmit asChild onSubmit={onSubmitEnv}>
-												<Button
-													type="submit"
-													variant={"default"}
-													disabled={!envPreview || loading}
-												>
-													{loading ? <Loader2 className="animate-spin" /> : <Upload />}
-													Import file
-												</Button>
-											</DialogSubmit>
-										</DialogFooter>
-									</form>
-								</Form>
-							</TabsContent>
-							<TabsContent value="text">
-								<Form {...VariableTextForm}>
-									<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+						<TabsContent value="text">
+							<Form {...VariableTextForm}>
+								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+									<AlertDialogBody>
 										<FormField
 											control={VariableTextForm.control}
 											name="textarea"
@@ -839,31 +788,25 @@ function ImportEnv({
 												);
 											}}
 										/>
+									</AlertDialogBody>
 
-										<DialogFooter className="mt-4">
-											<DialogClose asChild>
-												<Button type="button" variant={"secondary"}>
-													Close
-												</Button>
-											</DialogClose>
-											<DialogSubmit asChild onSubmit={onSubmitText}>
-												<Button
-													type="submit"
-													variant={"default"}
-													disabled={!VariableTextForm.formState.isValid}
-												>
-													<Copy />
-													Import content
-												</Button>
-											</DialogSubmit>
-										</DialogFooter>
-									</form>
-								</Form>
-							</TabsContent>
-						</TabsBody>
-					</Tabs>
-				</DialogBody>
-			</DialogContent>
-		</Dialog>
+									<AlertDialogFooter className="mt-4">
+										<AlertDialogCancel>Close</AlertDialogCancel>
+										<AlertDialogAction
+											onAction={onSubmitText}
+											disabled={!VariableTextForm.formState.isValid}
+											type="submit"
+										>
+											<Copy />
+											Import content
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</form>
+							</Form>
+						</TabsContent>
+					</TabsBody>
+				</Tabs>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }

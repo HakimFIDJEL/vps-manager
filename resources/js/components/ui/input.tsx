@@ -124,7 +124,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               <button
                 type="button"
                 className={cn(
-                  "absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none",
+                  "absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer hover:bg-muted-foreground/10 transition-colors duration-200 p-1 rounded-md",
                   readOnly && "opacity-50 pointer-events-none",
                 )}
                 onClick={() => setShowPassword(!showPassword)}
