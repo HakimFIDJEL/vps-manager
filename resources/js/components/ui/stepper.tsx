@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { cn } from "@/lib/utils"
+import { useAutoAnimate } from "@formkit/auto-animate/react"
 
 // Types
 type StepperContextValue = {
@@ -245,6 +246,30 @@ function StepperSeparator({ className, ...props }: React.HTMLAttributes<HTMLDivE
   )
 }
 
+function StepperBody({
+	className,
+	children,
+	...props
+}: React.ComponentProps<"div">) {
+	const [ref] = useAutoAnimate<HTMLDivElement>({
+		duration: 300,
+    easing: "ease-in-out",
+	});
+
+	return (
+		<div 
+			className={cn(
+				"relative",
+				className
+			)} 
+			{...props} 
+			ref={ref}
+		>
+			{children}
+		</div>
+	);
+}
+
 // Ajouter l'interface StepperContentProps après StepperSeparator
 interface StepperContentProps extends React.HTMLAttributes<HTMLDivElement> {
   value: number
@@ -266,21 +291,23 @@ function StepperContent({ value, className, children, ...props }: StepperContent
   if (!isActive) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        data-slot="stepper-content"
-        data-state={isActive ? "active" : "inactive"}
-        className={cn(className)}
-        initial={isMounted ? { opacity: 0, x: 50 * direction } : { opacity: 1, x: 0 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -50 * direction }}
-        transition={{ duration: 0.3 }}
-        key={value}
-        {...props}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    // <AnimatePresence>
+    //   <motion.div
+    //     data-slot="stepper-content"
+    //     data-state={isActive ? "active" : "inactive"}
+    //     className={cn(className)}
+    //     initial={isMounted ? { opacity: 0, x: 50 * direction } : { opacity: 1, x: 0 }}
+    //     animate={{ opacity: 1, x: 0 }}
+    //     exit={{ opacity: 0, x: -50 * direction }}
+    //     transition={{ duration: 0.3 }}
+    //     key={value}
+    //     {...props}
+    //   >
+    <div className={cn(className)} {...props} data-slot="stepper-content" data-state={isActive ? "active" : "inactive"}>
+      {children}
+    </div>
+    //   </motion.div>
+    // </AnimatePresence>
   )
 }
 
@@ -337,4 +364,5 @@ export {
   StepperTitle,
   StepperTrigger,
   StepperNavigation,
+  StepperBody,
 }

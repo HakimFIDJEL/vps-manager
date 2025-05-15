@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import {
 	Table,
 	TableBody,
@@ -68,6 +69,7 @@ import {
 	Copy,
 	Loader2,
 	Upload,
+	FileUp,
 } from "lucide-react";
 
 // Types
@@ -76,7 +78,7 @@ import {
 	VariableSchema,
 	VariableTextSchema,
 	VariableEnvSchema,
-} from "@/types/models/project";
+} from "@/types/models/variable";
 
 export function AppVariables() {
 	const [variables, setVariables] = useState<Variable[]>([]);
@@ -92,7 +94,7 @@ export function AppVariables() {
 
 	return (
 		// Wrapper
-		<div className="grid gap-4">
+		<div className="grid">
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import .env */}
@@ -137,6 +139,8 @@ export function AppVariables() {
 				</SmoothResize>
 			</div>
 
+			{/* <Separator className="my-8" /> */}
+
 			<VariablesList
 				variables={variables}
 				setVariables={setVariables}
@@ -177,77 +181,82 @@ function VariablesList({
 	}
 
 	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead>Key</TableHead>
-					<TableHead>Value</TableHead>
-					<TableHead className="text-right">Actions</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>
-				{variables
-					.filter((variable) =>
-						variable.key.toLowerCase().includes(search.toLowerCase()),
-					)
-					.map((variable) => (
-						<TableRow key={variable.key}>
-							<TableCell className="font-mono">
-								<div className="flex items-center gap-2">
-									<Lock className="h-4 w-4" />
-									{variable.key}
-								</div>
-							</TableCell>
-							<TableCell>
-								<span className="font-mono text-muted-foreground relative">
-									{!variable.visible && (
-										<div className="h-full w-full bg-muted rounded-md absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-									)}
-									{variable.value}
-								</span>
-							</TableCell>
-							<TableCell className="text-right">
-								<div className="flex items-center justify-end gap-2">
-									<Button
-										variant={"ghost"}
-										size="icon"
-										onClick={() => toggleVisibility(variable)}
-									>
-										{variable.visible ? (
-											<EyeOff className="h-4 w-4" />
-										) : (
-											<Eye className="h-4 w-4" />
-										)}
-									</Button>
-
-									<EditVariable
-										variable={variable}
-										variables={variables}
-										setVariables={setVariables}
-									/>
-
-									<Button
-										variant={"outline"}
-										size="icon"
-										onClick={() => handleDelete(variable.key)}
-									>
-										<Trash className="h-4 w-4" />
-									</Button>
-								</div>
-							</TableCell>
+		<>
+			<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
+			<div className="rounded-md border">
+				<Table >
+					<TableHeader>
+						<TableRow>
+							<TableHead>Key</TableHead>
+							<TableHead>Value</TableHead>
+							<TableHead className="text-right">Actions</TableHead>
 						</TableRow>
-					))}
-				{variables.filter((variable) =>
-					variable.key.toLowerCase().includes(search.toLowerCase()),
-				).length === 0 && (
-					<TableRow>
-						<TableCell colSpan={3} className="text-center py-4 bg-muted/50">
-							No variables added yet. Click on "Add Variable" to create one.
-						</TableCell>
-					</TableRow>
-				)}
-			</TableBody>
-		</Table>
+					</TableHeader>
+					<TableBody>
+						{variables
+							.filter((variable) =>
+								variable.key.toLowerCase().includes(search.toLowerCase()),
+							)
+							.map((variable) => (
+								<TableRow key={variable.key}>
+									<TableCell className="font-mono">
+										<div className="flex items-center gap-2">
+											<Lock className="h-4 w-4" />
+											{variable.key}
+										</div>
+									</TableCell>
+									<TableCell>
+										<span className="font-mono text-muted-foreground relative">
+											{!variable.visible && (
+												<div className="h-full w-full bg-muted rounded-md absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+											)}
+											{variable.value}
+										</span>
+									</TableCell>
+									<TableCell className="text-right">
+										<div className="flex items-center justify-end gap-2">
+											<Button
+												variant={"ghost"}
+												size="icon"
+												onClick={() => toggleVisibility(variable)}
+											>
+												{variable.visible ? (
+													<EyeOff className="h-4 w-4" />
+												) : (
+													<Eye className="h-4 w-4" />
+												)}
+											</Button>
+
+											<EditVariable
+												variable={variable}
+												variables={variables}
+												setVariables={setVariables}
+											/>
+
+											<Button
+												variant={"outline"}
+												size="icon"
+												onClick={() => handleDelete(variable.key)}
+											>
+												<Trash className="h-4 w-4" />
+											</Button>
+										</div>
+									</TableCell>
+								</TableRow>
+							))}
+						{variables.filter((variable) =>
+							variable.key.toLowerCase().includes(search.toLowerCase()),
+						).length === 0 && (
+							<TableRow>
+								<TableCell colSpan={3} className="text-center py-4 bg-muted/50">
+									No variables added yet. Click on "Add Variable" to create one.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
+			</div>
+		</>
 	);
 }
 
@@ -571,7 +580,7 @@ function ImportEnv({
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
 				<Button variant={"outline"}>
-					<Upload />
+					<FileUp />
 					Import variables
 				</Button>
 			</AlertDialogTrigger>
@@ -586,7 +595,7 @@ function ImportEnv({
 				<Tabs defaultValue="file">
 					<TabsList className="w-full gap-4">
 						<TabsTrigger value="file" className="flex items-center gap-2">
-							<Upload />
+							<FileUp />
 							Import file
 						</TabsTrigger>
 						<TabsTrigger value="text" className="flex items-center gap-2">
@@ -613,8 +622,8 @@ function ImportEnv({
 																<FormLabel
 																	htmlFor="file"
 																	className={cn(
-																		"cursor-pointer flex justify-center items-center gap-2 flex-col border border-dashed border-border rounded-md p-4 transition-colors",
-																		isDragActive && "border-primary bg-primary/10",
+																		"flex items-center justify-center p-4 border-2 border-dashed rounded-lg bg-muted/50 hover:border-primary transition-colors cursor-pointer group",
+																		isDragActive && "border-primary",
 																	)}
 																	onDragOver={(e) => {
 																		e.preventDefault();
@@ -662,10 +671,16 @@ function ImportEnv({
 																		reader.readAsText(file);
 																	}}
 																>
-																	<span>Upload .env file</span>
-																	<span className="text-sm text-muted-foreground">
-																		Drag and drop your .env file here or click to select it.
-																	</span>
+
+																	<div className="text-center">
+																		<FileUp className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+																		<p className="text-sm text-muted-foreground mb-2">
+																			Drag and drop your .env file here or click to select it.
+																		</p>
+																		<Button variant="outline" size="sm" className="pointer-events-none">
+																			Browse files
+																		</Button>
+																	</div>
 																</FormLabel>
 															) : (
 																<div className="grid gap-2">
@@ -755,7 +770,7 @@ function ImportEnv({
 											disabled={!envPreview || loading}
 											type="submit"
 										>
-											{loading ? <Loader2 className="animate-spin" /> : <Upload />}
+											{loading ? <Loader2 className="animate-spin" /> : <FileUp />}
 											Import file
 										</AlertDialogAction>
 									</AlertDialogFooter>

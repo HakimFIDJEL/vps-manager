@@ -24,6 +24,7 @@ import {
 	StepperContent,
 	StepperList,
 	StepperNavigation,
+	StepperBody,
   } from "@/components/ui/stepper"
 import {
 	Card,
@@ -133,91 +134,94 @@ export default function Page() {
 					</CardContent>
 				</Card>
 
-				<StepperContent value={1}>
-					<Card>
-						<CardHeader>
-							<CardTitle>Project details</CardTitle>
-							<CardDescription>
-								Fill in the details below to create a new project.
-							</CardDescription>
-							<CardAction>
-								<StepperNavigation />
-							</CardAction>
-						</CardHeader>
-						<Separator />
-						<CardContent>
-							<AppProject />
-						</CardContent>
-					</Card>
-				</StepperContent>
-				<StepperContent value={2}>
-					<Card>
-						<CardHeader>
-							<CardTitle>Variables</CardTitle>
-							<CardDescription>
-								Either fill in the environnement variables or import your .env file.
-							</CardDescription>
-							<CardAction>
-								<StepperNavigation />
-							</CardAction>
-						</CardHeader>
-						<Separator />
-						<CardContent>
-							<AppVariables />
-						</CardContent>
-					</Card>
-				</StepperContent>
-				<StepperContent value={3}>
-					<Card>
-						<CardHeader>
-							<CardTitle>Docker</CardTitle>
-							<CardDescription>
-								Fill in your docker configuration, importing a docker-compose or create it from scratch.
-							</CardDescription>
-							<CardAction>
-								<StepperNavigation />
-							</CardAction>
-						</CardHeader>
-						<Separator />
-						<CardContent>
-							<AppDocker />
-						</CardContent>
-					</Card>
-				</StepperContent>
-				<StepperContent value={4}>
-					<Card>
-						<CardHeader>
-							<CardTitle>Makefile</CardTitle>
-							<CardDescription>
-								To easily execute your commands, fill in the Makefile configuration.
-							</CardDescription>
-							<CardAction>
-								<StepperNavigation />
-							</CardAction>
-						</CardHeader>
-						<Separator />
-						<CardContent>
-							<AppMakefile />
-						</CardContent>
-					</Card>
-				</StepperContent>
-				<StepperContent value={5}>
-					<Card>
-						<CardHeader>
-							<CardTitle>Done</CardTitle>
-							<CardDescription>
-								Your project is ready! You can now start using it.
-							</CardDescription>
-							<CardAction>
-								<StepperNavigation />
-							</CardAction>
-						</CardHeader>
-						<Separator />
-						<CardContent>
-							<AppDone />
-						</CardContent>
-					</Card>
-				</StepperContent>
+				<StepperBody>
+					<StepperContent value={1}>
+						<Card>
+							<CardHeader>
+								<CardTitle>Project details</CardTitle>
+								<CardDescription>
+									Fill in the details below to create a new project.
+								</CardDescription>
+								<CardAction>
+									<StepperNavigation />
+								</CardAction>
+							</CardHeader>
+							<Separator />
+							<CardContent>
+								<AppProject />
+							</CardContent>
+						</Card>
+					</StepperContent>
+					<StepperContent value={2}>
+						<Card>
+							<CardHeader>
+								<CardTitle>Variables</CardTitle>
+								<CardDescription>
+									Either fill in the environnement variables or import your .env file.
+								</CardDescription>
+								<CardAction>
+									<StepperNavigation />
+								</CardAction>
+							</CardHeader>
+							<Separator />
+							<CardContent>
+								<AppVariables />
+							</CardContent>
+						</Card>
+					</StepperContent>
+					<StepperContent value={3}>
+						<Card>
+							<CardHeader>
+								<CardTitle>Docker</CardTitle>
+								<CardDescription>
+									Fill in your docker configuration, importing a docker-compose or create it from scratch.
+								</CardDescription>
+								<CardAction>
+									<StepperNavigation />
+								</CardAction>
+							</CardHeader>
+							<Separator />
+							<CardContent>
+								<AppDocker />
+							</CardContent>
+						</Card>
+					</StepperContent>
+					<StepperContent value={4}>
+						<Card>
+							<CardHeader>
+								<CardTitle>Makefile</CardTitle>
+								<CardDescription>
+									To easily execute your commands, fill in the Makefile configuration.
+								</CardDescription>
+								<CardAction>
+									<StepperNavigation />
+								</CardAction>
+							</CardHeader>
+							<Separator />
+							<CardContent>
+								<AppMakefile />
+							</CardContent>
+						</Card>
+					</StepperContent>
+					<StepperContent value={5}>
+						<Card>
+							<CardHeader>
+								<CardTitle>Done</CardTitle>
+								<CardDescription>
+									Your project is ready! You can now start using it.
+								</CardDescription>
+								<CardAction>
+									<StepperNavigation />
+								</CardAction>
+							</CardHeader>
+							<Separator />
+							<CardContent>
+								<AppDone />
+							</CardContent>
+						</Card>
+					</StepperContent>
+				</StepperBody>
+
 			</Stepper>
 
 			{/* Mettre ici les différentes cards, une card par étape */}

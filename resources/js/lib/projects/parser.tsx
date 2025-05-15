@@ -3,7 +3,7 @@ import { toast } from "sonner"
 import { z } from "zod";
 
 // Types
-import { type Variable, VariableSchema } from "@/types/models/project";
+import { type Variable, VariableSchema } from "@/types/models/variable";
 
 
 // Parse .env content into key-value pairs

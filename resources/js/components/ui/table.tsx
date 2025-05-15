@@ -1,9 +1,11 @@
 import * as React from "react"
 import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { SmoothItem, SmoothResize, SmoothAnimate } from "@/components/ui/smooth-resized"
 
 import { cn } from "@/lib/utils"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+
 
   return (
     <div
@@ -29,14 +31,20 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   )
 }
 
-function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
+function TableBody({ className, children, ...props }: React.ComponentProps<"tbody">) {
+
+  
+  // const [bodyRef] = useAutoAnimate<HTMLTableSectionElement>();
 
   return (
     <tbody
       data-slot="table-body"
+      // ref={bodyRef}
       className={cn("[&_tr:last-child]:border-0", className)}
       {...props}
-    />
+    >
+        {children}
+    </tbody>
   )
 }
 
@@ -55,14 +63,14 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
-    <tr
-      data-slot="table-row"
-      className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
-        className
-      )}
-      {...props}
-    />
+        <tr
+          data-slot="table-row"
+          className={cn(
+          "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+          className
+        )}
+        {...props}
+      />
   )
 }
 
