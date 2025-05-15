@@ -1,12 +1,20 @@
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
+import { useState } from "react";
+import { Flipper, Flipped } from "react-flip-toolkit";
 
 // Admin Layout
 import { AdminLayout } from "@/components/layouts/admin-layout";
 
 // Shadcn UI components
-import { TabsList, TabsContent, TabsTrigger, Tabs } from "@/components/ui/tabs";
+import {
+	TabsList,
+	TabsContent,
+	TabsTrigger,
+	Tabs,
+	TabsBody,
+} from "@/components/ui/tabs";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
 	AlertDialog,
@@ -14,13 +22,16 @@ import {
 	AlertDialogTrigger,
 	AlertDialogFooter,
 	AlertDialogCancel,
+	AlertDialogHeader,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { AlertDialogTitle } from "@radix-ui/react-alert-dialog";
 
 function Example() {
 	const [ref] = useAutoAnimate<HTMLDivElement>({
 		duration: 300,
 	});
+
 
 	return (
 		<AlertDialog>
@@ -28,8 +39,11 @@ function Example() {
 				<Button variant={"outline"}>Open Dialog</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Animation Example - Tabs</AlertDialogTitle>
+				</AlertDialogHeader>
 				<Tabs>
-					<TabsList className="w-full">
+					<TabsList className="w-full gap-2">
 						<TabsTrigger value="tab1">Tab 1</TabsTrigger>
 						<TabsTrigger value="tab2">Tab 2</TabsTrigger>
 					</TabsList>

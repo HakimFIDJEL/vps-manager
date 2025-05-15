@@ -69,7 +69,7 @@ function Tabs({
 				value={currentValue}
 				onValueChange={handleValueChange}
 				data-slot="tabs"
-				className={cn("flex flex-col gap-2 overflow-hidden relative", className)}
+				className={cn("flex flex-col gap-2 relative overflow-y-hidden overflow-x-visible", className)}
 				{...props}
 			>
 				{children}
@@ -107,7 +107,7 @@ function TabsBody({
 	return (
 		<div 
 			className={cn(
-				"relative overflow-hidden",
+				"relative overflow-y-hidden overflow-x-visible",
 				className
 			)} 
 			{...props} 
@@ -156,7 +156,7 @@ function TabsContent({ className, children, ...props }: TabsContentProps) {
 			data-slot="tabs-content"
 			{...props}
 			className={cn(
-				"w-full flex flex-col !top-0 !left-0 !transform-x-0 !transform-y-0",
+				"w-full !data-[state=inactive]:static",
 				className
 			)}
 		>
@@ -165,5 +165,6 @@ function TabsContent({ className, children, ...props }: TabsContentProps) {
 	);
 }
 TabsContent.displayName = "TabsContent";
+
 
 export { Tabs, TabsList, TabsTrigger, TabsContent, TabsBody };

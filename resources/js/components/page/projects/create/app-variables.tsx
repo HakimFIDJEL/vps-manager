@@ -778,6 +778,7 @@ function ImportEnv({
 															<Textarea
 																id="textarea"
 																placeholder="KEY=VALUE"
+																autoFocus={true}
 																className="min-h-32 max-h-64"
 																comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
 																{...field}

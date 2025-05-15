@@ -5,6 +5,7 @@ import { z } from "zod";
 // Types
 import { type Variable, VariableSchema } from "@/types/models/project";
 
+
 // Parse .env content into key-value pairs
 export function parseVariablesFromEnv({
   content,
@@ -51,4 +52,3 @@ export function parseVariablesFromEnv({
   }
   return parsed;
 }
-

@@ -106,7 +106,7 @@ export default function Page() {
 				</CardHeader>
 			</Card>
 
-			<Stepper defaultValue={2} totalSteps={steps.length}>
+			<Stepper defaultValue={3} totalSteps={steps.length}>
 				<Card className="bg-muted/50 dark:bg-background  border-0 shadow-none mb-4">
 					<CardContent>
 						<div className="space-y-8 text-center">
