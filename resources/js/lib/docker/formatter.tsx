@@ -7,10 +7,17 @@ export function formatServiceImage(image: string) {
   );
 }
 
-export function formatDockerDriver(driver: string) {
+export function formatDockerDriver(driver: string, name?: string) {
   return (
-    <span className="text-xs text-muted-foreground">
-      {driver} driver
-    </span>
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-muted-foreground">
+        {driver} driver
+      </span>
+      {(name && name !== driver) && (
+        <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+          {name}
+        </span>
+      )}
+    </div>
   );
 }

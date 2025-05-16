@@ -56,17 +56,27 @@ export type ParsedDockerCompose = {
   isValid: boolean;
   services: Array<{ name: string; image: string; }>;
   volumes: Array<{ name: string; driver: string; }>;
-  networks: Array<{ name: string; driver: string; }>;
+  networks: Array<{ name: string; driver: string; customName?: string; }>;
 };
 
 export function parseDockerCompose(content: string): ParsedDockerCompose {
   try {
-    console.log('Parsing docker-compose file...');
-    console.log('Raw content:', content);
+    // console.log('Parsing docker-compose file...');
+    // console.log('Raw content:', content);
+
+    if(content.length === 0) {
+      toast.error('Invalid docker-compose format: Empty file');
+      return {
+        isValid: false,
+        services: [],
+        volumes: [],
+        networks: []
+      };
+    }
 
     // Parse YAML content
     const parsedYaml = yaml.load(content);
-    console.log('Parsed YAML:', parsedYaml);
+    // console.log('Parsed YAML:', parsedYaml);
     
     // Validate against schema
     const result = DockerComposeSchema.safeParse(parsedYaml);
@@ -100,13 +110,14 @@ export function parseDockerCompose(content: string): ParsedDockerCompose {
 
     const networks = Object.entries(result.data.networks || {}).map(([name, config]) => ({
       name,
-      driver: config?.driver || "bridge"
+      driver: config?.driver || "bridge",
+      customName: config?.name
     }));
 
-    console.log('Successfully parsed docker-compose file');
-    console.log('Services:', services);
-    console.log('Volumes:', volumes);
-    console.log('Networks:', networks);
+    // console.log('Successfully parsed docker-compose file');
+    // console.log('Services:', services);
+    // console.log('Volumes:', volumes);
+    // console.log('Networks:', networks);
 
     return {
       isValid: true,

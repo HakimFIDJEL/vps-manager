@@ -52,46 +52,42 @@ const DockerComposeSchema = z.object({
 }).passthrough();
 
 export const DockerComposeFileSchema = z.object({
-  file: z.custom<File>((val) => val instanceof File, {
-    message: "Le fichier n'est pas valide",
-  })
-  .refine((file) => file.name.endsWith(".yml") || file.name.endsWith(".yaml"), {
-    message: "Le fichier doit avoir l'extension .yml ou .yaml",
-  })
-  .refine((file) => file.size <= 1024 * 1024, {
-    message: "Le fichier ne doit pas dépasser 1 Mo",
-  })
-  .refine(
-    async (file) => {
-      try {
-        const text = await file.text();
-        console.log('File content:', text);
-        const parsed = yaml.load(text) as Record<string, any>;
-        console.log('Parsed YAML:', parsed);
-        
-        // Vérification basique de la structure
-        if (!parsed || typeof parsed !== 'object') {
-          console.error('Invalid YAML structure');
+  file: z
+    .instanceof(File)
+    .refine((file) => file.name.endsWith(".yml") || file.name.endsWith(".yaml"), {
+      message: "The file must have .yml or .yaml extension",
+    })
+    .refine((file) => file.size <= 1024 * 1024, {
+      message: "The file must not exceed 1 MB",
+    })
+    .refine(
+      async (file) => {
+        try {
+          const text = await file.text();
+          return text.trim().length > 0;
+        } catch (error) {
           return false;
         }
-
-        // Vérification des services
-        if (!parsed.services || typeof parsed.services !== 'object') {
-          console.error('No services found');
+      },
+      {
+        message: "The file must not be empty",
+      },
+    )
+    .refine(
+      async (file) => {
+        try {
+          const text = await file.text();
+          yaml.load(text);
+          return true;
+        } catch (error) {
+          console.error('YAML parsing error:', error);
           return false;
         }
-
-        // Si on arrive ici, le fichier est valide
-        return true;
-      } catch (error) {
-        console.error('Error parsing file:', error);
-        return false;
-      }
-    },
-    {
-      message: "Le fichier doit être un fichier docker-compose valide",
-    },
-  ),
+      },
+      {
+        message: "The file must be a valid YAML file",
+      },
+    ),
 });
 
 export type DockerComposeState = {
@@ -100,7 +96,7 @@ export type DockerComposeState = {
   parsed: {
     services: Array<{ name: string; image: string; }>;
     volumes: Array<{ name: string; driver: string; }>;
-    networks: Array<{ name: string; driver: string; }>;
+    networks: Array<{ name: string; driver: string; customName?: string; }>;
   };
 };
 
