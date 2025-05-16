@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type Appearance = 'light' | 'dark' | 'system';
 
@@ -70,4 +70,26 @@ export function useAppearance() {
     }, [updateAppearance]);
 
     return { appearance, updateAppearance } as const;
+}
+
+// Nouveau hook pour écouter les changements d'apparence
+export function useAppearanceChange(callback: (appearance: Appearance) => void) {
+    const { appearance } = useAppearance();
+    const lastAppearance = useRef(appearance);
+
+    useEffect(() => {
+        if (lastAppearance.current !== appearance) {
+            callback(appearance);
+            lastAppearance.current = appearance;
+        }
+        // Écoute cross-tab
+        const onStorage = (event: StorageEvent) => {
+            if (event.key === 'appearance' && event.newValue && event.newValue !== lastAppearance.current) {
+                callback(event.newValue as Appearance);
+                lastAppearance.current = event.newValue as Appearance;
+            }
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+    }, [appearance, callback]);
 }

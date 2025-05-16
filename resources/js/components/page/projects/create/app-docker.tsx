@@ -127,7 +127,6 @@ import {
 } from "@/lib/docker/templates";
 import { useProject } from "@/contexts/project-context";
 
-
 export function AppDocker() {
 	const { project, updateProject } = useProject();
 
@@ -712,13 +711,16 @@ function DockerContent({
 						</div>
 					</div>
 				</div>
-				<div className="p-4">
-					<CodeEditor
-						value={state.content}
-						onChange={handleDockerComposeChange}
-						language="yaml"
-					/>
-				</div>
+				<SmoothAnimate className="p-4">
+
+
+						<CodeEditor
+							value={state.content}
+							onChange={handleDockerComposeChange}
+							language="yaml"
+						/>
+					
+				</SmoothAnimate>
 			</div>
 		</div>
 	);

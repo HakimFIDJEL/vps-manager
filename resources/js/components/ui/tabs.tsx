@@ -81,7 +81,7 @@ function Tabs({
 				value={currentValue}
 				onValueChange={handleValueChange}
 				data-slot="tabs"
-				className={cn("flex flex-col gap-2 relative overflow-y-hidden overflow-x-visible", className)}
+				className={cn("flex flex-col gap-2 relative overflow-y-visible overflow-x-visible", className)}
 				{...props}
 			>
 				{children}
@@ -119,7 +119,7 @@ function TabsBody({
 	return (
 		<div 
 			className={cn(
-				"relative overflow-y-hidden overflow-x-visible",
+				"relative overflow-y-visible overflow-x-visible",
 				className
 			)} 
 			{...props} 

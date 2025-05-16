@@ -101,10 +101,19 @@ export function AppVariables() {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
-	// Synchroniser les variables locales avec le contexte du projet
+	// Synchroniser l'état local avec le contexte projet si le contexte change
 	useEffect(() => {
-		updateProject("variables", variables);
-	}, [variables, updateProject]);
+		if (JSON.stringify(project.variables) !== JSON.stringify(variables)) {
+			setVariables(project.variables);
+		}
+	}, [project.variables]);
+
+	// Synchroniser le contexte projet avec l'état local si le local change
+	useEffect(() => {
+		if (JSON.stringify(variables) !== JSON.stringify(project.variables)) {
+			updateProject("variables", variables);
+		}
+	}, [variables]);
 
 	return (
 		// Wrapper

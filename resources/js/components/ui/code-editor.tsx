@@ -14,9 +14,10 @@ import { rust } from "@codemirror/lang-rust"
 import { sql } from "@codemirror/lang-sql"
 import { xml } from "@codemirror/lang-xml"
 import { dracula } from "@uiw/codemirror-theme-dracula"
+import { githubLight } from "@uiw/codemirror-theme-github"
 import { linter, lintGutter } from "@codemirror/lint"
 import { yamlLinter } from "@/lib/docker/linter"
-import { useAppearance } from '@/hooks/use-appearance';
+import { useAppearance, useAppearanceChange } from '@/hooks/use-appearance';
 
 type CodeBlockProps = {
   language: string
@@ -208,27 +209,28 @@ type CodeEditorProps = {
   className?: string
 }
 
+const getEditorTheme = (appearance: string) => {
+  if (appearance === "dark") return dracula;
+  return githubLight;
+};
+
 export const CodeEditor = ({
   value,
   onChange,
   language = "yaml",
   className = ""
 }: CodeEditorProps) => {
+  const { appearance } = useAppearance();
+  const [theme, setTheme] = React.useState(getEditorTheme(appearance));
 
-  const [theme, setTheme] = React.useState<ReactCodeMirrorProps["theme"]>("light");
-  const { appearance, updateAppearance } = useAppearance();
-
-  React.useEffect(() => {
-    if(appearance == 'light') {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
-  }, [appearance]);
+  useAppearanceChange((newAppearance) => {
+    console.log(newAppearance);
+    setTheme(getEditorTheme(newAppearance));
+  });
 
 
   return (
-    <div className={`w-full rounded-lg bg-background ${className}`}>
+    <div className={`relative w-full rounded-lg bg-background ${className}`}>
       <CodeMirror
         value={value}
         height="auto"
