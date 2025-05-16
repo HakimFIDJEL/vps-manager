@@ -2,7 +2,7 @@
 import React from "react"
 import { Save } from "lucide-react"
 // import { IconCheck, IconCopy, IconEdit, IconEye } from "@tabler/icons-react"
-import CodeMirror from "@uiw/react-codemirror"
+import CodeMirror, { ReactCodeMirrorProps } from "@uiw/react-codemirror"
 import { javascript } from "@codemirror/lang-javascript"
 import { yaml } from "@codemirror/lang-yaml"
 import { html } from "@codemirror/lang-html"
@@ -14,6 +14,9 @@ import { rust } from "@codemirror/lang-rust"
 import { sql } from "@codemirror/lang-sql"
 import { xml } from "@codemirror/lang-xml"
 import { dracula } from "@uiw/codemirror-theme-dracula"
+import { linter, lintGutter } from "@codemirror/lint"
+import { yamlLinter } from "@/lib/docker/linter"
+import { useAppearance } from '@/hooks/use-appearance';
 
 type CodeBlockProps = {
   language: string
@@ -92,6 +95,17 @@ export const CodeBlock = ({
   }
   */
 
+  const [theme, setTheme] = React.useState<ReactCodeMirrorProps["theme"]>("light");
+  const { appearance, updateAppearance } = useAppearance();
+
+  React.useEffect(() => {
+    if(appearance == 'light') {
+      setTheme("light");
+    } else {
+      setTheme("dark");
+    }
+  }, [appearance]);
+
   const handleCodeChange = (newCode: string) => {
     if (tabsExist) {
       const newTabs = [...tabsContent]
@@ -161,9 +175,13 @@ export const CodeBlock = ({
       <div className="border border-slate-700 rounded">
         <CodeMirror
           value={activeCode}
-          height="300px"
-          theme={dracula}
-          extensions={[getLanguageExtension(activeLanguage)]}
+          height="auto"
+          theme={theme}
+          extensions={[
+            getLanguageExtension(activeLanguage),
+            lintGutter(),
+            linter(yamlLinter)
+          ]}
           onChange={handleCodeChange}
           basicSetup={{
             lineNumbers: true,
@@ -181,4 +199,59 @@ export const CodeBlock = ({
       </div>
     </div>
   )
+}
+
+type CodeEditorProps = {
+  value: string
+  onChange: (value: string) => void
+  language?: string
+  className?: string
+}
+
+export const CodeEditor = ({
+  value,
+  onChange,
+  language = "yaml",
+  className = ""
+}: CodeEditorProps) => {
+
+  const [theme, setTheme] = React.useState<ReactCodeMirrorProps["theme"]>("light");
+  const { appearance, updateAppearance } = useAppearance();
+
+  React.useEffect(() => {
+    if(appearance == 'light') {
+      setTheme("light");
+    } else {
+      setTheme("dark");
+    }
+  }, [appearance]);
+
+
+  return (
+    <div className={`w-full rounded-lg bg-background ${className}`}>
+      <CodeMirror
+        value={value}
+        height="auto"
+        theme={theme}
+        extensions={[
+          yaml(),
+          lintGutter(),
+          linter(yamlLinter)
+        ]}
+        onChange={onChange}
+        basicSetup={{
+          lineNumbers: true,
+          highlightActiveLine: true,
+          highlightSelectionMatches: true,
+          autocompletion: true,
+          bracketMatching: true,
+          closeBrackets: true,
+          crosshairCursor: true,
+          foldGutter: true,
+          indentOnInput: true,
+          syntaxHighlighting: true,
+        }}
+      />
+    </div>
+  );
 }

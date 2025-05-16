@@ -68,7 +68,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CodeBlock } from "@/components/ui/code-editor";
+import { CodeEditor } from "@/components/ui/code-editor";
 import {
 	Accordion,
 	AccordionContent,
@@ -713,11 +713,10 @@ function DockerContent({
 					</div>
 				</div>
 				<div className="p-4">
-					<Textarea
+					<CodeEditor
 						value={state.content}
-						onChange={(e) => handleDockerComposeChange(e.target.value)}
-						className="min-h-[400px] font-mono text-sm"
-						placeholder={DOCKER_COMPOSE_PLACEHOLDER}
+						onChange={handleDockerComposeChange}
+						language="yaml"
 					/>
 				</div>
 			</div>
