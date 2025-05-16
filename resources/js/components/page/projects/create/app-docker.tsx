@@ -123,7 +123,7 @@ export function AppDocker() {
 
 	return (
 		<Tabs defaultValue="empty">
-			<TabsList className="hidden">
+			<TabsList className="">
 				<TabsTrigger value="empty" ref={emptyRef}>
 					Empty
 				</TabsTrigger>
