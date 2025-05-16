@@ -89,12 +89,22 @@ import {
 	VariableEnvSchema,
 } from "@/types/models/variable";
 
+// Contexts
+import { useProject } from "@/contexts/project-context";
+
 export function AppVariables() {
-	const [variables, setVariables] = useState<Variable[]>([]);
+	const { project, updateProject } = useProject();
+	
+	const [variables, setVariables] = useState<Variable[]>(project.variables);
 	const [search, setSearch] = useState<string>("");
 
 	const inputRef = useRef<HTMLInputElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
+
+	// Synchroniser les variables locales avec le contexte du projet
+	useEffect(() => {
+		updateProject("variables", variables);
+	}, [variables, updateProject]);
 
 	return (
 		// Wrapper

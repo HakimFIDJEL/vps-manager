@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { LucideIcon, Save } from "lucide-react";
+import { FileLock, LucideIcon, Save, X } from "lucide-react";
 import { useTabsContext } from "@/components/ui/tabs";
 import { type DockerComposeState, DockerComposeFileSchema } from "@/types/models/docker";
 import { parseDockerCompose } from "@/lib/docker/parser";
@@ -121,154 +121,41 @@ import {
 	type DockerNetwork,
 } from "@/types/models/docker";
 
-const DOCKER_TEMPLATES = {
-	webApp: `version: '3'
+import {
+	DOCKER_TEMPLATES,
+	DOCKER_COMPOSE_PLACEHOLDER
+} from "@/lib/docker/templates";
+import { useProject } from "@/contexts/project-context";
 
-services:
-  apache:
-    image: php:8.2-apache
-    volumes:
-      - ./src:/var/www/html
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.apache.rule=Host("app.localhost")
-
-  node:
-    image: node:latest
-    working_dir: /app
-    volumes:
-      - ./app:/app
-    command: npm run dev
-
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: app
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    environment:
-      PMA_HOST: mysql
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.pma.rule=Host("pma.localhost")
-
-  traefik:
-    image: traefik:v2.10
-    command:
-      - --api.insecure=true
-      - --providers.docker=true
-    ports:
-      - 80:80
-      - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
-volumes:
-  mysql_data:
-    driver: local
-
-networks:
-  default:
-    name: web
-    driver: bridge`,
-
-	dataScience: `version: '3'
-
-services:
-  jupyter:
-    image: jupyter/datascience-notebook
-    ports:
-      - 8888:8888
-    volumes:
-      - jupyter_data:/home/jovyan/work
-    environment:
-      JUPYTER_ENABLE_LAB: 'yes'
-
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: data
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  metabase:
-    image: metabase/metabase
-    ports:
-      - 3000:3000
-    environment:
-      MB_DB_TYPE: postgres
-      MB_DB_DBNAME: data
-      MB_DB_PORT: 5432
-      MB_DB_USER: postgres
-      MB_DB_PASS: postgres
-      MB_DB_HOST: postgres
-
-volumes:
-  jupyter_data:
-    driver: local
-  postgres_data:
-    driver: local
-
-networks:
-  analytics:
-    driver: bridge`,
-
-	minimal: `version: '3'
-
-services:
-  app:
-    image: nginx:alpine
-    volumes:
-      - app_data:/usr/share/nginx/html
-    ports:
-      - 8080:80
-    networks:
-      - web
-
-volumes:
-  app_data:
-    driver: local
-
-networks:
-  web:
-    driver: bridge`
-};
-
-const DOCKER_COMPOSE_PLACEHOLDER = `version: '3'
-services:
-  web:
-    image: nginx
-    ports:
-      - '80:80'
-  db:
-    image: postgres
-    volumes:
-      - data:/var/lib/postgresql/data
-
-volumes:
-  data:
-
-networks:
-  frontend:`;
 
 export function AppDocker() {
-	const [state, setState] = useState<DockerComposeState>({
-		content: "",
-		isSaved: true,
-		parsed: {
-			services: [],
-			volumes: [],
-			networks: []
+	const { project, updateProject } = useProject();
+
+	const [state, setState] = useState<DockerComposeState>(project.docker);
+
+
+	// Synchroniser l'état avec le contexte du projet
+	useEffect(() => {
+		if (project.docker.content && project.docker.content !== state.content) {
+			setState({
+				content: project.docker.content,
+				isSaved: project.docker.isSaved,
+				parsed: project.docker.parsed
+			});
 		}
-	});
+	}, [project.docker]);
+
+	// Synchroniser le contexte avec l'état
+	useEffect(() => {
+		if (state.content && state.content !== project.docker.content) {
+			updateProject("docker", state);
+		}
+	}, [state, updateProject]);
 
 	return (
-		<Tabs defaultValue="empty">
+		<Tabs 
+			defaultValue={project.docker.content ? "docker" : "empty"}
+		>
 			<TabsList className="hidden">
 				<TabsTrigger value="empty">Empty</TabsTrigger>
 				<TabsTrigger value="docker">Docker</TabsTrigger>
@@ -531,11 +418,62 @@ function TemplateLink({
 
 function DockerSidebar({
 	state,
+	setState,
 	setCurrentValue
 }: {
 	state: DockerComposeState;
+	setState: React.Dispatch<React.SetStateAction<DockerComposeState>>;
 	setCurrentValue: (value: string) => void;
 }) {
+	const { project, updateProject } = useProject();
+
+	const handleRemove = (name: string, type: 'services' | 'volumes' | 'networks') => {
+		const content = yaml.load(state.content) as Record<string, any>;
+		if (!content) return;
+
+		const newContent = yaml.dump({
+			...content,
+			[type]: Object.fromEntries(
+				Object.entries(content[type] || {})
+					.filter(([key]) => key !== name)
+			)
+		});
+		
+		const parsed = parseDockerCompose(newContent);
+		if (parsed.isValid) {
+			setState({
+				content: newContent,
+				isSaved: false,
+				parsed: {
+					services: parsed.services,
+					volumes: parsed.volumes,
+					networks: parsed.networks
+				}
+			});
+			updateProject("docker", {
+				content: newContent,
+				isSaved: false,
+				parsed: {
+					services: parsed.services,
+					volumes: parsed.volumes,
+					networks: parsed.networks
+				}
+			});
+		}
+	};
+
+	const handleReset = () => {
+		const newState = {
+			content: "",
+			isSaved: true,
+			parsed: { services: [], volumes: [], networks: [] }
+		};
+
+		setState(newState);
+		setCurrentValue("empty");
+		updateProject("docker", newState);
+	};
+	
 	return (
 		<div className="col-span-1 flex flex-col gap-4">
 			<div className="rounded-lg border bg-card overflow-hidden">
@@ -558,11 +496,19 @@ function DockerSidebar({
 							<Separator className="mb-6" />
 							<SmoothAnimate className="space-y-2 px-4 pb-2">
 								{state.parsed.services.map(service => (
-									<div key={service.name} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
+									<div key={service.name} className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group">
 										<div>
 											<div className="text-sm font-medium">{service.name}</div>
 											{formatServiceImage(service.image)}
 										</div>
+										<Button 
+											variant="ghost" 
+											size="icon" 
+											className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+											onClick={() => handleRemove(service.name, 'services')}
+										>
+											<X className="h-2 w-2 text-primary" />
+										</Button>
 									</div>
 								))}
 								{state.parsed.services.length === 0 && (
@@ -592,11 +538,19 @@ function DockerSidebar({
 							<Separator className="mb-6" />
 							<SmoothAnimate className="space-y-2 px-4 pb-2">
 								{state.parsed.volumes.map(volume => (
-									<div key={volume.name} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
+									<div key={volume.name} className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group">
 										<div>
 											<div className="text-sm font-medium">{volume.name}</div>
 											{formatDockerDriver(volume.driver)}
 										</div>
+										<Button 
+											variant="ghost" 
+											size="icon" 
+											className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+											onClick={() => handleRemove(volume.name, 'volumes')}
+										>
+											<X className="h-2 w-2 text-primary" />
+										</Button>
 									</div>
 								))}
 								{state.parsed.volumes.length === 0 && (
@@ -626,11 +580,19 @@ function DockerSidebar({
 							<Separator className="mb-6" />
 							<SmoothAnimate className="space-y-2 px-4 pb-2">
 								{state.parsed.networks.map(network => (
-									<div key={network.name} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
+									<div key={network.name} className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group">
 										<div>
 											<div className="text-sm font-medium">{network.name}</div>
 											{formatDockerDriver(network.driver, network.customName)}
 										</div>
+										<Button 
+											variant="ghost" 
+											size="icon" 
+											className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+											onClick={() => handleRemove(network.name, 'networks')}
+										>
+											<X className="h-2 w-2 text-primary" />
+										</Button>
 									</div>
 								))}
 								{state.parsed.networks.length === 0 && (
@@ -641,11 +603,35 @@ function DockerSidebar({
 							</SmoothAnimate>
 						</AccordionContent>
 					</AccordionItem>
+
+					{project.variables.length > 0 && (
+						<AccordionItem value="variables">
+							<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
+								<div className="flex items-center gap-2">
+									<FileLock className="h-4 w-4 text-primary" />
+									<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+										<span>Variables available</span>
+									</SmoothAnimate>
+								</div>
+							</AccordionTrigger>
+							<AccordionContent className="px-0 pt-0">
+								<Separator className="mb-6" />
+									<SmoothAnimate className="space-y-2 px-4 pb-2 flex flex-wrap gap-2">
+										{project.variables.map(variable => (
+											<div key={variable.key} className="text-xs flex items-center justify-center px-2 py-1 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
+													{variable.key}
+											</div>
+										))}
+									</SmoothAnimate>
+							</AccordionContent>
+						</AccordionItem>
+					)}
+
 				</Accordion>
 			</div>
-			<Button variant="outline" className="w-full" onClick={() => setCurrentValue("empty")}>
+			<Button variant="outline" className="w-full" onClick={handleReset}>
 				<ArrowLeft className="h-4 w-4" />
-				Go back
+				Reset
 			</Button>
 		</div>
 	);
@@ -751,7 +737,7 @@ function DockerConfiguration({
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-4 gap-4">
-				<DockerSidebar state={state} setCurrentValue={setCurrentValue} />
+				<DockerSidebar state={state} setState={setState} setCurrentValue={setCurrentValue} />
 				<DockerContent state={state} setState={setState} />
 			</div>
 		</div>

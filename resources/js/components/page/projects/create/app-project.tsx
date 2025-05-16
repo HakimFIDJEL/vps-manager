@@ -1,5 +1,6 @@
 // Necessary imports
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useProject } from "@/contexts/project-context";
 
 // Shadcn UI components
 import { Input } from "@/components/ui/input";
@@ -9,9 +10,14 @@ import { Label } from "@/components/ui/label";
 import { formatSlug } from "@/lib/projects/formatter"; 
 
 export function AppProject() {
+    const { project, updateProject } = useProject();
+    const [name, setName] = useState<string>(project.name);
+    const [folderPath, setFolderPath] = useState<string>(project.folderPath);
 
-    const [name, setName] = useState<string>("");
-    const [folderPath, setFolderPath] = useState<string>("");
+    useEffect(() => {
+        setName(project.name);
+        setFolderPath(project.folderPath);
+    }, [project]);
 
     return (
         // Wrapper
@@ -30,8 +36,12 @@ export function AppProject() {
                         value={name}
                         autoFocus
                         onChange={(e) => {
-                            setName(e.target.value);
-                            setFolderPath(formatSlug(e.target.value));
+                            const newName = e.target.value;
+                            setName(newName);
+                            const newFolderPath = formatSlug(newName);
+                            setFolderPath(newFolderPath);
+                            updateProject("name", newName);
+                            updateProject("folderPath", newFolderPath);
                         }}
                     />
                 </div>
