@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 // Custom components
-import { parseVariablesFromEnv } from "@/lib/projects/parser";
+import { parseVariablesFromEnv } from "@/lib/variables/parser";
 import {
 	SmoothAnimate,
 	SmoothItem,
@@ -56,6 +56,11 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // Icons
 import {
@@ -70,6 +75,10 @@ import {
 	Loader2,
 	Upload,
 	FileUp,
+	ArrowDownNarrowWide,
+	ArrowUpNarrowWide,
+	ArrowUpDown,
+	OctagonAlert,
 } from "lucide-react";
 
 // Types
@@ -87,11 +96,6 @@ export function AppVariables() {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
-	function handleDeleteAll() {
-		setVariables([]);
-		toast.success(`All variables deleted successfully!`);
-	}
-
 	return (
 		// Wrapper
 		<div className="grid">
@@ -104,39 +108,18 @@ export function AppVariables() {
 					<CreateVariable variables={variables} setVariables={setVariables} />
 				</div>
 
-				<SmoothResize className="flex items-center gap-2 relative">
-					<AnimatePresence mode={"sync"}>
-						<Input
-							ref={inputRef}
-							name="search"
-							placeholder="Filter variables..."
-							className="z-100 relative"
-							addonText={<Search className="h-4 w-4" />}
-							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-							readOnly={variables.length === 0}
-						/>
-
-						{variables.length > 0 && (
-							<SmoothItem
-								key={"delete"}
-								initial={{ opacity: 0, scale: 0.95, width: 0 }}
-								animate={{ opacity: 1, scale: 1, width: "auto" }}
-								exit={{ opacity: 0, scale: 0.95, width: 0 }}
-							>
-								<Button
-									ref={buttonRef}
-									variant={"outline"}
-									onClick={handleDeleteAll}
-									size={"default"}
-								>
-									<Trash className="h-4 w-4" />
-									Delete variables
-								</Button>
-							</SmoothItem>
-						)}
-					</AnimatePresence>
-				</SmoothResize>
+				<div className="flex items-center gap-2 relative">
+					<Input
+						ref={inputRef}
+						name="search"
+						placeholder="Filter variables..."
+						className="z-100 relative"
+						addonText={<Search className="h-4 w-4" />}
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						readOnly={variables.length === 0}
+					/>
+				</div>
 			</div>
 
 			{/* <Separator className="my-8" /> */}
@@ -159,6 +142,9 @@ function VariablesList({
 	setVariables: (variables: Variable[]) => void;
 	search: string;
 }) {
+
+	const [sortKey, setSortKey] = useState<string>("none");
+
 	function handleDelete(key: string) {
 		setVariables(variables.filter((variable) => variable.key !== key));
 		toast.success(`Variable ${key} deleted successfully!`);
@@ -180,6 +166,16 @@ function VariablesList({
 		}
 	}
 
+	function handleDeleteAll() {
+		setVariables([]);
+		toast.success(`All variables deleted successfully!`);
+		return true;
+	}
+
+	function toggleVisibilityAll() {
+		setVariables(variables.map((v) => ({ ...v, visible: !v.visible })));
+	}
+
 	return (
 		<>
 			<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
@@ -187,9 +183,92 @@ function VariablesList({
 				<Table >
 					<TableHeader>
 						<TableRow>
-							<TableHead>Key</TableHead>
+							<TableHead>
+								<Button
+									variant={"ghost"}
+									size={"sm"}
+									onClick={() => setSortKey(sortKey === "desc" ? "asc" : sortKey === "asc" ? "none" : "desc")}
+								>
+									{sortKey === "desc" && (
+										<ArrowDownNarrowWide className="w-4 h-4 text-muted-foreground" />
+									)}
+									{sortKey === "asc" && (
+										<ArrowUpNarrowWide className="w-4 h-4 text-muted-foreground" />
+									)}
+									{sortKey === "none" && (
+										<ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+									)}
+									Key
+								</Button>
+							</TableHead>
 							<TableHead>Value</TableHead>
-							<TableHead className="text-right">Actions</TableHead>
+							<TableHead className="flex items-center gap-4 justify-end">
+								<span className="mr-2">
+									Actions
+								</span>
+								<div className="h-[70%]">
+									<Separator orientation="vertical" />
+								</div>
+								<div className="flex items-center gap-2">
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button variant={"ghost"} size={"icon"} disabled={variables.length === 0} onClick={toggleVisibilityAll}>
+												{variables.every((v) => v.visible) ? (
+													<EyeOff />
+												) : (
+													<Eye />
+												)}
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>
+											{variables.every((v) => v.visible) ? (
+												"Hide all variables"
+											) : (
+												"Show all variables"
+											)}
+										</TooltipContent>
+									</Tooltip>
+									<AlertDialog>
+										<Tooltip>
+											<AlertDialogTrigger asChild>
+												<TooltipTrigger asChild>
+													<Button variant={"ghost"} size={"icon"} disabled={variables.length === 0}>
+														<div className="flex items-center justify-center">
+															<Trash />
+														</div>
+													</Button>
+												</TooltipTrigger>
+											</AlertDialogTrigger>
+											<TooltipContent>
+												Delete all variables
+											</TooltipContent>
+										</Tooltip>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle className="flex items-center gap-2">
+													<OctagonAlert className="w-4 h-4 text-destructive" />
+													Delete all variables
+												</AlertDialogTitle>
+												<AlertDialogDescription>Are you sure you want to delete all variables?</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogBody>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogAction onAction={() => handleDeleteAll()} variant={"destructive"}>
+														<Trash />
+														Delete
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogBody>
+										</AlertDialogContent>
+
+									</AlertDialog>
+									{/* <Button variant={"ghost"} size={"icon"} disabled={variables.length === 0} onClick={handleDeleteAll}>
+											<Trash />
+										</Button> */}
+								</div>
+
+							</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -197,20 +276,23 @@ function VariablesList({
 							.filter((variable) =>
 								variable.key.toLowerCase().includes(search.toLowerCase()),
 							)
+							.sort((a, b) => {
+								if (sortKey === "desc") return b.key.localeCompare(a.key);
+								if (sortKey === "asc") return a.key.localeCompare(b.key);
+								return 0;
+							})
 							.map((variable) => (
 								<TableRow key={variable.key}>
-									<TableCell className="font-mono">
+									<TableCell>
 										<div className="flex items-center gap-2">
 											<Lock className="h-4 w-4" />
 											{variable.key}
 										</div>
 									</TableCell>
 									<TableCell>
-										<span className="font-mono text-muted-foreground relative">
-											{!variable.visible && (
-												<div className="h-full w-full bg-muted rounded-md absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-											)}
-											{variable.value}
+										<span className="font-mono text-muted-foreground relative overflow-hidden rounded-md">
+											<div className={`absolute inset-0 bg-muted transition-opacity duration-200 z-1 rounded-xs ${!variable.visible ? 'opacity-100' : 'opacity-0'}`} />
+											<span className="relative">{variable.value}</span>
 										</span>
 									</TableCell>
 									<TableCell className="text-right">
@@ -247,12 +329,12 @@ function VariablesList({
 						{variables.filter((variable) =>
 							variable.key.toLowerCase().includes(search.toLowerCase()),
 						).length === 0 && (
-							<TableRow>
-								<TableCell colSpan={3} className="text-center py-4 bg-muted/50">
-									No variables added yet. Click on "Add Variable" to create one.
-								</TableCell>
-							</TableRow>
-						)}
+								<TableRow>
+									<TableCell colSpan={3} className="text-center py-4 bg-muted/50">
+										No variables added yet. Click on "Add Variable" to create one.
+									</TableCell>
+								</TableRow>
+							)}
 					</TableBody>
 				</Table>
 			</div>
@@ -305,7 +387,7 @@ function CreateVariable({
 			<AlertDialogTrigger asChild>
 				<Button variant={"default"}>
 					<Plus />
-					Add Variable
+					Add variable
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
@@ -521,6 +603,8 @@ function ImportEnv({
 		const isValid = await VariableTextForm.trigger();
 		if (!isValid) return false;
 
+		setLoading(true);
+
 		const data = VariableTextForm.getValues();
 
 		return handleUpdate(data.textarea);
@@ -637,47 +721,32 @@ function ImportEnv({
 																		e.preventDefault();
 																		setIsDragActive(false);
 																		const file = e.dataTransfer.files?.[0];
-																		if (!file) {
-																			VariableEnvForm.setError("file", {
-																				message: "An error occured while importing the file.",
-																			});
-																			return;
-																		}
+																		if (!file) return;
 
-																		// Vérification JS côté client
-																		if (!file.name.endsWith(".env")) {
-																			VariableEnvForm.setError("file", {
-																				message: "The file must have the .env extension.",
-																			});
-																			return;
-																		}
-																		if (file.size > 1024 * 1024) {
-																			VariableEnvForm.setError("file", {
-																				message: "The file must not exceed 1 MB.",
-																			});
-																			return;
-																		}
-
-																		// Si tout est bon, on clear les erreurs et on passe au form
-																		VariableEnvForm.clearErrors("file");
+																		// On utilise directement le formulaire pour la validation
 																		field.onChange(file);
-																		if (inputFileRef.current) inputFileRef.current.value = "";
+																		const isValid = await VariableEnvForm.trigger("file");
 
-																		// Lecture du fichier pour l'aperçu
-																		const reader = new FileReader();
-																		reader.onload = (e) => {
-																			setEnvPreview(e.target?.result as string);
-																		};
-																		reader.readAsText(file);
+																		if (isValid) {
+																			// Lecture du fichier pour l'aperçu
+																			const reader = new FileReader();
+																			reader.onload = (e) => {
+																				setEnvPreview(e.target?.result as string);
+																			};
+																			reader.readAsText(file);
+																		}
 																	}}
 																>
-
 																	<div className="text-center">
 																		<FileUp className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
 																		<p className="text-sm text-muted-foreground mb-2">
 																			Drag and drop your .env file here or click to select it.
 																		</p>
-																		<Button variant="outline" size="sm" className="pointer-events-none">
+																		<Button
+																			variant="outline"
+																			size="sm"
+																			onClick={() => inputFileRef.current?.click()}
+																		>
 																			Browse files
 																		</Button>
 																	</div>
@@ -701,37 +770,24 @@ function ImportEnv({
 																accept=".env"
 																className="hidden"
 																ref={inputFileRef}
-																{...Object.fromEntries(
-																	Object.entries(rest).filter(([k]) => k !== "ref"),
-																)}
-																onChange={(e) => {
+																onChange={async (e) => {
 																	const file = e.target.files?.[0] ?? null;
 																	if (file) {
-																		if (!file.name.endsWith(".env")) {
-																			VariableEnvForm.setError("file", {
-																				message: "Le fichier doit avoir l'extension .env.",
-																			});
-																			return;
-																		}
-																		if (file.size > 1024 * 1024) {
-																			VariableEnvForm.setError("file", {
-																				message: "Le fichier ne doit pas dépasser 1 Mo.",
-																			});
-																			return;
-																		}
-
-																		// Si tout est bon, on clear les erreurs et on passe au form
-																		VariableEnvForm.clearErrors("file");
+																		// On met à jour le champ du formulaire
 																		field.onChange(file);
+																		// On déclenche la validation
+																		const isValid = await VariableEnvForm.trigger("file");
 
-																		// Lecture du fichier pour l'aperçu
-																		const reader = new FileReader();
-																		reader.onload = (e) => {
-																			setEnvPreview(e.target?.result as string);
-																		};
-																		reader.readAsText(file);
+																		if (isValid) {
+																			const reader = new FileReader();
+																			reader.onload = (e) => {
+																				setEnvPreview(e.target?.result as string);
+																			};
+																			reader.readAsText(file);
+																		}
 																	} else {
 																		setEnvPreview("");
+																		field.onChange(null);
 																	}
 																}}
 															/>
@@ -747,9 +803,9 @@ function ImportEnv({
 											<AnimatePresence mode="sync">
 												{envPreview && (
 													<motion.div
-														initial={{ opacity: 0, y: -20 }}
-														animate={{ opacity: 1, y: 0 }}
-														exit={{ opacity: 0, y: -20 }}
+														initial={{ opacity: 0 }}
+														animate={{ opacity: 1 }}
+														exit={{ opacity: 0 }}
 														transition={{ duration: 0.3 }}
 													>
 														<Button
@@ -810,10 +866,10 @@ function ImportEnv({
 										<AlertDialogCancel>Close</AlertDialogCancel>
 										<AlertDialogAction
 											onAction={onSubmitText}
-											disabled={!VariableTextForm.formState.isValid}
+											disabled={!VariableTextForm.formState.isValid || loading}
 											type="submit"
 										>
-											<Copy />
+											{loading ? <Loader2 className="animate-spin" /> : <Copy />}
 											Import content
 										</AlertDialogAction>
 									</AlertDialogFooter>

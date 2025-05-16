@@ -40,6 +40,12 @@ import { Separator } from "@/components/ui/separator";
 // Icons
 import {
 	ArrowLeft,
+	Check,
+	Container,
+	File,
+	FileLock,
+	Folder,
+	SquareTerminal,
 } from "lucide-react";
 
 
@@ -64,22 +70,27 @@ const steps = [
 	{
 	  step: 1,
 	  title: "Project",
+	  icon: <File />,
 	},
 	{
 	  step: 2,
 	  title: "Variables",
+	  icon: <FileLock />,
 	},
 	{
 	  step: 3,
 	  title: "Docker",
+	  icon: <Container />,
 	},
 	{
 	  step: 4,
 	  title: "Makefile",
+	  icon: <SquareTerminal />,
 	},
 	{
 	  step: 5,
 	  title: "Done",
+	  icon: <Check />,
 	},
   ]
 
@@ -92,7 +103,10 @@ export default function Page() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Create a new project</CardTitle>
+					<CardTitle className="flex items-center gap-2">
+						<Folder className="w-5 h-5 text-muted-foreground" />
+						Create a project
+					</CardTitle>
 					<CardDescription>
 						Finally a new project! It took you a while.. Let's get started.
 					</CardDescription>
@@ -112,7 +126,7 @@ export default function Page() {
 					<CardContent>
 						<div className="space-y-8 text-center">
 							<StepperList>
-								{steps.map(({ step, title }) => (
+								{steps.map(({ step, title, icon }) => (
 									<StepperItem
 										key={step}
 										step={step}
@@ -138,7 +152,10 @@ export default function Page() {
 					<StepperContent value={1}>
 						<Card>
 							<CardHeader>
-								<CardTitle>Project details</CardTitle>
+								<CardTitle className="flex items-center gap-2">
+									<File className="w-5 h-5 text-muted-foreground" />
+									Project details
+								</CardTitle>
 								<CardDescription>
 									Fill in the details below to create a new project.
 								</CardDescription>
@@ -155,7 +172,10 @@ export default function Page() {
 					<StepperContent value={2}>
 						<Card>
 							<CardHeader>
-								<CardTitle>Variables</CardTitle>
+								<CardTitle className="flex items-center gap-2">
+									<FileLock className="w-5 h-5 text-muted-foreground" />
+									Variables
+								</CardTitle>
 								<CardDescription>
 									Either fill in the environnement variables or import your .env file.
 								</CardDescription>
@@ -172,7 +192,10 @@ export default function Page() {
 					<StepperContent value={3}>
 						<Card>
 							<CardHeader>
-								<CardTitle>Docker</CardTitle>
+								<CardTitle className="flex items-center gap-2">
+									<Container className="w-5 h-5 text-muted-foreground" />
+									Docker
+								</CardTitle>
 								<CardDescription>
 									Fill in your docker configuration, importing a docker-compose or create it from scratch.
 								</CardDescription>
@@ -189,7 +212,10 @@ export default function Page() {
 					<StepperContent value={4}>
 						<Card>
 							<CardHeader>
-								<CardTitle>Makefile</CardTitle>
+								<CardTitle className="flex items-center gap-2">
+									<SquareTerminal className="w-5 h-5 text-muted-foreground" />
+									Makefile
+								</CardTitle>
 								<CardDescription>
 									To easily execute your commands, fill in the Makefile configuration.
 								</CardDescription>
@@ -206,7 +232,10 @@ export default function Page() {
 					<StepperContent value={5}>
 						<Card>
 							<CardHeader>
-								<CardTitle>Done</CardTitle>
+								<CardTitle className="flex items-center gap-2">
+									<Check className="w-5 h-5 text-muted-foreground" />
+									Done
+								</CardTitle>
 								<CardDescription>
 									Your project is ready! You can now start using it.
 								</CardDescription>

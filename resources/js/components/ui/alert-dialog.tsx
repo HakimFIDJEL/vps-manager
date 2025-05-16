@@ -132,7 +132,7 @@ const AlertDialogAction = React.forwardRef<
 		asChild?: boolean;
 		onAction?: () => boolean | Promise<boolean>;
 		className?: string;
-		variant?: "default" | "outline" | "secondary" | "ghost" | "link";
+		variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
 	}
 >(({ children, asChild = false, onAction, className, variant = "default", ...props }, forwardedRef) => {
 	const closeRef = React.useRef<HTMLButtonElement>(null);

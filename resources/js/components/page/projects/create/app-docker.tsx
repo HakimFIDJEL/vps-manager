@@ -6,6 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { LucideIcon, Save } from "lucide-react";
+import { useTabsContext } from "@/components/ui/tabs";
+import { type DockerComposeState, DockerComposeFileSchema } from "@/types/models/docker";
+import { parseDockerCompose } from "@/lib/docker/parser";
+import { formatServiceImage, formatDockerDriver } from "@/lib/docker/formatter";
+import yaml from "js-yaml";
 
 // Custom components
 import {
@@ -115,33 +121,152 @@ import {
 	type DockerNetwork,
 } from "@/types/models/docker";
 
-export function AppDocker() {
-	const [hasComposeFile, setHasComposeFile] = useState<boolean>(false);
+const DOCKER_TEMPLATES = {
+	webApp: `version: '3'
 
-	const emptyRef = useRef<HTMLButtonElement>(null);
-	const dockerRef = useRef<HTMLButtonElement>(null);
+services:
+  apache:
+    image: php:8.2-apache
+    volumes:
+      - ./src:/var/www/html
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.apache.rule=Host("app.localhost")
+
+  node:
+    image: node:latest
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    command: npm run dev
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysql
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.pma.rule=Host("pma.localhost")
+
+  traefik:
+    image: traefik:v2.10
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  default:
+    name: web
+    driver: bridge`,
+
+	dataScience: `version: '3'
+
+services:
+  jupyter:
+    image: jupyter/datascience-notebook
+    ports:
+      - 8888:8888
+    volumes:
+      - jupyter_data:/home/jovyan/work
+    environment:
+      JUPYTER_ENABLE_LAB: 'yes'
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  metabase:
+    image: metabase/metabase
+    ports:
+      - 3000:3000
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: data
+      MB_DB_PORT: 5432
+      MB_DB_USER: postgres
+      MB_DB_PASS: postgres
+      MB_DB_HOST: postgres
+
+volumes:
+  jupyter_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+networks:
+  analytics:
+    driver: bridge`,
+
+	minimal: `version: '3'
+
+services:
+  app:
+    image: nginx:alpine
+    volumes:
+      - app_data:/usr/share/nginx/html
+    ports:
+      - 8080:80
+    networks:
+      - web
+
+volumes:
+  app_data:
+    driver: local
+
+networks:
+  web:
+    driver: bridge`
+};
+
+export function AppDocker() {
+	const [state, setState] = useState<DockerComposeState>({
+		content: "",
+		isSaved: true,
+		parsed: {
+			services: [],
+			volumes: [],
+			networks: []
+		}
+	});
 
 	return (
 		<Tabs defaultValue="empty">
-			<TabsList className="">
-				<TabsTrigger value="empty" ref={emptyRef}>
-					Empty
-				</TabsTrigger>
-				<TabsTrigger value="docker" ref={dockerRef}>
-					Docker
-				</TabsTrigger>
+			<TabsList className="hidden">
+				<TabsTrigger value="empty">Empty</TabsTrigger>
+				<TabsTrigger value="docker">Docker</TabsTrigger>
 			</TabsList>
 			<TabsBody>
 				<TabsContent value="empty">
 					<EmptyDockerState 
-						emptyRef={emptyRef}
-						dockerRef={dockerRef}
+						state={state}
+						setState={setState}
 					/>
 				</TabsContent>
 				<TabsContent value="docker">
 					<DockerConfiguration 
-						emptyRef={emptyRef}
-						dockerRef={dockerRef}
+						state={state}
+						setState={setState}
 					/>
 				</TabsContent>
 			</TabsBody>
@@ -149,115 +274,164 @@ export function AppDocker() {
 	);
 }
 
-function QuickActions() {
-	return (
-		<div className="grid grid-cols-3 gap-4">
-			<AlertDialog>
-				<AlertDialogTrigger asChild>
-					<Button
-						variant="outline"
-						className="w-full justify-start gap-2 h-auto py-2"
-					>
-						<div className="p-1.5 bg-primary/10 rounded-md">
-							<Server className="h-4 w-4 text-primary" />
-						</div>
-						<div className="flex-1 text-left">
-							<div className="font-medium text-sm">Services</div>
-							<div className="text-xs text-muted-foreground">Configure services</div>
-						</div>
-						<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-					</Button>
-				</AlertDialogTrigger>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Create Service</AlertDialogTitle>
-						<AlertDialogDescription>
-							Configure a new Docker service
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter></AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
-
-			<AlertDialog>
-				<AlertDialogTrigger asChild>
-					<Button
-						variant="outline"
-						className="w-full justify-start gap-2 h-auto py-2"
-					>
-						<div className="p-1.5 bg-primary/10 rounded-md">
-							<Database className="h-4 w-4 text-primary" />
-						</div>
-						<div className="flex-1 text-left">
-							<div className="font-medium text-sm">Volumes</div>
-							<div className="text-xs text-muted-foreground">Manage volumes</div>
-						</div>
-						<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-					</Button>
-				</AlertDialogTrigger>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Create Volume</AlertDialogTitle>
-						<AlertDialogDescription>
-							Configure a new persistent volume
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter></AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
-
-			<AlertDialog>
-				<AlertDialogTrigger asChild>
-					<Button
-						variant="outline"
-						className="w-full justify-start gap-2 h-auto py-2"
-					>
-						<div className="p-1.5 bg-primary/10 rounded-md">
-							<Network className="h-4 w-4 text-primary" />
-						</div>
-						<div className="flex-1 text-left">
-							<div className="font-medium text-sm">Networks</div>
-							<div className="text-xs text-muted-foreground">Configure networks</div>
-						</div>
-						<ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-					</Button>
-				</AlertDialogTrigger>
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Create Network</AlertDialogTitle>
-						<AlertDialogDescription>
-							Configure a new Docker network
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-					<AlertDialogFooter></AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
-		</div>
-	);
-}
-
 function EmptyDockerState({
-	emptyRef,
-	dockerRef,
+	state,
+	setState,
 }: {
-	emptyRef: React.RefObject<HTMLButtonElement>;
-	dockerRef: React.RefObject<HTMLButtonElement>;
+	state: DockerComposeState;
+	setState: React.Dispatch<React.SetStateAction<DockerComposeState>>;
 }) {
+	const { setCurrentValue } = useTabsContext();
+	const [isDragActive, setIsDragActive] = useState(false);
+	const inputFileRef = useRef<HTMLInputElement>(null);
+
+	const DockerComposeForm = useForm<z.infer<typeof DockerComposeFileSchema>>({
+		resolver: zodResolver(DockerComposeFileSchema),
+		mode: "onChange"
+	});
+
+	const handleTemplateSelect = (templateKey: keyof typeof DOCKER_TEMPLATES) => {
+		const templateContent = DOCKER_TEMPLATES[templateKey];
+		console.log('Template content:', templateKey, templateContent);
+		const parsed = parseDockerCompose(templateContent);
+		if (parsed.isValid) {
+			setState({
+				content: templateContent,
+				isSaved: true,
+				parsed: {
+					services: parsed.services,
+					volumes: parsed.volumes,
+					networks: parsed.networks
+				}
+			});
+			setCurrentValue("docker");
+		}
+	};
+
+	const handleFileUpload = async (file: File) => {
+		try {
+			// Update form field
+			DockerComposeForm.setValue("file", file, {
+				shouldValidate: true,
+				shouldDirty: true,
+				shouldTouch: true
+			});
+			
+			// Validate file
+			const result = await DockerComposeForm.trigger("file");
+			if (!result) {
+				const errors = DockerComposeForm.formState.errors;
+				if (errors.file) {
+					console.error('Form validation errors:', errors.file);
+					toast.error(errors.file.message as string);
+				}
+				return;
+			}
+			
+			// Read file content
+			const content = await file.text();
+			console.log('File content:', content);
+			
+			// Parse and validate content
+			const parsed = parseDockerCompose(content);
+			if (parsed.isValid) {
+				setState({
+					content,
+					isSaved: true,
+					parsed: {
+						services: parsed.services,
+						volumes: parsed.volumes,
+						networks: parsed.networks
+					}
+				});
+				setCurrentValue("docker");
+			}
+		} catch (error) {
+			console.error('Error uploading file:', error);
+			toast.error("An error occurred while importing the file");
+		}
+	};
+
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col">
 				<h3 className="text-sm font-medium mb-2">Import file</h3>
-				<div className="flex items-center justify-center p-4 border-2 border-dashed rounded-lg bg-muted/50 hover:border-primary transition-colors cursor-pointer group">
-					<div className="text-center">
-						<FileUp className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-						<p className="text-sm text-muted-foreground mb-2">
-							Drag and drop your docker-compose.yml file here
-						</p>
-						<Button variant="outline" size="sm" className="pointer-events-none">
-							Browse files
-						</Button>
-					</div>
-				</div>
+				<Form {...DockerComposeForm}>
+					<form onSubmit={(e) => e.preventDefault()}>
+						<FormField
+							control={DockerComposeForm.control}
+							name="file"
+							render={({ field }) => {
+								const { value, ...rest } = field;
+								
+								return (
+									<FormItem>
+										<FormLabel
+											htmlFor="file"
+											className={cn(
+												"flex items-center justify-center p-4 border-2 border-dashed rounded-lg bg-muted/50 hover:border-primary transition-colors cursor-pointer group",
+												isDragActive && "border-primary",
+											)}
+											onDragOver={(e) => {
+												e.preventDefault();
+												setIsDragActive(true);
+											}}
+											onDragLeave={(e) => {
+												e.preventDefault();
+												setIsDragActive(false);
+											}}
+											onDrop={async (e) => {
+												e.preventDefault();
+												setIsDragActive(false);
+												const file = e.dataTransfer.files?.[0];
+												if (!file) {
+													toast.error("No file was dropped");
+													return;
+												}
+
+												// Validate and upload
+												await handleFileUpload(file);
+											}}
+										>
+											<div className="text-center">
+												<FileUp className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+												<p className="text-sm text-muted-foreground mb-2">
+													Drag and drop your docker-compose.yml file here
+												</p>
+												<Button 
+													variant="outline" 
+													size="sm" 
+													onClick={() => inputFileRef.current?.click()}
+												>
+													Browse files
+												</Button>
+											</div>
+										</FormLabel>
+										<FormControl>
+											<Input
+												id="file"
+												type="file"
+												accept=".yml,.yaml"
+												className="hidden"
+												ref={inputFileRef}
+												{...Object.fromEntries(
+													Object.entries(rest).filter(([k]) => k !== "ref"),
+												)}
+												onChange={async (e) => {
+													const file = e.target.files?.[0] ?? null;
+													if (file) {
+														await handleFileUpload(file);
+													}
+												}}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								);
+							}}
+						/>
+					</form>
+				</Form>
 
 				<div className="relative flex items-center my-6">
 					<div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-border" />
@@ -268,79 +442,162 @@ function EmptyDockerState({
 
 				<h3 className="text-sm font-medium mb-2">Choose a template</h3>
 				<div className="grid grid-cols-3 gap-4">
-					<Button variant="outline" className="w-full justify-start gap-2 h-auto py-4">
-						<div className="p-2 bg-primary/10 rounded-md">
-							<Server className="h-5 w-5 text-primary" />
-						</div>
-						<div className="flex-1 text-left">
-							<div className="font-medium">Web Application</div>
-							<div className="text-xs text-muted-foreground">Nginx + PHP + MySQL</div>
-						</div>
-					</Button>
+					<TemplateLink
+						title="Web Application"
+						subtitle="PHP 8.2, Node.js, Apache, MySQL, phpMyAdmin, Traefik"
+						icon={Server}
+						onClick={() => handleTemplateSelect("webApp")}
+						dockerCompose={DOCKER_TEMPLATES.webApp}
+					/>
 
-					<Button variant="outline" className="w-full justify-start gap-2 h-auto py-4">
-						<div className="p-2 bg-primary/10 rounded-md">
-							<Database className="h-5 w-5 text-primary" />
-						</div>
-						<div className="flex-1 text-left">
-							<div className="font-medium">Database Stack</div>
-							<div className="text-xs text-muted-foreground">PostgreSQL + pgAdmin</div>
-						</div>
-					</Button>
+					<TemplateLink
+						title="Data Science Stack"
+						subtitle="Jupyter Notebook, PostgreSQL, Metabase"
+						icon={Database}
+						onClick={() => handleTemplateSelect("dataScience")}
+						dockerCompose={DOCKER_TEMPLATES.dataScience}
+					/>
 
-					<Button variant="outline" className="w-full justify-start gap-2 h-auto py-4">
-						<div className="p-2 bg-primary/10 rounded-md">
-							<Network className="h-5 w-5 text-primary" />
-						</div>
-						<div className="flex-1 text-left">
-							<div className="font-medium">Development</div>
-							<div className="text-xs text-muted-foreground">Node.js + MongoDB</div>
-						</div>
-					</Button>
+					<TemplateLink
+						title="Minimal Configuration"
+						subtitle="Nginx, Volume, Network"
+						icon={Settings}
+						onClick={() => handleTemplateSelect("minimal")}
+						dockerCompose={DOCKER_TEMPLATES.minimal}
+					/>
 				</div>
 			</div>
 		</div>
 	);
 }
 
+interface TemplateLinkProps {
+	title: string;
+	subtitle: string;
+	icon: LucideIcon;
+	onClick: () => void;
+	dockerCompose: string;
+	className?: string;
+}
+
+function TemplateLink({
+	title,
+	subtitle,
+	icon: Icon,
+	onClick,
+	dockerCompose,
+	className
+}: TemplateLinkProps) {
+	return (
+		<button
+			onClick={onClick}
+			className={cn(
+				"group w-full flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 transition-all duration-200 cursor-pointer",
+				"relative overflow-hidden",
+				className
+			)}
+		>
+			<div className="p-2 bg-primary/10 rounded-md">
+				<Icon className="h-5 w-5 text-primary" />
+			</div>
+			<div className="flex-1 text-left">
+				<div className="font-medium">{title}</div>
+				<div className="text-xs text-muted-foreground">{subtitle}</div>
+			</div>
+			<ArrowRight className="h-5 w-5 text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+		</button>
+	);
+}
+
 function DockerConfiguration({
-	emptyRef,
-	dockerRef,
+	state,
+	setState,
 }: {
-	emptyRef: React.RefObject<HTMLButtonElement>;
-	dockerRef: React.RefObject<HTMLButtonElement>;
+	state: DockerComposeState;
+	setState: React.Dispatch<React.SetStateAction<DockerComposeState>>;
 }) {
+	const { setCurrentValue } = useTabsContext();
+
+	const [isSaving, setIsSaving] = useState(false);
+	const [isCopying, setIsCopying] = useState(false);
+
+	const handleDockerComposeChange = (content: string) => {
+		setState((prev: DockerComposeState) => ({
+			...prev,
+			content,
+			isSaved: false
+		}));
+	};
+
+	const handleSave = () => {
+		setIsSaving(true);
+
+		// Validation stricte au moment de la sauvegarde
+		const parsed = parseDockerCompose(state.content);
+		if (parsed.isValid) {
+			setState({
+				content: state.content,
+				isSaved: true,
+				parsed: {
+					services: parsed.services,
+					volumes: parsed.volumes,
+					networks: parsed.networks
+				}
+			});
+			toast.success("Docker-compose.yml file saved");
+		} else {
+			toast.error("Le fichier docker-compose n'est pas valide. Vérifiez la structure et les champs requis.");
+		}
+
+		setIsSaving(false);
+	};
+
+	const handleCopy = () => {
+		setIsCopying(true);
+		navigator.clipboard.writeText(state.content);
+		setIsCopying(false);
+		toast.success("Docker-compose.yml file copied to clipboard");
+	};
+
 	return (
 		<div className="grid gap-4">
-			{/* Main content */}
 			<div className="grid grid-cols-4 gap-4">
-				{/* Left sidebar - Docker elements */}
+				
+				{/* Sidebar */}
 				<div className="col-span-1 flex flex-col gap-4">
 					<div className="rounded-lg border bg-card overflow-hidden">
-						<Accordion type="multiple">
+						<Accordion type="single" collapsible>
 							<AccordionItem value="services">
 								<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
 									<div className="flex items-center gap-2">
 										<Server className="h-4 w-4 text-primary" />
-										<span className="text-sm font-medium">Services</span>
+										<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+											<span>Services</span> 
+											{ state.parsed.services.length > 0 && (
+												<span className="text-xs text-muted-foreground">
+													({state.parsed.services.length})
+												</span>
+											)}
+										</SmoothAnimate>
 									</div>
 								</AccordionTrigger>
-								<AccordionContent className="px-0">
-									<div className="space-y-2 px-4 pb-2">
-										<div className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
-											<div>
-												<div className="text-sm font-medium">web</div>
-												<div className="text-xs text-muted-foreground">nginx:latest</div>
+								<AccordionContent className="px-0 pt-0">
+									<Separator className="mb-6" />
+									<SmoothAnimate className="space-y-2 px-4 pb-2">
+										{state.parsed.services.map(service => (
+											<div key={service.name} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
+												<div>
+													<div className="text-sm font-medium">{service.name}</div>
+													{formatServiceImage(service.image)}
+												</div>
 											</div>
-											<Badge variant="secondary" className="text-xs">New</Badge>
-										</div>
-										<div className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
-											<div>
-												<div className="text-sm font-medium">db</div>
-												<div className="text-xs text-muted-foreground">postgres:15</div>
+										))}
+										{state.parsed.services.length === 0 && (
+											<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
+												Aucun service trouvé
 											</div>
-										</div>
-									</div>
+										)}
+									</SmoothAnimate>
 								</AccordionContent>
 							</AccordionItem>
 
@@ -348,19 +605,33 @@ function DockerConfiguration({
 								<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
 									<div className="flex items-center gap-2">
 										<Database className="h-4 w-4 text-primary" />
-										<span className="text-sm font-medium">Volumes</span>
+										<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+											<span>Volumes</span> 
+											{ state.parsed.volumes.length > 0 && (
+												<span className="text-xs text-muted-foreground">
+													({state.parsed.volumes.length})
+												</span>
+											)}
+										</SmoothAnimate>
 									</div>
 								</AccordionTrigger>
-								<AccordionContent  className="px-0"	>
-									<div className="space-y-2 px-4 pb-2">
-										<div className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
-											<div>
-												<div className="text-sm font-medium">data</div>
-												<div className="text-xs text-muted-foreground">local driver</div>
+								<AccordionContent className="px-0 pt-0">
+									<Separator className="mb-6" />
+									<SmoothAnimate className="space-y-2 px-4 pb-2">
+										{state.parsed.volumes.map(volume => (
+											<div key={volume.name} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
+												<div>
+													<div className="text-sm font-medium">{volume.name}</div>
+													{formatDockerDriver(volume.driver)}
+												</div>
 											</div>
-											<Badge variant="secondary" className="text-xs">New</Badge>
-										</div>
-									</div>
+										))}
+										{state.parsed.volumes.length === 0 && (
+											<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
+												Aucun volume trouvé
+											</div>
+										)}
+									</SmoothAnimate>
 								</AccordionContent>
 							</AccordionItem>
 
@@ -368,44 +639,66 @@ function DockerConfiguration({
 								<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
 									<div className="flex items-center gap-2">
 										<Network className="h-4 w-4 text-primary" />
-										<span className="text-sm font-medium">Networks</span>
+										<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+											<span>Networks</span> 
+											{state.parsed.networks.length > 0 && (
+												<span className="text-xs text-muted-foreground">
+													({state.parsed.networks.length})
+												</span>
+											)}
+										</SmoothAnimate>
 									</div>
 								</AccordionTrigger>
-								<AccordionContent className="px-0">
-									<div className="space-y-2 px-4 pb-2">
-										<div className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
-											<div>
-												<div className="text-sm font-medium">frontend</div>
-												<div className="text-xs text-muted-foreground">bridge driver</div>
+								<AccordionContent className="px-0 pt-0">
+									<Separator className="mb-6" />
+									<SmoothAnimate className="space-y-2 px-4 pb-2">
+										{state.parsed.networks.map(network => (
+											<div key={network.name} className="flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors">
+												<div>
+													<div className="text-sm font-medium">{network.name}</div>
+													{formatDockerDriver(network.driver)}
+												</div>
 											</div>
-										</div>
-									</div>
+										))}
+										{state.parsed.networks.length === 0 && (
+											<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
+												Aucun réseau trouvé
+											</div>
+										)}
+									</SmoothAnimate>
 								</AccordionContent>
 							</AccordionItem>
 						</Accordion>
 					</div>
-					<Button variant="outline" className="w-full">
+					<Button variant="outline" className="w-full" onClick={() => setCurrentValue("empty")}>
 						<ArrowLeft className="h-4 w-4" />
 						Go back
 					</Button>
 				</div>
 
-				{/* Main editor area */}
+				{/* Docker Compose */}
 				<div className="col-span-3">
 					<div className="rounded-lg border">
 						<div className="border-b p-4">
 							<div className="flex items-center justify-between">
-								<h3 className="text-sm font-medium flex items-center gap-2">
-									<File className="h-4 w-4 text-muted-foreground" />
-									Docker Compose
-								</h3>
 								<div className="flex items-center gap-2">
-									<Button variant="outline" size="sm">
-										<FileUp className="h-4 w-4 mr-2" />
-										Import
+									<Badge variant="secondary" className="text-xs">
+										{state.isSaved ? "Saved" : "Not saved"}
+									</Badge>
+									<h3 className="text-sm font-medium flex items-center gap-2">
+										<File className="h-4 w-4 text-muted-foreground" />
+										Docker Compose
+									</h3>
+								</div>
+								<div className="flex items-center gap-2">
+									
+									<Button variant="outline" size="sm" disabled={state.isSaved || isSaving} onClick={() => handleSave()}>
+										{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+										Save
 									</Button>
-									<Button variant="outline" size="sm">
-										<Copy className="h-4 w-4 mr-2" />
+
+									<Button variant="outline" size="sm" disabled={isCopying} onClick={() => handleCopy()}>
+										{isCopying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />}
 										Copy
 									</Button>
 								</div>
@@ -413,6 +706,8 @@ function DockerConfiguration({
 						</div>
 						<div className="p-4">
 							<Textarea
+								value={state.content}
+								onChange={(e) => handleDockerComposeChange(e.target.value)}
 								className="min-h-[400px] font-mono text-sm"
 								placeholder="version: '3'
 services:

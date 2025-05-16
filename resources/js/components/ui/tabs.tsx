@@ -14,8 +14,19 @@ interface TabsContextProps {
 	previousValue: string | null;
 	triggerOrder: string[];
 	isFirstRender: boolean;
+	setCurrentValue: (value: string) => void;
 }
-const TabsAnimateContext = React.createContext<TabsContextProps | null>(null);
+
+const TabsContext = React.createContext<TabsContextProps | null>(null);
+
+// Hook pour utiliser le contexte des tabs
+export function useTabsContext() {
+	const context = React.useContext(TabsContext);
+	if (!context) {
+		throw new Error("useTabsContext doit être utilisé à l'intérieur d'un composant Tabs");
+	}
+	return context;
+}
 
 function Tabs({
 	className,
@@ -57,12 +68,13 @@ function Tabs({
 	};
 
 	return (
-		<TabsAnimateContext.Provider
+		<TabsContext.Provider
 			value={{
 				currentValue,
 				previousValue: previousValueRef.current,
 				triggerOrder,
 				isFirstRender,
+				setCurrentValue: handleValueChange,
 			}}
 		>
 			<TabsPrimitive.Root
@@ -74,7 +86,7 @@ function Tabs({
 			>
 				{children}
 			</TabsPrimitive.Root>
-		</TabsAnimateContext.Provider>
+		</TabsContext.Provider>
 	);
 }
 
@@ -143,7 +155,7 @@ export interface TabsContentProps
 }
 
 function TabsContent({ className, children, ...props }: TabsContentProps) {
-	const context = React.useContext(TabsAnimateContext);
+	const context = React.useContext(TabsContext);
 	if (!context) return null;
 	const { currentValue } = context;
 	const thisValue = (props as any).value as string;
