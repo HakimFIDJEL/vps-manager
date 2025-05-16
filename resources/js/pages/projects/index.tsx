@@ -135,7 +135,7 @@ export default function Page() {
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
-							<Folder />
+						<Folder className="w-5 h-5 text-muted-foreground" />
 							Projects
 						</CardTitle>
 						<CardDescription>List of all projects</CardDescription>

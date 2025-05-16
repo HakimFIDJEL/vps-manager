@@ -193,7 +193,7 @@ function StepperIndicator({ asChild = false, className, children, ...props }: St
     <span
       data-slot="stepper-indicator"
       className={cn(
-        "dark:bg-muted bg-background dark:border-0 border border-border text-muted-foreground data-[state=active]:bg-primary data-[state=completed]:bg-primary data-[state=active]:text-primary-foreground data-[state=completed]:text-primary-foreground relative flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium",
+        "dark:bg-muted bg-background dark:border-0 border border-border text-muted-foreground dark:data-[state=active]:bg-primary data-[state=active]:bg-primary dark:data-[state=completed]:bg-primary data-[state=completed]:bg-primary data-[state=active]:text-primary-foreground data-[state=completed]:text-primary-foreground relative flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-all duration-300",
         className,
       )}
       data-state={state}
@@ -238,7 +238,7 @@ function StepperSeparator({ className, ...props }: React.HTMLAttributes<HTMLDivE
     <div
       data-slot="stepper-separator"
       className={cn(
-        "dark:bg-muted bg-background group-data-[state=completed]/step:bg-primary m-0.5 group-data-[orientation=horizontal]/stepper:h-0.5 group-data-[orientation=horizontal]/stepper:w-full group-data-[orientation=horizontal]/stepper:flex-1 group-data-[orientation=vertical]/stepper:h-12 group-data-[orientation=vertical]/stepper:w-0.5",
+        "group-data-[state=completed]/step:bg-primary dark:group-data-[state=completed]/step:bg-primary dark:bg-muted bg-background  m-0.5 group-data-[orientation=horizontal]/stepper:h-0.5 group-data-[orientation=horizontal]/stepper:w-full group-data-[orientation=horizontal]/stepper:flex-1 group-data-[orientation=vertical]/stepper:h-12 group-data-[orientation=vertical]/stepper:w-0.5 transition-all duration-300",
         className,
       )}
       {...props}
@@ -291,23 +291,9 @@ function StepperContent({ value, className, children, ...props }: StepperContent
   if (!isActive) return null
 
   return (
-    // <AnimatePresence>
-    //   <motion.div
-    //     data-slot="stepper-content"
-    //     data-state={isActive ? "active" : "inactive"}
-    //     className={cn(className)}
-    //     initial={isMounted ? { opacity: 0, x: 50 * direction } : { opacity: 1, x: 0 }}
-    //     animate={{ opacity: 1, x: 0 }}
-    //     exit={{ opacity: 0, x: -50 * direction }}
-    //     transition={{ duration: 0.3 }}
-    //     key={value}
-    //     {...props}
-    //   >
     <div className={cn(className)} {...props} data-slot="stepper-content" data-state={isActive ? "active" : "inactive"}>
       {children}
     </div>
-    //   </motion.div>
-    // </AnimatePresence>
   )
 }
 

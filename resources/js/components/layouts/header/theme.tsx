@@ -5,7 +5,7 @@ import { Monitor, Moon, Sun } from 'lucide-react';
 import { HTMLAttributes } from 'react';
 
 export default function AppearanceToggleDropdown({ className = '', ...props }: HTMLAttributes<HTMLDivElement>) {
-    const { appearance, updateAppearance } = useAppearance();
+    const { appearance, setAppearance } = useAppearance();
 
     const getCurrentIcon = () => {
         switch (appearance) {
@@ -28,19 +28,19 @@ export default function AppearanceToggleDropdown({ className = '', ...props }: H
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => updateAppearance('light')} disabled={appearance === 'light'}>
+                    <DropdownMenuItem onClick={() => setAppearance('light')} disabled={appearance === 'light'}>
                         <span className="flex items-center gap-2">
                             <Sun className="h-5 w-5" />
                             Light
                         </span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateAppearance('dark')} disabled={appearance === 'dark'}>
+                    <DropdownMenuItem onClick={() => setAppearance('dark')} disabled={appearance === 'dark'}>
                         <span className="flex items-center gap-2">
                             <Moon className="h-5 w-5" />
                             Dark
                         </span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => updateAppearance('system')} disabled={appearance === 'system'}>
+                    <DropdownMenuItem onClick={() => setAppearance('system')} disabled={appearance === 'system'}>
                         <span className="flex items-center gap-2">
                             <Monitor className="h-5 w-5" />
                             System

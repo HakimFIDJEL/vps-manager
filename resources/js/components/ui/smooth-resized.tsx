@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useRef, useEffect } from 'react'
 import autoAnimate from "@formkit/auto-animate";
-import { motion, AnimatePresence, TargetAndTransition, VariantLabels, LayoutGroup } from "framer-motion";
+import { motion, AnimatePresence, TargetAndTransition, VariantLabels, LayoutGroup, MotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 function SmoothResize({
@@ -21,7 +21,7 @@ function SmoothResize({
 	);
 }
 
-type SmoothItemProps = React.ComponentProps<"div"> & {
+type SmoothItemProps = React.ComponentProps<"div"> & MotionProps & {
 	initial?: boolean | TargetAndTransition | VariantLabels | undefined;
 	animate?: boolean | TargetAndTransition | VariantLabels | undefined;
 	exit?: TargetAndTransition | VariantLabels | undefined;

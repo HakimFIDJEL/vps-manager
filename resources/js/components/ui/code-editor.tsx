@@ -17,7 +17,7 @@ import { dracula } from "@uiw/codemirror-theme-dracula"
 import { githubLight } from "@uiw/codemirror-theme-github"
 import { linter, lintGutter } from "@codemirror/lint"
 import { yamlLinter } from "@/lib/docker/linter"
-import { useAppearance, useAppearanceChange } from '@/hooks/use-appearance';
+import { useAppearance } from '@/hooks/use-appearance';
 
 type CodeBlockProps = {
   language: string
@@ -97,7 +97,7 @@ export const CodeBlock = ({
   */
 
   const [theme, setTheme] = React.useState<ReactCodeMirrorProps["theme"]>("light");
-  const { appearance, updateAppearance } = useAppearance();
+  const { appearance } = useAppearance();
 
   React.useEffect(() => {
     if(appearance == 'light') {
@@ -205,29 +205,44 @@ export const CodeBlock = ({
 type CodeEditorProps = {
   value: string
   onChange: (value: string) => void
+  onSave?: () => void
+  isSaved?: boolean
   language?: string
   className?: string
 }
 
-const getEditorTheme = (appearance: string) => {
-  if (appearance === "dark") return dracula;
-  return githubLight;
-};
-
 export const CodeEditor = ({
   value,
   onChange,
+  onSave,
+  isSaved = true,
   language = "yaml",
   className = ""
 }: CodeEditorProps) => {
+  const [theme, setTheme] = React.useState<ReactCodeMirrorProps["theme"]>(dracula);
   const { appearance } = useAppearance();
-  const [theme, setTheme] = React.useState(getEditorTheme(appearance));
 
-  useAppearanceChange((newAppearance) => {
-    console.log(newAppearance);
-    setTheme(getEditorTheme(newAppearance));
-  });
+  React.useEffect(() => {
+    if (appearance === "dark") {
+      setTheme(dracula);
+    } else {
+      setTheme(githubLight);
+    }
+  }, [appearance]);
 
+  const handleKeyDown = React.useCallback((event: KeyboardEvent) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      if (!isSaved && onSave) {
+        onSave();
+      }
+    }
+  }, [isSaved, onSave]);
+
+  React.useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <div className={`relative w-full rounded-lg bg-background ${className}`}>
