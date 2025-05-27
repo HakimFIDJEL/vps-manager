@@ -94,29 +94,8 @@ export type DockerComposeState = {
   content: string;
   isSaved: boolean;
   parsed: {
-    services: Array<{ name: string; image: string; }>;
+    services: Array<{ name: string; image: string; env_file?: string[]; }>;
     volumes: Array<{ name: string; driver: string; }>;
     networks: Array<{ name: string; driver: string; customName?: string; }>;
   };
-};
-
-export type DockerService = {
-  name: string;
-  image: string;
-};
-
-export type DockerVolume = {
-  name: string;
-  driver: string;
-};
-
-export type DockerNetwork = {
-  name: string;
-  driver: string;
-};
-
-export type DockerAction = {
-  name: string;
-  icon: string;
-  description: string;
 };

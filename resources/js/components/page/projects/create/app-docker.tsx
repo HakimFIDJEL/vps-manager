@@ -4,46 +4,34 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Check, FileLock, LucideIcon, Save, X } from "lucide-react";
-import { useTabsContext } from "@/components/ui/tabs";
+import yaml from "js-yaml";
+import { useProject } from "@/contexts/project-context";
+
+// Libs
+import { DOCKER_COMPOSE_KEYWORDS } from "@/lib/docker/keywords";
+import { parseDockerCompose } from "@/lib/docker/parser";
+import { formatServiceImage, formatDockerDriver } from "@/lib/docker/formatter";
+import { DOCKER_TEMPLATES } from "@/lib/docker/templates";
+
+// Types
 import {
 	type DockerComposeState,
 	DockerComposeFileSchema,
 } from "@/types/models/docker";
-import { parseDockerCompose } from "@/lib/docker/parser";
-import { formatServiceImage, formatDockerDriver } from "@/lib/docker/formatter";
-import yaml from "js-yaml";
 
 // Custom components
 import {
 	SmoothAnimate,
-	SmoothItem,
-	SmoothResize,
 } from "@/components/ui/smooth-resized";
+import { 
+	CodeEditor 
+} from "@/components/ui/code-editor";
 
 // Shadcn UI components
 import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 import {
 	Form,
 	FormControl,
@@ -58,20 +46,8 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
+	useTabsContext
 } from "@/components/ui/tabs";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogBody,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { CodeEditor } from "@/components/ui/code-editor";
 import {
 	Accordion,
 	AccordionContent,
@@ -79,56 +55,26 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 // Icons
 import {
-	Search,
-	Lock,
-	Trash,
-	Eye,
-	EyeOff,
-	Pen,
-	Plus,
 	Copy,
 	Loader2,
-	Upload,
-	Download,
 	Server,
 	Database,
 	Network,
 	Settings,
-	List,
-	FileText,
-	Play,
-	ChevronRight,
 	FileUp,
-	FileCode,
-	FileJson,
 	ArrowRight,
 	File,
 	ArrowLeft,
+	Check,
+	FileLock,
+	Info,
+	LucideIcon,
+	Save,
+	X,
 } from "lucide-react";
-
-// Types
-import {
-	type DockerAction,
-	type DockerService,
-	type DockerVolume,
-	type DockerNetwork,
-} from "@/types/models/docker";
-
-import {
-	DOCKER_TEMPLATES,
-	DOCKER_COMPOSE_PLACEHOLDER,
-} from "@/lib/docker/templates";
-import { useProject } from "@/contexts/project-context";
 
 export function AppDocker() {
 	const { project, updateProject } = useProject();
@@ -148,10 +94,14 @@ export function AppDocker() {
 
 	// Synchroniser le contexte avec l'état
 	useEffect(() => {
+		// Ne mettre à jour que si le contenu a réellement changé
 		if (state.content && state.content !== project.docker.content) {
-			updateProject("docker", state);
+			updateProject("docker", {
+				...state,
+				isSaved: false
+			});
 		}
-	}, [state, updateProject]);
+	}, [state.content, updateProject, project.docker.content]);
 
 	return (
 		<Tabs defaultValue={project.docker.content ? "docker" : "empty"}>
@@ -192,11 +142,10 @@ function EmptyDockerState({
 
 	const handleTemplateSelect = (templateKey: keyof typeof DOCKER_TEMPLATES) => {
 		const templateContent = DOCKER_TEMPLATES[templateKey];
-		// console.log('Template content:', templateKey, templateContent);
 		const parsed = parseDockerCompose(templateContent);
-		if (parsed.isValid) {
+		if (parsed.isValid && parsed.updatedContent) {
 			setState({
-				content: templateContent,
+				content: parsed.updatedContent,
 				isSaved: true,
 				parsed: {
 					services: parsed.services,
@@ -234,9 +183,9 @@ function EmptyDockerState({
 
 			// Parse and validate content
 			const parsed = parseDockerCompose(content);
-			if (parsed.isValid) {
+			if (parsed.isValid && parsed.updatedContent) {
 				setState({
-					content,
+					content: parsed.updatedContent,
 					isSaved: true,
 					parsed: {
 						services: parsed.services,
@@ -371,15 +320,6 @@ function EmptyDockerState({
 	);
 }
 
-interface TemplateLinkProps {
-	title: string;
-	subtitle: string;
-	icon: LucideIcon;
-	onClick: () => void;
-	dockerCompose: string;
-	className?: string;
-}
-
 function TemplateLink({
 	title,
 	subtitle,
@@ -387,7 +327,14 @@ function TemplateLink({
 	onClick,
 	dockerCompose,
 	className,
-}: TemplateLinkProps) {
+}: {
+	title: string;
+	subtitle: string;
+	icon: LucideIcon;
+	onClick: () => void;
+	dockerCompose: string;
+	className?: string;
+}) {
 	return (
 		<button
 			onClick={onClick}
@@ -470,7 +417,7 @@ function DockerSidebar({
 	};
 
 	return (
-		<div className="col-span-1 flex flex-col gap-4">
+		<div className="col-span-4 flex flex-col gap-4">
 			<div className="rounded-lg border bg-card overflow-hidden">
 				<Accordion type="single" collapsible>
 					<AccordionItem value="services">
@@ -620,7 +567,7 @@ function DockerSidebar({
 							</AccordionTrigger>
 							<AccordionContent className="px-0 pt-0">
 								<Separator className="mb-6" />
-								<SmoothAnimate className="space-y-2 px-4 pb-2 flex flex-wrap gap-2">
+								<SmoothAnimate className="px-4 pb-2 flex flex-wrap gap-2">
 									{project.variables.map((variable) => (
 										<div
 											key={variable.key}
@@ -635,6 +582,41 @@ function DockerSidebar({
 					)}
 				</Accordion>
 			</div>
+
+			{project.variables.length > 0 && (
+				<div className="space-y-4">
+					<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
+						<div className="flex items-start gap-3">
+							<div className="space-y-2">
+								<div className="flex items-center gap-2">
+									<Info className="h-4 w-4 text-primary" />
+									<p className="font-medium text-foreground">Variables usage</p>
+								</div>
+								<p>Variables are defined in a docker-compose.yml file like this:</p>
+								<code className="block px-3 py-2 bg-background rounded-md border border-border/50 text-center">
+									$&#123;VARIABLE_NAME&#125;
+								</code>
+							</div>
+						</div>
+					</div>
+
+					<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
+						<div className="flex items-start gap-3">
+							<div className="space-y-2">
+								<div className="flex items-center gap-2">
+									<Info className="h-4 w-4 text-primary" />
+									<p className="font-medium text-foreground">Environment file</p>
+								</div>
+								<p>
+									Even if deleted, all services will have a .env file containing all
+									variables associated with them.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
 			<Button variant="outline" className="w-full" onClick={handleReset}>
 				<ArrowLeft className="h-4 w-4" />
 				Reset
@@ -653,6 +635,8 @@ function DockerContent({
 	const [isSaving, setIsSaving] = useState(false);
 	const [isCopying, setIsCopying] = useState(false);
 
+	const { project, updateProject } = useProject();
+
 	const handleDockerComposeChange = (content: string) => {
 		setState((prev: DockerComposeState) => ({
 			...prev,
@@ -666,19 +650,19 @@ function DockerContent({
 
 		// Validation stricte au moment de la sauvegarde
 		const parsed = parseDockerCompose(state.content);
-		if (parsed.isValid) {
-			setState({
-				content: state.content,
+		if (parsed.isValid && parsed.updatedContent) {
+			const newState = {
+				content: parsed.updatedContent,
 				isSaved: true,
 				parsed: {
 					services: parsed.services,
 					volumes: parsed.volumes,
 					networks: parsed.networks,
 				},
-			});
+			};
+			setState(newState);
+			updateProject("docker", newState); // Synchroniser avec l'état global
 			toast.success("Docker-compose.yml file saved");
-		} else {
-			// toast.error("The docker-compose file is not valid. Check the structure and required fields.");
 		}
 
 		setIsSaving(false);
@@ -692,7 +676,7 @@ function DockerContent({
 	};
 
 	return (
-		<div className="col-span-3">
+		<div className="col-span-8">
 			<div className="rounded-lg border">
 				<div className="border-b p-4">
 					<div className="flex items-center justify-between">
@@ -701,17 +685,17 @@ function DockerContent({
 								<File className="h-4 w-4 text-muted-foreground" />
 								Docker Compose
 							</h3>
-								{state.isSaved ? (
-									<Badge variant="secondary" className="text-xs ">
-										<Check className="h-4 w-4 text-muted-foreground" />
-										Saved
-									</Badge>
-								) : (
-									<Badge variant="secondary" className="text-xs ">
-										<X className="h-4 w-4 text-muted-foreground" />
-										Not saved
-									</Badge>
-								)}
+							{state.isSaved ? (
+								<Badge variant="secondary" className="text-xs ">
+									<Check className="h-4 w-4 text-muted-foreground" />
+									Saved
+								</Badge>
+							) : (
+								<Badge variant="secondary" className="text-xs ">
+									<X className="h-4 w-4 text-muted-foreground" />
+									Not saved
+								</Badge>
+							)}
 						</div>
 						<div className="flex items-center gap-2">
 							<Button
@@ -751,6 +735,12 @@ function DockerContent({
 						onSave={handleSave}
 						isSaved={state.isSaved}
 						language="yaml"
+						customVariables={project.variables.map((variable) => ({
+							label: variable.key,
+							type: "variable",
+							detail: variable.value,
+						}))}
+						keywords={DOCKER_COMPOSE_KEYWORDS}
 					/>
 				</SmoothAnimate>
 			</div>
@@ -769,7 +759,7 @@ function DockerConfiguration({
 
 	return (
 		<div className="grid gap-4">
-			<div className="grid grid-cols-4 gap-4">
+			<div className="grid grid-cols-12 gap-4">
 				<DockerSidebar
 					state={state}
 					setState={setState}

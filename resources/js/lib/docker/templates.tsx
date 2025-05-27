@@ -115,21 +115,3 @@ networks:
   web:
     driver: bridge`
 };
-
-export const DOCKER_COMPOSE_PLACEHOLDER = `version: '3'
-
-services:
-  web:
-    image: nginx
-    ports:
-      - '80:80'
-  db:
-    image: postgres
-    volumes:
-      - data:/var/lib/postgresql/data
-
-volumes:
-  data:
-
-networks:
-  frontend:`; 

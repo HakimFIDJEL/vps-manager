@@ -12,6 +12,7 @@ import { type ReactNode } from "react";
 
 // Shadcn UI components
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from 'sonner'
 
 interface AdminLayoutProps {
 	children: ReactNode;
@@ -19,6 +20,7 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
+
 	return (
 		<TooltipProvider>
 			<SidebarProvider className="bg-muted/50 dark:bg-background">

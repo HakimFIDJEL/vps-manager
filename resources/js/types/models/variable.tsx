@@ -15,6 +15,7 @@ export const VariableSchema = z.object({
 		.regex(/^[A-Z][A-Z0-9_]*$/, {
 			message: "Key must be uppercase and separated by an underscore",
 		}),
+
 	value: z
 		.string({
 			message: "The field is required",

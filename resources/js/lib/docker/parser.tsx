@@ -54,16 +54,14 @@ const DockerComposeSchema = z.object({
 
 export type ParsedDockerCompose = {
   isValid: boolean;
-  services: Array<{ name: string; image: string; }>;
+  services: Array<{ name: string; image: string; env_file?: string[]; }>;
   volumes: Array<{ name: string; driver: string; }>;
   networks: Array<{ name: string; driver: string; customName?: string; }>;
+  updatedContent?: string;
 };
 
 export function parseDockerCompose(content: string): ParsedDockerCompose {
   try {
-    // console.log('Parsing docker-compose file...');
-    // console.log('Raw content:', content);
-
     if(content.length === 0) {
       toast.error('Invalid docker-compose format: Empty file');
       return {
@@ -75,8 +73,7 @@ export function parseDockerCompose(content: string): ParsedDockerCompose {
     }
 
     // Parse YAML content
-    const parsedYaml = yaml.load(content);
-    // console.log('Parsed YAML:', parsedYaml);
+    const parsedYaml = yaml.load(content) as Record<string, any>;
     
     // Validate against schema
     const result = DockerComposeSchema.safeParse(parsedYaml);
@@ -97,33 +94,46 @@ export function parseDockerCompose(content: string): ParsedDockerCompose {
       };
     }
 
+    // Modifier le YAML pour ajouter .env à tous les services
+    if (parsedYaml.services) {
+      Object.keys(parsedYaml.services).forEach(serviceName => {
+        const service = parsedYaml.services[serviceName];
+        const envFile = service.env_file || [];
+        const envFileArray = Array.isArray(envFile) ? envFile : [envFile];
+        
+        if (!envFileArray.includes('.env')) {
+          service.env_file = [...envFileArray, '.env'];
+        }
+      });
+    }
+
+    // Mettre à jour le contenu YAML
+    const updatedContent = yaml.dump(parsedYaml);
+    
     // Extract services, volumes, and networks
-    const services = Object.entries(result.data.services).map(([name, config]) => ({
+    const services = Object.entries(parsedYaml.services).map(([name, config]: [string, any]) => ({
       name,
-      image: config.image || 'build context'
+      image: config.image || 'build context',
+      env_file: config.env_file
     }));
 
-    const volumes = Object.entries(result.data.volumes || {}).map(([name, config]) => ({
+    const volumes = Object.entries(parsedYaml.volumes || {}).map(([name, config]: [string, any]) => ({
       name,
       driver: config?.driver || "local"
     }));
 
-    const networks = Object.entries(result.data.networks || {}).map(([name, config]) => ({
+    const networks = Object.entries(parsedYaml.networks || {}).map(([name, config]: [string, any]) => ({
       name,
       driver: config?.driver || "bridge",
       customName: config?.name
     }));
 
-    // console.log('Successfully parsed docker-compose file');
-    // console.log('Services:', services);
-    // console.log('Volumes:', volumes);
-    // console.log('Networks:', networks);
-
     return {
       isValid: true,
       services,
       volumes,
-      networks
+      networks,
+      updatedContent
     };
 
   } catch (error) {

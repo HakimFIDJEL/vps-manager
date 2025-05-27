@@ -10,9 +10,7 @@ import { cn } from "@/lib/utils";
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/variables/parser";
 import {
-	SmoothAnimate,
-	SmoothItem,
-	SmoothResize,
+	SmoothAnimate,	
 } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
@@ -91,6 +89,7 @@ import {
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
+import { CodeEditor } from "@/components/ui/code-editor";
 
 export function AppVariables() {
 	const { project, updateProject } = useProject();
@@ -349,7 +348,7 @@ function VariablesList({
 							variable.key.toLowerCase().includes(search.toLowerCase()),
 						).length === 0 && (
 								<TableRow>
-									<TableCell colSpan={3} className="text-center py-4 bg-muted/50">
+									<TableCell colSpan={3} className="text-center py-4 bg-muted/50 text-muted-foreground">
 										No variables added yet. Click on "Add Variable" to create one.
 									</TableCell>
 								</TableRow>
@@ -865,13 +864,19 @@ function ImportEnv({
 													<FormItem>
 														<FormLabel>Content</FormLabel>
 														<FormControl>
-															<Textarea
+															{/* <Textarea
 																id="textarea"
 																placeholder="KEY=VALUE"
 																autoFocus={true}
 																className="min-h-32 max-h-64"
 																comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
 																{...field}
+															/> */}
+															<CodeEditor
+																language="env"
+																value={(field.value == "" || field.value == null) ? "\n\n\n\n\n\n" : field.value}
+																onChange={field.onChange}
+																comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
 															/>
 														</FormControl>
 														<FormMessage />
