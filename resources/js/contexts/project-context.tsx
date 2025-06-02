@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { type Project, type ProjectContextType, DEFAULT_PROJECT } from "@/types/models/project";
+import { type Project, type ProjectContextType, DEFAULT_PROJECT } from "@/lib/projects/type";
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 

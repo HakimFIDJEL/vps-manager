@@ -17,7 +17,7 @@ import {
 } from "@/lib/projects/formatter";
 
 // Types
-import { type Project } from "@/types/models/project";
+import { type Project } from "@/lib/projects/type";
 
 export function AppTable({ projects }: { projects: Project[] }) {
 	return (

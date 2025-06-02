@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Check, X, ArrowUpRight } from "lucide-react";
 
 // Types
-import { type Container } from "@/types/models/project";
+import { type Container } from "@/lib/projects/type";
 
 export function formatDate(date: string): string {
   const opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };

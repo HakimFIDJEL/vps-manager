@@ -8,7 +8,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 // Custom components
-import { parseVariablesFromEnv } from "@/lib/variables/parser";
 import {
 	SmoothAnimate,
 	SmoothItem,
@@ -21,15 +20,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 import {
 	Form,
 	FormControl,
@@ -57,13 +47,6 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { Terminal } from "lucide-react";
 
 // Icons
 import {
@@ -85,12 +68,12 @@ import {
 } from "lucide-react";
 
 // Types
-import { type Command, CommandSchema } from "@/types/models/command";
+import { type Command, CommandSchema } from "@/lib/commands/type";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
 import { parseCommandsFromMakefile } from "@/lib/commands/parser";
-import { MakefileSchema, MakefileTextSchema } from "@/types/models/command";
+import { MakefileSchema, MakefileTextSchema } from "@/lib/commands/type";
 
 export function AppMakefile() {
 	const { project, updateProject } = useProject();
@@ -118,6 +101,7 @@ export function AppMakefile() {
 	function handleDeleteAll() {
 		setCommands([]);
 		toast.success("All commands deleted successfully!");
+		return true;
 	}
 
 	return (
@@ -152,15 +136,38 @@ export function AppMakefile() {
 								animate={{ opacity: 1, scale: 1, width: "auto" }}
 								exit={{ opacity: 0, scale: 0.95, width: 0 }}
 							>
-								<Button
+								
+								<AlertDialog>
+											<AlertDialogTrigger asChild>
+											<Button
 									ref={buttonRef}
 									variant={"outline"}
-									onClick={handleDeleteAll}
 									size={"default"}
 								>
 									<Trash className="h-4 w-4" />
 									Delete commands
 								</Button>
+											</AlertDialogTrigger>
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle className="flex items-center gap-2">
+													<OctagonAlert className="w-4 h-4 text-destructive" />
+													Delete all commands
+												</AlertDialogTitle>
+												<AlertDialogDescription>Are you sure you want to delete all commands?</AlertDialogDescription>
+											</AlertDialogHeader>
+											<AlertDialogBody>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogAction onAction={() => handleDeleteAll()} variant={"destructive"}>
+														<Trash />
+														Delete
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogBody>
+										</AlertDialogContent>
+
+									</AlertDialog>
 							</SmoothItem>
 						)}
 					</AnimatePresence>

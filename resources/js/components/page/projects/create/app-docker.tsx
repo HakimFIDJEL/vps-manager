@@ -16,9 +16,9 @@ import { DOCKER_TEMPLATES } from "@/lib/docker/templates";
 
 // Types
 import {
-	type DockerComposeState,
+	type DockerCompose,
 	DockerComposeFileSchema,
-} from "@/types/models/docker";
+} from "@/lib/docker/type";
 
 // Custom components
 import {
@@ -79,7 +79,7 @@ import {
 export function AppDocker() {
 	const { project, updateProject } = useProject();
 
-	const [state, setState] = useState<DockerComposeState>(project.docker);
+	const [state, setState] = useState<DockerCompose>(project.docker);
 
 	// Synchroniser l'état avec le contexte du projet
 	useEffect(() => {
@@ -125,12 +125,13 @@ function EmptyDockerState({
 	state,
 	setState,
 }: {
-	state: DockerComposeState;
-	setState: React.Dispatch<React.SetStateAction<DockerComposeState>>;
+	state: DockerCompose;
+	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
 }) {
 	const { setCurrentValue } = useTabsContext();
 	const [isDragActive, setIsDragActive] = useState(false);
 	const inputFileRef = useRef<HTMLInputElement>(null);
+	const { project, updateProject } = useProject();
 
 	const DockerComposeForm = useForm<z.infer<typeof DockerComposeFileSchema>>({
 		resolver: zodResolver(DockerComposeFileSchema),
@@ -144,7 +145,7 @@ function EmptyDockerState({
 		const templateContent = DOCKER_TEMPLATES[templateKey];
 		const parsed = parseDockerCompose(templateContent);
 		if (parsed.isValid && parsed.updatedContent) {
-			setState({
+			const newState = {
 				content: parsed.updatedContent,
 				isSaved: true,
 				parsed: {
@@ -152,8 +153,15 @@ function EmptyDockerState({
 					volumes: parsed.volumes,
 					networks: parsed.networks,
 				},
-			});
+			};
+
+			setState(newState);
+
 			setCurrentValue("docker");
+
+			updateProject("docker", newState);
+
+			
 		}
 	};
 
@@ -338,6 +346,7 @@ function TemplateLink({
 	return (
 		<button
 			onClick={onClick}
+			type="button"
 			className={cn(
 				"group w-full flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 transition-all duration-200 cursor-pointer",
 				"relative overflow-hidden",
@@ -361,8 +370,8 @@ function DockerSidebar({
 	setState,
 	setCurrentValue,
 }: {
-	state: DockerComposeState;
-	setState: React.Dispatch<React.SetStateAction<DockerComposeState>>;
+	state: DockerCompose;
+	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
 	setCurrentValue: (value: string) => void;
 }) {
 	const { project, updateProject } = useProject();
@@ -629,8 +638,8 @@ function DockerContent({
 	state,
 	setState,
 }: {
-	state: DockerComposeState;
-	setState: React.Dispatch<React.SetStateAction<DockerComposeState>>;
+	state: DockerCompose;
+	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
 }) {
 	const [isSaving, setIsSaving] = useState(false);
 	const [isCopying, setIsCopying] = useState(false);
@@ -638,7 +647,7 @@ function DockerContent({
 	const { project, updateProject } = useProject();
 
 	const handleDockerComposeChange = (content: string) => {
-		setState((prev: DockerComposeState) => ({
+		setState((prev: DockerCompose) => ({
 			...prev,
 			content,
 			isSaved: false,
@@ -752,8 +761,8 @@ function DockerConfiguration({
 	state,
 	setState,
 }: {
-	state: DockerComposeState;
-	setState: React.Dispatch<React.SetStateAction<DockerComposeState>>;
+	state: DockerCompose;
+	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
 }) {
 	const { setCurrentValue } = useTabsContext();
 

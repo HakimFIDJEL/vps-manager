@@ -1,18 +1,15 @@
 import { z } from "zod";
-import { type Variable } from "@/types/models/variable";
-import { type DockerComposeState } from "@/types/models/docker";
-import { type Command } from "@/types/models/command";
+import { VariableSchema, type Variable } from "@/lib/variables/type";
+import { type DockerCompose, DockerComposeStateSchema } from "@/lib/docker/type";
+import { CommandSchema, type Command } from "@/lib/commands/type";
+
 // Types
 export type Project = {
 	name: string;
 	folderPath: string;
 	variables: Variable[];
 	commands: Command[];
-	docker: DockerComposeState;
-	makefile: {
-		content: string;
-		isSaved: boolean;
-	};
+	docker: DockerCompose;
 };
 
 export type ProjectContextType = {
@@ -32,20 +29,16 @@ export const DEFAULT_PROJECT: Project = {
 		parsed: {
 			services: [],
 			volumes: [],
-			networks: []
-		}
+			networks: [],
+		},
 	},
-	makefile: {
-		content: "",
-		isSaved: true
-	}
 };
 
-export type Container = {
-	name: string;
-	image: string;
-	status: string;
-	updated_at: string;
-	created_at: string;
-};
-
+// Schemas
+export const ProjectSchema = z.object({
+	name: z.string().nonempty(),
+	folderPath: z.string().nonempty(),
+	variables: z.array(VariableSchema),
+	commands: z.array(CommandSchema),
+	docker: DockerComposeStateSchema,
+});

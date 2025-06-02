@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { z } from "zod";
-import { type Variable, VariableSchema } from "@/types/models/variable";
+import { type Variable, VariableSchema } from "@/lib/variables/type";
 
 export function parseVariablesFromEnv({
   content,

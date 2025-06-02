@@ -31,7 +31,7 @@ const DockerServiceSchema = z.object({
   command: z.union([z.string(), z.array(z.string())]).optional()
 }).passthrough();
 
-const DockerComposeSchema = z.object({
+export const DockerComposeSchema = z.object({
   version: z.string().optional(),
   services: z.record(DockerServiceSchema),
   volumes: z.record(z.union([
@@ -50,6 +50,27 @@ const DockerComposeSchema = z.object({
     z.null()
   ])).optional(),
 }).passthrough();
+
+export const DockerComposeStateSchema = z.object({
+  content: z.string().nonempty(),
+  isSaved: z.boolean(),
+  parsed: z.object({
+    services: z.array(z.object({
+      name: z.string(),
+      image: z.string(),
+      env_file: z.array(z.string()).optional()
+    })),
+    volumes: z.array(z.object({
+      name: z.string(),
+      driver: z.string()
+    })),
+    networks: z.array(z.object({
+      name: z.string(),
+      driver: z.string(),
+      customName: z.string().optional()
+    }))
+  })
+});
 
 export const DockerComposeFileSchema = z.object({
   file: z
@@ -90,7 +111,7 @@ export const DockerComposeFileSchema = z.object({
     ),
 });
 
-export type DockerComposeState = {
+export type DockerCompose = {
   content: string;
   isSaved: boolean;
   parsed: {

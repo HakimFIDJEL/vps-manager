@@ -85,7 +85,7 @@ import {
 	VariableSchema,
 	VariableTextSchema,
 	VariableEnvSchema,
-} from "@/types/models/variable";
+} from "@/lib/variables/type";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
@@ -162,6 +162,7 @@ function VariablesList({
 }) {
 
 	const [sortKey, setSortKey] = useState<string>("none");
+	const [showAll, setShowAll] = useState<boolean>(false);
 
 	function handleDelete(key: string) {
 		setVariables(variables.filter((variable) => variable.key !== key));
@@ -191,7 +192,8 @@ function VariablesList({
 	}
 
 	function toggleVisibilityAll() {
-		setVariables(variables.map((v) => ({ ...v, visible: !v.visible })));
+		setShowAll(!showAll);
+		setVariables(variables.map((v) => ({ ...v, visible: !showAll })));
 	}
 
 	return (

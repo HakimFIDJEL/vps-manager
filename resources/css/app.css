@@ -244,12 +244,12 @@
 
 
 .cm-editor {
-  font-family: var(--font-sans) !important;
+  font-family: var(--font-mono) !important;
   background-color: var(--card) !important;
 }
 
 .cm-scroller {
-  font-family: var(--font-sans) !important; 
+  font-family: var(--font-mono) !important; 
   font-size: 14px !important;
 }
 

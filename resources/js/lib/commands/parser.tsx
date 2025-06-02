@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { z } from "zod";
-import { type Command, CommandSchema } from "@/types/models/command";
+import { type Command, CommandSchema } from "@/lib/commands/type";
 
 export function parseCommandsFromMakefile({
   content,
