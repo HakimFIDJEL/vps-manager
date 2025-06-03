@@ -248,8 +248,13 @@
   background-color: var(--card) !important;
 }
 
+.cm-line {
+  font-family: var(--font-mono) !important;
+  background-color: var(--card) !important;
+}
+
 .cm-scroller {
-  font-family: var(--font-mono) !important; 
+  font-family: var(--font-sans) !important; 
   font-size: 14px !important;
 }
 

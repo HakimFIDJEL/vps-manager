@@ -453,7 +453,7 @@ function DockerSidebar({
 
 	return (
 		<SmoothAnimate
-			className="col-span-4 flex flex-col gap-4"
+			className="col-span-3 flex flex-col gap-4"
 		>
 			{(state.isStrict || project.variables.length > 0) && (
 				<Accordion
@@ -803,7 +803,7 @@ function DockerContent({
 	};
 
 	return (
-		<div className="col-span-8">
+		<div className="col-span-9">
 			<div className="rounded-lg border">
 				<div className="border-b">
 					<div className="flex items-center justify-between px-4 py-3">
@@ -916,12 +916,12 @@ function DockerConfiguration({
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-12 gap-4">
+				<DockerContent state={state} setState={setState} />
 				<DockerSidebar
 					state={state}
 					setState={setState}
 					setCurrentValue={setCurrentValue}
 				/>
-				<DockerContent state={state} setState={setState} />
 			</div>
 		</div>
 	);

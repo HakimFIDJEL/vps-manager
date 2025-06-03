@@ -215,7 +215,7 @@ function Content() {
 	return (
 		<Stepper defaultValue={1} totalSteps={steps.length}>
 			<Card className="bg-muted/50 dark:bg-background  border-0 shadow-none mb-4">
-				<CardContent>
+				<CardContent className="px-4 py-2">
 					<div className="space-y-8 text-center">
 						<StepperList>
 							{steps.map(({ step, title, icon }) => (

@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Folder, FileLock, Container, SquareTerminal } from "lucide-react";
+import { Folder, FileLock, Container, SquareTerminal, OctagonMinus } from "lucide-react";
 import { useProject } from "@/contexts/project-context";
 
 export function AppDone() {
@@ -8,7 +8,7 @@ export function AppDone() {
 	return (
 		<div className="grid grid-cols-2 gap-4">
 			{/* Project Info */}
-			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-300">
+			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 				<div className="flex items-center gap-3">
 					<div className="p-2 bg-primary/5 rounded-full">
 						<Folder className="h-5 w-5 text-primary" />
@@ -23,7 +23,7 @@ export function AppDone() {
 			</div>
 
 			{/* Variables */}
-			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-300">
+			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 				<div className="flex items-center gap-3">
 					<div className="p-2 bg-primary/5 rounded-full">
 						<FileLock className="h-5 w-5 text-primary" />
@@ -44,7 +44,7 @@ export function AppDone() {
 			</div>
 
 			{/* Docker */}
-			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-300">
+			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 				<div className="flex items-center gap-3">
 					<div className="p-2 bg-primary/5 rounded-full">
 						<Container className="h-5 w-5 text-primary" />
@@ -52,28 +52,37 @@ export function AppDone() {
 					<div className="flex flex-col">
 						<h4 className="font-medium">Docker Compose</h4>
 						<p className="text-sm text-muted-foreground flex gap-2">
-							<Badge variant="outline">
-								{project.docker.parsed.services.length === 0
-									? "No services"
-									: `${project.docker.parsed.services.length} service${project.docker.parsed.services.length > 1 ? "s" : ""}`}
-							</Badge>
-							<Badge variant="outline">
-								{project.docker.parsed.volumes.length === 0
-									? "No volumes"
-									: `${project.docker.parsed.volumes.length} volume${project.docker.parsed.volumes.length > 1 ? "s" : ""}`}
-							</Badge>
-							<Badge variant="outline">
-								{project.docker.parsed.networks.length === 0
-									? "No networks"
-									: `${project.docker.parsed.networks.length} network${project.docker.parsed.networks.length > 1 ? "s" : ""}`}
-							</Badge>
+							{project.docker.isStrict ? (
+								<>
+									<Badge variant="outline">
+										{project.docker.parsed.services.length === 0
+											? "No services"
+											: `${project.docker.parsed.services.length} service${project.docker.parsed.services.length > 1 ? "s" : ""}`}
+									</Badge>
+									<Badge variant="outline">
+										{project.docker.parsed.volumes.length === 0
+											? "No volumes"
+											: `${project.docker.parsed.volumes.length} volume${project.docker.parsed.volumes.length > 1 ? "s" : ""}`}
+									</Badge>
+									<Badge variant="outline">
+										{project.docker.parsed.networks.length === 0
+											? "No networks"
+											: `${project.docker.parsed.networks.length} network${project.docker.parsed.networks.length > 1 ? "s" : ""}`}
+									</Badge>
+								</>
+							) : (
+								<Badge variant="outline">
+									<OctagonMinus />
+									Strict mode disabled
+								</Badge>
+							)}
 						</p>
 					</div>
 				</div>
 			</div>
 
 			{/* Commands */}
-			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-300">
+			<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 				<div className="flex items-center gap-3">
 					<div className="p-2 bg-primary/5 rounded-full">
 						<SquareTerminal className="h-5 w-5 text-primary" />

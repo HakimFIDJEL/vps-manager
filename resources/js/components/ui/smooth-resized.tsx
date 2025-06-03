@@ -48,7 +48,7 @@ function SmoothAnimate({ className, ...props }: React.ComponentProps<"div">) {
 	const parent = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		parent.current && autoAnimate(parent.current, { duration: 300, easing: "ease-in-out" });
+		parent.current && autoAnimate(parent.current, { duration: 200, easing: "ease-in-out" });
 	}, [parent])
 
 	return <div ref={parent} className={className} {...props} />;
