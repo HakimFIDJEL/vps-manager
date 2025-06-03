@@ -136,38 +136,37 @@ export function AppMakefile() {
 								animate={{ opacity: 1, scale: 1, width: "auto" }}
 								exit={{ opacity: 0, scale: 0.95, width: 0 }}
 							>
-								
 								<AlertDialog>
-											<AlertDialogTrigger asChild>
-											<Button
-									ref={buttonRef}
-									variant={"outline"}
-									size={"default"}
-								>
-									<Trash className="h-4 w-4" />
-									Delete commands
-								</Button>
-											</AlertDialogTrigger>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle className="flex items-center gap-2">
-													<OctagonAlert className="w-4 h-4 text-destructive" />
-													Delete all commands
-												</AlertDialogTitle>
-												<AlertDialogDescription>Are you sure you want to delete all commands?</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogBody>
-												<AlertDialogFooter>
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
-													<AlertDialogAction onAction={() => handleDeleteAll()} variant={"destructive"}>
-														<Trash />
-														Delete
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogBody>
-										</AlertDialogContent>
-
-									</AlertDialog>
+									<AlertDialogTrigger asChild>
+										<Button ref={buttonRef} variant={"outline"} size={"default"} type="button">
+											<Trash className="h-4 w-4" />
+											Delete commands
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle className="flex items-center gap-2">
+												<OctagonAlert className="w-4 h-4 text-destructive" />
+												Delete all commands
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Are you sure you want to delete all commands?
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogBody>
+											<AlertDialogFooter>
+												<AlertDialogCancel>Cancel</AlertDialogCancel>
+												<AlertDialogAction
+													onAction={() => handleDeleteAll()}
+													variant={"destructive"}
+												>
+													<Trash />
+													Delete
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogBody>
+									</AlertDialogContent>
+								</AlertDialog>
 							</SmoothItem>
 						)}
 					</AnimatePresence>
@@ -264,7 +263,7 @@ function ImportMakefile({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"outline"}>
+				<Button variant={"outline"} type="button">
 					<FileUp />
 					Import makefile
 				</Button>
@@ -347,6 +346,7 @@ function ImportMakefile({
 																			variant="outline"
 																			size="sm"
 																			onClick={() => inputFileRef.current?.click()}
+																			type="button"
 																		>
 																			Browse files
 																		</Button>
@@ -448,7 +448,11 @@ function ImportMakefile({
 														<FormControl>
 															<CodeEditor
 																className="max-h-64 w-full"
-																value={(field.value == "" || field.value == null) ? "\n\n\n\n\n\n" : field.value}
+																value={
+																	field.value == "" || field.value == null
+																		? "\n\n\n\n\n\n"
+																		: field.value
+																}
 																onChange={field.onChange}
 																comment="Each target must be in the form 'target:'. Comments before a target will be used as its description."
 															/>
@@ -531,7 +535,7 @@ function CreateCommand({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"default"}>
+				<Button variant={"default"} type="button">
 					<Plus />
 					Add command
 				</Button>
@@ -598,7 +602,11 @@ function CreateCommand({
 											/> */}
 											<CodeEditor
 												className="max-h-64 w-full"
-												value={(field.value == "" || field.value == null) ? "\n\n\n\n\n\n" : field.value}
+												value={
+													field.value == "" || field.value == null
+														? "\n\n\n\n\n\n"
+														: field.value
+												}
 												onChange={field.onChange}
 												// {...field}
 												comment="The command(s) to run."
@@ -680,6 +688,7 @@ function CommandList({
 											variant="ghost"
 											size="icon"
 											onClick={() => handleDelete(command.target)}
+											type="button"
 										>
 											<Trash className="h-4 w-4 text-muted-foreground" />
 										</Button>
@@ -745,7 +754,7 @@ function EditCommand({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"ghost"} size={"icon"}>
+				<Button variant={"ghost"} size={"icon"} type="button">
 					<Pen className="h-4 w-4 text-muted-foreground" />
 				</Button>
 			</AlertDialogTrigger>
@@ -809,7 +818,6 @@ function EditCommand({
 												value={field.value}
 												onChange={field.onChange}
 												className="max-h-64 w-full"
-												language="shell"
 												comment="The command(s) to run."
 											/>
 										</FormControl>

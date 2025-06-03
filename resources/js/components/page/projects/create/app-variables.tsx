@@ -205,6 +205,7 @@ function VariablesList({
 						<TableRow>
 							<TableHead>
 								<Button
+									type={"button"}
 									variant={"ghost"}
 									size={"sm"}
 									onClick={() => setSortKey(sortKey === "desc" ? "asc" : sortKey === "asc" ? "none" : "desc")}
@@ -232,7 +233,7 @@ function VariablesList({
 								<div className="flex items-center gap-2">
 									<Tooltip>
 										<TooltipTrigger asChild>
-											<Button variant={"ghost"} size={"icon"} disabled={variables.length === 0} onClick={toggleVisibilityAll}>
+											<Button type={"button"} variant={"ghost"} size={"icon"} disabled={variables.length === 0} onClick={toggleVisibilityAll}>
 												{variables.every((v) => v.visible) ? (
 													<EyeOff />
 												) : (
@@ -252,7 +253,7 @@ function VariablesList({
 										<Tooltip>
 											<AlertDialogTrigger asChild>
 												<TooltipTrigger asChild>
-													<Button variant={"ghost"} size={"icon"} disabled={variables.length === 0}>
+													<Button type={"button"} variant={"ghost"} size={"icon"} disabled={variables.length === 0}>
 														<div className="flex items-center justify-center">
 															<Trash />
 														</div>
@@ -283,9 +284,6 @@ function VariablesList({
 										</AlertDialogContent>
 
 									</AlertDialog>
-									{/* <Button variant={"ghost"} size={"icon"} disabled={variables.length === 0} onClick={handleDeleteAll}>
-											<Trash />
-										</Button> */}
 								</div>
 
 							</TableHead>
@@ -318,6 +316,7 @@ function VariablesList({
 									<TableCell className="text-right">
 										<div className="flex items-center justify-end gap-2">
 											<Button
+												type={"button"}
 												variant={"ghost"}
 												size="icon"
 												onClick={() => toggleVisibility(variable)}
@@ -336,6 +335,7 @@ function VariablesList({
 											/>
 
 											<Button
+												type={"button"}
 												variant={"outline"}
 												size="icon"
 												onClick={() => handleDelete(variable.key)}
@@ -405,7 +405,7 @@ function CreateVariable({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"default"}>
+				<Button variant={"default"} type={"button"}>
 					<Plus />
 					Add variable
 				</Button>
@@ -524,7 +524,7 @@ function EditVariable({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"ghost"} size={"icon"}>
+				<Button variant={"ghost"} size={"icon"} type={"button"}>
 					<Pen />
 				</Button>
 			</AlertDialogTrigger>
@@ -683,7 +683,7 @@ function ImportEnv({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"outline"}>
+				<Button variant={"outline"} type={"button"}>
 					<FileUp />
 					Import variables
 				</Button>
@@ -763,6 +763,7 @@ function ImportEnv({
 																			Drag and drop your .env file here or click to select it.
 																		</p>
 																		<Button
+																			type={"button"}
 																			variant="outline"
 																			size="sm"
 																			onClick={() => inputFileRef.current?.click()}
@@ -829,7 +830,7 @@ function ImportEnv({
 														transition={{ duration: 0.3 }}
 													>
 														<Button
-															type="button"
+															type={"button"}
 															variant={"outline"}
 															onClick={() => setEnvPreview("")}
 														>

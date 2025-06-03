@@ -15,23 +15,23 @@ import { formatServiceImage, formatDockerDriver } from "@/lib/docker/formatter";
 import { DOCKER_TEMPLATES } from "@/lib/docker/templates";
 
 // Types
-import {
-	type DockerCompose,
-	DockerComposeFileSchema,
-} from "@/lib/docker/type";
+import { type DockerCompose, DockerComposeFileSchema } from "@/lib/docker/type";
 
 // Custom components
-import {
-	SmoothAnimate,
-} from "@/components/ui/smooth-resized";
-import { 
-	CodeEditor 
-} from "@/components/ui/code-editor";
+import { SmoothAnimate } from "@/components/ui/smooth-resized";
+import { CodeEditor } from "@/components/ui/code-editor";
 
 // Shadcn UI components
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	Form,
 	FormControl,
@@ -46,7 +46,7 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-	useTabsContext
+	useTabsContext,
 } from "@/components/ui/tabs";
 import {
 	Accordion,
@@ -55,11 +55,12 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 // Icons
 import {
 	Copy,
-	Loader2,
 	Server,
 	Database,
 	Network,
@@ -74,6 +75,10 @@ import {
 	LucideIcon,
 	Save,
 	X,
+	Menu,
+	OctagonMinus,
+	FileKey,
+	Trash,
 } from "lucide-react";
 
 export function AppDocker() {
@@ -87,6 +92,7 @@ export function AppDocker() {
 			setState({
 				content: project.docker.content,
 				isSaved: project.docker.isSaved,
+				isStrict: project.docker.isStrict,
 				parsed: project.docker.parsed,
 			});
 		}
@@ -98,7 +104,7 @@ export function AppDocker() {
 		if (state.content && state.content !== project.docker.content) {
 			updateProject("docker", {
 				...state,
-				isSaved: false
+				isSaved: false,
 			});
 		}
 	}, [state.content, updateProject, project.docker.content]);
@@ -143,11 +149,17 @@ function EmptyDockerState({
 
 	const handleTemplateSelect = (templateKey: keyof typeof DOCKER_TEMPLATES) => {
 		const templateContent = DOCKER_TEMPLATES[templateKey];
-		const parsed = parseDockerCompose(templateContent);
+		const variable_length = project.variables.length;
+		const parsed = parseDockerCompose(
+			templateContent,
+			state.isStrict,
+			variable_length,
+		);
 		if (parsed.isValid && parsed.updatedContent) {
 			const newState = {
 				content: parsed.updatedContent,
 				isSaved: true,
+				isStrict: false,
 				parsed: {
 					services: parsed.services,
 					volumes: parsed.volumes,
@@ -160,8 +172,6 @@ function EmptyDockerState({
 			setCurrentValue("docker");
 
 			updateProject("docker", newState);
-
-			
 		}
 	};
 
@@ -190,18 +200,25 @@ function EmptyDockerState({
 			console.log("File content:", content);
 
 			// Parse and validate content
-			const parsed = parseDockerCompose(content);
+			const variable_length = project.variables.length;
+			const parsed = parseDockerCompose(content, state.isStrict, variable_length);
 			if (parsed.isValid && parsed.updatedContent) {
-				setState({
+				const newState = {
 					content: parsed.updatedContent,
 					isSaved: true,
+					isStrict: false,
 					parsed: {
 						services: parsed.services,
 						volumes: parsed.volumes,
 						networks: parsed.networks,
 					},
-				});
+				};
+
+				setState(newState);
+
 				setCurrentValue("docker");
+
+				updateProject("docker", newState);
 			}
 		} catch (error) {
 			console.error("Error uploading file:", error);
@@ -259,6 +276,7 @@ function EmptyDockerState({
 													variant="outline"
 													size="sm"
 													onClick={() => inputFileRef.current?.click()}
+													type="button"
 												>
 													Browse files
 												</Button>
@@ -390,11 +408,17 @@ function DockerSidebar({
 			),
 		});
 
-		const parsed = parseDockerCompose(newContent);
+		const variable_length = project.variables.length;
+		const parsed = parseDockerCompose(
+			newContent,
+			state.isStrict,
+			variable_length,
+		);
 		if (parsed.isValid) {
 			setState({
 				content: newContent,
 				isSaved: false,
+				isStrict: false,
 				parsed: {
 					services: parsed.services,
 					volumes: parsed.volumes,
@@ -404,6 +428,7 @@ function DockerSidebar({
 			updateProject("docker", {
 				content: newContent,
 				isSaved: false,
+				isStrict: false,
 				parsed: {
 					services: parsed.services,
 					volumes: parsed.volumes,
@@ -417,6 +442,7 @@ function DockerSidebar({
 		const newState = {
 			content: "",
 			isSaved: true,
+			isStrict: false,
 			parsed: { services: [], volumes: [], networks: [] },
 		};
 
@@ -426,174 +452,189 @@ function DockerSidebar({
 	};
 
 	return (
-		<div className="col-span-4 flex flex-col gap-4">
-			<div className="rounded-lg border bg-card overflow-hidden">
-				<Accordion type="single" collapsible>
-					<AccordionItem value="services">
-						<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
-							<div className="flex items-center gap-2">
-								<Server className="h-4 w-4 text-primary" />
-								<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
-									<span>Services</span>
-									{state.parsed.services.length > 0 && (
-										<span className="text-xs text-muted-foreground">
-											({state.parsed.services.length})
-										</span>
-									)}
-								</SmoothAnimate>
-							</div>
-						</AccordionTrigger>
-						<AccordionContent className="px-0 pt-0">
-							<Separator className="mb-6" />
-							<SmoothAnimate className="space-y-2 px-4 pb-2">
-								{state.parsed.services.map((service) => (
-									<div
-										key={service.name}
-										className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
-									>
-										<div>
-											<div className="text-sm font-medium">{service.name}</div>
-											{formatServiceImage(service.image)}
+		<SmoothAnimate
+			className="col-span-4 flex flex-col gap-4"
+		>
+			{(state.isStrict || project.variables.length > 0) && (
+				<Accordion
+					type="single"
+					collapsible
+					className={`rounded-lg bg-card overflow-hidden ${state.isStrict || project.variables.length > 0 ? "border" : ""}`}
+				>
+					<SmoothAnimate>
+						{state.isStrict && (
+							<>
+								<AccordionItem value="services">
+									<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
+										<div className="flex items-center gap-2">
+											<Server className="h-4 w-4 text-primary" />
+											<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+												<span>Services</span>
+												{state.parsed.services.length > 0 && (
+													<span className="text-xs text-muted-foreground">
+														({state.parsed.services.length})
+													</span>
+												)}
+											</SmoothAnimate>
 										</div>
-										<Button
-											variant="ghost"
-											size="icon"
-											className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-											onClick={() => handleRemove(service.name, "services")}
-										>
-											<X className="h-2 w-2 text-primary" />
-										</Button>
-									</div>
-								))}
-								{state.parsed.services.length === 0 && (
-									<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
-										No services found
-									</div>
-								)}
-							</SmoothAnimate>
-						</AccordionContent>
-					</AccordionItem>
+									</AccordionTrigger>
+									<AccordionContent className="px-0 pt-0">
+										<Separator className="mb-6" />
+										<SmoothAnimate className="space-y-2 px-4 pb-2">
+											{state.parsed.services.map((service) => (
+												<div
+													key={service.name}
+													className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
+												>
+													<div>
+														<div className="text-sm font-medium">{service.name}</div>
+														{formatServiceImage(service.image)}
+													</div>
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+														onClick={() => handleRemove(service.name, "services")}
+													>
+														<X className="h-2 w-2 text-primary" />
+													</Button>
+												</div>
+											))}
+											{state.parsed.services.length === 0 && (
+												<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
+													No services found
+												</div>
+											)}
+										</SmoothAnimate>
+									</AccordionContent>
+								</AccordionItem>
 
-					<AccordionItem value="volumes">
-						<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
-							<div className="flex items-center gap-2">
-								<Database className="h-4 w-4 text-primary" />
-								<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
-									<span>Volumes</span>
-									{state.parsed.volumes.length > 0 && (
-										<span className="text-xs text-muted-foreground">
-											({state.parsed.volumes.length})
-										</span>
-									)}
-								</SmoothAnimate>
-							</div>
-						</AccordionTrigger>
-						<AccordionContent className="px-0 pt-0">
-							<Separator className="mb-6" />
-							<SmoothAnimate className="space-y-2 px-4 pb-2">
-								{state.parsed.volumes.map((volume) => (
-									<div
-										key={volume.name}
-										className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
-									>
-										<div>
-											<div className="text-sm font-medium">{volume.name}</div>
-											{formatDockerDriver(volume.driver)}
+								<AccordionItem value="volumes">
+									<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
+										<div className="flex items-center gap-2">
+											<Database className="h-4 w-4 text-primary" />
+											<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+												<span>Volumes</span>
+												{state.parsed.volumes.length > 0 && (
+													<span className="text-xs text-muted-foreground">
+														({state.parsed.volumes.length})
+													</span>
+												)}
+											</SmoothAnimate>
 										</div>
-										<Button
-											variant="ghost"
-											size="icon"
-											className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-											onClick={() => handleRemove(volume.name, "volumes")}
-										>
-											<X className="h-2 w-2 text-primary" />
-										</Button>
-									</div>
-								))}
-								{state.parsed.volumes.length === 0 && (
-									<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
-										No volumes found
-									</div>
-								)}
-							</SmoothAnimate>
-						</AccordionContent>
-					</AccordionItem>
+									</AccordionTrigger>
+									<AccordionContent className="px-0 pt-0">
+										<Separator className="mb-6" />
+										<SmoothAnimate className="space-y-2 px-4 pb-2">
+											{state.parsed.volumes.map((volume) => (
+												<div
+													key={volume.name}
+													className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
+												>
+													<div>
+														<div className="text-sm font-medium">{volume.name}</div>
+														{formatDockerDriver(volume.driver)}
+													</div>
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+														onClick={() => handleRemove(volume.name, "volumes")}
+													>
+														<X className="h-2 w-2 text-primary" />
+													</Button>
+												</div>
+											))}
+											{state.parsed.volumes.length === 0 && (
+												<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
+													No volumes found
+												</div>
+											)}
+										</SmoothAnimate>
+									</AccordionContent>
+								</AccordionItem>
 
-					<AccordionItem value="networks">
-						<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
-							<div className="flex items-center gap-2">
-								<Network className="h-4 w-4 text-primary" />
-								<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
-									<span>Networks</span>
-									{state.parsed.networks.length > 0 && (
-										<span className="text-xs text-muted-foreground">
-											({state.parsed.networks.length})
-										</span>
-									)}
-								</SmoothAnimate>
-							</div>
-						</AccordionTrigger>
-						<AccordionContent className="px-0 pt-0">
-							<Separator className="mb-6" />
-							<SmoothAnimate className="space-y-2 px-4 pb-2">
-								{state.parsed.networks.map((network) => (
-									<div
-										key={network.name}
-										className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
-									>
-										<div>
-											<div className="text-sm font-medium">{network.name}</div>
-											{formatDockerDriver(network.driver, network.customName)}
+								<AccordionItem value="networks">
+									<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
+										<div className="flex items-center gap-2">
+											<Network className="h-4 w-4 text-primary" />
+											<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+												<span>Networks</span>
+												{state.parsed.networks.length > 0 && (
+													<span className="text-xs text-muted-foreground">
+														({state.parsed.networks.length})
+													</span>
+												)}
+											</SmoothAnimate>
 										</div>
-										<Button
-											variant="ghost"
-											size="icon"
-											className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-											onClick={() => handleRemove(network.name, "networks")}
-										>
-											<X className="h-2 w-2 text-primary" />
-										</Button>
-									</div>
-								))}
-								{state.parsed.networks.length === 0 && (
-									<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
-										No networks found
-									</div>
-								)}
-							</SmoothAnimate>
-						</AccordionContent>
-					</AccordionItem>
+									</AccordionTrigger>
+									<AccordionContent className="px-0 pt-0">
+										<Separator className="mb-6" />
+										<SmoothAnimate className="space-y-2 px-4 pb-2">
+											{state.parsed.networks.map((network) => (
+												<div
+													key={network.name}
+													className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
+												>
+													<div>
+														<div className="text-sm font-medium">{network.name}</div>
+														{formatDockerDriver(network.driver, network.customName)}
+													</div>
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+														onClick={() => handleRemove(network.name, "networks")}
+													>
+														<X className="h-2 w-2 text-primary" />
+													</Button>
+												</div>
+											))}
+											{state.parsed.networks.length === 0 && (
+												<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
+													No networks found
+												</div>
+											)}
+										</SmoothAnimate>
+									</AccordionContent>
+								</AccordionItem>
+							</>
+						)}
 
-					{project.variables.length > 0 && (
-						<AccordionItem value="variables">
-							<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
-								<div className="flex items-center gap-2">
-									<FileLock className="h-4 w-4 text-primary" />
-									<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
-										<span>Variables available</span>
+						{project.variables.length > 0 && (
+							<AccordionItem value="variables">
+								<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
+									<div className="flex items-center gap-2">
+										<FileLock className="h-4 w-4 text-primary" />
+										<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
+											<span>Variables available</span>
+										</SmoothAnimate>
+									</div>
+								</AccordionTrigger>
+								<AccordionContent className="px-0 pt-0">
+									<Separator className="mb-6" />
+									<SmoothAnimate className="px-4 pb-2 flex flex-wrap gap-2">
+										{project.variables.map((variable) => (
+											<div
+												key={variable.key}
+												className="text-xs flex items-center justify-center px-2 py-1 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors"
+											>
+												{variable.key}
+											</div>
+										))}
 									</SmoothAnimate>
-								</div>
-							</AccordionTrigger>
-							<AccordionContent className="px-0 pt-0">
-								<Separator className="mb-6" />
-								<SmoothAnimate className="px-4 pb-2 flex flex-wrap gap-2">
-									{project.variables.map((variable) => (
-										<div
-											key={variable.key}
-											className="text-xs flex items-center justify-center px-2 py-1 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors"
-										>
-											{variable.key}
-										</div>
-									))}
-								</SmoothAnimate>
-							</AccordionContent>
-						</AccordionItem>
-					)}
+								</AccordionContent>
+							</AccordionItem>
+						)}
+					</SmoothAnimate>
 				</Accordion>
-			</div>
+				)}
 
 			{project.variables.length > 0 && (
-				<div className="space-y-4">
+				<div className={`flex flex-col ${state.isStrict ? "gap-4" : ""}`}>
 					<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
 						<div className="flex items-start gap-3">
 							<div className="space-y-2">
@@ -608,29 +649,53 @@ function DockerSidebar({
 							</div>
 						</div>
 					</div>
+				</div>
+			)}
 
-					<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
-						<div className="flex items-start gap-3">
-							<div className="space-y-2">
-								<div className="flex items-center gap-2">
-									<Info className="h-4 w-4 text-primary" />
-									<p className="font-medium text-foreground">Environment file</p>
-								</div>
-								<p>
-									Even if deleted, all services will have a .env file containing all
-									variables associated with them.
-								</p>
+			{state.isStrict && project.variables.length > 0 && (
+				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
+					<div className="flex items-start gap-3">
+						<div className="space-y-2">
+							<div className="flex items-center gap-2">
+								<FileKey className="h-4 w-4 text-primary" />
+								<p className="font-medium text-foreground">Environment file</p>
 							</div>
+							<p>
+								Even if deleted, all services will have a .env file containing all
+								variables associated with them.
+							</p>
 						</div>
 					</div>
 				</div>
 			)}
 
-			<Button variant="outline" className="w-full" onClick={handleReset}>
+			{state.isStrict == false && (
+				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
+					<div className="flex items-start gap-3">
+						<div className="space-y-2">
+							<div className="flex items-center gap-2">
+								<OctagonMinus className="h-4 w-4 text-primary" />
+								<p className="font-medium text-foreground">Strict mode disabled</p>
+							</div>
+							<p>
+								Activating strict mode applies comprehensive validations to the format
+								and to all services, volumes, and networks.
+							</p>
+						</div>
+					</div>
+				</div>
+			)}
+
+			<Button
+				type="button"
+				variant="outline"
+				className="w-full"
+				onClick={handleReset}
+			>
 				<ArrowLeft className="h-4 w-4" />
 				Reset
 			</Button>
-		</div>
+		</SmoothAnimate>
 	);
 }
 
@@ -658,11 +723,17 @@ function DockerContent({
 		setIsSaving(true);
 
 		// Validation stricte au moment de la sauvegarde
-		const parsed = parseDockerCompose(state.content);
+		const variable_length = project.variables.length;
+		const parsed = parseDockerCompose(
+			state.content,
+			state.isStrict,
+			variable_length,
+		);
 		if (parsed.isValid && parsed.updatedContent) {
 			const newState = {
 				content: parsed.updatedContent,
 				isSaved: true,
+				isStrict: state.isStrict,
 				parsed: {
 					services: parsed.services,
 					volumes: parsed.volumes,
@@ -677,6 +748,39 @@ function DockerContent({
 		setIsSaving(false);
 	};
 
+	const handleClear = () => {
+		const updatedContent = yaml.dump({
+			services: {},
+			volumes: {},
+			networks: {},
+		});
+		const variable_length = project.variables.length;
+		const parsed = parseDockerCompose(
+			updatedContent,
+			state.isStrict,
+			variable_length,
+		);
+
+		if (!parsed.isValid) {
+			toast.error(
+				"Failed to clear Docker-compose.yml file due to validation errors",
+			);
+			return;
+		}
+		// Mettre à jour l'état avec le contenu vide
+
+		const newState: DockerCompose = {
+			content: updatedContent,
+			isSaved: true,
+			isStrict: state.isStrict,
+			parsed: { services: [], volumes: [], networks: [] },
+		};
+		setState(newState);
+		updateProject("docker", newState);
+
+		toast.success("Docker-compose.yml file cleared");
+	};
+
 	const handleCopy = () => {
 		setIsCopying(true);
 		navigator.clipboard.writeText(state.content);
@@ -684,19 +788,33 @@ function DockerContent({
 		toast.success("Docker-compose.yml file copied to clipboard");
 	};
 
+	const handleStrictToggle = () => {
+		setState((prev: DockerCompose) => ({
+			...prev,
+			isStrict: !prev.isStrict,
+			isSaved: false,
+		}));
+
+		updateProject("docker", {
+			...state,
+			isStrict: !state.isStrict,
+			isSaved: false,
+		});
+	};
+
 	return (
 		<div className="col-span-8">
 			<div className="rounded-lg border">
-				<div className="border-b p-4">
-					<div className="flex items-center justify-between">
+				<div className="border-b">
+					<div className="flex items-center justify-between px-4 py-3">
 						<div className="flex items-center gap-2">
-							<h3 className="text-sm font-medium flex items-center gap-2">
+							<div className="w-7 h-7  rounded-md flex items-center justify-center">
 								<File className="h-4 w-4 text-muted-foreground" />
-								Docker Compose
-							</h3>
+							</div>
+							<span className="text-sm font-medium">Docker Compose</span>
 							{state.isSaved ? (
-								<Badge variant="secondary" className="text-xs ">
-									<Check className="h-4 w-4 text-muted-foreground" />
+								<Badge variant="default" className="text-xs ">
+									<Check className="h-4 w-4" />
 									Saved
 								</Badge>
 							) : (
@@ -706,37 +824,66 @@ function DockerContent({
 								</Badge>
 							)}
 						</div>
-						<div className="flex items-center gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								disabled={state.isSaved || isSaving}
-								onClick={() => handleSave()}
-							>
-								{isSaving ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									<Save className="h-4 w-4" />
-								)}
-								Save
-							</Button>
 
-							<Button
-								variant="outline"
-								size="sm"
-								disabled={isCopying}
-								onClick={() => handleCopy()}
-							>
-								{isCopying ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									<Copy className="h-4 w-4" />
-								)}
-								Copy
-							</Button>
+						<div className="flex items-center gap-2">
+							{/* Actions in a dropdown */}
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button variant="outline" size="sm" type="button" className="h-8 px-2">
+										<Menu className="h-4 w-4" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end" className="">
+									<DropdownMenuItem
+										onClick={handleSave}
+										className="flex items-center gap-2"
+										disabled={state.isSaved || isSaving}
+									>
+										<Save className="h-4 w-4" />
+										<span>Save</span>
+										{state.isSaved && <Check className="h-3 w-3 ml-auto text-primary" />}
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={handleCopy}
+										className="flex items-center gap-2"
+									>
+										<Copy className="h-4 w-4" />
+										<span>Copy</span>
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={handleClear}
+										className="flex items-center gap-2"
+									>
+										<Trash className="h-4 w-4" />
+										<span>Clear</span>
+									</DropdownMenuItem>
+
+									<DropdownMenuSeparator />
+									<div className="p-2">
+										<div className="flex items-center justify-between gap-8">
+											<div className="flex flex-col gap-1">
+												<Label
+													htmlFor="strict-mode-dropdown"
+													className="text-xs font-medium"
+												>
+													Strict Mode
+												</Label>
+												<p className="text-xs text-muted-foreground">Enable validations</p>
+											</div>
+											<Switch
+												id="strict-mode-dropdown"
+												className="cursor-pointer"
+												checked={state.isStrict}
+												onCheckedChange={handleStrictToggle}
+											/>
+										</div>
+									</div>
+								</DropdownMenuContent>
+							</DropdownMenu>
 						</div>
 					</div>
 				</div>
+
 				<SmoothAnimate className="p-4">
 					<CodeEditor
 						value={state.content}

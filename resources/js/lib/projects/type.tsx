@@ -26,6 +26,7 @@ export const DEFAULT_PROJECT: Project = {
 	docker: {
 		content: "",
 		isSaved: true,
+		isStrict: false,
 		parsed: {
 			services: [],
 			volumes: [],

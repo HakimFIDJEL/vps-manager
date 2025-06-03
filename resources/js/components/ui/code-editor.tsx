@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Save } from "lucide-react";
+import { Save, X } from "lucide-react";
 // import { IconCheck, IconCopy, IconEdit, IconEye } from "@tabler/icons-react"
 import CodeMirror, { ReactCodeMirrorProps } from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -22,6 +22,8 @@ import { yamlLinter } from "@/lib/docker/linter";
 import { useAppearance } from "@/hooks/use-appearance";
 import { autocompletion } from "@codemirror/autocomplete";
 import { StreamLanguage } from "@codemirror/language";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 
 type CodeBlockProps = {
 	language: string;
@@ -47,7 +49,9 @@ type CodeBlockProps = {
 );
 
 // Helper function to get the appropriate language extension for CodeMirror
-const getLanguageExtension = (lang: string) => {
+const getLanguageExtension = (lang: string | null) => {
+	if (!lang) return null;
+
 	const languageMap: Record<string, any> = {
 		javascript: javascript(),
 		js: javascript(),
@@ -71,7 +75,7 @@ const getLanguageExtension = (lang: string) => {
 		env: StreamLanguage.define(properties),
 	};
 
-	return languageMap[lang.toLowerCase()] || javascript();
+	return languageMap[lang.toLowerCase()] || null;
 };
 
 export const CodeBlock = ({
@@ -90,17 +94,6 @@ export const CodeBlock = ({
 	const [tabsContent, setTabsContent] = React.useState(tabs);
 
 	const tabsExist = tabsContent.length > 0;
-
-	/* Commented out copy functionality as requested
-  const copyToClipboard = async () => {
-    const textToCopy = tabsExist ? tabsContent[activeTab].code : code
-    if (textToCopy) {
-      await navigator.clipboard.writeText(textToCopy)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
-  */
 
 	const [theme, setTheme] =
 		React.useState<ReactCodeMirrorProps["theme"]>("light");
@@ -193,7 +186,7 @@ export const CodeBlock = ({
 						getLanguageExtension(activeLanguage),
 						lintGutter(),
 						linter(yamlLinter),
-					]}
+					].filter(Boolean)}
 					onChange={handleCodeChange}
 					basicSetup={{
 						lineNumbers: true,
@@ -219,7 +212,7 @@ type CodeEditorProps = {
 	onChange: (value: string) => void;
 	onSave?: () => void;
 	isSaved?: boolean;
-	language?: string;
+	language?: string | null;
 	className?: string;
 	customVariables?: Array<{
 		label: string;
@@ -239,7 +232,7 @@ export const CodeEditor = ({
 	onChange,
 	onSave,
 	isSaved = true,
-	language = "yaml",
+	language = null,
 	className = "",
 	customVariables = [],
 	keywords = [],
@@ -298,9 +291,13 @@ export const CodeEditor = ({
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [handleKeyDown]);
 
+	const [showError, setShowError] = React.useState(true);
+
 	return (
 		<>
-			<div className={`relative w-full rounded-lg overflow-auto border ${className}`}>
+			<div
+				className={`relative w-full rounded-lg overflow-auto border ${className}`}
+			>
 				<CodeMirror
 					value={value}
 					height="auto"
@@ -311,7 +308,7 @@ export const CodeEditor = ({
 						lintGutter(),
 						linter(yamlLinter),
 						customCompletion,
-					]}
+					].filter(Boolean)}
 					onChange={onChange}
 					basicSetup={{
 						lineNumbers: true,
@@ -327,8 +324,30 @@ export const CodeEditor = ({
 					}}
 				/>
 
+				<AnimatePresence>
+					{getLanguageExtension(language) == null && showError && (
+						<motion.div
+							initial={{ opacity: 0, y: -10 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -10 }}
+							transition={{ duration: 0.2 }}
+							className="absolute flex items-center justify-center text-sm bg-muted border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
+						>
+							<p className="whitespace-nowrap">There format is currently not supported</p>
+							<Button
+								variant={"outline"}
+								size={"icon"}
+								type="button"
+								onClick={() => setShowError(false)}
+								className="absolute top-1/2 right-[-0.5rem] translate-x-[100%] translate-y-[-50%] rounded-full !bg-muted"
+							>
+								<X size={14} />
+							</Button>
+						</motion.div>
+					)}
+				</AnimatePresence>
 			</div>
-				{comment && <p className="mt-1 text-xs text-muted-foreground">{comment}</p>}
+			{comment && <p className="mt-1 text-xs text-muted-foreground">{comment}</p>}
 		</>
 	);
 };

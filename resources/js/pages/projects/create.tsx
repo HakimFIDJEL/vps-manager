@@ -161,26 +161,6 @@ function Content() {
 
 	function handleValidateStep3() {
 		try {
-			// // Validate only Docker configuration
-			// if (!project.docker.content || project.docker.content.trim() === "") {
-			// 	toast.error("Please configure your Docker Compose");
-			// 	return false;
-			// }
-
-			// // Try to parse the content to ensure it's valid YAML
-			// try {
-			// 	yaml.load(project.docker.content);
-			// } catch (error) {
-			// 	toast.error("Invalid Docker Compose configuration");
-			// 	return false;
-			// }
-
-			// // Check if there's at least one service
-			// if (project.docker.parsed.services.length === 0) {
-			// 	toast.error("Please add at least one service to your Docker Compose");
-			// 	return false;
-			// }
-
 			ProjectSchema.pick({ docker: true }).parse(project);
 
 			// Check if the content is saved

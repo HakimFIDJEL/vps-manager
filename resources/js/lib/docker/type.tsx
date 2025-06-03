@@ -54,6 +54,7 @@ export const DockerComposeSchema = z.object({
 export const DockerComposeStateSchema = z.object({
   content: z.string().nonempty(),
   isSaved: z.boolean(),
+  isStrict: z.boolean(),
   parsed: z.object({
     services: z.array(z.object({
       name: z.string(),
@@ -114,6 +115,7 @@ export const DockerComposeFileSchema = z.object({
 export type DockerCompose = {
   content: string;
   isSaved: boolean;
+  isStrict: boolean;
   parsed: {
     services: Array<{ name: string; image: string; env_file?: string[]; }>;
     volumes: Array<{ name: string; driver: string; }>;
