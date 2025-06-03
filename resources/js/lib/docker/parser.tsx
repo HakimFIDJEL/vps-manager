@@ -132,6 +132,17 @@ export function parseDockerCompose(content: string, isStrict: boolean, variables
         customName: config?.name
       }));
 
+      if(services.length === 0) {
+        toast.error('Invalid docker-compose format: No services found');
+        return {
+          isValid: false,
+          isStrict: isStrict,
+          services: [],
+          volumes: [],
+          networks: []
+        };
+      }
+
       return {
         isValid: true,
         isStrict: isStrict,

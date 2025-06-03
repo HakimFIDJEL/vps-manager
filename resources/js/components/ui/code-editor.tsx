@@ -325,7 +325,7 @@ export const CodeEditor = ({
 				/>
 
 				<AnimatePresence>
-					{getLanguageExtension(language) == null && showError && (
+					{getLanguageExtension(language) == null && showError && value.length == 0 && (
 						<motion.div
 							initial={{ opacity: 0, y: -10 }}
 							animate={{ opacity: 1, y: 0 }}
@@ -333,7 +333,7 @@ export const CodeEditor = ({
 							transition={{ duration: 0.2 }}
 							className="absolute flex items-center justify-center text-sm bg-card border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
 						>
-							<p className="whitespace-nowrap">The format is currently not supported</p>
+								<p className="whitespace-nowrap">The format is currently not supported</p>
 							<Button
 								variant={"outline"}
 								size={"icon"}

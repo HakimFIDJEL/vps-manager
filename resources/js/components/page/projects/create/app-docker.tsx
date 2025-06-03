@@ -79,6 +79,8 @@ import {
 	OctagonMinus,
 	FileKey,
 	Trash,
+	ListRestart,
+	Eraser,
 } from "lucide-react";
 
 export function AppDocker() {
@@ -418,7 +420,7 @@ function DockerSidebar({
 			setState({
 				content: newContent,
 				isSaved: false,
-				isStrict: false,
+				isStrict: state.isStrict,
 				parsed: {
 					services: parsed.services,
 					volumes: parsed.volumes,
@@ -428,7 +430,7 @@ function DockerSidebar({
 			updateProject("docker", {
 				content: newContent,
 				isSaved: false,
-				isStrict: false,
+				isStrict: state.isStrict,
 				parsed: {
 					services: parsed.services,
 					volumes: parsed.volumes,
@@ -442,7 +444,7 @@ function DockerSidebar({
 		const newState = {
 			content: "",
 			isSaved: true,
-			isStrict: false,
+			isStrict: state.isStrict,
 			parsed: { services: [], volumes: [], networks: [] },
 		};
 
@@ -453,13 +455,25 @@ function DockerSidebar({
 
 	return (
 		<SmoothAnimate
-			className="col-span-3 flex flex-col gap-4"
+			className="col-span-3 flex flex-col gap-4 items-center"
 		>
+			<Button
+				type="button"
+				variant="outline"
+				className="w-full"
+				onClick={handleReset}
+			>
+				<Eraser className="h-4 w-4" />
+				Reset
+			</Button>
+			
+			<Separator className="!w-[90%]"/>
+
 			{(state.isStrict || project.variables.length > 0) && (
 				<Accordion
 					type="single"
 					collapsible
-					className={`rounded-lg bg-card overflow-hidden ${state.isStrict || project.variables.length > 0 ? "border" : ""}`}
+					className={`rounded-lg bg-card overflow-hidden w-full ${state.isStrict || project.variables.length > 0 ? "border" : ""}`}
 				>
 					<SmoothAnimate>
 						{state.isStrict && (
@@ -634,7 +648,7 @@ function DockerSidebar({
 				)}
 
 			{project.variables.length > 0 && (
-				<div className={`flex flex-col ${state.isStrict ? "gap-4" : ""}`}>
+				<div className={` w-full flex flex-col ${state.isStrict ? "gap-4" : ""}`}>
 					<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
 						<div className="flex items-start gap-3">
 							<div className="space-y-2">
@@ -653,7 +667,7 @@ function DockerSidebar({
 			)}
 
 			{state.isStrict && project.variables.length > 0 && (
-				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
+				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md w-full">
 					<div className="flex items-start gap-3">
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
@@ -670,7 +684,7 @@ function DockerSidebar({
 			)}
 
 			{state.isStrict == false && (
-				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
+				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md w-full">
 					<div className="flex items-start gap-3">
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
@@ -686,15 +700,7 @@ function DockerSidebar({
 				</div>
 			)}
 
-			<Button
-				type="button"
-				variant="outline"
-				className="w-full"
-				onClick={handleReset}
-			>
-				<ArrowLeft className="h-4 w-4" />
-				Reset
-			</Button>
+			
 		</SmoothAnimate>
 	);
 }
