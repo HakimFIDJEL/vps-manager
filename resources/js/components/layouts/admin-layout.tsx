@@ -1,3 +1,7 @@
+// Necessary imports
+import { usePage } from "@inertiajs/react";
+import { useEffect } from "react";
+
 // Providers
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,7 +16,7 @@ import { type ReactNode } from "react";
 
 // Shadcn UI components
 import { Toaster } from "@/components/ui/sonner";
-import { toast } from 'sonner'
+import { toast } from "sonner";
 
 interface AdminLayoutProps {
 	children: ReactNode;
@@ -20,14 +24,29 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
+	const { props } = usePage<{
+		flash?: { success?: string; error?: string };
+		success?: string;
+		error?: string;
+	}>();
+
+	useEffect(() => {
+		const flashSuccess =
+			props.flash?.success ?? (props.success as string | undefined);
+		const flashError = props.flash?.error ?? (props.error as string | undefined);
+
+		if (flashSuccess) {
+			toast.success(flashSuccess);
+		}
+		if (flashError) {
+			toast.error(flashError);
+		}
+	}, [props]);
 
 	return (
 		<TooltipProvider>
 			<SidebarProvider className="bg-muted/50 dark:bg-background">
-				<AppSidebar
-					variant="floating"
-					className="bg-muted/50 dark:bg-background"
-				/>
+				<AppSidebar variant="floating" className="bg-muted/50 dark:bg-background" />
 				<SidebarInset className="bg-muted/50 dark:bg-background">
 					<AppHeader breadcrumbs={breadcrumbs} />
 					<div className="flex flex-1 flex-col">

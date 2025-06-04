@@ -28,6 +28,8 @@ Route::prefix('/projects')->name('projects.')->controller(ProjectController::cla
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
     Route::get('/show/{inode}', 'show')->name('show');
+
+    Route::post('/store', 'store')->name('store');
 });
 
 // AUTH ROUTES

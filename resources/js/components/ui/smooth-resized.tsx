@@ -25,9 +25,10 @@ type SmoothItemProps = React.ComponentProps<"div"> & MotionProps & {
 	initial?: boolean | TargetAndTransition | VariantLabels | undefined;
 	animate?: boolean | TargetAndTransition | VariantLabels | undefined;
 	exit?: TargetAndTransition | VariantLabels | undefined;
+	delay?: number;
 }
 
-function SmoothItem({ className, initial, animate, exit, ...props }: SmoothItemProps) {
+function SmoothItem({ className, initial, delay, animate, exit, ...props }: SmoothItemProps) {
 	return (
 		<motion.div
 			layout
@@ -35,10 +36,11 @@ function SmoothItem({ className, initial, animate, exit, ...props }: SmoothItemP
 			transition={{
 				duration: 0.3,
 				ease: "easeInOut",
+				delay: delay ? delay : 0,
 			}}
-			initial={initial || { opacity: 0, scale: 0.95 }}
+			initial={initial || { opacity: 0, scale: 0.99, }}
 			animate={animate || { opacity: 1, scale: 1 }}
-			exit={exit || { opacity: 0, scale: 0.95 }}
+			exit={exit || { opacity: 0, scale: 0.99 }}
 			{...props}
 		/>
 	);

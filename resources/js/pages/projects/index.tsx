@@ -21,7 +21,14 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsBody, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+	Tabs,
+	TabsBody,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@/components/ui/tabs";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Icons
 import {
@@ -123,59 +130,68 @@ export default function Page() {
 			<Head title="Projects" />
 
 			<Tabs defaultValue="list" className="w-full">
-				<TabsList className="grid w-max grid-cols-2">
-					<TabsTrigger value="list">
-						<TableProperties />
-					</TabsTrigger>
-					<TabsTrigger value="grid">
-						<LayoutGrid />
-					</TabsTrigger>
-				</TabsList>
+				<SmoothItem
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					delay={0.1}
+				>
+					<TabsList className="grid w-max grid-cols-2">
+						<TabsTrigger value="list">
+							<TableProperties />
+						</TabsTrigger>
+						<TabsTrigger value="grid">
+							<LayoutGrid />
+						</TabsTrigger>
+					</TabsList>
+				</SmoothItem>
 
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-						<Folder className="w-5 h-5 text-muted-foreground" />
-							Projects
-						</CardTitle>
-						<CardDescription>List of all projects</CardDescription>
-						<CardAction className="flex items-center gap-2">
-							<Link href={route("projects.index")}>
-								<Button variant={"secondary"}>
-									<RefreshCcw />
-								</Button>
-							</Link>
-							<Link href={route("projects.create")}>
-								<Button variant={"default"}>
-									<Plus />
-									Create a new project
-								</Button>
-							</Link>
-						</CardAction>
-					</CardHeader>
-					<Separator />
+				<SmoothItem delay={0.3}>
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Folder className="w-5 h-5 text-muted-foreground" />
+								Projects
+							</CardTitle>
+							<CardDescription>List of all projects</CardDescription>
+							<CardAction className="flex items-center gap-2">
+								<Link href={route("projects.index")}>
+									<Button variant={"secondary"}>
+										<RefreshCcw />
+									</Button>
+								</Link>
+								<Link href={route("projects.create")}>
+									<Button variant={"default"}>
+										<Plus />
+										Create a new project
+									</Button>
+								</Link>
+							</CardAction>
+						</CardHeader>
+						<Separator />
 
-					<CardContent>
-						<TabsBody>
-							<TabsContent value="grid">
+						<CardContent>
+							<TabsBody>
+								<TabsContent value="grid">
 									{/* Cards */}
 									<AppGrid projects={projects} />
-							</TabsContent>
-							<TabsContent value="list">
+								</TabsContent>
+								<TabsContent value="list">
 									{/* Table */}
 									<AppTable projects={projects} />
-							</TabsContent>
-						</TabsBody>
-					</CardContent>
+								</TabsContent>
+							</TabsBody>
+						</CardContent>
 
-					<Separator />
-					<CardFooter className="text-sm text-muted-foreground flex items-center gap-2">
-						<TriangleAlert />
-						All projects are fetched from the server itself without a database, if a
-						project is not found, try reloading the page, check the server logs or
-						access the sever via SSH.
-					</CardFooter>
-				</Card>
+						<Separator />
+						<CardFooter className="text-sm text-muted-foreground flex items-center gap-2">
+							<TriangleAlert />
+							All projects are fetched from the server itself without a database, if a
+							project is not found, try reloading the page, check the server logs or
+							access the sever via SSH.
+						</CardFooter>
+					</Card>
+				</SmoothItem>
 			</Tabs>
 		</AdminLayout>
 	);

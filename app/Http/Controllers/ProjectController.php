@@ -14,4 +14,10 @@ class ProjectController extends Controller
     public function create() {
         return Inertia::render('projects/create');
     }
+
+    public function store(Request $request) {
+        sleep(2);
+
+        return redirect()->route('projects.index')->with(['success' => 'Project created successfully!']);
+    }
 }
