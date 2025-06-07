@@ -12,7 +12,7 @@ function SmoothResize({
 	return (
 		<motion.div
 			layout
-			className={cn("overflow-hidden", className)}
+			className={cn("", className)}
 			transition={{ duration: 0.3, ease: "easeInOut" }}
 			{...props}
 		>
@@ -26,12 +26,13 @@ type SmoothItemProps = React.ComponentProps<"div"> & MotionProps & {
 	animate?: boolean | TargetAndTransition | VariantLabels | undefined;
 	exit?: TargetAndTransition | VariantLabels | undefined;
 	delay?: number;
+	layout?: boolean | "size" | "position" | "preserve-aspect" | "preserve-aspect-size";
 }
 
-function SmoothItem({ className, initial, delay, animate, exit, ...props }: SmoothItemProps) {
+function SmoothItem({ className, layout=true, initial, delay, animate, exit, ...props }: SmoothItemProps) {
 	return (
 		<motion.div
-			layout
+			layout={layout ? layout : false}
 			className={className}
 			transition={{
 				duration: 0.3,

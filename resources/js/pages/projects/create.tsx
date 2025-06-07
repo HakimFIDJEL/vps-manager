@@ -54,7 +54,6 @@ import {
 	Plus,
 	SquareTerminal,
 } from "lucide-react";
-import { set } from "date-fns";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
@@ -252,7 +251,7 @@ function Content() {
 				</Card>
 			</SmoothItem>
 
-			<SmoothItem delay={0.5}>
+			<SmoothItem delay={0.5} layout={false}>
 				<form onSubmit={handleSubmit}>
 					
 					<StepperBody>

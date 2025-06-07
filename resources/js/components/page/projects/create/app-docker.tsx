@@ -81,6 +81,8 @@ import {
 	Trash,
 	ListRestart,
 	Eraser,
+	RefreshCcw,
+	Ellipsis,
 } from "lucide-react";
 
 export function AppDocker() {
@@ -388,11 +390,9 @@ function TemplateLink({
 function DockerSidebar({
 	state,
 	setState,
-	setCurrentValue,
 }: {
 	state: DockerCompose;
 	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
-	setCurrentValue: (value: string) => void;
 }) {
 	const { project, updateProject } = useProject();
 
@@ -440,35 +440,8 @@ function DockerSidebar({
 		}
 	};
 
-	const handleReset = () => {
-		const newState = {
-			content: "",
-			isSaved: true,
-			isStrict: state.isStrict,
-			parsed: { services: [], volumes: [], networks: [] },
-		};
-
-		setState(newState);
-		setCurrentValue("empty");
-		updateProject("docker", newState);
-	};
-
 	return (
-		<SmoothAnimate
-			className="col-span-3 flex flex-col gap-4 items-center"
-		>
-			<Button
-				type="button"
-				variant="outline"
-				className="w-full"
-				onClick={handleReset}
-			>
-				<Eraser className="h-4 w-4" />
-				Reset
-			</Button>
-			
-			<Separator className="!w-[90%]"/>
-
+		<SmoothAnimate className="col-span-3 flex flex-col gap-4 items-center">
 			{(state.isStrict || project.variables.length > 0) && (
 				<Accordion
 					type="single"
@@ -645,7 +618,7 @@ function DockerSidebar({
 						)}
 					</SmoothAnimate>
 				</Accordion>
-				)}
+			)}
 
 			{project.variables.length > 0 && (
 				<div className={` w-full flex flex-col ${state.isStrict ? "gap-4" : ""}`}>
@@ -699,8 +672,6 @@ function DockerSidebar({
 					</div>
 				</div>
 			)}
-
-			
 		</SmoothAnimate>
 	);
 }
@@ -708,9 +679,11 @@ function DockerSidebar({
 function DockerContent({
 	state,
 	setState,
+	setCurrentValue,
 }: {
 	state: DockerCompose;
 	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
+	setCurrentValue: (value: string) => void;
 }) {
 	const [isSaving, setIsSaving] = useState(false);
 	const [isCopying, setIsCopying] = useState(false);
@@ -723,6 +696,19 @@ function DockerContent({
 			content,
 			isSaved: false,
 		}));
+	};
+
+	const handleReset = () => {
+		const newState = {
+			content: "",
+			isSaved: true,
+			isStrict: state.isStrict,
+			parsed: { services: [], volumes: [], networks: [] },
+		};
+
+		setState(newState);
+		setCurrentValue("empty");
+		updateProject("docker", newState);
 	};
 
 	const handleSave = () => {
@@ -835,8 +821,8 @@ function DockerContent({
 							{/* Actions in a dropdown */}
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="outline" size="sm" type="button" className="h-8 px-2">
-										<Menu className="h-4 w-4" />
+									<Button variant="outline" size="icon" type="button" className="h-8 px-2">
+										<Ellipsis className="h-4 w-4" />
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="">
@@ -859,9 +845,17 @@ function DockerContent({
 									<DropdownMenuItem
 										onClick={handleClear}
 										className="flex items-center gap-2"
+										disabled={state.isStrict}
 									>
-										<Trash className="h-4 w-4" />
+										<Eraser className="h-4 w-4" />
 										<span>Clear</span>
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onClick={handleReset}
+										className="flex items-center gap-2"
+									>
+										<RefreshCcw className="h-4 w-4" />
+										<span>Reset</span>
 									</DropdownMenuItem>
 
 									<DropdownMenuSeparator />
@@ -922,12 +916,12 @@ function DockerConfiguration({
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-12 gap-4">
-				<DockerContent state={state} setState={setState} />
-				<DockerSidebar
+				<DockerContent
 					state={state}
 					setState={setState}
 					setCurrentValue={setCurrentValue}
 				/>
+				<DockerSidebar state={state} setState={setState} />
 			</div>
 		</div>
 	);

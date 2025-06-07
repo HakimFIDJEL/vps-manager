@@ -15,6 +15,10 @@ class ProjectController extends Controller
         return Inertia::render('projects/create');
     }
 
+    public function show() {
+        return Inertia::render('projects/show');
+    }
+
     public function store(Request $request) {
         sleep(2);
 
