@@ -15,7 +15,8 @@ class ProjectController extends Controller
         return Inertia::render('projects/create');
     }
 
-    public function show() {
+    public function show(int $inode) {
+
         return Inertia::render('projects/show');
     }
 

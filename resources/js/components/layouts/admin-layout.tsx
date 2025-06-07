@@ -46,7 +46,7 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 	return (
 		<TooltipProvider>
 			<SidebarProvider className="bg-muted/50 dark:bg-background">
-				<AppSidebar variant="floating" className="bg-muted/50 dark:bg-background" />
+				<AppSidebar variant="floating" />
 				<SidebarInset className="bg-muted/50 dark:bg-background">
 					<AppHeader breadcrumbs={breadcrumbs} />
 					<div className="flex flex-1 flex-col">

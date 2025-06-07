@@ -42,7 +42,7 @@ export function formatActions(inode: number) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Link href={route("projects.show", { inode })}>
+        <Link href={route("projects.show", { 'inode': inode })}>
           <Button variant="outline" size="sm"><ArrowUpRight className="h-4 w-4"/></Button>
         </Link>
       </TooltipTrigger>

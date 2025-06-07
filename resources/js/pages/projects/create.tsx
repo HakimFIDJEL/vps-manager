@@ -16,6 +16,7 @@ import { AppVariables } from "@/components/page/projects/create/app-variables";
 import { AppDocker } from "@/components/page/projects/create/app-docker";
 import { AppMakefile } from "@/components/page/projects/create/app-makefile";
 import { AppDone } from "@/components/page/projects/create/app-done";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import {
@@ -40,7 +41,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Icons
 import {
