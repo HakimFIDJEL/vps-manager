@@ -10,10 +10,15 @@ import { Label } from "@/components/ui/label";
 import { formatSlug } from "@/lib/projects/formatter"; 
 
 export function AppProject() {
+
+    // Custom hooks
     const { project, updateProject } = useProject();
+    
+    // States
     const [name, setName] = useState<string>(project.name);
     const [folderPath, setFolderPath] = useState<string>(project.folderPath);
-
+    
+    // Hooks
     useEffect(() => {
         setName(project.name);
         setFolderPath(project.folderPath);

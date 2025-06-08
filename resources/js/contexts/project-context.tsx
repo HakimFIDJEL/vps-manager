@@ -1,5 +1,8 @@
 import { createContext, useContext, useState } from "react";
 import { type Project, type ProjectContextType, DEFAULT_PROJECT } from "@/lib/projects/type";
+import { CommandProvider } from "./command-context";
+import { VariableProvider } from "./variable-context";
+import { DockerProvider } from "./docker-context";
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -15,7 +18,13 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ProjectContext.Provider value={{ project, setProject, updateProject }}>
-      {children}
+      <CommandProvider>
+        <VariableProvider>
+          <DockerProvider>
+            {children}
+          </DockerProvider>
+        </VariableProvider>
+      </CommandProvider>
     </ProjectContext.Provider>
   );
 }

@@ -43,3 +43,31 @@ export const ProjectSchema = z.object({
 	commands: z.array(CommandSchema),
 	docker: DockerComposeStateSchema,
 });
+
+export const ProjectExample: Project = {
+	name: "Example Project",
+	folderPath: "/projects/example-project",
+	variables: [
+		{
+			key: "EXAMPLE_VAR",
+			value: "example_value",
+		},
+	],
+	commands: [
+		{
+			target: "build",
+			command: "npm run build",
+			description: "Build the project",
+		},
+	],
+	docker: {
+		content: "",
+		isSaved: true,
+		isStrict: false,
+		parsed: {
+			services: [],
+			volumes: [],
+			networks: [],
+		},
+	},
+}

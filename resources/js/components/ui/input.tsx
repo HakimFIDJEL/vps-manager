@@ -32,7 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const inputStyles = cn(
       // Styles de base
       "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground",
-      "dark:bg-input/30 bg-transparent text-base shadow-xs outline-none md:text-sm",
+      "dark:bg-input/30 bg-background text-base shadow-xs outline-none md:text-sm",
       "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
       "h-9 min-w-0 px-3 py-1 transition-[color,box-shadow]",
 

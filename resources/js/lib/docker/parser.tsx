@@ -64,7 +64,7 @@ export type ParsedDockerCompose = {
 export function parseDockerCompose(content: string, isStrict: boolean, variables_length: number): ParsedDockerCompose {
   try {
     if(content.length === 0) {
-      toast.error('Invalid docker-compose format: Empty file');
+      toast.error('Invalid docker configuration format: Empty file');
       return {
         isValid: false,
         isStrict: isStrict,
@@ -88,7 +88,7 @@ export function parseDockerCompose(content: string, isStrict: boolean, variables
           return `Field "${path}": ${err.message}`;
         });
         console.error('Detailed validation errors:', errors);
-        toast.error(`Invalid docker-compose format: ${errors.join(', ')}`);
+        toast.error(`Invalid docker configuration format: ${errors.join(', ')}`);
         return {
           isValid: false,
           isStrict: false,
@@ -133,7 +133,7 @@ export function parseDockerCompose(content: string, isStrict: boolean, variables
       }));
 
       if(services.length === 0) {
-        toast.error('Invalid docker-compose format: No services found');
+        toast.error('Invalid docker configuration format: No services found');
         return {
           isValid: false,
           isStrict: isStrict,
@@ -169,15 +169,15 @@ export function parseDockerCompose(content: string, isStrict: boolean, variables
 
 
   } catch (error) {
-    console.error('Error parsing docker-compose:', error);
+    console.error('Error parsing docker configuration:', error);
     if (error instanceof z.ZodError) {
       const errors = error.errors.map(err => {
         const path = err.path.join('.');
         return `Field "${path}": ${err.message}`;
       });
-      toast.error(`Invalid docker-compose format: ${errors.join(', ')}`);
+      toast.error(`Invalid docker configuration format: ${errors.join(', ')}`);
     } else if (error instanceof Error) {
-      toast.error(`Failed to parse docker-compose: ${error.message}`);
+      toast.error(`Failed to parse docker configuration: ${error.message}`);
     }
 
     return {

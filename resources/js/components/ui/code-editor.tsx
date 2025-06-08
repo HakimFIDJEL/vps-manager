@@ -321,7 +321,13 @@ export const CodeEditor = ({
 						foldGutter: true,
 						indentOnInput: true,
 						syntaxHighlighting: true,
+						drawSelection: true,
+						highlightActiveLineGutter: true,
 					}}
+					style={{
+						"--cm-selection-background": "rgba(255, 255, 255, 0.2)",
+						"--cm-selectionMatch-background": "rgba(255, 255, 255, 0.2)",
+					} as React.CSSProperties}
 				/>
 
 				<AnimatePresence>
@@ -333,7 +339,7 @@ export const CodeEditor = ({
 							transition={{ duration: 0.2 }}
 							className="absolute flex items-center justify-center text-sm bg-card border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
 						>
-								<p className="whitespace-nowrap">The format is currently not supported</p>
+							<p className="whitespace-nowrap">The format is currently not supported</p>
 							<Button
 								variant={"outline"}
 								size={"icon"}

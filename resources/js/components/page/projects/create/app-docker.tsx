@@ -2,11 +2,12 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import yaml from "js-yaml";
 import { useProject } from "@/contexts/project-context";
+import { useDocker } from "@/contexts/docker-context";
 
 // Libs
 import { DOCKER_COMPOSE_KEYWORDS } from "@/lib/docker/keywords";
@@ -15,7 +16,7 @@ import { formatServiceImage, formatDockerDriver } from "@/lib/docker/formatter";
 import { DOCKER_TEMPLATES } from "@/lib/docker/templates";
 
 // Types
-import { type DockerCompose, DockerComposeFileSchema } from "@/lib/docker/type";
+import { DockerComposeFileSchema } from "@/lib/docker/type";
 
 // Custom components
 import { SmoothAnimate } from "@/components/ui/smooth-resized";
@@ -68,50 +69,21 @@ import {
 	FileUp,
 	ArrowRight,
 	File,
-	ArrowLeft,
 	Check,
 	FileLock,
 	Info,
 	LucideIcon,
 	Save,
 	X,
-	Menu,
 	OctagonMinus,
 	FileKey,
-	Trash,
-	ListRestart,
 	Eraser,
 	RefreshCcw,
 	Ellipsis,
 } from "lucide-react";
 
 export function AppDocker() {
-	const { project, updateProject } = useProject();
-
-	const [state, setState] = useState<DockerCompose>(project.docker);
-
-	// Synchroniser l'état avec le contexte du projet
-	useEffect(() => {
-		if (project.docker.content && project.docker.content !== state.content) {
-			setState({
-				content: project.docker.content,
-				isSaved: project.docker.isSaved,
-				isStrict: project.docker.isStrict,
-				parsed: project.docker.parsed,
-			});
-		}
-	}, [project.docker]);
-
-	// Synchroniser le contexte avec l'état
-	useEffect(() => {
-		// Ne mettre à jour que si le contenu a réellement changé
-		if (state.content && state.content !== project.docker.content) {
-			updateProject("docker", {
-				...state,
-				isSaved: false,
-			});
-		}
-	}, [state.content, updateProject, project.docker.content]);
+	const { project } = useProject();
 
 	return (
 		<Tabs defaultValue={project.docker.content ? "docker" : "empty"}>
@@ -121,28 +93,29 @@ export function AppDocker() {
 			</TabsList>
 			<TabsBody>
 				<TabsContent value="empty">
-					<EmptyDockerState state={state} setState={setState} />
+					<EmptyDockerState />
 				</TabsContent>
 				<TabsContent value="docker">
-					<DockerConfiguration state={state} setState={setState} />
+					<DockerConfiguration />
 				</TabsContent>
 			</TabsBody>
 		</Tabs>
 	);
 }
 
-function EmptyDockerState({
-	state,
-	setState,
-}: {
-	state: DockerCompose;
-	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
-}) {
-	const { setCurrentValue } = useTabsContext();
+function EmptyDockerState() {
+	// States
 	const [isDragActive, setIsDragActive] = useState(false);
-	const inputFileRef = useRef<HTMLInputElement>(null);
-	const { project, updateProject } = useProject();
 
+	// Refs
+	const inputFileRef = useRef<HTMLInputElement>(null);
+
+	// Custom hooks
+	const { setCurrentValue } = useTabsContext();
+	const { project } = useProject();
+	const { handleDockerAction } = useDocker();
+
+	// Variables
 	const DockerComposeForm = useForm<z.infer<typeof DockerComposeFileSchema>>({
 		resolver: zodResolver(DockerComposeFileSchema),
 		mode: "onChange",
@@ -151,12 +124,13 @@ function EmptyDockerState({
 		},
 	});
 
+	// Custom methods
 	const handleTemplateSelect = (templateKey: keyof typeof DOCKER_TEMPLATES) => {
 		const templateContent = DOCKER_TEMPLATES[templateKey];
 		const variable_length = project.variables.length;
 		const parsed = parseDockerCompose(
 			templateContent,
-			state.isStrict,
+			project.docker.isStrict,
 			variable_length,
 		);
 		if (parsed.isValid && parsed.updatedContent) {
@@ -171,11 +145,8 @@ function EmptyDockerState({
 				},
 			};
 
-			setState(newState);
-
 			setCurrentValue("docker");
-
-			updateProject("docker", newState);
+			handleDockerAction({ type: "create", docker: newState });
 		}
 	};
 
@@ -201,11 +172,14 @@ function EmptyDockerState({
 
 			// Read file content
 			const content = await file.text();
-			console.log("File content:", content);
 
 			// Parse and validate content
 			const variable_length = project.variables.length;
-			const parsed = parseDockerCompose(content, state.isStrict, variable_length);
+			const parsed = parseDockerCompose(
+				content,
+				project.docker.isStrict,
+				variable_length,
+			);
 			if (parsed.isValid && parsed.updatedContent) {
 				const newState = {
 					content: parsed.updatedContent,
@@ -218,11 +192,9 @@ function EmptyDockerState({
 					},
 				};
 
-				setState(newState);
-
 				setCurrentValue("docker");
 
-				updateProject("docker", newState);
+				handleDockerAction({ type: "create", docker: newState });
 			}
 		} catch (error) {
 			console.error("Error uploading file:", error);
@@ -326,7 +298,6 @@ function EmptyDockerState({
 						subtitle="PHP 8.2, Node.js, Apache, MySQL, phpMyAdmin, Traefik"
 						icon={Server}
 						onClick={() => handleTemplateSelect("webApp")}
-						dockerCompose={DOCKER_TEMPLATES.webApp}
 					/>
 
 					<TemplateLink
@@ -334,7 +305,6 @@ function EmptyDockerState({
 						subtitle="Jupyter Notebook, PostgreSQL, Metabase"
 						icon={Database}
 						onClick={() => handleTemplateSelect("dataScience")}
-						dockerCompose={DOCKER_TEMPLATES.dataScience}
 					/>
 
 					<TemplateLink
@@ -342,7 +312,6 @@ function EmptyDockerState({
 						subtitle="Nginx, Volume, Network"
 						icon={Settings}
 						onClick={() => handleTemplateSelect("minimal")}
-						dockerCompose={DOCKER_TEMPLATES.minimal}
 					/>
 				</div>
 			</div>
@@ -355,14 +324,12 @@ function TemplateLink({
 	subtitle,
 	icon: Icon,
 	onClick,
-	dockerCompose,
 	className,
 }: {
 	title: string;
 	subtitle: string;
 	icon: LucideIcon;
 	onClick: () => void;
-	dockerCompose: string;
 	className?: string;
 }) {
 	return (
@@ -387,69 +354,33 @@ function TemplateLink({
 	);
 }
 
-function DockerSidebar({
-	state,
-	setState,
-}: {
-	state: DockerCompose;
-	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
-}) {
-	const { project, updateProject } = useProject();
+function DockerSidebar() {
+	// Custom hooks
+	const { project } = useProject();
+	const { handleDockerAction } = useDocker();
 
+	// Custom methods
 	const handleRemove = (
 		name: string,
 		type: "services" | "volumes" | "networks",
 	) => {
-		const content = yaml.load(state.content) as Record<string, any>;
-		if (!content) return;
-
-		const newContent = yaml.dump({
-			...content,
-			[type]: Object.fromEntries(
-				Object.entries(content[type] || {}).filter(([key]) => key !== name),
-			),
+		handleDockerAction({
+			type: "remove-type",
+			name,
+			elementType: type,
 		});
-
-		const variable_length = project.variables.length;
-		const parsed = parseDockerCompose(
-			newContent,
-			state.isStrict,
-			variable_length,
-		);
-		if (parsed.isValid) {
-			setState({
-				content: newContent,
-				isSaved: false,
-				isStrict: state.isStrict,
-				parsed: {
-					services: parsed.services,
-					volumes: parsed.volumes,
-					networks: parsed.networks,
-				},
-			});
-			updateProject("docker", {
-				content: newContent,
-				isSaved: false,
-				isStrict: state.isStrict,
-				parsed: {
-					services: parsed.services,
-					volumes: parsed.volumes,
-					networks: parsed.networks,
-				},
-			});
-		}
 	};
 
 	return (
 		<SmoothAnimate className="col-span-3 flex flex-col gap-4 items-center">
-			{(state.isStrict || project.variables.length > 0) && (
+			{(project.docker.isStrict || project.variables.length > 0) && (
 				<Accordion
 					type="single"
 					collapsible
-					className={`rounded-lg bg-card overflow-hidden w-full ${state.isStrict || project.variables.length > 0 ? "border" : ""}`}
+					className={`rounded-lg bg-card overflow-hidden w-full ${project.docker.isStrict || project.variables.length > 0 ? "border" : ""}`}
 				>
 					<SmoothAnimate>
-						{state.isStrict && (
+						{project.docker.isStrict && (
 							<>
 								<AccordionItem value="services">
 									<AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors rounded-none cursor-pointer">
@@ -457,9 +388,9 @@ function DockerSidebar({
 											<Server className="h-4 w-4 text-primary" />
 											<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
 												<span>Services</span>
-												{state.parsed.services.length > 0 && (
+												{project.docker.parsed.services.length > 0 && (
 													<span className="text-xs text-muted-foreground">
-														({state.parsed.services.length})
+														({project.docker.parsed.services.length})
 													</span>
 												)}
 											</SmoothAnimate>
@@ -468,7 +399,7 @@ function DockerSidebar({
 									<AccordionContent className="px-0 pt-0">
 										<Separator className="mb-6" />
 										<SmoothAnimate className="space-y-2 px-4 pb-2">
-											{state.parsed.services.map((service) => (
+											{project.docker.parsed.services.map((service) => (
 												<div
 													key={service.name}
 													className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
@@ -488,7 +419,7 @@ function DockerSidebar({
 													</Button>
 												</div>
 											))}
-											{state.parsed.services.length === 0 && (
+											{project.docker.parsed.services.length === 0 && (
 												<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
 													No services found
 												</div>
@@ -503,9 +434,9 @@ function DockerSidebar({
 											<Database className="h-4 w-4 text-primary" />
 											<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
 												<span>Volumes</span>
-												{state.parsed.volumes.length > 0 && (
+												{project.docker.parsed.volumes.length > 0 && (
 													<span className="text-xs text-muted-foreground">
-														({state.parsed.volumes.length})
+														({project.docker.parsed.volumes.length})
 													</span>
 												)}
 											</SmoothAnimate>
@@ -514,7 +445,7 @@ function DockerSidebar({
 									<AccordionContent className="px-0 pt-0">
 										<Separator className="mb-6" />
 										<SmoothAnimate className="space-y-2 px-4 pb-2">
-											{state.parsed.volumes.map((volume) => (
+											{project.docker.parsed.volumes.map((volume) => (
 												<div
 													key={volume.name}
 													className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
@@ -534,7 +465,7 @@ function DockerSidebar({
 													</Button>
 												</div>
 											))}
-											{state.parsed.volumes.length === 0 && (
+											{project.docker.parsed.volumes.length === 0 && (
 												<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
 													No volumes found
 												</div>
@@ -549,9 +480,9 @@ function DockerSidebar({
 											<Network className="h-4 w-4 text-primary" />
 											<SmoothAnimate className="text-sm font-medium flex items-center gap-2">
 												<span>Networks</span>
-												{state.parsed.networks.length > 0 && (
+												{project.docker.parsed.networks.length > 0 && (
 													<span className="text-xs text-muted-foreground">
-														({state.parsed.networks.length})
+														({project.docker.parsed.networks.length})
 													</span>
 												)}
 											</SmoothAnimate>
@@ -560,7 +491,7 @@ function DockerSidebar({
 									<AccordionContent className="px-0 pt-0">
 										<Separator className="mb-6" />
 										<SmoothAnimate className="space-y-2 px-4 pb-2">
-											{state.parsed.networks.map((network) => (
+											{project.docker.parsed.networks.map((network) => (
 												<div
 													key={network.name}
 													className="relative flex items-center justify-between px-3 py-2 rounded-md bg-muted/50 border border-border/50 hover:border-primary/50 transition-colors group"
@@ -580,7 +511,7 @@ function DockerSidebar({
 													</Button>
 												</div>
 											))}
-											{state.parsed.networks.length === 0 && (
+											{project.docker.parsed.networks.length === 0 && (
 												<div className="text-sm text-muted-foreground px-4 py-2 bg-muted/50 border border-border/50 rounded-md">
 													No networks found
 												</div>
@@ -621,7 +552,9 @@ function DockerSidebar({
 			)}
 
 			{project.variables.length > 0 && (
-				<div className={` w-full flex flex-col ${state.isStrict ? "gap-4" : ""}`}>
+				<div
+					className={` w-full flex flex-col ${project.docker.isStrict ? "gap-4" : ""}`}
+				>
 					<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
 						<div className="flex items-start gap-3">
 							<div className="space-y-2">
@@ -639,7 +572,7 @@ function DockerSidebar({
 				</div>
 			)}
 
-			{state.isStrict && project.variables.length > 0 && (
+			{project.docker.isStrict && project.variables.length > 0 && (
 				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md w-full">
 					<div className="flex items-start gap-3">
 						<div className="space-y-2">
@@ -656,7 +589,7 @@ function DockerSidebar({
 				</div>
 			)}
 
-			{state.isStrict == false && (
+			{project.docker.isStrict == false && (
 				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md w-full">
 					<div className="flex items-start gap-3">
 						<div className="space-y-2">
@@ -676,123 +609,11 @@ function DockerSidebar({
 	);
 }
 
-function DockerContent({
-	state,
-	setState,
-	setCurrentValue,
-}: {
-	state: DockerCompose;
-	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
-	setCurrentValue: (value: string) => void;
-}) {
-	const [isSaving, setIsSaving] = useState(false);
-	const [isCopying, setIsCopying] = useState(false);
-
-	const { project, updateProject } = useProject();
-
-	const handleDockerComposeChange = (content: string) => {
-		setState((prev: DockerCompose) => ({
-			...prev,
-			content,
-			isSaved: false,
-		}));
-	};
-
-	const handleReset = () => {
-		const newState = {
-			content: "",
-			isSaved: true,
-			isStrict: state.isStrict,
-			parsed: { services: [], volumes: [], networks: [] },
-		};
-
-		setState(newState);
-		setCurrentValue("empty");
-		updateProject("docker", newState);
-	};
-
-	const handleSave = () => {
-		setIsSaving(true);
-
-		// Validation stricte au moment de la sauvegarde
-		const variable_length = project.variables.length;
-		const parsed = parseDockerCompose(
-			state.content,
-			state.isStrict,
-			variable_length,
-		);
-		if (parsed.isValid && parsed.updatedContent) {
-			const newState = {
-				content: parsed.updatedContent,
-				isSaved: true,
-				isStrict: state.isStrict,
-				parsed: {
-					services: parsed.services,
-					volumes: parsed.volumes,
-					networks: parsed.networks,
-				},
-			};
-			setState(newState);
-			updateProject("docker", newState); // Synchroniser avec l'état global
-			toast.success("Docker-compose.yml file saved");
-		}
-
-		setIsSaving(false);
-	};
-
-	const handleClear = () => {
-		const updatedContent = yaml.dump({
-			services: {},
-			volumes: {},
-			networks: {},
-		});
-		const variable_length = project.variables.length;
-		const parsed = parseDockerCompose(
-			updatedContent,
-			state.isStrict,
-			variable_length,
-		);
-
-		if (!parsed.isValid) {
-			toast.error(
-				"Failed to clear Docker-compose.yml file due to validation errors",
-			);
-			return;
-		}
-		// Mettre à jour l'état avec le contenu vide
-
-		const newState: DockerCompose = {
-			content: updatedContent,
-			isSaved: true,
-			isStrict: state.isStrict,
-			parsed: { services: [], volumes: [], networks: [] },
-		};
-		setState(newState);
-		updateProject("docker", newState);
-
-		toast.success("Docker-compose.yml file cleared");
-	};
-
-	const handleCopy = () => {
-		setIsCopying(true);
-		navigator.clipboard.writeText(state.content);
-		setIsCopying(false);
-		toast.success("Docker-compose.yml file copied to clipboard");
-	};
-
-	const handleStrictToggle = () => {
-		setState((prev: DockerCompose) => ({
-			...prev,
-			isStrict: !prev.isStrict,
-			isSaved: false,
-		}));
-
-		updateProject("docker", {
-			...state,
-			isStrict: !state.isStrict,
-			isSaved: false,
-		});
-	};
+function DockerContent() {
+	// Custom hooks
+	const { project } = useProject();
+	const { handleDockerAction } = useDocker();
+	const { setCurrentValue } = useTabsContext();
 
 	return (
 		<div className="col-span-9">
@@ -804,7 +625,7 @@ function DockerContent({
 								<File className="h-4 w-4 text-muted-foreground" />
 							</div>
 							<span className="text-sm font-medium">Docker Compose</span>
-							{state.isSaved ? (
+							{project.docker.isSaved ? (
 								<Badge variant="default" className="text-xs ">
 									<Check className="h-4 w-4" />
 									Saved
@@ -821,37 +642,47 @@ function DockerContent({
 							{/* Actions in a dropdown */}
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="outline" size="icon" type="button" className="h-8 px-2">
+									<Button
+										variant="outline"
+										size="icon"
+										type="button"
+										className="h-8 px-2"
+									>
 										<Ellipsis className="h-4 w-4" />
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="">
 									<DropdownMenuItem
-										onClick={handleSave}
+										onClick={() => handleDockerAction({ type: "save" })}
 										className="flex items-center gap-2"
-										disabled={state.isSaved || isSaving}
+										disabled={project.docker.isSaved}
 									>
 										<Save className="h-4 w-4" />
 										<span>Save</span>
-										{state.isSaved && <Check className="h-3 w-3 ml-auto text-primary" />}
+										{project.docker.isSaved && (
+											<Check className="h-3 w-3 ml-auto text-primary" />
+										)}
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={handleCopy}
+										onClick={() => handleDockerAction({ type: "copy" })}
 										className="flex items-center gap-2"
 									>
 										<Copy className="h-4 w-4" />
 										<span>Copy</span>
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={handleClear}
+										onClick={() => handleDockerAction({ type: "clear" })}
 										className="flex items-center gap-2"
-										disabled={state.isStrict}
+										disabled={project.docker.isStrict}
 									>
 										<Eraser className="h-4 w-4" />
 										<span>Clear</span>
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onClick={handleReset}
+										onClick={() => {
+											handleDockerAction({ type: "reset" });
+											setCurrentValue("empty");
+										}}
 										className="flex items-center gap-2"
 									>
 										<RefreshCcw className="h-4 w-4" />
@@ -873,8 +704,10 @@ function DockerContent({
 											<Switch
 												id="strict-mode-dropdown"
 												className="cursor-pointer"
-												checked={state.isStrict}
-												onCheckedChange={handleStrictToggle}
+												checked={project.docker.isStrict}
+												onCheckedChange={() =>
+													handleDockerAction({ type: "strict-toggle" })
+												}
 											/>
 										</div>
 									</div>
@@ -886,10 +719,10 @@ function DockerContent({
 
 				<SmoothAnimate className="p-4">
 					<CodeEditor
-						value={state.content}
-						onChange={handleDockerComposeChange}
-						onSave={handleSave}
-						isSaved={state.isSaved}
+						value={project.docker.content}
+						onChange={(content) => handleDockerAction({ type: "un-save", content })}
+						onSave={() => handleDockerAction({ type: "save" })}
+						isSaved={project.docker.isSaved}
 						language="yaml"
 						customVariables={project.variables.map((variable) => ({
 							label: variable.key,
@@ -904,24 +737,15 @@ function DockerContent({
 	);
 }
 
-function DockerConfiguration({
-	state,
-	setState,
-}: {
-	state: DockerCompose;
-	setState: React.Dispatch<React.SetStateAction<DockerCompose>>;
-}) {
-	const { setCurrentValue } = useTabsContext();
+function DockerConfiguration() {
+	const { project } = useProject();
+	const { handleDockerAction } = useDocker();
 
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-12 gap-4">
-				<DockerContent
-					state={state}
-					setState={setState}
-					setCurrentValue={setCurrentValue}
-				/>
-				<DockerSidebar state={state} setState={setState} />
+				<DockerContent />
+				<DockerSidebar />
 			</div>
 		</div>
 	);

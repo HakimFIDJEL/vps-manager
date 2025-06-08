@@ -1,6 +1,11 @@
-import { Badge } from "@/components/ui/badge";
-import { Folder, FileLock, Container, SquareTerminal, OctagonMinus } from "lucide-react";
+// Necessary imports
 import { useProject } from "@/contexts/project-context";
+
+// Shadcn UI components
+import { Badge } from "@/components/ui/badge";
+
+// Icons
+import { Folder, FileLock, Container, SquareTerminal, OctagonMinus } from "lucide-react";
 
 export function AppDone() {
 	const { project } = useProject();
@@ -76,7 +81,7 @@ export function AppDone() {
 									</>
 								) : (
 									<Badge variant="outline">
-										<OctagonMinus />
+										<OctagonMinus className="h-3 w-3"/>
 										Strict mode disabled
 									</Badge>
 								)}

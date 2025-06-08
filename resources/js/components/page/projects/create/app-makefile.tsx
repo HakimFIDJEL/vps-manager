@@ -3,7 +3,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -47,23 +46,17 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 
 // Icons
 import {
 	Search,
-	Lock,
 	Trash,
-	Eye,
-	EyeOff,
 	Pen,
 	Plus,
 	Copy,
 	Loader2,
-	Upload,
 	FileUp,
-	ArrowDownNarrowWide,
-	ArrowUpNarrowWide,
-	ArrowUpDown,
 	OctagonAlert,
 } from "lucide-react";
 
@@ -74,35 +67,19 @@ import { type Command, CommandSchema } from "@/lib/commands/type";
 import { useProject } from "@/contexts/project-context";
 import { parseCommandsFromMakefile } from "@/lib/commands/parser";
 import { MakefileSchema, MakefileTextSchema } from "@/lib/commands/type";
+import { useCommand } from "@/contexts/command-context";
 
 export function AppMakefile() {
-	const { project, updateProject } = useProject();
-
-	const [commands, setCommands] = useState<Command[]>(project.commands);
+	// States
 	const [search, setSearch] = useState<string>("");
 
+	// Refs
 	const inputRef = useRef<HTMLInputElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
-	// Synchroniser l'état local avec le contexte projet si le contexte change
-	useEffect(() => {
-		if (JSON.stringify(project.commands) !== JSON.stringify(commands)) {
-			setCommands(project.commands);
-		}
-	}, [project.commands]);
-
-	// Synchroniser le contexte projet avec l'état local si le local change
-	useEffect(() => {
-		if (JSON.stringify(commands) !== JSON.stringify(project.commands)) {
-			updateProject("commands", commands);
-		}
-	}, [commands]);
-
-	function handleDeleteAll() {
-		setCommands([]);
-		toast.success("All commands deleted successfully!");
-		return true;
-	}
+	// Custom Hooks
+	const { project } = useProject();
+	const { handleCommandAction } = useCommand();
 
 	return (
 		// Wrapper
@@ -110,10 +87,10 @@ export function AppMakefile() {
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import Makefile */}
-					<ImportMakefile commands={commands} setCommands={setCommands} />
+					<ImportMakefile />
 
 					{/* Add command */}
-					<CreateCommand commands={commands} setCommands={setCommands} />
+					<CreateCommand />
 				</div>
 
 				<SmoothResize className="flex items-center gap-2 relative">
@@ -122,14 +99,14 @@ export function AppMakefile() {
 							ref={inputRef}
 							name="search"
 							placeholder="Filter commands..."
-							className="z-100 relative"
+							className="z-1 relative"
 							addonText={<Search className="h-4 w-4" />}
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							readOnly={commands.length === 0}
+							readOnly={project.commands.length === 0}
 						/>
 
-						{commands.length > 0 && (
+						{project.commands.length > 0 && (
 							<SmoothItem
 								key={"delete"}
 								initial={{ opacity: 0, scale: 0.95, width: 0 }}
@@ -138,7 +115,12 @@ export function AppMakefile() {
 							>
 								<AlertDialog>
 									<AlertDialogTrigger asChild>
-										<Button ref={buttonRef} variant={"outline"} size={"default"} type="button">
+										<Button
+											ref={buttonRef}
+											variant={"outline"}
+											size={"default"}
+											type={"button"}
+										>
 											<Trash className="h-4 w-4" />
 											Delete commands
 										</Button>
@@ -157,7 +139,10 @@ export function AppMakefile() {
 											<AlertDialogFooter>
 												<AlertDialogCancel>Cancel</AlertDialogCancel>
 												<AlertDialogAction
-													onAction={() => handleDeleteAll()}
+													onAction={() => {
+														handleCommandAction({ type: "delete-all" });
+														return true;
+													}}
 													variant={"destructive"}
 												>
 													<Trash />
@@ -173,24 +158,26 @@ export function AppMakefile() {
 				</SmoothResize>
 			</div>
 
-			<CommandList commands={commands} setCommands={setCommands} search={search} />
+			<CommandList search={search} />
 		</div>
 	);
 }
 
-function ImportMakefile({
-	commands,
-	setCommands,
-}: {
-	commands: Command[];
-	setCommands: (commands: Command[]) => void;
-}) {
+function ImportMakefile() {
+	// States
 	const [makefilePreview, setMakefilePreview] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
 	const [isDragActive, setIsDragActive] = useState(false);
+
+	// Refs
 	const inputFileRef = useRef<HTMLInputElement>(null);
 	const closeRef = useRef<HTMLButtonElement>(null);
 
+	// Custom Hooks
+	const { project } = useProject();
+	const { handleCommandAction } = useCommand();
+
+	// Variables
 	const MakefileForm = useForm<z.infer<typeof MakefileSchema>>({
 		resolver: zodResolver(MakefileSchema),
 	});
@@ -199,6 +186,7 @@ function ImportMakefile({
 		resolver: zodResolver(MakefileTextSchema),
 	});
 
+	// Custom methods
 	async function onSubmitText() {
 		const isValid = await MakefileTextForm.trigger();
 		if (!isValid) return false;
@@ -236,7 +224,7 @@ function ImportMakefile({
 		// On parse le contenu du fichier
 		const parsedCommands = parseCommandsFromMakefile({
 			content: text,
-			commands: commands,
+			commands: project.commands,
 		});
 
 		if (parsedCommands.length === 0) {
@@ -250,9 +238,7 @@ function ImportMakefile({
 			MakefileForm.reset();
 		}
 
-		toast.success(`${parsedCommands.length} commands imported successfully!`);
-
-		setCommands([...parsedCommands, ...commands]);
+		handleCommandAction({ type: "create-multiple", commands: parsedCommands });
 
 		setLoading(false);
 
@@ -263,7 +249,7 @@ function ImportMakefile({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"outline"} type="button">
+				<Button variant={"outline"} type={"button"}>
 					<FileUp />
 					Import makefile
 				</Button>
@@ -287,10 +273,15 @@ function ImportMakefile({
 							Paste content
 						</TabsTrigger>
 					</TabsList>
-					<TabsBody>
+					<TabsBody className="pt-4">
 						<TabsContent value="file">
 							<Form {...MakefileForm}>
-								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+								<form
+									onSubmit={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+									}}
+								>
 									<AlertDialogBody>
 										<FormField
 											control={MakefileForm.control}
@@ -343,10 +334,10 @@ function ImportMakefile({
 																			Drag and drop your Makefile here or click to select it.
 																		</p>
 																		<Button
-																			variant="outline"
+																			type={"button"}
+																			variant={"outline"}
 																			size="sm"
 																			onClick={() => inputFileRef.current?.click()}
-																			type="button"
 																		>
 																			Browse files
 																		</Button>
@@ -409,7 +400,7 @@ function ImportMakefile({
 														transition={{ duration: 0.3 }}
 													>
 														<Button
-															type="button"
+															type={"button"}
 															variant={"outline"}
 															onClick={() => setMakefilePreview("")}
 														>
@@ -436,7 +427,12 @@ function ImportMakefile({
 
 						<TabsContent value="text">
 							<Form {...MakefileTextForm}>
-								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+								<form
+									onSubmit={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+									}}
+								>
 									<AlertDialogBody>
 										<FormField
 											control={MakefileTextForm.control}
@@ -469,7 +465,7 @@ function ImportMakefile({
 										<AlertDialogAction
 											onAction={onSubmitText}
 											disabled={!MakefileTextForm.formState.isValid || loading}
-											type="submit"
+											type={"submit"}
 										>
 											{loading ? <Loader2 className="animate-spin" /> : <Copy />}
 											Import content
@@ -485,29 +481,25 @@ function ImportMakefile({
 	);
 }
 
-function CreateCommand({
-	commands,
-	setCommands,
-}: {
-	commands: Command[];
-	setCommands: (commands: Command[]) => void;
-}) {
-	const [command, setCommand] = useState<Command>({
-		target: "",
-		description: "",
-		command: "",
-	});
+function CreateCommand() {
+	// States
 	const [loading, setLoading] = useState<boolean>(false);
 
+	// Custom hooks
+	const { project } = useProject();
+	const { handleCommandAction } = useCommand();
+
+	// Variables
 	const CommandForm = useForm<z.infer<typeof CommandSchema>>({
 		resolver: zodResolver(CommandSchema),
 		defaultValues: {
-			target: command.target,
-			description: command.description,
-			command: command.command,
+			target: "",
+			description: "",
+			command: "",
 		},
 	});
 
+	// Custom methods
 	async function onSubmit() {
 		const isValid = await CommandForm.trigger();
 		if (!isValid) return false;
@@ -515,7 +507,8 @@ function CreateCommand({
 		setLoading(true);
 
 		const data = CommandForm.getValues();
-		const targetExists = commands.some(
+
+		const targetExists = project.commands.some(
 			(command) => command.target.toLowerCase() === data.target.toLowerCase(),
 		);
 		if (targetExists) {
@@ -524,9 +517,8 @@ function CreateCommand({
 			return false;
 		}
 
-		setCommands([...commands, data]);
-		setCommand({ target: "", description: "", command: "" });
-		toast.success(`Command ${data.target} created successfully!`);
+		handleCommandAction({ type: "create", command: data });
+
 		CommandForm.reset();
 		setLoading(false);
 		return true; // Retourne true pour fermer le Dialog
@@ -535,14 +527,19 @@ function CreateCommand({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"default"} type="button">
+				<Button variant={"default"} type={"button"}>
 					<Plus />
 					Add command
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<Form {...CommandForm}>
-					<form onSubmit={(e) => e.preventDefault()}>
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+					>
 						<AlertDialogHeader>
 							<AlertDialogTitle>Add command</AlertDialogTitle>
 							<AlertDialogDescription>
@@ -622,7 +619,7 @@ function CreateCommand({
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!CommandForm.formState.isValid || loading}
-								type="submit"
+								type={"submit"}
 							>
 								{loading ? <Loader2 className="animate-spin" /> : <Plus />}
 								Add command
@@ -635,85 +632,14 @@ function CreateCommand({
 	);
 }
 
-function CommandList({
-	commands,
-	setCommands,
-	search,
-}: {
-	commands: Command[];
-	setCommands: (commands: Command[]) => void;
-	search: string;
-}) {
-	const filteredCommands = commands.filter((command) => {
-		return command.target.toLowerCase().includes(search.toLowerCase());
-	});
-
-	function handleDelete(target: string) {
-		setCommands(commands.filter((command) => command.target !== target));
-		toast.success(`Command ${target} deleted successfully!`);
-	}
-
-	return (
-		<>
-			<SmoothAnimate>
-				<h3 className="text-sm font-medium mb-2 mt-8">Commands</h3>
-
-				{filteredCommands.length === 0 ? (
-					<div className="flex items-center justify-center border border-border border-dashed rounded-md p-4 bg-muted/50">
-						<p className="text-sm text-muted-foreground">
-							No commands added yet. Click on "Add command" to create one.
-						</p>
-					</div>
-				) : (
-					<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-						{filteredCommands.map((command) => (
-							<div
-								key={command.target}
-								className="group relative rounded-md border border-border bg-card p-4 transition-all hover:border-primary/50 "
-							>
-								<div className="flex items-start justify-between gap-2">
-									<div>
-										<p className="font-mono">{command.target}</p>
-										<p className="text-sm text-muted-foreground mt-1">
-											{command.description}
-										</p>
-									</div>
-									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-										<EditCommand
-											command={command}
-											commands={commands}
-											setCommands={setCommands}
-										/>
-										<Button
-											variant="ghost"
-											size="icon"
-											onClick={() => handleDelete(command.target)}
-											type="button"
-										>
-											<Trash className="h-4 w-4 text-muted-foreground" />
-										</Button>
-									</div>
-								</div>
-							</div>
-						))}
-					</SmoothAnimate>
-				)}
-			</SmoothAnimate>
-		</>
-	);
-}
-
-function EditCommand({
-	command,
-	commands,
-	setCommands,
-}: {
-	command: Command;
-	commands: Command[];
-	setCommands: (commands: Command[]) => void;
-}) {
+function EditCommand({ command }: { command: Command }) {
+	// States
 	const [loading, setLoading] = useState<boolean>(false);
 
+	// Custom hooks
+	const { handleCommandAction } = useCommand();
+	
+	// Variables
 	const CommandForm = useForm<z.infer<typeof CommandSchema>>({
 		resolver: zodResolver(CommandSchema),
 		defaultValues: {
@@ -723,6 +649,7 @@ function EditCommand({
 		},
 	});
 
+	// Hooks
 	useEffect(() => {
 		CommandForm.reset({
 			target: command.target,
@@ -731,6 +658,7 @@ function EditCommand({
 		});
 	}, [command, CommandForm]);
 
+	// Custom methods
 	async function onSubmit() {
 		const isValid = await CommandForm.trigger();
 		if (!isValid) return false;
@@ -738,14 +666,9 @@ function EditCommand({
 		setLoading(true);
 
 		const data = CommandForm.getValues();
-		setCommands(
-			commands.map((c) =>
-				c.target === command.target
-					? { ...c, description: data.description, command: data.command }
-					: c,
-			),
-		);
-		toast.success(`Command ${data.target} updated successfully!`);
+
+		handleCommandAction({ type: "update", command: data });
+
 		CommandForm.reset();
 		setLoading(false);
 		return true;
@@ -754,13 +677,18 @@ function EditCommand({
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={"ghost"} size={"icon"} type="button">
+				<Button variant={"ghost"} size={"icon"} type={"button"}>
 					<Pen className="h-4 w-4 text-muted-foreground" />
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<Form {...CommandForm}>
-					<form onSubmit={(e) => e.preventDefault()}>
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+					>
 						<AlertDialogHeader>
 							<AlertDialogTitle>Edit command</AlertDialogTitle>
 							<AlertDialogDescription>
@@ -831,7 +759,7 @@ function EditCommand({
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!CommandForm.formState.isValid || loading}
-								type="submit"
+								type={"submit"}
 							>
 								{loading ? <Loader2 className="animate-spin" /> : <Pen />}
 								Edit command
@@ -843,3 +771,98 @@ function EditCommand({
 		</AlertDialog>
 	);
 }
+
+function CommandList({ search }: { search: string }) {
+
+	// Custom hooks
+	const { project } = useProject();
+	const { handleCommandAction } = useCommand();
+	
+	// Custom methods
+	function handleDelete(target: string) {
+		const command = project.commands.find((c) => c.target === target);
+		if (!command) return false;
+		
+		handleCommandAction({ type: "delete", command: command });
+		return true;
+	}
+
+	// Variables
+	const filteredCommands = project.commands.filter((command) => {
+		return command.target.toLowerCase().includes(search.toLowerCase());
+	});
+
+	return (
+		<>
+			<SmoothAnimate>
+				<h3 className="text-sm font-medium mb-2 mt-8">Commands</h3>
+
+				{filteredCommands.length === 0 ? (
+					<div className="flex items-center justify-center border border-border border-dashed rounded-md p-4 bg-muted/50">
+						<p className="text-sm text-muted-foreground">
+							No commands added yet. Click on "Add command" to create one.
+						</p>
+					</div>
+				) : (
+					<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{filteredCommands.map((command) => (
+							<div
+								key={command.target}
+								className="group relative rounded-md border border-border bg-card p-4 transition-all hover:border-primary/50 "
+							>
+								<div className="flex items-start justify-between gap-2">
+									<div>
+										<p className="font-mono">{command.target}</p>
+										<p className="text-sm text-muted-foreground mt-1">
+											{command.description}
+										</p>
+									</div>
+									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+										<EditCommand command={command} />
+										<AlertDialog>
+											<AlertDialogTrigger asChild>
+												<Button variant={"ghost"} size={"icon"} type={"button"}>
+													<Trash className="h-4 w-4 text-muted-foreground" />
+												</Button>
+											</AlertDialogTrigger>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle className="flex items-center gap-2">
+														<OctagonAlert className="w-4 h-4 text-destructive" />
+														Delete command
+													</AlertDialogTitle>
+													<AlertDialogDescription>
+														Are you sure you want to delete
+														<Badge variant={"outline"} className="font-mono mx-2">
+															{command.target}
+														</Badge>
+														command ?
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogBody>
+													<AlertDialogFooter>
+														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogAction
+															onAction={() => handleDelete(command.target)}
+															variant={"destructive"}
+															type={"button"}
+														>
+															<Trash />
+															Delete
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogBody>
+											</AlertDialogContent>
+										</AlertDialog>
+									</div>
+								</div>
+							</div>
+						))}
+					</SmoothAnimate>
+				)}
+			</SmoothAnimate>
+		</>
+	);
+}
+
+

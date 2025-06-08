@@ -55,6 +55,9 @@ import {
 	SquareTerminal,
 } from "lucide-react";
 
+// Contexts
+import { CommandProvider } from "@/contexts/command-context";
+
 const breadcrumbs: BreadcrumbItem[] = [
 	{
 		title: "Dashboard",
@@ -102,30 +105,31 @@ export default function Page() {
 	return (
 		<AdminLayout breadcrumbs={breadcrumbs}>
 			<Head title="Create a project" />
+			{/* Project provider has every providers needed (commands, variables, docker etc..) */}
 			<ProjectProvider>
-				<SmoothItem delay={0.1}>
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Folder className="w-5 h-5 text-muted-foreground" />
-								Create a project
-							</CardTitle>
-							<CardDescription>
-								Finally a new project! It took you a while.. Let's get started.
-							</CardDescription>
-							<CardAction>
-								<Link href={route("projects.index")}>
-									<Button variant={"outline"}>
-										<ArrowLeft />
-										Go back to projects
-									</Button>
-								</Link>
-							</CardAction>
-						</CardHeader>
-					</Card>
-				</SmoothItem>
+					<SmoothItem delay={0.1}>
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<Folder className="w-5 h-5 text-muted-foreground" />
+									Create a project
+								</CardTitle>
+								<CardDescription>
+									Finally a new project! It took you a while.. Let's get started.
+								</CardDescription>
+								<CardAction>
+									<Link href={route("projects.index")}>
+										<Button variant={"outline"}>
+											<ArrowLeft />
+											Go back to projects
+										</Button>
+									</Link>
+								</CardAction>
+							</CardHeader>
+						</Card>
+					</SmoothItem>
 
-				<Content />
+					<Content />
 			</ProjectProvider>
 		</AdminLayout>
 	);
@@ -133,7 +137,6 @@ export default function Page() {
 
 function Content() {
 	const { project, updateProject } = useProject();
-	const [isLoading, setIsLoading] = useState(false);
 
 	const { data, setData, post, processing, errors } = useForm({
 		project: project,	
@@ -175,14 +178,14 @@ function Content() {
 
 			// Check if the content is saved
 			if (!project.docker.isSaved) {
-				toast.error("Please save your Docker Compose");
+				toast.error("Please save your docker configuration");
 				return false;
 			}
 
 			return true;
 		} catch (error) {
 			if (error instanceof z.ZodError) {
-				toast.error("Please configure your Docker Compose");
+				toast.error("Please configure your docker configuration");
 			}
 			return false;
 		}
@@ -203,7 +206,6 @@ function Content() {
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		setIsLoading(true);
 
 		try {
 			// Validation de ton projet
@@ -217,7 +219,6 @@ function Content() {
 				toast.error("Please check all project fields");
 			}
 
-			setIsLoading(false);
 		}
 	}
 
@@ -353,9 +354,9 @@ function Content() {
 													variant="default"
 													size="sm"
 													type="submit"
-													disabled={isLoading}
+													disabled={processing}
 												>
-													{isLoading ? (
+													{processing ? (
 														<LoaderCircleIcon className="animate-spin" />
 													) : (
 														<Plus />
