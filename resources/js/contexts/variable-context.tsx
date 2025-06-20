@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useProject } from "./project-context";
 import { type Variable } from "@/lib/variables/type";
 
-type VariableAction = 
+export type VariableAction = 
   | { type: "create"; variable: Variable }
   | { type: "create-multiple"; variables: Variable[] }
   | { type: "update"; variable: Variable }
@@ -18,62 +18,128 @@ interface VariableContextType {
 
 const VariableContext = createContext<VariableContextType | undefined>(undefined);
 
-export function VariableProvider({ children }: { children: React.ReactNode }) {
+export function VariableProvider({ children, projectCreated=false }: { children: React.ReactNode, projectCreated: boolean }) {
   const { project, updateProject } = useProject();
 
-  const handleVariableAction = useCallback((action: VariableAction) => {
-    switch (action.type) {
-      case "create":
-        updateProject("variables", [...project.variables, action.variable]);
-        toast.success(`Variable ${action.variable.key} created successfully!`);
-        break;
+  let handleVariableAction: (action: VariableAction) => void;
 
-      case "create-multiple":
-        updateProject("variables", [...action.variables, ...project.variables]);
-        toast.success(`${action.variables.length} variables imported successfully!`);
-        break;
+	// Server actions
+	if (projectCreated) {
+    handleVariableAction = useCallback(
+      (action: VariableAction) => {
+        switch (action.type) {
+          case "create":
+            updateProject("variables", [...project.variables, action.variable]);
+            toast.success(`Variable ${action.variable.key} created successfully!`);
+            break;
+    
+          case "create-multiple":
+            updateProject("variables", [...action.variables, ...project.variables]);
+            toast.success(`${action.variables.length} variables imported successfully!`);
+            break;
+    
+          case "update":
+            updateProject(
+              "variables",
+              project.variables.map((v) =>
+                v.key === action.variable.key ? action.variable : v
+              )
+            );
+            toast.success(`Variable ${action.variable.key} updated successfully!`);
+            break;
+    
+          case "delete":
+            updateProject(
+              "variables",
+              project.variables.filter((v) => v.key !== action.variable.key)
+            );
+            toast.success(`Variable ${action.variable.key} deleted successfully!`);
+            break;
+    
+          case "delete-all":
+            updateProject("variables", []);
+            toast.success("All variables deleted successfully!");
+            break;
+    
+          case "toggle-visibility":
+            updateProject(
+              "variables",
+              project.variables.map((v) =>
+                v.key === action.variable.key ? { ...v, visible: !v.visible } : v
+              )
+            );
+            break;
+    
+          case "toggle-visibility-all":
+            const allVisible = project.variables.every((v) => v.visible);
+            updateProject(
+              "variables",
+              project.variables.map((v) => ({ ...v, visible: !allVisible }))
+            );
+            break;
+        }
+      },
+      [project.variables, updateProject],
+    );
+  } else {
+    handleVariableAction = useCallback(
+      (action: VariableAction) => {
+        switch (action.type) {
+          case "create":
+            updateProject("variables", [...project.variables, action.variable]);
+            toast.success(`Variable ${action.variable.key} created successfully!`);
+            break;
+    
+          case "create-multiple":
+            updateProject("variables", [...action.variables, ...project.variables]);
+            toast.success(`${action.variables.length} variables imported successfully!`);
+            break;
+    
+          case "update":
+            updateProject(
+              "variables",
+              project.variables.map((v) =>
+                v.key === action.variable.key ? action.variable : v
+              )
+            );
+            toast.success(`Variable ${action.variable.key} updated successfully!`);
+            break;
+    
+          case "delete":
+            updateProject(
+              "variables",
+              project.variables.filter((v) => v.key !== action.variable.key)
+            );
+            toast.success(`Variable ${action.variable.key} deleted successfully!`);
+            break;
+    
+          case "delete-all":
+            updateProject("variables", []);
+            toast.success("All variables deleted successfully!");
+            break;
+    
+          case "toggle-visibility":
+            updateProject(
+              "variables",
+              project.variables.map((v) =>
+                v.key === action.variable.key ? { ...v, visible: !v.visible } : v
+              )
+            );
+            break;
+    
+          case "toggle-visibility-all":
+            const allVisible = project.variables.every((v) => v.visible);
+            updateProject(
+              "variables",
+              project.variables.map((v) => ({ ...v, visible: !allVisible }))
+            );
+            break;
+        }
+      },
+      [project.variables, updateProject],
+    );
+  }
 
-      case "update":
-        updateProject(
-          "variables",
-          project.variables.map((v) =>
-            v.key === action.variable.key ? action.variable : v
-          )
-        );
-        toast.success(`Variable ${action.variable.key} updated successfully!`);
-        break;
-
-      case "delete":
-        updateProject(
-          "variables",
-          project.variables.filter((v) => v.key !== action.variable.key)
-        );
-        toast.success(`Variable ${action.variable.key} deleted successfully!`);
-        break;
-
-      case "delete-all":
-        updateProject("variables", []);
-        toast.success("All variables deleted successfully!");
-        break;
-
-      case "toggle-visibility":
-        updateProject(
-          "variables",
-          project.variables.map((v) =>
-            v.key === action.variable.key ? { ...v, visible: !v.visible } : v
-          )
-        );
-        break;
-
-      case "toggle-visibility-all":
-        const allVisible = project.variables.every((v) => v.visible);
-        updateProject(
-          "variables",
-          project.variables.map((v) => ({ ...v, visible: !allVisible }))
-        );
-        break;
-    }
-  }, [project, updateProject]);
 
   return (
     <VariableContext.Provider value={{ handleVariableAction }}>

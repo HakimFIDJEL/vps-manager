@@ -19,7 +19,7 @@ export function ProjectProvider({ children, projectCreated=false }: { children: 
   return (
     <ProjectContext.Provider value={{ project, setProject, updateProject }}>
       <CommandProvider projectCreated={projectCreated}>
-        <VariableProvider>
+        <VariableProvider projectCreated={projectCreated}>
           <DockerProvider>
             {children}
           </DockerProvider>

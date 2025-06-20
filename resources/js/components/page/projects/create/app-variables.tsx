@@ -8,9 +8,7 @@ import { cn } from "@/lib/utils";
 
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/variables/parser";
-import {
-	SmoothAnimate,	
-} from "@/components/ui/smooth-resized";
+import { SmoothAnimate } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import { Label } from "@/components/ui/label";
@@ -57,7 +55,7 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 
 // Icons
@@ -89,8 +87,8 @@ import {
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
-import { useVariable } from "@/contexts/variable-context";
 import { CodeEditor } from "@/components/ui/code-editor";
+import { VariableAction, useVariable } from "@/contexts/variable-context";
 
 export function AppVariables() {
 	// States
@@ -101,6 +99,7 @@ export function AppVariables() {
 
 	// Custom Hooks
 	const { project } = useProject();
+	const { handleVariableAction } = useVariable();
 
 	return (
 		// Wrapper
@@ -108,10 +107,20 @@ export function AppVariables() {
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import .env */}
-					<ImportEnv />
+					<ImportEnv handleVariableAction={handleVariableAction}>
+						<Button variant={"outline"} type={"button"}>
+							<FileUp />
+							Import variables
+						</Button>
+					</ImportEnv>
 
 					{/* Add variable */}
-					<CreateVariable />
+					<CreateVariable handleVariableAction={handleVariableAction}>
+						<Button variant={"default"} type={"button"}>
+							<Plus />
+							Add variable
+						</Button>
+					</CreateVariable>
 				</div>
 
 				<div className="flex items-center gap-2 relative">
@@ -128,23 +137,28 @@ export function AppVariables() {
 				</div>
 			</div>
 
-			<VariablesList search={search} />
+			<VariablesList search={search} handleVariableAction={handleVariableAction} />
 		</div>
 	);
 }
 
-function VariablesList({ search }: { search: string }) {
+export function VariablesList({
+	search,
+	handleVariableAction,
+}: {
+	search: string;
+	handleVariableAction: (action: VariableAction) => void;
+}) {
 	// States
 	const [sortKey, setSortKey] = useState<string>("none");
 
 	// Custom hooks
 	const { project } = useProject();
-	const { handleVariableAction } = useVariable();
 
 	// Variables
 	const filteredVariables = project.variables
 		.filter((variable) =>
-			variable.key.toLowerCase().includes(search.toLowerCase())
+			variable.key.toLowerCase().includes(search.toLowerCase()),
 		)
 		.sort((a, b) => {
 			if (sortKey === "desc") return b.key.localeCompare(a.key);
@@ -155,9 +169,9 @@ function VariablesList({ search }: { search: string }) {
 	return (
 		<>
 			<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
-			<div className="rounded-md border">
+			<div className="rounded-md border overflow-hidden">
 				<Table>
-					<TableHeader>
+					<TableHeader className="bg-card">
 						<TableRow>
 							<TableHead>
 								<Button
@@ -166,11 +180,7 @@ function VariablesList({ search }: { search: string }) {
 									size="sm"
 									onClick={() =>
 										setSortKey(
-											sortKey === "desc"
-												? "asc"
-												: sortKey === "asc"
-												? "none"
-												: "desc"
+											sortKey === "desc" ? "asc" : sortKey === "asc" ? "none" : "desc",
 										)
 									}
 								>
@@ -206,11 +216,7 @@ function VariablesList({ search }: { search: string }) {
 													})
 												}
 											>
-												{project.variables.every((v) => v.visible) ? (
-													<EyeOff />
-												) : (
-													<Eye />
-												)}
+												{project.variables.every((v) => v.visible) ? <EyeOff /> : <Eye />}
 											</Button>
 										</TooltipTrigger>
 										<TooltipContent>
@@ -268,7 +274,7 @@ function VariablesList({ search }: { search: string }) {
 							</TableHead>
 						</TableRow>
 					</TableHeader>
-					<TableBody>
+					<TableBody className="bg-background">
 						{filteredVariables.map((variable) => (
 							<TableRow key={variable.key} className="group">
 								<TableCell>
@@ -307,15 +313,11 @@ function VariablesList({ search }: { search: string }) {
 											)}
 										</Button>
 
-										<EditVariable variable={variable} />
+										<EditVariable variable={variable} handleVariableAction={handleVariableAction} />
 
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
-												<Button
-													type={"button"}
-													variant={"ghost"}
-													size={"icon"}
-												>
+												<Button type={"button"} variant={"ghost"} size={"icon"}>
 													<Trash className="h-4 w-4" />
 												</Button>
 											</AlertDialogTrigger>
@@ -327,7 +329,9 @@ function VariablesList({ search }: { search: string }) {
 													</AlertDialogTitle>
 													<AlertDialogDescription>
 														Are you sure you want to delete
-														<Badge variant={"outline"} className="font-mono mx-2">{variable.key}</Badge>
+														<Badge variant={"outline"} className="font-mono mx-2">
+															{variable.key}
+														</Badge>
 														?
 													</AlertDialogDescription>
 												</AlertDialogHeader>
@@ -370,12 +374,15 @@ function VariablesList({ search }: { search: string }) {
 	);
 }
 
-function CreateVariable() {
+export function CreateVariable({
+	children,
+	handleVariableAction,
+}: {
+	children: React.ReactNode;
+	handleVariableAction: (action: VariableAction) => void;
+}) {
 	// States
 	const [loading, setLoading] = useState<boolean>(false);
-
-	// Custom hooks
-	const { handleVariableAction } = useVariable();
 
 	// Variables
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
@@ -402,12 +409,7 @@ function CreateVariable() {
 
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button variant={"default"} type={"button"}>
-					<Plus />
-					Add variable
-				</Button>
-			</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<Form {...VariableForm}>
 					<form
@@ -480,12 +482,15 @@ function CreateVariable() {
 	);
 }
 
-function EditVariable({ variable }: { variable: Variable }) {
+export function EditVariable({
+	variable,
+	handleVariableAction,
+}: {
+	variable: Variable;
+	handleVariableAction: (action: VariableAction) => void;
+}) {
 	// States
 	const [loading, setLoading] = useState<boolean>(false);
-
-	// Custom hooks
-	const { handleVariableAction } = useVariable();
 
 	// Variables
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
@@ -603,7 +608,13 @@ function EditVariable({ variable }: { variable: Variable }) {
 	);
 }
 
-function ImportEnv() {
+export function ImportEnv({
+	children,
+	handleVariableAction,
+}: {
+	children: React.ReactNode;
+	handleVariableAction: (action: VariableAction) => void;
+}) {
 	// States
 	const [envPreview, setEnvPreview] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
@@ -615,7 +626,6 @@ function ImportEnv() {
 
 	// Custom hooks
 	const { project } = useProject();
-	const { handleVariableAction } = useVariable();
 
 	// Variables
 	const VariableEnvForm = useForm<z.infer<typeof VariableEnvSchema>>({
@@ -688,12 +698,7 @@ function ImportEnv() {
 
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button variant={"outline"} type={"button"}>
-					<FileUp />
-					Import variables
-				</Button>
-			</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Import variables</AlertDialogTitle>
@@ -738,7 +743,7 @@ function ImportEnv() {
 																	htmlFor="file"
 																	className={cn(
 																		"flex items-center justify-center p-4 border-2 border-dashed rounded-lg bg-muted/50 hover:border-primary transition-colors cursor-pointer group",
-																		isDragActive && "border-primary"
+																		isDragActive && "border-primary",
 																	)}
 																	onDragOver={(e) => {
 																		e.preventDefault();

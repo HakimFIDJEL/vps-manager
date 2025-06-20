@@ -110,7 +110,7 @@ export function AppMakefile() {
 								</div>
 								<div className="flex-1 text-left">
 									<div className="font-medium text-foreground">Import makefile</div>
-									<div className="text-xs text-muted-foreground">Load existing file</div>
+									<div className="text-xs text-muted-foreground">Load or paste existing file</div>
 								</div>
 							</Button>
 						</ImportMakefile>

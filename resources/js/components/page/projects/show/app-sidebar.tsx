@@ -37,18 +37,18 @@ import {
     SquareTerminal,
 } from "lucide-react";
 
-export function AppSidebar({ ...props }) {
+export function AppSidebar({ className, ...props } : { className : string }) {
     return (
-        <ProjectSidebar {...props} />
+        <ProjectSidebar className={className} {...props} />
     );
 }
 
-function ProjectSidebar({ ...props }) {
+function ProjectSidebar({ className, ...props } : { className : string }) {
 	return (
 		<Sidebar
 			collapsible="none"
 			variant="floating"
-			className="rounded-md border h-[calc(100vh-5rem)]"
+			className={`rounded-md border h-full ${className} `}
 			{...props}
 		>
 			<SidebarHeader>

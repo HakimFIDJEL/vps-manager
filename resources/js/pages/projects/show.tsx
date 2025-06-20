@@ -66,7 +66,7 @@ function Content() {
 
 
 	return (
-		<Tabs className="flex flex-row items-start justify-between gap-4" defaultValue={"commands"}>
+		<Tabs className="flex flex-row items-start justify-between gap-4" defaultValue={"variables"}>
 			{/* Header + TabsContent */}
 			<div className="flex flex-col gap-4 w-full">
 				<SmoothItem delay={0.3} layout={false}>
@@ -95,8 +95,8 @@ function Content() {
 			</div>
 
 			{/* Sidebar */}
-			<SmoothItem delay={0.1} layout={false}>
-				<AppSidebar />
+			<SmoothItem delay={0.1} layout={false} className="self-start sticky top-[4.5rem]">
+				<AppSidebar className="h-[calc(100vh-5rem)]" />
 			</SmoothItem>
 		</Tabs>
 	);
