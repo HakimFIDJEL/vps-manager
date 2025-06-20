@@ -106,17 +106,24 @@ export default function Page() {
 		<AdminLayout breadcrumbs={breadcrumbs}>
 			<Head title="Create a project" />
 			{/* Project provider has every providers needed (commands, variables, docker etc..) */}
-			<ProjectProvider>
+			<ProjectProvider projectCreated={false}>
 					<SmoothItem delay={0.1}>
 						<Card>
 							<CardHeader>
-								<CardTitle className="flex items-center gap-2">
-									<Folder className="w-5 h-5 text-muted-foreground" />
-									Create a project
-								</CardTitle>
-								<CardDescription>
-									Finally a new project! It took you a while.. Let's get started.
-								</CardDescription>
+
+								<div className="flex items-center gap-3">
+									<div className="bg-card border rounded-md p-2">
+										<Folder className="w-5 h-5 text-muted-foreground" />
+									</div>
+									<div>
+										<CardTitle className="flex items-center gap-2 text-xl">
+											Create a project
+										</CardTitle>
+										<CardDescription>Finally a new project! It took you a while.. Let's get started.</CardDescription>
+									</div>
+								</div>
+
+
 								<CardAction>
 									<Link href={route("projects.index")}>
 										<Button variant={"outline"}>
@@ -259,13 +266,22 @@ function Content() {
 						<StepperContent value={1}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<File className="w-5 h-5 text-muted-foreground" />
-										Project details
-									</CardTitle>
-									<CardDescription>
-										Fill in the details below to create a new project.
-									</CardDescription>
+
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<File className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+											Project details
+											</CardTitle>
+											<CardDescription>
+												Fill in the details below to create a new project.
+											</CardDescription>
+										</div>
+									</div>
+
+
 									<CardAction>
 										<StepperNavigation onNext={handleValidateStep1} />
 									</CardAction>
@@ -279,13 +295,22 @@ function Content() {
 						<StepperContent value={2}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<FileLock className="w-5 h-5 text-muted-foreground" />
-										Variables
-									</CardTitle>
-									<CardDescription>
-										Either fill in the environnement variables or import your .env file.
-									</CardDescription>
+
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<FileLock className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Variables
+											</CardTitle>
+											<CardDescription>
+												Either fill in the environnement variables or import your .env file.
+											</CardDescription>
+										</div>
+									</div>
+
+
 									<CardAction>
 										<StepperNavigation onNext={handleValidateStep2} />
 									</CardAction>
@@ -299,14 +324,23 @@ function Content() {
 						<StepperContent value={3}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Container className="w-5 h-5 text-muted-foreground" />
-										Docker
-									</CardTitle>
-									<CardDescription>
-										Fill in your docker configuration, importing a docker-compose or
-										create it from scratch.
-									</CardDescription>
+
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<Container className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Docker
+											</CardTitle>
+											<CardDescription>
+												Fill in your docker configuration, importing a docker-compose or
+												create it from scratch.
+											</CardDescription>
+										</div>
+									</div>
+
+
 									<CardAction>
 										<StepperNavigation onNext={handleValidateStep3} />
 									</CardAction>
@@ -320,13 +354,22 @@ function Content() {
 						<StepperContent value={4}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<SquareTerminal className="w-5 h-5 text-muted-foreground" />
-										Makefile
-									</CardTitle>
-									<CardDescription>
-										Create your Makefile to easily execute your commands.
-									</CardDescription>
+
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<SquareTerminal className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Makefile
+											</CardTitle>
+											<CardDescription>
+												Create your Makefile to easily execute your commands.
+											</CardDescription>
+										</div>
+									</div>
+
+
 									<CardAction>
 										<StepperNavigation onNext={handleValidateStep4} />
 									</CardAction>
@@ -340,13 +383,22 @@ function Content() {
 						<StepperContent value={5}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Check className="w-5 h-5 text-muted-foreground" />
-										Done
-									</CardTitle>
-									<CardDescription>
-										Your project is ready! You can now create it.
-									</CardDescription>
+
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<Check className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Done
+											</CardTitle>
+											<CardDescription>
+												Your project is ready! You can now create it.
+											</CardDescription>
+										</div>
+									</div>
+
+
 									<CardAction>
 										<StepperNavigation
 											nextButton={

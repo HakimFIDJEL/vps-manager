@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import yaml from "js-yaml";
 import { useProject } from "@/contexts/project-context";
 import { useDocker } from "@/contexts/docker-context";
 
@@ -83,6 +82,7 @@ import {
 } from "lucide-react";
 
 export function AppDocker() {
+	// Custom hooks
 	const { project } = useProject();
 
 	return (
@@ -249,10 +249,10 @@ function EmptyDockerState() {
 													Drag and drop your docker-compose.yml file here
 												</p>
 												<Button
-													variant="outline"
-													size="sm"
+													variant={"outline"}
+													size={"sm"}
 													onClick={() => inputFileRef.current?.click()}
-													type="button"
+													type={"button"}
 												>
 													Browse files
 												</Button>
@@ -366,7 +366,7 @@ function DockerSidebar() {
 	) => {
 		handleDockerAction({
 			type: "remove-type",
-			name,
+			name: name,
 			elementType: type,
 		});
 	};
@@ -738,9 +738,6 @@ function DockerContent() {
 }
 
 function DockerConfiguration() {
-	const { project } = useProject();
-	const { handleDockerAction } = useDocker();
-
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-12 gap-4">

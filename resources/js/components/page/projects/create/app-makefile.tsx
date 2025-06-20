@@ -67,7 +67,7 @@ import { type Command, CommandSchema } from "@/lib/commands/type";
 import { useProject } from "@/contexts/project-context";
 import { parseCommandsFromMakefile } from "@/lib/commands/parser";
 import { MakefileSchema, MakefileTextSchema } from "@/lib/commands/type";
-import { useCommand } from "@/contexts/command-context";
+import { CommandAction, useCommand } from "@/contexts/command-context";
 
 export function AppMakefile() {
 	// States
@@ -87,10 +87,20 @@ export function AppMakefile() {
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import Makefile */}
-					<ImportMakefile />
+					<ImportMakefile handleCommandAction={handleCommandAction}>
+						<Button variant={"outline"} type={"button"}>
+							<FileUp />
+							Import makefile
+						</Button>
+					</ImportMakefile>
 
 					{/* Add command */}
-					<CreateCommand />
+					<CreateCommand handleCommandAction={handleCommandAction}>
+						<Button variant={"default"} type={"button"}>
+							<Plus />
+							Add command
+						</Button>
+					</CreateCommand>
 				</div>
 
 				<SmoothResize className="flex items-center gap-2 relative">
@@ -158,12 +168,18 @@ export function AppMakefile() {
 				</SmoothResize>
 			</div>
 
-			<CommandList search={search} />
+			<CommandList search={search} handleCommandAction={handleCommandAction} />
 		</div>
 	);
 }
 
-function ImportMakefile() {
+export function ImportMakefile({
+	handleCommandAction,
+	children,
+}: {
+	handleCommandAction: (action: CommandAction) => void;
+	children: React.ReactNode;
+}) {
 	// States
 	const [makefilePreview, setMakefilePreview] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
@@ -175,7 +191,6 @@ function ImportMakefile() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleCommandAction } = useCommand();
 
 	// Variables
 	const MakefileForm = useForm<z.infer<typeof MakefileSchema>>({
@@ -248,12 +263,7 @@ function ImportMakefile() {
 
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button variant={"outline"} type={"button"}>
-					<FileUp />
-					Import makefile
-				</Button>
-			</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Import makefile</AlertDialogTitle>
@@ -481,13 +491,18 @@ function ImportMakefile() {
 	);
 }
 
-function CreateCommand() {
+export function CreateCommand({
+	handleCommandAction,
+	children,
+}: {
+	handleCommandAction: (action: CommandAction) => void;
+	children: React.ReactNode;
+}) {
 	// States
 	const [loading, setLoading] = useState<boolean>(false);
 
 	// Custom hooks
 	const { project } = useProject();
-	const { handleCommandAction } = useCommand();
 
 	// Variables
 	const CommandForm = useForm<z.infer<typeof CommandSchema>>({
@@ -526,12 +541,7 @@ function CreateCommand() {
 
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button variant={"default"} type={"button"}>
-					<Plus />
-					Add command
-				</Button>
-			</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<Form {...CommandForm}>
 					<form
@@ -632,13 +642,16 @@ function CreateCommand() {
 	);
 }
 
-function EditCommand({ command }: { command: Command }) {
+export function EditCommand({
+	command,
+	handleCommandAction,
+}: {
+	command: Command;
+	handleCommandAction: (action: CommandAction) => void;
+}) {
 	// States
 	const [loading, setLoading] = useState<boolean>(false);
 
-	// Custom hooks
-	const { handleCommandAction } = useCommand();
-	
 	// Variables
 	const CommandForm = useForm<z.infer<typeof CommandSchema>>({
 		resolver: zodResolver(CommandSchema),
@@ -772,17 +785,21 @@ function EditCommand({ command }: { command: Command }) {
 	);
 }
 
-function CommandList({ search }: { search: string }) {
-
+function CommandList({
+	search,
+	handleCommandAction,
+}: {
+	search: string;
+	handleCommandAction: (action: CommandAction) => void;
+}) {
 	// Custom hooks
 	const { project } = useProject();
-	const { handleCommandAction } = useCommand();
-	
+
 	// Custom methods
 	function handleDelete(target: string) {
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
-		
+
 		handleCommandAction({ type: "delete", command: command });
 		return true;
 	}
@@ -818,7 +835,10 @@ function CommandList({ search }: { search: string }) {
 										</p>
 									</div>
 									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-										<EditCommand command={command} />
+										<EditCommand
+											command={command}
+											handleCommandAction={handleCommandAction}
+										/>
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
 												<Button variant={"ghost"} size={"icon"} type={"button"}>
@@ -864,5 +884,3 @@ function CommandList({ search }: { search: string }) {
 		</>
 	);
 }
-
-

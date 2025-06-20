@@ -1,9 +1,6 @@
 // Necessary imports
-import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
-import { useProject } from "@/contexts/project-context";
-import { ProjectProvider } from "@/contexts/project-context";
-import { ProjectExample } from "@/lib/projects/type";
+import { useEffect } from "react";
 
 // Components
 import { AdminLayout } from "@/components/layouts/admin-layout";
@@ -25,6 +22,13 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsBody } from "@/components/ui/tabs";
 
+// Contexts
+import { useProject, ProjectProvider } from "@/contexts/project-context";
+
+// Libs
+import { type BreadcrumbItem } from "@/types";
+import { ProjectExample } from "@/lib/projects/type";
+
 const breadcrumbs: BreadcrumbItem[] = [
 	{
 		title: "Dashboard",
@@ -44,7 +48,7 @@ export default function Page() {
 	return (
 		<AdminLayout breadcrumbs={breadcrumbs}>
 			<Head title="The name of the project" />
-			<ProjectProvider>
+			<ProjectProvider projectCreated={true}>
 				{/* Content */}
 
 				<Content />
@@ -56,12 +60,15 @@ export default function Page() {
 function Content() {
 	const { project, setProject, updateProject } = useProject();
 
-	setProject(ProjectExample);
+	useEffect(() => {
+		setProject(ProjectExample);
+	}, []);
+
 
 	return (
-		<Tabs className="flex flex-row items-start gap-4" defaultValue="overview">
+		<Tabs className="flex flex-row items-start justify-between gap-4" defaultValue={"commands"}>
 			{/* Header + TabsContent */}
-			<div className="flex flex-col gap-4 flex-shrink-0 flex-grow-1">
+			<div className="flex flex-col gap-4 w-full">
 				<SmoothItem delay={0.3} layout={false}>
 					<Card className="bg-transparent border-0 shadow-none rounded-none">
 						<CardHeader className="px-2 py-4">
@@ -76,7 +83,7 @@ function Content() {
 					<Separator />
 				</SmoothItem>
 
-				<SmoothItem delay={0.5} layout={false}>
+				<SmoothItem delay={0.5} layout={false} className="!flex-grow-0">
 					<TabsBody className="mt-4">
 						<AppOverview />
 						<AppMakefile />

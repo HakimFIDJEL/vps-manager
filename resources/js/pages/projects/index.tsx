@@ -149,11 +149,17 @@ export default function Page() {
 				<SmoothItem delay={0.3}>
 					<Card>
 						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Folder className="w-5 h-5 text-muted-foreground" />
-								Projects
-							</CardTitle>
-							<CardDescription>List of all projects</CardDescription>
+							<div className="flex items-center gap-3">
+								<div className="bg-card border rounded-md p-2">
+									<Folder className="w-5 h-5 text-muted-foreground" />
+								</div>
+								<div>
+									<CardTitle className="flex items-center gap-2 text-xl">
+										Projects
+									</CardTitle>
+									<CardDescription>List of all projects</CardDescription>
+								</div>
+							</div>
 							<CardAction className="flex items-center gap-2">
 								<Link href={route("projects.index")}>
 									<Button variant={"secondary"}>

@@ -8,12 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Folder, FileLock, Container, SquareTerminal, OctagonMinus } from "lucide-react";
 
 export function AppDone() {
+
+	// Custom hooks
 	const { project } = useProject();
 
 	return (
 
-		<>
-			<h3 className="text-sm font-medium mb-2">Overview</h3>
+		<div className="flex flex-col gap-2">
+			<h3 className="text-sm font-medium">Overview</h3>
 
 			<div className="grid grid-cols-2 gap-4">
 				{/* Project Info */}
@@ -111,6 +113,6 @@ export function AppDone() {
 					</div>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }

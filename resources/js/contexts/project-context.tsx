@@ -6,7 +6,7 @@ import { DockerProvider } from "./docker-context";
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
-export function ProjectProvider({ children }: { children: React.ReactNode }) {
+export function ProjectProvider({ children, projectCreated=false }: { children: React.ReactNode, projectCreated: boolean }) {
   const [project, setProject] = useState<Project>(DEFAULT_PROJECT);
 
   const updateProject = <K extends keyof Project>(key: K, value: Project[K]) => {
@@ -18,7 +18,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ProjectContext.Provider value={{ project, setProject, updateProject }}>
-      <CommandProvider>
+      <CommandProvider projectCreated={projectCreated}>
         <VariableProvider>
           <DockerProvider>
             {children}
