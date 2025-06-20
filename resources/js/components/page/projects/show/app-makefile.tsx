@@ -21,6 +21,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
+import { 
+	Alert,
+	AlertTitle,
+	AlertDescription
+} from "@/components/ui/alert"
 
 // Icons
 import {
@@ -58,6 +63,12 @@ export function AppMakefile() {
 	return (
 		<TabsContent value="commands" className="flex flex-col gap-6">
 			{/* Wrapper */}
+			{/* <Alert>
+				<AlertTitle>Success! Your changes have been saved</AlertTitle>
+				<AlertDescription>
+				This is an alert with icon, title and description.
+				</AlertDescription>
+			</Alert> */}
 			<div className="grid">
 
 				<h3 className="text-sm font-medium mb-2">Actions</h3>

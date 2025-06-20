@@ -21,12 +21,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
+import { 
+	Alert,
+	AlertTitle,
+	AlertDescription
+} from "@/components/ui/alert"
 
 // Icons
 import {
 	Search,
 	Trash,
 	OctagonAlert,
+	CheckCircle2Icon,
 	Play,
 	Plus,
 	FileUp,
@@ -55,7 +61,15 @@ export function AppVariables() {
 	return (
 		<TabsContent value="variables" className="flex flex-col gap-6">
 			{/* Wrapper */}
+			{/* <CheckCircle2Icon /> */}
+			{/* <Alert>
+				<AlertTitle>Success! Your changes have been saved</AlertTitle>
+				<AlertDescription>
+				This is an alert with icon, title and description.
+				</AlertDescription>
+			</Alert> */}
 			<div className="grid">
+
 
 				<h3 className="text-sm font-medium mb-2">Actions</h3>
 				<div className="flex flex-col gap-2 w-full">
