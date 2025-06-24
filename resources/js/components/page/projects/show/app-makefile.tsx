@@ -21,11 +21,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
-import { 
-	Alert,
-	AlertTitle,
-	AlertDescription
-} from "@/components/ui/alert"
 
 // Icons
 import {
@@ -61,7 +56,7 @@ export function AppMakefile() {
 	const { handleCommandAction } = useCommand();
 
 	return (
-		<TabsContent value="commands" className="flex flex-col gap-6">
+		<TabsContent value="commands" className="space-y-12">
 			{/* Wrapper */}
 			{/* <Alert>
 				<AlertTitle>Success! Your changes have been saved</AlertTitle>
@@ -69,8 +64,8 @@ export function AppMakefile() {
 				This is an alert with icon, title and description.
 				</AlertDescription>
 			</Alert> */}
-			<div className="grid">
 
+			<>
 				<h3 className="text-sm font-medium mb-2">Actions</h3>
 				<div className="flex flex-col gap-2 w-full">
 					<SmoothAnimate className="flex items-center gap-2 relative">
@@ -178,9 +173,10 @@ export function AppMakefile() {
 						)}
 					</SmoothAnimate>
 				</div>
+			</>
 
-				<CommandList search={search} handleCommandAction={handleCommandAction} />
-			</div>
+			<CommandList search={search} handleCommandAction={handleCommandAction} />
+			
 		</TabsContent>
 	);
 }
@@ -229,7 +225,7 @@ function CommandList({
 						</p>
 					</div>
 				) : (
-					<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 gap-2">
 						{filteredCommands.map((command) => (
 							<div
 								key={command.target}

@@ -1,5 +1,7 @@
+// Necessary imports
 import { z } from "zod";
 import yaml from "js-yaml";
+
 
 // Docker Compose Schema
 const DockerServiceSchema = z.object({
@@ -122,3 +124,16 @@ export type DockerCompose = {
     networks: Array<{ name: string; driver: string; customName?: string; }>;
   };
 };
+
+// TEMP
+
+export type tempContainer = {
+  container_id : string;
+  image : string;
+  command : string;
+  created_at : string;
+  status: string;
+  state : "running" | "exited" | "created" | "restarting" | "paused" | "dead";
+  ports : string;
+  name : string;
+}

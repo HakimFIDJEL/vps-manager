@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useProject } from "@/contexts/project-context";
-import { useDocker } from "@/contexts/docker-context";
+import { DockerAction, useDocker } from "@/contexts/docker-context";
 
 // Libs
 import { DOCKER_COMPOSE_KEYWORDS } from "@/lib/docker/keywords";
@@ -79,11 +79,14 @@ import {
 	Eraser,
 	RefreshCcw,
 	Ellipsis,
+	Upload,
 } from "lucide-react";
+import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
 
 export function AppDocker() {
 	// Custom hooks
 	const { project } = useProject();
+	const { handleDockerAction } = useDocker();
 
 	return (
 		<Tabs defaultValue={project.docker.content ? "docker" : "empty"}>
@@ -93,17 +96,21 @@ export function AppDocker() {
 			</TabsList>
 			<TabsBody>
 				<TabsContent value="empty">
-					<EmptyDockerState />
+					<EmptyDockerState handleDockerAction={handleDockerAction} />
 				</TabsContent>
 				<TabsContent value="docker">
-					<DockerConfiguration />
+					<DockerConfiguration handleDockerAction={handleDockerAction} />
 				</TabsContent>
 			</TabsBody>
 		</Tabs>
 	);
 }
 
-function EmptyDockerState() {
+function EmptyDockerState({
+	handleDockerAction,
+}: {
+	handleDockerAction: (action: DockerAction) => void;
+}) {
 	// States
 	const [isDragActive, setIsDragActive] = useState(false);
 
@@ -113,7 +120,6 @@ function EmptyDockerState() {
 	// Custom hooks
 	const { setCurrentValue } = useTabsContext();
 	const { project } = useProject();
-	const { handleDockerAction } = useDocker();
 
 	// Variables
 	const DockerComposeForm = useForm<z.infer<typeof DockerComposeFileSchema>>({
@@ -354,10 +360,13 @@ function TemplateLink({
 	);
 }
 
-function DockerSidebar() {
+function DockerSidebar({
+	handleDockerAction,
+}: {
+	handleDockerAction: (action: DockerAction) => void;
+}) {
 	// Custom hooks
 	const { project } = useProject();
-	const { handleDockerAction } = useDocker();
 
 	// Custom methods
 	const handleRemove = (
@@ -609,15 +618,18 @@ function DockerSidebar() {
 	);
 }
 
-function DockerContent() {
+function DockerContent({
+	handleDockerAction,
+}: {
+	handleDockerAction: (action: DockerAction) => void;
+}) {
 	// Custom hooks
 	const { project } = useProject();
-	const { handleDockerAction } = useDocker();
 	const { setCurrentValue } = useTabsContext();
 
 	return (
 		<div className="col-span-9">
-			<div className="rounded-lg border">
+			<div className="rounded-lg border bg-card">
 				<div className="border-b">
 					<div className="flex items-center justify-between px-4 py-3">
 						<div className="flex items-center gap-2">
@@ -652,42 +664,50 @@ function DockerContent() {
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="">
-									<DropdownMenuItem
-										onClick={() => handleDockerAction({ type: "save" })}
-										className="flex items-center gap-2"
-										disabled={project.docker.isSaved}
-									>
-										<Save className="h-4 w-4" />
-										<span>Save</span>
-										{project.docker.isSaved && (
-											<Check className="h-3 w-3 ml-auto text-primary" />
-										)}
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() => handleDockerAction({ type: "copy" })}
-										className="flex items-center gap-2"
-									>
-										<Copy className="h-4 w-4" />
-										<span>Copy</span>
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() => handleDockerAction({ type: "clear" })}
-										className="flex items-center gap-2"
-										disabled={project.docker.isStrict}
-									>
-										<Eraser className="h-4 w-4" />
-										<span>Clear</span>
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() => {
-											handleDockerAction({ type: "reset" });
-											setCurrentValue("empty");
-										}}
-										className="flex items-center gap-2"
-									>
-										<RefreshCcw className="h-4 w-4" />
-										<span>Reset</span>
-									</DropdownMenuItem>
+									{project.isCreated && (
+										<>
+											<DockerDropdownFileUpload handleDockerAction={handleDockerAction} />
+											<DropdownMenuSeparator />
+										</>
+									)}
+
+									<DropdownMenuGroup>
+										<DropdownMenuItem
+											onClick={() => handleDockerAction({ type: "save" })}
+											className="flex items-center gap-2"
+											disabled={project.docker.isSaved}
+										>
+											<Save className="h-4 w-4" />
+											<span>Save</span>
+										</DropdownMenuItem>
+										<DropdownMenuItem
+											onClick={() => handleDockerAction({ type: "copy" })}
+											className="flex items-center gap-2"
+										>
+											<Copy className="h-4 w-4" />
+											<span>Copy</span>
+										</DropdownMenuItem>
+										<DropdownMenuItem
+											onClick={() => handleDockerAction({ type: "clear" })}
+											className="flex items-center gap-2"
+											disabled={project.docker.isStrict}
+										>
+											<Eraser className="h-4 w-4" />
+											<span>Clear</span>
+										</DropdownMenuItem>
+										<DropdownMenuItem
+											onClick={() => {
+												handleDockerAction({ type: "reset" });
+												if(!project.isCreated) {
+													setCurrentValue("empty");
+												}
+											}}
+											className="flex items-center gap-2"
+										>
+											<RefreshCcw className="h-4 w-4" />
+											<span>Reset</span>
+										</DropdownMenuItem>
+									</DropdownMenuGroup>
 
 									<DropdownMenuSeparator />
 									<div className="p-2">
@@ -737,13 +757,137 @@ function DockerContent() {
 	);
 }
 
-function DockerConfiguration() {
+export function DockerConfiguration({
+	handleDockerAction,
+}: {
+	handleDockerAction: (action: DockerAction) => void;
+}) {
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-12 gap-4">
-				<DockerContent />
-				<DockerSidebar />
+				<DockerContent handleDockerAction={handleDockerAction} />
+				<DockerSidebar handleDockerAction={handleDockerAction} />
 			</div>
 		</div>
+	);
+}
+
+function DockerDropdownFileUpload({
+	handleDockerAction,
+}: {
+	handleDockerAction: (action: DockerAction) => void;
+}) {
+	const { project } = useProject();
+
+	const DockerComposeForm = useForm<z.infer<typeof DockerComposeFileSchema>>({
+		resolver: zodResolver(DockerComposeFileSchema),
+		mode: "onChange",
+		defaultValues: {
+			file: undefined,
+		},
+	});
+
+	const handleFileUpload = async (file: File) => {
+
+		try {
+			// Update form field
+			DockerComposeForm.setValue("file", file, {
+				shouldValidate: true,
+				shouldDirty: true,
+				shouldTouch: true,
+			});
+
+			// Validate file
+			const result = await DockerComposeForm.trigger("file");
+			if (!result) {
+				const errors = DockerComposeForm.formState.errors;
+				if (errors.file) {
+					console.error("Form validation errors:", errors.file);
+					toast.error(errors.file.message as string);
+				}
+				return;
+			}
+
+			// Read file content
+			const content = await file.text();
+
+			// Parse and validate content
+			const variable_length = project.variables.length;
+			const parsed = parseDockerCompose(
+				content,
+				project.docker.isStrict,
+				variable_length,
+			);
+			if (parsed.isValid && parsed.updatedContent) {
+				const newState = {
+					content: parsed.updatedContent,
+					isSaved: true,
+					isStrict: false,
+					parsed: {
+						services: parsed.services,
+						volumes: parsed.volumes,
+						networks: parsed.networks,
+					},
+				};
+
+				// setCurrentValue("docker");
+
+				handleDockerAction({ type: "create", docker: newState });
+			}
+		} catch (error) {
+			console.error("Error uploading file:", error);
+			toast.error("An error occurred while importing the file");
+		}
+	};
+
+	const dropdownButton = useRef<HTMLButtonElement>(null);
+
+	return (
+		<Form {...DockerComposeForm}>
+			<FormField
+				control={DockerComposeForm.control}
+				name="file"
+				render={({ field }) => {
+					const { value, ...rest } = field;
+
+					return (
+						<FormItem>
+							<Button
+								className="flex items-start flex-col gap-0 relative py-0 px-2 rounded-sm h-auto hover:!bg-accent"
+								variant={"ghost"}
+							>
+								<FormLabel
+									htmlFor="file"
+									className="w-full h-full py-2 cursor-pointer"
+								>
+									<Upload className="h-4 w-4 text-muted-foreground" />
+									<span>Import file</span>
+								</FormLabel>
+
+								<FormControl>
+									<Input
+										id="file"
+										type="file"
+										accept=".yml,.yaml"
+										className="hidden absolute top-0 left-0 right-0 bottom-0"
+										onClick={(e) => {
+											(e.target as HTMLInputElement).value = "";
+										}}
+										onChange={async (e) => {
+											const file = e.target.files?.[0] ?? null;
+											if (file) {
+												await handleFileUpload(file);
+											}
+										}}
+									/>
+								</FormControl>
+
+								<FormMessage />
+							</Button>
+						</FormItem>
+					);
+				}}
+			/>
+		</Form>
 	);
 }

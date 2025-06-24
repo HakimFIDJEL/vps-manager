@@ -7,44 +7,21 @@ import { SmoothAnimate } from "@/components/ui/smooth-resized";
 // Shadcn UI components
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogBody,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
-import { 
-	Alert,
-	AlertTitle,
-	AlertDescription
-} from "@/components/ui/alert"
 
 // Icons
-import {
-	Search,
-	Trash,
-	OctagonAlert,
-	CheckCircle2Icon,
-	Play,
-	Plus,
-	FileUp,
-	Download,
-} from "lucide-react";
+import { Search, Plus, FileUp, Download } from "lucide-react";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
 // import { CommandAction, useCommand } from "@/contexts/command-context";
 import { useVariable } from "@/contexts/variable-context";
 
-import { CreateVariable, ImportEnv, VariablesList } from "../create/app-variables";
+import {
+	CreateVariable,
+	ImportEnv,
+	VariablesList,
+} from "../create/app-variables";
 
 export function AppVariables() {
 	// States
@@ -59,18 +36,8 @@ export function AppVariables() {
 	const { handleVariableAction } = useVariable();
 
 	return (
-		<TabsContent value="variables" className="flex flex-col gap-6">
-			{/* Wrapper */}
-			{/* <CheckCircle2Icon /> */}
-			{/* <Alert>
-				<AlertTitle>Success! Your changes have been saved</AlertTitle>
-				<AlertDescription>
-				This is an alert with icon, title and description.
-				</AlertDescription>
-			</Alert> */}
-			<div className="grid">
-
-
+		<TabsContent value="variables" className="space-y-12">
+			<>
 				<h3 className="text-sm font-medium mb-2">Actions</h3>
 				<div className="flex flex-col gap-2 w-full">
 					<SmoothAnimate className="flex items-center gap-2 relative">
@@ -121,19 +88,20 @@ export function AppVariables() {
 								</div>
 								<div className="flex-1 text-left">
 									<div className="font-medium text-foreground">Import variables</div>
-									<div className="text-xs text-muted-foreground">Load or paste existing file</div>
+									<div className="text-xs text-muted-foreground">
+										Load or paste existing file
+									</div>
 								</div>
 							</Button>
 						</ImportEnv>
 
 						{/* Export .env */}
 						<ExportEnv />
-
 					</SmoothAnimate>
 				</div>
+			</>
 
-				<VariablesList search={search} handleVariableAction={handleVariableAction} />
-			</div>
+			<VariablesList search={search} handleVariableAction={handleVariableAction} />
 		</TabsContent>
 	);
 }
@@ -181,4 +149,3 @@ function ExportEnv() {
 		</Button>
 	);
 }
-

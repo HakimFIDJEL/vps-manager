@@ -106,7 +106,7 @@ export default function Page() {
 		<AdminLayout breadcrumbs={breadcrumbs}>
 			<Head title="Create a project" />
 			{/* Project provider has every providers needed (commands, variables, docker etc..) */}
-			<ProjectProvider projectCreated={false}>
+			<ProjectProvider>
 					<SmoothItem delay={0.1}>
 						<Card>
 							<CardHeader>

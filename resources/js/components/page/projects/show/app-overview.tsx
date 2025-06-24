@@ -34,9 +34,9 @@ export function AppOverview() {
 			<div className="flex flex-col gap-2">
 				<h3 className="text-sm font-medium">Overview</h3>
 
-				<TabsList className="grid grid-cols-2 gap-4 !bg-transparent border-0 shadow-none rounded-none w-full text-foreground h-auto">
+				<TabsList className="grid grid-cols-2 gap-2 !bg-transparent border-0 shadow-none rounded-none w-full text-foreground h-auto">
 					{/* Project Info */}
-					<div className="p-6 rounded-lg border bg-card hover:border-primary/50 transition-all duration-200 group relative">
+					<div className="p-4 rounded-lg border bg-card hover:border-primary/50 transition-all duration-200 group relative">
 						<div className="flex items-center gap-3">
 							<div className="p-2 bg-primary/5 rounded-full">
 								<Folder className="h-4 w-4 text-primary" />
@@ -56,7 +56,7 @@ export function AppOverview() {
 
 					{/* Variables */}
 					<TabsTrigger
-						className="p-6 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start"
+						className="p-4 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start"
 						value="variables"
 					>
 						<div className="flex items-center gap-3">
@@ -82,7 +82,7 @@ export function AppOverview() {
 
 					{/* Docker */}
 					<TabsTrigger
-						className="p-6 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start"
+						className="p-4 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start"
 						value="containers"
 					>
 						<div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export function AppOverview() {
 
 					{/* Commands */}
 					<TabsTrigger
-						className="p-6 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start"
+						className="p-4 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start"
 						value="commands"
 					>
 						<div className="flex items-center gap-3">

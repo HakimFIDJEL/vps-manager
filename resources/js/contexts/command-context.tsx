@@ -20,17 +20,15 @@ const CommandContext = createContext<CommandContextType | null>(null);
 
 export function CommandProvider({
 	children,
-	projectCreated = false,
 }: {
 	children: ReactNode;
-	projectCreated: boolean;
 }) {
 	const { project, updateProject } = useProject();
 
 	let handleCommandAction: (action: CommandAction) => void;
 
 	// Server actions
-	if (projectCreated) {
+	if (project.isCreated) {
 		handleCommandAction = useCallback(
 			(action: CommandAction) => {
 				switch (action.type) {

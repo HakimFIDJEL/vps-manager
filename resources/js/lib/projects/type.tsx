@@ -10,6 +10,7 @@ export type Project = {
 	variables: Variable[];
 	commands: Command[];
 	docker: DockerCompose;
+	isCreated: boolean;
 };
 
 export type ProjectContextType = {
@@ -33,6 +34,7 @@ export const DEFAULT_PROJECT: Project = {
 			networks: [],
 		},
 	},
+	isCreated: false,
 };
 
 // Schemas
@@ -70,4 +72,5 @@ export const ProjectExample: Project = {
 			networks: [],
 		},
 	},
+	isCreated: true,
 }

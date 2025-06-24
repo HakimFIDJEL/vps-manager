@@ -51,10 +51,6 @@ function ProjectSidebar({ className, ...props } : { className : string }) {
 			className={`rounded-md border h-full ${className} `}
 			{...props}
 		>
-			<SidebarHeader>
-				<ProjectSidebarHeader />
-			</SidebarHeader>
-			<Separator />
 			<SidebarContent>
 				<ProjectSidebarContent />
 			</SidebarContent>
@@ -66,7 +62,7 @@ function ProjectSidebar({ className, ...props } : { className : string }) {
 	);
 }
 
-function ProjectSidebarHeader({ ...props }: {}) {
+function ProjectSidebarFooter({ ...props }: {}) {
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
@@ -174,19 +170,19 @@ function ProjectSidebarContent({ ...props }: {}) {
 	);
 }
 
-function ProjectSidebarFooter({ ...props }: {}) {
-	return (
-		<SidebarMenu className="mt-auto">
-			<SidebarMenuItem className="p-2">
-				{/* <SidebarMenuButton asChild> */}
-					<Link href={route("projects.index")}>
-						<Button variant={"outline"}  className="w-full" size={"sm"}>
-							<ArrowLeft />
-							Go back to projects
-						</Button>
-					</Link>
-				{/* </SidebarMenuButton> */}
-			</SidebarMenuItem>
-		</SidebarMenu>
-	);
-}
+// function ProjectSidebarFooter({ ...props }: {}) {
+// 	return (
+// 		<SidebarMenu className="mt-auto">
+// 			<SidebarMenuItem className="p-2">
+// 				{/* <SidebarMenuButton asChild> */}
+// 					<Link href={route("projects.index")}>
+// 						<Button variant={"outline"}  className="w-full" size={"sm"}>
+// 							<ArrowLeft />
+// 							Go back to projects
+// 						</Button>
+// 					</Link>
+// 				{/* </SidebarMenuButton> */}
+// 			</SidebarMenuItem>
+// 		</SidebarMenu>
+// 	);
+// }

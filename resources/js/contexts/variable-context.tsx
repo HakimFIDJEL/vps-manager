@@ -18,13 +18,13 @@ interface VariableContextType {
 
 const VariableContext = createContext<VariableContextType | undefined>(undefined);
 
-export function VariableProvider({ children, projectCreated=false }: { children: React.ReactNode, projectCreated: boolean }) {
+export function VariableProvider({ children }: { children: React.ReactNode }) {
   const { project, updateProject } = useProject();
 
   let handleVariableAction: (action: VariableAction) => void;
 
 	// Server actions
-	if (projectCreated) {
+	if (project.isCreated) {
     handleVariableAction = useCallback(
       (action: VariableAction) => {
         switch (action.type) {
