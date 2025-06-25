@@ -564,7 +564,7 @@ function DockerSidebar({
 				<div
 					className={` w-full flex flex-col ${project.docker.isStrict ? "gap-4" : ""}`}
 				>
-					<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md">
+					<div className="text-sm text-muted-foreground px-4 py-3 bg-card border rounded-md">
 						<div className="flex items-start gap-3">
 							<div className="space-y-2">
 								<div className="flex items-center gap-2">
@@ -582,7 +582,7 @@ function DockerSidebar({
 			)}
 
 			{project.docker.isStrict && project.variables.length > 0 && (
-				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md w-full">
+				<div className="text-sm text-muted-foreground px-4 py-3 bg-card border rounded-md w-full">
 					<div className="flex items-start gap-3">
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">
@@ -599,7 +599,7 @@ function DockerSidebar({
 			)}
 
 			{project.docker.isStrict == false && (
-				<div className="text-sm text-muted-foreground px-4 py-3 bg-muted/50 border border-border/50 rounded-md w-full">
+				<div className="text-sm text-muted-foreground px-4 py-3 bg-card border rounded-md w-full">
 					<div className="flex items-start gap-3">
 						<div className="space-y-2">
 							<div className="flex items-center gap-2">

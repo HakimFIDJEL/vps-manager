@@ -1,6 +1,6 @@
 // Necessary imports
 import { Head } from "@inertiajs/react";
-import { useEffect } from "react";
+import * as React from "react";
 import { Link } from "@inertiajs/react";
 
 // Components
@@ -23,11 +23,23 @@ import {
 	CardAction,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsBody } from "@/components/ui/tabs";
+import {
+	Tabs,
+	TabsBody,
+	TabsList,
+	TabsNavigation,
+	TabsTrigger,
+} from "@/components/ui/tabs";
 
 // Icons
 import {
-    ArrowLeft,
+	ArrowLeft,
+	Container,
+	FileLock,
+	Folder,
+	LayoutGrid,
+	Settings2,
+	SquareTerminal,
 } from "lucide-react";
 
 // Contexts
@@ -68,7 +80,15 @@ export default function Page() {
 function Content() {
 	const { project, setProject, updateProject } = useProject();
 
-	useEffect(() => {
+	const tabs = [
+		{ value: "overview", label: "Overview", icon: <LayoutGrid /> },
+		{ value: "commands", label: "Commands", icon: <SquareTerminal /> },
+		{ value: "containers", label: "Containers", icon: <Container /> },
+		{ value: "variables", label: "Variables", icon: <FileLock /> },
+		{ value: "settings", label: "Settings", icon: <Settings2 /> },
+	];
+
+	React.useEffect(() => {
 		setProject(ProjectExample);
 	}, []);
 
@@ -78,16 +98,15 @@ function Content() {
 			defaultValue={"containers"}
 		>
 			{/* Header + TabsContent */}
-			<div className="flex flex-col gap-4 w-full overflow-hidden">
-				<SmoothItem delay={0.3} layout={false}>
-					<Card className="bg-transparent border-0 shadow-none rounded-none">
-					{/* <Card > */}
+			<div className="flex flex-col w-full overflow-hidden gap-4">
+				<SmoothItem delay={0.1} layout={false}>
+					{/* <Card className="bg-transparent border-0 shadow-none rounded-none">
+						
 						<CardHeader className="px-2 py-4">
-						{/* <CardHeader> */}
-							<CardTitle className="text-2xl">{project.name}</CardTitle>
+							
+							<CardTitle className="text-2xl"></CardTitle>
 							<CardDescription>
-								Here you can view details, manage settings, and perform actions related
-								to this project.
+								
 							</CardDescription>
 							<CardAction>
 								<Link href={route("projects.index")}>
@@ -98,12 +117,40 @@ function Content() {
 								</Link>
 							</CardAction>
 						</CardHeader>
-					</Card>
+					</Card> */}
 
-					<Separator />
+					<Card>
+						<CardHeader>
+							<div className="flex items-center gap-3">
+								<div className="bg-card border rounded-md p-2">
+									<Folder className="w-5 h-5 text-muted-foreground" />
+								</div>
+								<div>
+									<CardTitle className="flex items-center gap-2 text-xl">
+										{project.name}
+									</CardTitle>
+									<CardDescription>
+										Here you can view details, manage settings, and perform actions
+										related to this project.
+									</CardDescription>
+								</div>
+							</div>
+
+							<CardAction>
+								<Link href={route("projects.index")}>
+									<Button variant={"outline"}>
+										<ArrowLeft />
+										Go back to projects
+									</Button>
+								</Link>
+							</CardAction>
+						</CardHeader>
+					</Card>
 				</SmoothItem>
 
-				<SmoothItem delay={0.5} layout={false} className="!flex-grow-0 w-full">
+				<SmoothItem delay={0.3} layout={false} className="!flex-grow-0 w-full">
+					<TabsNavigation tabs={tabs} className="mb-12" />
+
 					<TabsBody className="mt-4">
 						<AppOverview />
 						<AppMakefile />
@@ -115,13 +162,13 @@ function Content() {
 			</div>
 
 			{/* Sidebar */}
-			<SmoothItem
+			{/* <SmoothItem
 				delay={0.1}
 				layout={false}
 				className="self-start sticky top-[4.5rem] right-[0.5rem]"
 			>
 				<AppSidebar className="h-[calc(100vh-5rem)]" />
-			</SmoothItem>
+			</SmoothItem> */}
 		</Tabs>
 	);
 }

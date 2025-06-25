@@ -360,7 +360,7 @@ export function ImportMakefile({
 																		id="preview"
 																		value={makefilePreview}
 																		disabled={true}
-																		className="h-64 resize-none"
+																		className="min-h-32 max-h-64 resize-none"
 																	/>
 																</div>
 															)}
@@ -821,7 +821,7 @@ function CommandList({
 						</p>
 					</div>
 				) : (
-					<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
 						{filteredCommands.map((command) => (
 							<div
 								key={command.target}

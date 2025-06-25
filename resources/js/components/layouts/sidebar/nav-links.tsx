@@ -30,6 +30,8 @@ export function NavLinks({
   title,
   className,
   items,
+  openMenu,
+  setOpenMenu,
 }: {
   title?: string;
   className?: string;
@@ -43,20 +45,20 @@ export function NavLinks({
   openMenu: string | null;
   setOpenMenu: (key: string | null) => void;
 }) {
-  const { openMenu, setOpenMenu } = useSidebar()
+  const { openMenu: contextOpenMenu, setOpenMenu: contextSetOpenMenu } = useSidebar()
   return (
     <SidebarGroup className={className}>
       {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
 
       <SidebarMenu>
         {items.map((item) => {
-          const isOpen = openMenu === item.title;
+          const isOpen = contextOpenMenu === item.title;
 
           return (
             <Collapsible
               key={item.title}
               open={isOpen}
-              onOpenChange={(open) => setOpenMenu(open ? item.title : null)}
+              onOpenChange={(open) => contextSetOpenMenu(open ? item.title : null)}
               asChild
             >
               <SidebarMenuItem>

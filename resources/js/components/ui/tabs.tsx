@@ -7,7 +7,6 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SmoothAnimate } from "@/components/ui/smooth-resized";
 
-
 // Context to provide animation settings and tab order
 interface TabsContextProps {
 	currentValue: string;
@@ -23,7 +22,9 @@ const TabsContext = React.createContext<TabsContextProps | null>(null);
 export function useTabsContext() {
 	const context = React.useContext(TabsContext);
 	if (!context) {
-		throw new Error("useTabsContext doit être utilisé à l'intérieur d'un composant Tabs");
+		throw new Error(
+			"useTabsContext doit être utilisé à l'intérieur d'un composant Tabs",
+		);
 	}
 	return context;
 }
@@ -81,7 +82,10 @@ function Tabs({
 				value={currentValue}
 				onValueChange={handleValueChange}
 				data-slot="tabs"
-				className={cn("flex flex-col gap-2 relative overflow-y-visible overflow-x-visible", className)}
+				className={cn(
+					"flex flex-col gap-2 relative overflow-y-visible overflow-x-visible",
+					className,
+				)}
 				{...props}
 			>
 				{children}
@@ -117,12 +121,9 @@ function TabsBody({
 	});
 
 	return (
-		<div 
-			className={cn(
-				"relative overflow-y-visible overflow-x-visible",
-				className
-			)} 
-			{...props} 
+		<div
+			className={cn("relative overflow-y-visible overflow-x-visible", className)}
+			{...props}
 			ref={ref}
 		>
 			{children}
@@ -130,23 +131,40 @@ function TabsBody({
 	);
 }
 
-function TabsTrigger({
-	className,
-	ref,
-	...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+// function TabsTrigger({
+// 	className,
+// 	ref,
+// 	...props
+// }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+// 	return (
+// 		<TabsPrimitive.Trigger
+// 			data-slot="tabs-trigger"
+// 			ref={ref}
+// 			className={cn(
+// 				"cursor-pointer data-[state=active]:bg-primary focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring  text-foreground dark:text-primary-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap !transition-[color,box-shadow,background] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm data-[state=active]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 !duration-200",
+// 				className,
+// 			)}
+// 			{...props}
+// 		/>
+// 	);
+// }
+const TabsTrigger = React.forwardRef<
+	React.ElementRef<typeof TabsPrimitive.Trigger>,
+	React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(function TabsTrigger({ className, ...props }, ref) {
 	return (
 		<TabsPrimitive.Trigger
-			data-slot="tabs-trigger"
 			ref={ref}
+			data-slot="tabs-trigger"
 			className={cn(
-				"cursor-pointer data-[state=active]:bg-primary focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring  text-foreground dark:text-primary-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap !transition-[color,box-shadow,background] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm data-[state=active]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 !duration-200",
+				"cursor-pointer data-[state=active]:bg-primary focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring  text-foreground dark:text-primary-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap !transition-[color,box-shadow,background] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm data-[state=active]:text-primary-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 !duration-200", // ta classe ici
 				className,
 			)}
 			{...props}
 		/>
 	);
-}
+});
+
 TabsTrigger.displayName = "TabsTrigger";
 
 export interface TabsContentProps
@@ -161,24 +179,114 @@ function TabsContent({ className, children, ...props }: TabsContentProps) {
 	const thisValue = (props as any).value as string;
 	const isActive = thisValue === currentValue;
 
-	if(!isActive) {
-		return null 
-	} 
+	if (!isActive) {
+		return null;
+	}
 
 	return (
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
 			{...props}
-			className={cn(
-				"w-full !data-[state=inactive]:static",
-				className
-			)}
+			className={cn("w-full !data-[state=inactive]:static", className)}
 		>
-						{children}
+			{children}
 		</TabsPrimitive.Content>
 	);
 }
 TabsContent.displayName = "TabsContent";
 
+interface TabDefinition {
+	value: string;
+	label: string;
+	icon?: JSX.Element;
+}
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, TabsBody };
+function TabsNavigation({ tabs, className, ...props }: { className?: string, tabs: TabDefinition[] }) {
+	const { currentValue } = useTabsContext();
+	const [hoverStyle, setHoverStyle] = React.useState({});
+	const [activeStyle, setActiveStyle] = React.useState({ left: "0px", width: "0px" });
+	const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+	const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+	const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+	// Animation of highlight
+	React.useEffect(() => {
+		if (hoveredIndex !== null) {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+				timeoutRef.current = null;
+			}
+	
+			const hoveredElement = tabRefs.current[hoveredIndex];
+			if (hoveredElement) {
+				const { offsetLeft, offsetWidth } = hoveredElement;
+				setHoverStyle({
+					left: `${offsetLeft}px`,
+					width: `${offsetWidth}px`,
+				});
+			}
+		}
+	}, [hoveredIndex]);
+	
+
+	// Animation of indicator
+	React.useEffect(() => {
+		const activeIndex = tabs.findIndex((tab) => tab.value === currentValue);
+
+		const activeElement = tabRefs.current[activeIndex];
+		if (activeElement) {
+			const { offsetLeft, offsetWidth } = activeElement;
+			setActiveStyle({
+				left: `${offsetLeft}px`,
+				width: `${offsetWidth}px`,
+			});
+		}
+	}, [currentValue]);
+
+	return (
+		<div className={`relative border-b ${className}`}>
+			{/* Hover Highlight */}
+			<div
+				className="absolute h-full duration-200 bg-accent rounded-md flex items-center pointer-events-none"
+				style={{
+					...hoverStyle,
+					opacity: hoveredIndex !== null ? 1 : 0,
+				}}
+			/>
+
+			{/* Active Indicator */}
+			<div
+				className="absolute bottom-[-2px] h-[3px] bg-primary duration-200 pointer-events-none z-2 rounded-md"
+				style={activeStyle}
+			/>
+
+			<TabsList
+				className="!bg-transparent rounded-none h-auto p-0 space-x-[6px] relative border-0"
+				onMouseLeave={() => {
+					setHoveredIndex(null);
+					timeoutRef.current = setTimeout(() => {
+						setHoverStyle({});
+					}, 200);
+				}}
+			>
+				{tabs.map((tab, index) => (
+					<TabsTrigger
+						key={tab.value}
+						value={tab.value}
+						ref={(el) => (tabRefs.current[index] = el)}
+						className="px-3 py-2 text-sm whitespace-nowrap !bg-transparent data-[state=inactive]:!text-muted-foreground data-[state=active]:text-foreground hover:bg-transparent data-[state=inactive]:hover:!text-foreground rounded-md duration-200 relative"
+						onMouseEnter={() => {
+							setHoveredIndex(index);
+						}}
+						onMouseLeave={() => setHoveredIndex(null)}
+					>
+            {tab.icon}
+						{tab.label}
+					</TabsTrigger>
+				))}
+			</TabsList>
+		</div>
+	);
+}
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsBody, TabsNavigation };

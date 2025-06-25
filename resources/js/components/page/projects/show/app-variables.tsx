@@ -43,7 +43,7 @@ export function AppVariables() {
 					<SmoothAnimate className="flex items-center gap-2 relative">
 						{project.variables.length > 0 && (
 							<Input
-								ref={inputRef}
+							ref={inputRef}
 								name="search"
 								placeholder="Filter variables..."
 								className="z-1 relative"
@@ -101,7 +101,14 @@ export function AppVariables() {
 				</div>
 			</>
 
-			<VariablesList search={search} handleVariableAction={handleVariableAction} />
+
+			<>
+				<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
+				<div className="bg-background rounded-md">
+					<VariablesList search={search} handleVariableAction={handleVariableAction} />
+				</div>
+			</>
+			
 		</TabsContent>
 	);
 }

@@ -198,7 +198,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					openMenu={openMenu}
 					setOpenMenu={setOpenMenu}
 				/>
-
 				<NavLinks
 					title="Quick access"
 					items={data.footer}
@@ -206,7 +205,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					setOpenMenu={setOpenMenu}
 				/>
 			</SidebarContent>
-
 			<Separator />
 			<SidebarFooter>
 				<NavUser user={data.user} />

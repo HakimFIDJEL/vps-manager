@@ -8,12 +8,12 @@ interface AppHeaderProps {
   breadcrumbs?: BreadcrumbItem[];
 }
 
-export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
+export function AppHeader({ breadcrumbs = []}: AppHeaderProps ) {
   return (
     <>
       <header className="sticky top-0 bg-muted/50 dark:bg-background backdrop-blur-2xl z-10 w-full group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
         <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-          <SidebarTrigger className="-ml-1" />
+          <SidebarTrigger className="-ml-1"  />
           <Separator
             orientation="vertical"
             className="mx-2 data-[orientation=vertical]:h-4"

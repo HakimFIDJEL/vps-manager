@@ -16,6 +16,7 @@ import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarGroupContent,
+	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
     DropdownMenu,
@@ -44,22 +45,22 @@ export function AppSidebar({ className, ...props } : { className : string }) {
 }
 
 function ProjectSidebar({ className, ...props } : { className : string }) {
-	return (
-		<Sidebar
-			collapsible="none"
-			variant="floating"
-			className={`rounded-md border h-full ${className} `}
-			{...props}
-		>
-			<SidebarContent>
-				<ProjectSidebarContent />
-			</SidebarContent>
-			<Separator />
-			<SidebarFooter>
-				<ProjectSidebarFooter />
-			</SidebarFooter>
-		</Sidebar>
-	);
+    return (
+        <Sidebar
+            collapsible="none"
+            variant="floating"
+            className={`rounded-md border h-full ${className} `}
+            {...props}
+        >
+            <SidebarContent>
+                <ProjectSidebarContent />
+            </SidebarContent>
+            <Separator />
+            <SidebarFooter>
+                <ProjectSidebarFooter />
+            </SidebarFooter>
+        </Sidebar>
+    );
 }
 
 function ProjectSidebarFooter({ ...props }: {}) {
@@ -119,7 +120,12 @@ function ProjectSidebarFooter({ ...props }: {}) {
 function ProjectSidebarContent({ ...props }: {}) {
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel>Actions</SidebarGroupLabel>
+			<div className="flex items-center justify-between">
+				<SidebarGroupLabel>
+					Actions
+				</SidebarGroupLabel>
+				<SidebarTrigger className="text-muted-foreground"/>
+			</div>
 			<TabsList className="!bg-transparent h-auto border-none w-full">
 				<SidebarGroupContent>
 					<SidebarMenu>

@@ -17,7 +17,7 @@ export function AppDone() {
 		<div className="flex flex-col gap-2">
 			<h3 className="text-sm font-medium">Overview</h3>
 
-			<div className="grid grid-cols-2 gap-4">
+			<div className="grid grid-cols-2 gap-2">
 				{/* Project Info */}
 				<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 					<div className="flex items-center gap-3">

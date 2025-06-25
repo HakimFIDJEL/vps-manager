@@ -137,7 +137,13 @@ export function AppVariables() {
 				</div>
 			</div>
 
-			<VariablesList search={search} handleVariableAction={handleVariableAction} />
+			<>
+				<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
+				<VariablesList
+					search={search}
+					handleVariableAction={handleVariableAction}
+				/>
+			</>
 		</div>
 	);
 }
@@ -168,7 +174,6 @@ export function VariablesList({
 
 	return (
 		<>
-			<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
 			<div className="rounded-md border overflow-hidden">
 				<Table>
 					<TableHeader className="bg-card">
@@ -274,7 +279,7 @@ export function VariablesList({
 							</TableHead>
 						</TableRow>
 					</TableHeader>
-					<TableBody className="bg-background">
+					<TableBody className="bg-transparent">
 						{filteredVariables.map((variable) => (
 							<TableRow key={variable.key} className="group">
 								<TableCell>
@@ -313,7 +318,10 @@ export function VariablesList({
 											)}
 										</Button>
 
-										<EditVariable variable={variable} handleVariableAction={handleVariableAction} />
+										<EditVariable
+											variable={variable}
+											handleVariableAction={handleVariableAction}
+										/>
 
 										<AlertDialog>
 											<AlertDialogTrigger asChild>

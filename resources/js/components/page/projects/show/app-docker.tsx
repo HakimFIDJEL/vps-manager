@@ -548,7 +548,7 @@ function ContainersList({
 				<Table>
 					<TableHeader className="bg-card">
 						<TableRow>
-							<TableHead className="sticky left-0 z-1 bg-card after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border">
+							<TableHead className="sticky left-0 z-1 bg-card after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border ">
 								Name
 							</TableHead>
 							<TableHead>Image</TableHead>
@@ -564,7 +564,7 @@ function ContainersList({
 								<TableCell className="sticky left-0 z-1 bg-background after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border">
 									{container.name}
 								</TableCell>
-								<TableCell className="font-mono">{container.image}</TableCell>
+								<TableCell className="font-mono"><Badge variant={"outline"}>{container.image}</Badge></TableCell>
 								<TableCell>{container.status}</TableCell>
 								<TableCell>
 									{formatContainerState({ state: container.state })}
@@ -649,28 +649,6 @@ function ContainersList({
 													</div>
 												</div>
 											</DropdownMenuGroup>
-
-											{/* <div className="p-2">
-												<div className="flex items-center justify-between gap-8">
-													<div className="flex flex-col gap-1">
-														<Label
-															htmlFor="strict-mode-dropdown"
-															className="text-xs font-medium"
-														>
-															Strict Mode
-														</Label>
-														<p className="text-xs text-muted-foreground">Enable validations</p>
-													</div>
-													<Switch
-														id="strict-mode-dropdown"
-														className="cursor-pointer"
-														checked={project.docker.isStrict}
-														onCheckedChange={() =>
-															handleDockerAction({ type: "strict-toggle" })
-														}
-													/>
-												</div>
-											</div> */}
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</TableCell>

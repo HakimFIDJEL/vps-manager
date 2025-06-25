@@ -55,11 +55,6 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 
 							<Toaster richColors closeButton />
 
-							{/* <SectionCards />
-                <div className="px-4 lg:px-6">
-                  <ChartAreaInteractive />
-                </div>
-                <DataTable data={data} /> */}
 						</div>
 					</div>
 				</SidebarInset>
