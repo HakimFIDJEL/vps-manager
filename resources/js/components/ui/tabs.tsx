@@ -274,7 +274,7 @@ function TabsNavigation({ tabs, className, ...props }: { className?: string, tab
 						key={tab.value}
 						value={tab.value}
 						ref={(el) => (tabRefs.current[index] = el)}
-						className="px-3 py-2 text-sm whitespace-nowrap !bg-transparent data-[state=inactive]:!text-muted-foreground data-[state=active]:text-foreground hover:bg-transparent data-[state=inactive]:hover:!text-foreground rounded-md duration-200 relative"
+						className="px-3 py-2 text-sm whitespace-nowrap !shadow-none !bg-transparent data-[state=inactive]:!text-muted-foreground data-[state=active]:text-foreground hover:bg-transparent data-[state=inactive]:hover:!text-foreground rounded-md duration-200 relative"
 						onMouseEnter={() => {
 							setHoveredIndex(index);
 						}}
