@@ -6,7 +6,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useProject } from "@/contexts/project-context";
-import { DockerAction, useDocker } from "@/contexts/docker-context";
+import { useDocker } from "@/contexts/docker-context";
+import type { DockerAction } from "@/lib/docker/type";
 
 // Libs
 import { DOCKER_COMPOSE_KEYWORDS } from "@/lib/docker/keywords";
@@ -88,6 +89,8 @@ export function AppDocker() {
 	const { project } = useProject();
 	const { handleDockerAction } = useDocker();
 
+	const [loading, setLoading] = useState(false);
+
 	return (
 		<Tabs defaultValue={project.docker.content ? "docker" : "empty"}>
 			<TabsList className="hidden">
@@ -99,7 +102,7 @@ export function AppDocker() {
 					<EmptyDockerState handleDockerAction={handleDockerAction} />
 				</TabsContent>
 				<TabsContent value="docker">
-					<DockerConfiguration handleDockerAction={handleDockerAction} />
+					<DockerConfiguration handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
 				</TabsContent>
 			</TabsBody>
 		</Tabs>
@@ -362,8 +365,12 @@ function TemplateLink({
 
 function DockerSidebar({
 	handleDockerAction,
+	loading,
+	setLoading,
 }: {
 	handleDockerAction: (action: DockerAction) => void;
+	loading: boolean;
+	setLoading: (loading: boolean) => void;
 }) {
 	// Custom hooks
 	const { project } = useProject();
@@ -418,9 +425,10 @@ function DockerSidebar({
 														{formatServiceImage(service.image)}
 													</div>
 													<Button
-														type="button"
-														variant="ghost"
-														size="icon"
+														type={"button"}
+														variant={"ghost"}
+														size={"icon"}
+														disabled={loading}
 														className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
 														onClick={() => handleRemove(service.name, "services")}
 													>
@@ -464,9 +472,10 @@ function DockerSidebar({
 														{formatDockerDriver(volume.driver)}
 													</div>
 													<Button
-														type="button"
-														variant="ghost"
-														size="icon"
+														type={"button"}
+														variant={"ghost"}
+														size={"icon"}
+														disabled={loading}
 														className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
 														onClick={() => handleRemove(volume.name, "volumes")}
 													>
@@ -510,9 +519,10 @@ function DockerSidebar({
 														{formatDockerDriver(network.driver, network.customName)}
 													</div>
 													<Button
-														type="button"
-														variant="ghost"
-														size="icon"
+														type={"button"}
+														variant={"ghost"}
+														size={"icon"}
+														disabled={loading}
 														className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
 														onClick={() => handleRemove(network.name, "networks")}
 													>
@@ -620,8 +630,12 @@ function DockerSidebar({
 
 function DockerContent({
 	handleDockerAction,
+	loading,
+	setLoading,
 }: {
 	handleDockerAction: (action: DockerAction) => void;
+	loading: boolean;
+	setLoading: (loading: boolean) => void;
 }) {
 	// Custom hooks
 	const { project } = useProject();
@@ -659,6 +673,7 @@ function DockerContent({
 										size="icon"
 										type="button"
 										className="h-8 px-2"
+										disabled={loading}
 									>
 										<Ellipsis className="h-4 w-4" />
 									</Button>
@@ -672,14 +687,23 @@ function DockerContent({
 									)}
 
 									<DropdownMenuGroup>
+
+										
 										<DropdownMenuItem
-											onClick={() => handleDockerAction({ type: "save" })}
+											onClick={async () => { 
+												setLoading(true);
+												await handleDockerAction({ type: "save" });
+												setLoading(false);
+										}}
 											className="flex items-center gap-2"
 											disabled={project.docker.isSaved}
 										>
 											<Save className="h-4 w-4" />
 											<span>Save</span>
 										</DropdownMenuItem>
+
+
+
 										<DropdownMenuItem
 											onClick={() => handleDockerAction({ type: "copy" })}
 											className="flex items-center gap-2"
@@ -695,18 +719,20 @@ function DockerContent({
 											<Eraser className="h-4 w-4" />
 											<span>Clear</span>
 										</DropdownMenuItem>
-										<DropdownMenuItem
-											onClick={() => {
-												handleDockerAction({ type: "reset" });
-												if(!project.isCreated) {
-													setCurrentValue("empty");
-												}
-											}}
-											className="flex items-center gap-2"
-										>
-											<RefreshCcw className="h-4 w-4" />
-											<span>Reset</span>
-										</DropdownMenuItem>
+										{!project.isCreated && (
+											<DropdownMenuItem
+												onClick={() => {
+													handleDockerAction({ type: "reset" });
+													if(!project.isCreated) {
+														setCurrentValue("empty");
+													}
+												}}
+												className="flex items-center gap-2"
+											>
+												<RefreshCcw className="h-4 w-4" />
+												<span>Reset</span>
+											</DropdownMenuItem>
+										)}
 									</DropdownMenuGroup>
 
 									<DropdownMenuSeparator />
@@ -759,14 +785,18 @@ function DockerContent({
 
 export function DockerConfiguration({
 	handleDockerAction,
+	loading,
+	setLoading,
 }: {
 	handleDockerAction: (action: DockerAction) => void;
+	loading: boolean;
+	setLoading: (loading: boolean) => void;
 }) {
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-12 gap-4">
-				<DockerContent handleDockerAction={handleDockerAction} />
-				<DockerSidebar handleDockerAction={handleDockerAction} />
+				<DockerContent handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
+				<DockerSidebar handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
 			</div>
 		</div>
 	);

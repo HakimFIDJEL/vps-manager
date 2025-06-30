@@ -137,3 +137,24 @@ export type tempContainer = {
   ports : string;
   name : string;
 }
+
+export type DockerAction =
+  | { type: "create"; docker: DockerCompose }
+  | { type: "update"; docker: DockerCompose }
+  | { type: "delete" }
+  | { type: "save" }
+  | { type: "clear" }
+  | { type: "reset" }
+  | { type: "copy" }
+  | { type: "strict-toggle" }
+  | { type: "un-save"; content: string }
+  | { type: "remove-type"; name: string; elementType: "services" | "volumes" | "networks" }
+  // Server only
+  | { type: "run" }
+  | { type: "stop" }
+  | { type: "remove" }
+  | { type: "prune" }
+  | { type: "container-run"; container_id: string }
+  | { type: "container-stop"; container_id: string }
+  | { type: "container-restart"; container_id: string }
+  | { type: "container-remove"; container_id: string };
