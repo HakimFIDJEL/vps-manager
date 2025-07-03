@@ -15,7 +15,7 @@ import { Search, Plus, FileUp, Download } from "lucide-react";
 // Contexts
 import { useProject } from "@/contexts/project-context";
 // import { CommandAction, useCommand } from "@/contexts/command-context";
-import { useVariable } from "@/contexts/variable-context";
+import { useVariable, VariableAction } from "@/contexts/variable-context";
 
 import {
 	CreateVariable,
@@ -33,7 +33,7 @@ export function AppVariables() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleVariableAction } = useVariable();
+	const { handleVariableAction, loading } = useVariable();
 
 	return (
 		<TabsContent value="variables" className="space-y-12">
@@ -43,26 +43,30 @@ export function AppVariables() {
 					<SmoothAnimate className="flex items-center gap-2 relative">
 						{project.variables.length > 0 && (
 							<Input
-							ref={inputRef}
+								ref={inputRef}
 								name="search"
 								placeholder="Filter variables..."
 								className="z-1 relative"
 								addonText={<Search className="h-4 w-4" />}
 								value={search}
 								onChange={(e) => setSearch(e.target.value)}
-								readOnly={project.variables.length === 0}
+								readOnly={project.variables.length === 0 || loading}
 							/>
 						)}
 					</SmoothAnimate>
 					<SmoothAnimate
-						className={`grid gap-2 ${project.variables.length > 0 ? "grid-cols-3" : "grid-cols-2"}`}
+						className={`grid gap-2 ${project.variables.length > 0 ? "grid-cols-3" : "grid-cols-2  mt-[-10px]"}`}
 					>
 						{/* Add command */}
-						<CreateVariable handleVariableAction={handleVariableAction}>
+						<CreateVariable
+							handleVariableAction={handleVariableAction}
+							loading={loading}
+						>
 							<Button
 								type={"button"}
 								variant={"outline"}
 								className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
+								disabled={loading}
 							>
 								<div className="p-2 bg-primary/10 rounded-md">
 									<Plus className="h-5 w-5 text-primary" />
@@ -81,6 +85,7 @@ export function AppVariables() {
 							<Button
 								type={"button"}
 								variant={"outline"}
+								disabled={loading}
 								className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 							>
 								<div className="p-2 bg-primary/10 rounded-md">
@@ -96,24 +101,26 @@ export function AppVariables() {
 						</ImportEnv>
 
 						{/* Export .env */}
-						<ExportEnv />
+						{project.variables.length > 0 && <ExportEnv loading={loading} />}
 					</SmoothAnimate>
 				</div>
 			</>
 
-
 			<>
 				<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
 				<div className="bg-background rounded-md">
-					<VariablesList search={search} handleVariableAction={handleVariableAction} />
+					<VariablesList
+						search={search}
+						handleVariableAction={handleVariableAction}
+						loading={loading}
+					/>
 				</div>
 			</>
-			
 		</TabsContent>
 	);
 }
 
-function ExportEnv() {
+function ExportEnv({ loading = false }: { loading?: boolean }) {
 	// Custom Hooks
 	const { project } = useProject();
 
@@ -144,6 +151,7 @@ function ExportEnv() {
 			type={"button"}
 			variant={"outline"}
 			onClick={handleExport}
+			disabled={loading}
 			className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 		>
 			<div className="p-2 bg-primary/10 rounded-md">

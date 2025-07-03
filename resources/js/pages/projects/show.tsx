@@ -95,10 +95,10 @@ function Content() {
 	return (
 		<Tabs
 			className="flex flex-row items-start justify-between gap-4"
-			defaultValue={"containers"}
+			defaultValue={"variables"}
 		>
 			{/* Header + TabsContent */}
-			<div className="flex flex-col w-full overflow-hidden gap-4">
+			<div className="flex flex-col w-full gap-4">
 				<SmoothItem delay={0.1} layout={false}>
 					{/* <Card className="bg-transparent border-0 shadow-none rounded-none">
 						

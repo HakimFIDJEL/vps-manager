@@ -88,7 +88,8 @@ import {
 // Contexts
 import { useProject } from "@/contexts/project-context";
 import { CodeEditor } from "@/components/ui/code-editor";
-import { VariableAction, useVariable } from "@/contexts/variable-context";
+import { useVariable } from "@/contexts/variable-context";
+import { VariableAction } from "@/contexts/variable-context";
 
 export function AppVariables() {
 	// States
@@ -99,7 +100,7 @@ export function AppVariables() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleVariableAction } = useVariable();
+	const { handleVariableAction, loading } = useVariable();
 
 	return (
 		// Wrapper
@@ -107,16 +108,19 @@ export function AppVariables() {
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import .env */}
-					<ImportEnv handleVariableAction={handleVariableAction}>
-						<Button variant={"outline"} type={"button"}>
+					<ImportEnv handleVariableAction={handleVariableAction} loading={loading}>
+						<Button variant={"outline"} type={"button"} disabled={loading}>
 							<FileUp />
 							Import variables
 						</Button>
 					</ImportEnv>
 
 					{/* Add variable */}
-					<CreateVariable handleVariableAction={handleVariableAction}>
-						<Button variant={"default"} type={"button"}>
+					<CreateVariable
+						handleVariableAction={handleVariableAction}
+						loading={loading}
+					>
+						<Button variant={"default"} type={"button"} disabled={loading}>
 							<Plus />
 							Add variable
 						</Button>
@@ -132,7 +136,7 @@ export function AppVariables() {
 						addonText={<Search className="h-4 w-4" />}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						readOnly={project.variables.length === 0}
+						readOnly={project.variables.length === 0 || loading}
 					/>
 				</div>
 			</div>
@@ -151,9 +155,11 @@ export function AppVariables() {
 export function VariablesList({
 	search,
 	handleVariableAction,
+	loading = false,
 }: {
 	search: string;
-	handleVariableAction: (action: VariableAction) => void;
+	handleVariableAction: (action: VariableAction) => Promise<void>;
+	loading?: boolean;
 }) {
 	// States
 	const [sortKey, setSortKey] = useState<string>("none");
@@ -238,7 +244,7 @@ export function VariablesList({
 														type={"button"}
 														variant={"ghost"}
 														size={"icon"}
-														disabled={project.variables.length === 0}
+														disabled={project.variables.length === 0 || loading}
 													>
 														<div className="flex items-center justify-center">
 															<Trash />
@@ -260,15 +266,16 @@ export function VariablesList({
 											</AlertDialogHeader>
 											<AlertDialogBody>
 												<AlertDialogFooter>
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 													<AlertDialogAction
-														onAction={() => {
-															handleVariableAction({ type: "delete-all" });
+														onAction={async () => {
+															await handleVariableAction({ type: "delete-all" });
 															return true;
 														}}
+														disabled={loading}
 														variant={"destructive"}
 													>
-														<Trash />
+														{loading ? <Loader2 className="animate-spin" /> : <Trash />}
 														Delete
 													</AlertDialogAction>
 												</AlertDialogFooter>
@@ -321,11 +328,17 @@ export function VariablesList({
 										<EditVariable
 											variable={variable}
 											handleVariableAction={handleVariableAction}
+											loading={loading}
 										/>
 
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
-												<Button type={"button"} variant={"ghost"} size={"icon"}>
+												<Button
+													type={"button"}
+													variant={"ghost"}
+													size={"icon"}
+													disabled={loading}
+												>
 													<Trash className="h-4 w-4" />
 												</Button>
 											</AlertDialogTrigger>
@@ -345,7 +358,7 @@ export function VariablesList({
 												</AlertDialogHeader>
 												<AlertDialogBody>
 													<AlertDialogFooter>
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 														<AlertDialogAction
 															onAction={() => {
 																handleVariableAction({ type: "delete", variable });
@@ -353,8 +366,9 @@ export function VariablesList({
 															}}
 															variant={"destructive"}
 															type={"button"}
+															disabled={loading}
 														>
-															<Trash />
+															{loading ? <Loader2 className="animate-spin" /> : <Trash />}
 															Delete
 														</AlertDialogAction>
 													</AlertDialogFooter>
@@ -385,13 +399,12 @@ export function VariablesList({
 export function CreateVariable({
 	children,
 	handleVariableAction,
+	loading = false,
 }: {
 	children: React.ReactNode;
-	handleVariableAction: (action: VariableAction) => void;
+	handleVariableAction: (action: VariableAction) => Promise<void>;
+	loading?: boolean;
 }) {
-	// States
-	const [loading, setLoading] = useState<boolean>(false);
-
 	// Variables
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
 		resolver: zodResolver(VariableSchema),
@@ -401,17 +414,19 @@ export function CreateVariable({
 		},
 	});
 
+	// Refs
+	const closeRef = useRef<HTMLButtonElement>(null);
+
 	async function onSubmit() {
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
-		const data = VariableForm.getValues();
-		handleVariableAction({ type: "create", variable: data });
+		await handleVariableAction({
+			type: "create",
+			variable: VariableForm.getValues(),
+		});
 
 		VariableForm.reset();
-		setLoading(false);
 		return true;
 	}
 
@@ -443,6 +458,7 @@ export function CreateVariable({
 										<FormControl>
 											<Input
 												id="key"
+												readOnly={loading}
 												placeholder="eg: MY_KEY"
 												autoFocus={true}
 												{...field}
@@ -462,6 +478,7 @@ export function CreateVariable({
 										<FormControl>
 											<Input
 												id="value"
+												readOnly={loading}
 												placeholder="eg: My_value"
 												{...field}
 												comment="Must not contain spaces."
@@ -473,7 +490,7 @@ export function CreateVariable({
 							/>
 						</AlertDialogBody>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!VariableForm.formState.isValid || loading}
@@ -493,13 +510,12 @@ export function CreateVariable({
 export function EditVariable({
 	variable,
 	handleVariableAction,
+	loading = false,
 }: {
 	variable: Variable;
-	handleVariableAction: (action: VariableAction) => void;
+	handleVariableAction: (action: VariableAction) => Promise<void>;
+	loading?: boolean;
 }) {
-	// States
-	const [loading, setLoading] = useState<boolean>(false);
-
 	// Variables
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
 		resolver: zodResolver(VariableSchema),
@@ -521,16 +537,12 @@ export function EditVariable({
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
-		const data = VariableForm.getValues();
-		handleVariableAction({
+		await handleVariableAction({
 			type: "update",
-			variable: { ...variable, value: data.value },
+			variable: { ...variable, value: VariableForm.getValues().value },
 		});
 
 		VariableForm.reset();
-		setLoading(false);
 		return true;
 	}
 
@@ -589,6 +601,7 @@ export function EditVariable({
 												autoFocus={true}
 												placeholder="eg: My_value"
 												showPasswordToggle={true}
+												readOnly={loading}
 												comment="Must not contain spaces."
 												{...field}
 											/>
@@ -599,7 +612,7 @@ export function EditVariable({
 							/>
 						</AlertDialogBody>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!VariableForm.formState.isValid || loading}
@@ -619,13 +632,14 @@ export function EditVariable({
 export function ImportEnv({
 	children,
 	handleVariableAction,
+	loading = false,
 }: {
 	children: React.ReactNode;
-	handleVariableAction: (action: VariableAction) => void;
+	handleVariableAction: (action: VariableAction) => Promise<void>;
+	loading?: boolean;
 }) {
 	// States
 	const [envPreview, setEnvPreview] = useState<string>("");
-	const [loading, setLoading] = useState<boolean>(false);
 	const [isDragActive, setIsDragActive] = useState(false);
 
 	// Refs
@@ -649,8 +663,6 @@ export function ImportEnv({
 		const isValid = await VariableTextForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
 		const data = VariableTextForm.getValues();
 
 		return handleUpdate(data.textarea);
@@ -660,8 +672,6 @@ export function ImportEnv({
 		const isValid = await VariableEnvForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
 		const data = VariableEnvForm.getValues();
 
 		// On récupère le contenu du fichier
@@ -670,7 +680,6 @@ export function ImportEnv({
 			VariableEnvForm.setError("file", {
 				message: "An error occured importing the file.",
 			});
-			setLoading(false);
 			return false;
 		}
 		const text = await file.text();
@@ -678,7 +687,7 @@ export function ImportEnv({
 		return handleUpdate(text);
 	}
 
-	function handleUpdate(text: string) {
+	async function handleUpdate(text: string) {
 		// On parse le contenu du fichier
 		const parsedVariables = parseVariablesFromEnv({
 			content: text,
@@ -689,16 +698,16 @@ export function ImportEnv({
 			VariableEnvForm.setError("file", {
 				message: "No valid variables found in the file.",
 			});
-			setLoading(false);
 			return false;
 		} else {
 			setEnvPreview("");
 			VariableEnvForm.reset();
 		}
 
-		handleVariableAction({ type: "create-multiple", variables: parsedVariables });
-
-		setLoading(false);
+		await handleVariableAction({
+			type: "create-multiple",
+			variables: parsedVariables,
+		});
 
 		closeRef.current?.click();
 		return true;

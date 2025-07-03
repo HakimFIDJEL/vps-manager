@@ -87,9 +87,7 @@ import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
 export function AppDocker() {
 	// Custom hooks
 	const { project } = useProject();
-	const { handleDockerAction } = useDocker();
-
-	const [loading, setLoading] = useState(false);
+	const { handleDockerAction, loading } = useDocker();
 
 	return (
 		<Tabs defaultValue={project.docker.content ? "docker" : "empty"}>
@@ -99,10 +97,16 @@ export function AppDocker() {
 			</TabsList>
 			<TabsBody>
 				<TabsContent value="empty">
-					<EmptyDockerState handleDockerAction={handleDockerAction} />
+					<EmptyDockerState
+						handleDockerAction={handleDockerAction}
+						loading={loading}
+					/>
 				</TabsContent>
 				<TabsContent value="docker">
-					<DockerConfiguration handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
+					<DockerConfiguration
+						handleDockerAction={handleDockerAction}
+						loading={loading}
+					/>
 				</TabsContent>
 			</TabsBody>
 		</Tabs>
@@ -111,8 +115,10 @@ export function AppDocker() {
 
 function EmptyDockerState({
 	handleDockerAction,
+	loading = false,
 }: {
 	handleDockerAction: (action: DockerAction) => void;
+	loading?: boolean;
 }) {
 	// States
 	const [isDragActive, setIsDragActive] = useState(false);
@@ -262,6 +268,7 @@ function EmptyDockerState({
 													size={"sm"}
 													onClick={() => inputFileRef.current?.click()}
 													type={"button"}
+													disabled={loading}
 												>
 													Browse files
 												</Button>
@@ -307,6 +314,7 @@ function EmptyDockerState({
 						subtitle="PHP 8.2, Node.js, Apache, MySQL, phpMyAdmin, Traefik"
 						icon={Server}
 						onClick={() => handleTemplateSelect("webApp")}
+						disabled={loading}
 					/>
 
 					<TemplateLink
@@ -314,6 +322,7 @@ function EmptyDockerState({
 						subtitle="Jupyter Notebook, PostgreSQL, Metabase"
 						icon={Database}
 						onClick={() => handleTemplateSelect("dataScience")}
+						disabled={loading}
 					/>
 
 					<TemplateLink
@@ -321,6 +330,7 @@ function EmptyDockerState({
 						subtitle="Nginx, Volume, Network"
 						icon={Settings}
 						onClick={() => handleTemplateSelect("minimal")}
+						disabled={loading}
 					/>
 				</div>
 			</div>
@@ -334,17 +344,20 @@ function TemplateLink({
 	icon: Icon,
 	onClick,
 	className,
+	disabled = false,
 }: {
 	title: string;
 	subtitle: string;
 	icon: LucideIcon;
 	onClick: () => void;
 	className?: string;
+	disabled?: boolean;
 }) {
 	return (
 		<button
 			onClick={onClick}
-			type="button"
+			type={"button"}
+			disabled={disabled}
 			className={cn(
 				"group w-full flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 transition-all duration-200 cursor-pointer",
 				"relative overflow-hidden",
@@ -365,12 +378,10 @@ function TemplateLink({
 
 function DockerSidebar({
 	handleDockerAction,
-	loading,
-	setLoading,
+	loading = false,
 }: {
 	handleDockerAction: (action: DockerAction) => void;
-	loading: boolean;
-	setLoading: (loading: boolean) => void;
+	loading?: boolean;
 }) {
 	// Custom hooks
 	const { project } = useProject();
@@ -630,12 +641,10 @@ function DockerSidebar({
 
 function DockerContent({
 	handleDockerAction,
-	loading,
-	setLoading,
+	loading = false,
 }: {
 	handleDockerAction: (action: DockerAction) => void;
-	loading: boolean;
-	setLoading: (loading: boolean) => void;
+	loading?: boolean;
 }) {
 	// Custom hooks
 	const { project } = useProject();
@@ -687,22 +696,16 @@ function DockerContent({
 									)}
 
 									<DropdownMenuGroup>
-
-										
 										<DropdownMenuItem
-											onClick={async () => { 
-												setLoading(true);
+											onClick={async () => {
 												await handleDockerAction({ type: "save" });
-												setLoading(false);
-										}}
+											}}
 											className="flex items-center gap-2"
 											disabled={project.docker.isSaved}
 										>
 											<Save className="h-4 w-4" />
 											<span>Save</span>
 										</DropdownMenuItem>
-
-
 
 										<DropdownMenuItem
 											onClick={() => handleDockerAction({ type: "copy" })}
@@ -723,7 +726,7 @@ function DockerContent({
 											<DropdownMenuItem
 												onClick={() => {
 													handleDockerAction({ type: "reset" });
-													if(!project.isCreated) {
+													if (!project.isCreated) {
 														setCurrentValue("empty");
 													}
 												}}
@@ -785,18 +788,16 @@ function DockerContent({
 
 export function DockerConfiguration({
 	handleDockerAction,
-	loading,
-	setLoading,
+	loading = false,
 }: {
 	handleDockerAction: (action: DockerAction) => void;
-	loading: boolean;
-	setLoading: (loading: boolean) => void;
+	loading?: boolean;
 }) {
 	return (
 		<div className="grid gap-4">
 			<div className="grid grid-cols-12 gap-4">
-				<DockerContent handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
-				<DockerSidebar handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
+				<DockerContent handleDockerAction={handleDockerAction} loading={loading} />
+				<DockerSidebar handleDockerAction={handleDockerAction} loading={loading} />
 			</div>
 		</div>
 	);
@@ -818,7 +819,6 @@ function DockerDropdownFileUpload({
 	});
 
 	const handleFileUpload = async (file: File) => {
-
 		try {
 			// Update form field
 			DockerComposeForm.setValue("file", file, {
@@ -886,10 +886,7 @@ function DockerDropdownFileUpload({
 								className="flex items-start flex-col gap-0 relative py-0 px-2 rounded-sm h-auto hover:!bg-accent"
 								variant={"ghost"}
 							>
-								<FormLabel
-									htmlFor="file"
-									className="w-full h-full py-2 cursor-pointer"
-								>
+								<FormLabel htmlFor="file" className="w-full h-full py-2 cursor-pointer">
 									<Upload className="h-4 w-4 text-muted-foreground" />
 									<span>Import file</span>
 								</FormLabel>

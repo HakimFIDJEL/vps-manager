@@ -72,9 +72,7 @@ import { SmoothAnimate } from "@/components/ui/smooth-resized";
 export function AppDocker() {
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleDockerAction } = useDocker();
-
-	const [loading, setLoading] = useState(false);
+	const { handleDockerAction, loading } = useDocker();
 
 	// Variables
 	const initialContainers: tempContainer[] = [
@@ -127,20 +125,25 @@ export function AppDocker() {
 				handleDockerAction={handleDockerAction}
 				initialContainers={initialContainers}
 				loading={loading}
-				setLoading={setLoading}
 			/>
 
-				
 			<SmoothAnimate className="space-y-2">
 				{/* Strict mode */}
 				{!project.docker.isStrict && (
-					<StrictMode project={project} handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
+					<StrictMode
+						project={project}
+						handleDockerAction={handleDockerAction}
+						loading={loading}
+					/>
 				)}
-
 
 				{/* Save project */}
 				{!project.docker.isSaved && (
-					<SaveProject project={project} handleDockerAction={handleDockerAction} loading={loading} setLoading={setLoading} />
+					<SaveProject
+						project={project}
+						handleDockerAction={handleDockerAction}
+						loading={loading}
+					/>
 				)}
 			</SmoothAnimate>
 
@@ -149,7 +152,6 @@ export function AppDocker() {
 				handleDockerAction={handleDockerAction}
 				initialContainers={initialContainers}
 				loading={loading}
-				setLoading={setLoading}
 			/>
 
 			{/* Edition of docker compose */}
@@ -159,7 +161,6 @@ export function AppDocker() {
 				<DockerConfiguration
 					handleDockerAction={handleDockerAction}
 					loading={loading}
-					setLoading={setLoading}
 				/>
 			</div>
 
@@ -171,13 +172,11 @@ export function AppDocker() {
 function QuickActions({
 	handleDockerAction,
 	initialContainers,
-	loading,
-	setLoading,
+	loading = false,
 }: {
 	handleDockerAction: (action: DockerAction) => Promise<void>;
 	initialContainers: tempContainer[];
-	loading: boolean;
-	setLoading: (loading: boolean) => void;
+	loading?: boolean;
 }) {
 	const containers_running = initialContainers.filter(
 		(container) => container.state == "running",
@@ -251,26 +250,16 @@ function QuickActions({
 						</AlertDialogHeader>
 						<AlertDialogBody>
 							<AlertDialogFooter>
-								<AlertDialogCancel
-									disabled={loading}
-								>
-									Cancel
-								</AlertDialogCancel>
+								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										setLoading(true);
-									await handleDockerAction({ type: "run" });
-									setLoading(false);
-									return true;
-								}}
+										await handleDockerAction({ type: "run" });
+										return true;
+									}}
 									variant={"default"}
 								>
-									{loading ? (
-										<Loader2 className="w-4 h-4 animate-spin" />
-									) : (
-										<Play />
-									)}
+									{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play />}
 									Run
 								</AlertDialogAction>
 							</AlertDialogFooter>
@@ -314,26 +303,16 @@ function QuickActions({
 						</AlertDialogHeader>
 						<AlertDialogBody>
 							<AlertDialogFooter>
-								<AlertDialogCancel
-									disabled={loading}
-								>
-									Cancel
-								</AlertDialogCancel>
+								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										setLoading(true);
-									await handleDockerAction({ type: "stop" });
-									setLoading(false);
-									return true;
-								}}
+										await handleDockerAction({ type: "stop" });
+										return true;
+									}}
 									variant={"destructive"}
 								>
-									{loading ? (
-										<Loader2 className="w-4 h-4 animate-spin" />
-									) : (
-										<Octagon />
-									)}
+									{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Octagon />}
 									Stop
 								</AlertDialogAction>
 							</AlertDialogFooter>
@@ -377,19 +356,13 @@ function QuickActions({
 						</AlertDialogHeader>
 						<AlertDialogBody>
 							<AlertDialogFooter>
-								<AlertDialogCancel
-									disabled={loading}
-								>
-									Cancel
-								</AlertDialogCancel>
+								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										setLoading(true);
-									await handleDockerAction({ type: "remove" });
-									setLoading(false);
-									return true;
-								}}
+										await handleDockerAction({ type: "remove" });
+										return true;
+									}}
 									variant={"destructive"}
 								>
 									{loading ? (
@@ -444,26 +417,16 @@ function QuickActions({
 						</AlertDialogHeader>
 						<AlertDialogBody>
 							<AlertDialogFooter>
-								<AlertDialogCancel
-									disabled={loading}
-								>
-									Cancel
-								</AlertDialogCancel>
+								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										setLoading(true);
-									await handleDockerAction({ type: "prune" });
-									setLoading(false);
-									return true;
-								}}
+										await handleDockerAction({ type: "prune" });
+										return true;
+									}}
 									variant={"destructive"}
 								>
-									{loading ? (
-										<Loader2 className="w-4 h-4 animate-spin" />
-									) : (
-										<Eraser />
-									)}
+									{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eraser />}
 									Prune
 								</AlertDialogAction>
 							</AlertDialogFooter>
@@ -475,6 +438,7 @@ function QuickActions({
 					type={"button"}
 					variant={"outline"}
 					onClick={() => {}}
+					disabled={loading}
 					className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 				>
 					<div className="p-2 bg-primary/10 rounded-md">
@@ -493,13 +457,11 @@ function QuickActions({
 function StrictMode({
 	project,
 	handleDockerAction,
-	loading,
-	setLoading,
+	loading = false,
 }: {
 	project: Project;
 	handleDockerAction: (action: DockerAction) => void;
-	loading: boolean;
-	setLoading: (loading: boolean) => void;
+	loading?: boolean;
 }) {
 	return (
 		<>
@@ -530,9 +492,7 @@ function StrictMode({
 						onClick={() => handleDockerAction({ type: "strict-toggle" })}
 						disabled={loading}
 					>
-						{loading && (
-							<Loader2 className="w-4 h-4 animate-spin" />
-						)}
+						{loading && <Loader2 className="w-4 h-4 animate-spin" />}
 						Enable strict mode
 					</Button>
 				</Alert>
@@ -544,13 +504,11 @@ function StrictMode({
 function SaveProject({
 	project,
 	handleDockerAction,
-	loading,
-	setLoading,
+	loading = false,
 }: {
 	project: Project;
 	handleDockerAction: (action: DockerAction) => void;
-	loading: boolean;
-	setLoading: (loading: boolean) => void;
+	loading?: boolean;
 }) {
 	return (
 		<>
@@ -579,15 +537,11 @@ function SaveProject({
 						variant={"outline"}
 						size={"sm"}
 						onClick={async () => {
-							setLoading(true);
 							await handleDockerAction({ type: "save" });
-							setLoading(false);
 						}}
 						disabled={loading}
 					>
-						{loading && (
-							<Loader2 className="w-4 h-4 animate-spin" />
-						)}
+						{loading && <Loader2 className="w-4 h-4 animate-spin" />}
 						Save project
 					</Button>
 				</Alert>
@@ -600,14 +554,12 @@ function ContainersList({
 	// project,
 	handleDockerAction,
 	initialContainers,
-	loading,
-	setLoading,
+	loading = false,
 }: {
 	// project: Project;
 	handleDockerAction: (action: DockerAction) => Promise<void>;
 	initialContainers: tempContainer[];
-	loading: boolean;
-	setLoading: (loading: boolean) => void;
+	loading?: boolean;
 }) {
 	// States
 	const [search, setSearch] = useState<string>("");
@@ -650,7 +602,9 @@ function ContainersList({
 								<TableCell className="sticky left-0 z-1 bg-background after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border">
 									{container.name}
 								</TableCell>
-								<TableCell className="font-mono"><Badge variant={"outline"}>{container.image}</Badge></TableCell>
+								<TableCell className="font-mono">
+									<Badge variant={"outline"}>{container.image}</Badge>
+								</TableCell>
 								<TableCell>{container.status}</TableCell>
 								<TableCell>
 									{formatContainerState({ state: container.state })}
@@ -677,10 +631,11 @@ function ContainersList({
 											{/* Actions */}
 											<DropdownMenuGroup>
 												<DropdownMenuItem
-													onClick={async () => { 
-														setLoading(true);
-														await handleDockerAction({ type: "container-run", container_id: container.container_id });
-														setLoading(false);
+													onClick={async () => {
+														await handleDockerAction({
+															type: "container-run",
+															container_id: container.container_id,
+														});
 													}}
 													className="flex items-center gap-2"
 													disabled={container.state == "running"}
@@ -690,9 +645,10 @@ function ContainersList({
 												</DropdownMenuItem>
 												<DropdownMenuItem
 													onClick={async () => {
-														setLoading(true);
-														await handleDockerAction({ type: "container-stop", container_id: container.container_id });
-														setLoading(false);
+														await handleDockerAction({
+															type: "container-stop",
+															container_id: container.container_id,
+														});
 													}}
 													className="flex items-center gap-2"
 													disabled={container.state == "exited"}
@@ -701,10 +657,11 @@ function ContainersList({
 													<span>Stop</span>
 												</DropdownMenuItem>
 												<DropdownMenuItem
-													onClick={async () => { 
-														setLoading(true);
-														await handleDockerAction({ type: "container-restart", container_id: container.container_id });
-														setLoading(false);
+													onClick={async () => {
+														await handleDockerAction({
+															type: "container-restart",
+															container_id: container.container_id,
+														});
 													}}
 													className="flex items-center gap-2"
 													disabled={container.state != "running"}
@@ -714,9 +671,10 @@ function ContainersList({
 												</DropdownMenuItem>
 												<DropdownMenuItem
 													onClick={async () => {
-														setLoading(true);
-														await handleDockerAction({ type: "container-remove", container_id: container.container_id });
-														setLoading(false);
+														await handleDockerAction({
+															type: "container-remove",
+															container_id: container.container_id,
+														});
 													}}
 													className="flex items-center gap-2"
 												>
@@ -774,5 +732,3 @@ function ContainersList({
 		</>
 	);
 }
-
-
