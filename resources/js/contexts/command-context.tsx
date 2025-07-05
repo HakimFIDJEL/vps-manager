@@ -1,8 +1,9 @@
-import { createContext, useContext, useCallback, ReactNode } from "react";
-import { toast } from "sonner";
+import { createContext, useContext, useCallback, ReactNode, useState } from "react";
 import { useProject } from "./project-context";
 import { type Command } from "@/lib/commands/type";
-import { useForm } from "react-hook-form";
+import { useCommandActionsRemote } from "@/services/commands/remote";
+import { useCommandActionsLocal } from "@/services/commands/local";
+
 
 export type CommandAction =
 	| { type: "create"; command: Command }
@@ -14,113 +15,28 @@ export type CommandAction =
 
 interface CommandContextType {
 	handleCommandAction: (action: CommandAction) => void;
+	loading: boolean;
 }
 
-const CommandContext = createContext<CommandContextType | null>(null);
+const CommandContext = createContext<CommandContextType | undefined>(undefined);
 
-export function CommandProvider({
-	children,
-}: {
-	children: ReactNode;
-}) {
-	const { project, updateProject } = useProject();
+export function CommandProvider({ children }: { children: ReactNode }) {
+	const { project } = useProject();
+	const [loading, setLoading] = useState(false);
 
-	let handleCommandAction: (action: CommandAction) => void;
 
-	// Server actions
-	if (project.isCreated) {
-		handleCommandAction = useCallback(
-			(action: CommandAction) => {
-				switch (action.type) {
-					case "create":
-						updateProject("commands", [...project.commands, action.command]);
-						toast.success(`Command ${action.command.target} created successfully!`);
-						break;
-					case "create-multiple":
-						updateProject("commands", [...project.commands, ...action.commands]);
-						toast.success(
-							`${action.commands.length} commands imported successfully!`,
-						);
-						break;
-					case "update":
-						updateProject(
-							"commands",
-							project.commands.map((c) =>
-								c.target === action.command.target ? action.command : c,
-							),
-						);
-						toast.success(`Command ${action.command.target} updated successfully!`);
-						break;
-					case "delete":
-						updateProject(
-							"commands",
-							project.commands.filter((c) => c.target !== action.command.target),
-						);
-						toast.success(`Command ${action.command.target} deleted successfully!`);
-						break;
-					case "delete-all":
-						updateProject("commands", []);
-						toast.success("All commands deleted successfully!");
-						break;
-					case "run":
-						console.log("test");
-						toast.info(`Running command ${action.command.target}...`);
-						setTimeout(() => {
-							toast.success("Command ran successfully!");
-						}, 3000);
-						break;
-				}
-			},
-			[project.commands, updateProject],
-		);
-	}
-	// Local actions
-	else {
-		handleCommandAction = useCallback(
-			(action: CommandAction) => {
-				switch (action.type) {
-					case "create":
-						updateProject("commands", [...project.commands, action.command]);
-						toast.success(`Command ${action.command.target} created successfully!`);
-						break;
-					case "create-multiple":
-						updateProject("commands", [...project.commands, ...action.commands]);
-						toast.success(
-							`${action.commands.length} commands imported successfully!`,
-						);
-						break;
-					case "update":
-						updateProject(
-							"commands",
-							project.commands.map((c) =>
-								c.target === action.command.target ? action.command : c,
-							),
-						);
-						toast.success(`Command ${action.command.target} updated successfully!`);
-						break;
-					case "delete":
-						updateProject(
-							"commands",
-							project.commands.filter((c) => c.target !== action.command.target),
-						);
-						toast.success(`Command ${action.command.target} deleted successfully!`);
-						break;
-					case "delete-all":
-						updateProject("commands", []);
-						toast.success("All commands deleted successfully!");
-						break;
-					case "run":
-						// Ne rien faire dans create
-						console.log("test2");
-						break;
-				}
-			},
-			[project.commands, updateProject],
-		);
-	}
+	const handleCommandActionImpl = project.isCreated
+		? useCommandActionsRemote()
+		: useCommandActionsLocal();
+
+	const handleCommandAction = useCallback(async (action: CommandAction) => {
+		setLoading(true);
+		await handleCommandActionImpl(action);
+		setLoading(false);
+	}, [handleCommandActionImpl]);
 
 	return (
-		<CommandContext.Provider value={{ handleCommandAction }}>
+		<CommandContext.Provider value={{ handleCommandAction, loading }}>
 			{children}
 		</CommandContext.Provider>
 	);

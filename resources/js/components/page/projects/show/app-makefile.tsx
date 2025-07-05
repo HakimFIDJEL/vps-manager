@@ -31,6 +31,7 @@ import {
 	Plus,
 	FileUp,
 	Download,
+	Loader2,
 } from "lucide-react";
 
 // Contexts
@@ -49,11 +50,10 @@ export function AppMakefile() {
 
 	// Refs
 	const inputRef = useRef<HTMLInputElement>(null);
-	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleCommandAction } = useCommand();
+	const { handleCommandAction, loading } = useCommand();
 
 	return (
 		<TabsContent value="commands" className="space-y-12">
@@ -78,7 +78,7 @@ export function AppMakefile() {
 								addonText={<Search className="h-4 w-4" />}
 								value={search}
 								onChange={(e) => setSearch(e.target.value)}
-								readOnly={project.commands.length === 0}
+								readOnly={project.commands.length === 0 || loading}
 							/>
 						)}
 					</SmoothAnimate>
@@ -86,10 +86,14 @@ export function AppMakefile() {
 						className={`grid gap-2 ${project.commands.length > 0 ? "grid-cols-4" : "grid-cols-3"}`}
 					>
 						{/* Add command */}
-						<CreateCommand handleCommandAction={handleCommandAction}>
+						<CreateCommand
+							handleCommandAction={handleCommandAction}
+							loading={loading}
+						>
 							<Button
 								type={"button"}
 								variant={"outline"}
+								disabled={loading}
 								className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 							>
 								<div className="p-2 bg-primary/10 rounded-md">
@@ -105,10 +109,14 @@ export function AppMakefile() {
 						</CreateCommand>
 
 						{/* Import Makefile */}
-						<ImportMakefile handleCommandAction={handleCommandAction}>
+						<ImportMakefile
+							handleCommandAction={handleCommandAction}
+							loading={loading}
+						>
 							<Button
 								type={"button"}
 								variant={"outline"}
+								disabled={loading}
 								className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 							>
 								<div className="p-2 bg-primary/10 rounded-md">
@@ -116,12 +124,14 @@ export function AppMakefile() {
 								</div>
 								<div className="flex-1 text-left">
 									<div className="font-medium text-foreground">Import makefile</div>
-									<div className="text-xs text-muted-foreground">Load or paste existing file</div>
+									<div className="text-xs text-muted-foreground">
+										Load or paste existing file
+									</div>
 								</div>
 							</Button>
 						</ImportMakefile>
 
-						<ExportMakeFile />
+						<ExportMakeFile loading={loading} />
 
 						{project.commands.length > 0 && (
 							<AlertDialog>
@@ -129,7 +139,7 @@ export function AppMakefile() {
 									<Button
 										type={"button"}
 										variant={"outline"}
-										ref={buttonRef}
+										disabled={loading}
 										className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-destructive/50  transition-all duration-200 cursor-pointer relative overflow-hidden"
 									>
 										<div className="p-2 bg-destructive/10 rounded-md">
@@ -155,15 +165,16 @@ export function AppMakefile() {
 									</AlertDialogHeader>
 									<AlertDialogBody>
 										<AlertDialogFooter>
-											<AlertDialogCancel>Cancel</AlertDialogCancel>
+											<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 											<AlertDialogAction
-												onAction={() => {
-													handleCommandAction({ type: "delete-all" });
+												disabled={loading}
+												onAction={async () => {
+													await handleCommandAction({ type: "delete-all" });
 													return true;
 												}}
 												variant={"destructive"}
 											>
-												<Trash />
+												{loading ? <Loader2 className="animate-spin" /> : <Trash />}
 												Delete
 											</AlertDialogAction>
 										</AlertDialogFooter>
@@ -175,8 +186,11 @@ export function AppMakefile() {
 				</div>
 			</>
 
-			<CommandList search={search} handleCommandAction={handleCommandAction} />
-			
+			<CommandList
+				search={search}
+				handleCommandAction={handleCommandAction}
+				loading={loading}
+			/>
 		</TabsContent>
 	);
 }
@@ -184,27 +198,29 @@ export function AppMakefile() {
 function CommandList({
 	search,
 	handleCommandAction,
+	loading = false,
 }: {
 	search: string;
 	handleCommandAction: (action: CommandAction) => void;
+	loading?: boolean;
 }) {
 	// Custom hooks
 	const { project } = useProject();
 
 	// Custom methods
-	function handleDelete(target: string) {
+	async function handleDelete(target: string) {
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		handleCommandAction({ type: "delete", command: command });
+		await handleCommandAction({ type: "delete", command: command });
 		return true;
 	}
 
-	function handleRun(target: string) {
+	async function handleRun(target: string) {
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		handleCommandAction({ type: "run", command: command });
+		await handleCommandAction({ type: "run", command: command });
 		return true;
 	}
 
@@ -219,7 +235,7 @@ function CommandList({
 				<h3 className="text-sm font-medium mb-2 mt-8">Commands</h3>
 
 				{filteredCommands.length === 0 ? (
-					<div className="flex items-center justify-center border border-border border-dashed rounded-md px-4 py-12 bg-muted/50">
+					<div className="flex items-center justify-center border border-border border-dashed rounded-md px-4 py-4 bg-muted/50">
 						<p className="text-sm text-muted-foreground">
 							No commands added yet. Click on "Add command" to create one.
 						</p>
@@ -241,7 +257,12 @@ function CommandList({
 									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
-												<Button variant={"ghost"} size={"icon"} type={"button"}>
+												<Button
+													variant={"ghost"}
+													size={"icon"}
+													type={"button"}
+													disabled={loading}
+												>
 													<Play className="h-4 w-4 text-muted-foreground" />
 												</Button>
 											</AlertDialogTrigger>
@@ -261,13 +282,17 @@ function CommandList({
 												</AlertDialogHeader>
 												<AlertDialogBody>
 													<AlertDialogFooter>
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 														<AlertDialogAction
-															onAction={() => handleRun(command.target)}
+															onAction={async () => {
+																await handleRun(command.target);
+																return true;
+															}}
 															variant={"default"}
 															type={"button"}
+															disabled={loading}
 														>
-															<Play />
+															{loading ? <Loader2 className="animate-spin" /> : <Play />}
 															Run
 														</AlertDialogAction>
 													</AlertDialogFooter>
@@ -277,10 +302,16 @@ function CommandList({
 										<EditCommand
 											command={command}
 											handleCommandAction={handleCommandAction}
+											loading={loading}
 										/>
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
-												<Button variant={"ghost"} size={"icon"} type={"button"}>
+												<Button
+													variant={"ghost"}
+													size={"icon"}
+													type={"button"}
+													disabled={loading}
+												>
 													<Trash className="h-4 w-4 text-muted-foreground" />
 												</Button>
 											</AlertDialogTrigger>
@@ -300,13 +331,17 @@ function CommandList({
 												</AlertDialogHeader>
 												<AlertDialogBody>
 													<AlertDialogFooter>
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 														<AlertDialogAction
-															onAction={() => handleDelete(command.target)}
+															onAction={async () => {
+																await handleDelete(command.target);
+																return true;
+															}}
 															variant={"destructive"}
 															type={"button"}
+															disabled={loading}
 														>
-															<Trash />
+															{loading ? <Loader2 className="animate-spin" /> : <Trash />}
 															Delete
 														</AlertDialogAction>
 													</AlertDialogFooter>
@@ -324,7 +359,7 @@ function CommandList({
 	);
 }
 
-function ExportMakeFile() {
+function ExportMakeFile({ loading=false } : { loading?: boolean; }) {
 	// Custom Hooks
 	const { project } = useProject();
 
@@ -333,10 +368,8 @@ function ExportMakeFile() {
 		const makefileContent = project.commands
 			.map((command) => {
 				// Ajouter la description en commentaire
-				const description = command.description
-					? `# ${command.description}\n`
-					: "";
-				
+				const description = command.description ? `# ${command.description}\n` : "";
+
 				// Formater la commande
 				const formattedCommand = command.command
 					.split("\n")
@@ -368,6 +401,7 @@ function ExportMakeFile() {
 			type={"button"}
 			variant={"outline"}
 			onClick={handleExport}
+			disabled={loading}
 			className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 		>
 			<div className="p-2 bg-primary/10 rounded-md">

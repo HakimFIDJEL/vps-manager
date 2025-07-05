@@ -360,8 +360,8 @@ export function VariablesList({
 													<AlertDialogFooter>
 														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 														<AlertDialogAction
-															onAction={() => {
-																handleVariableAction({ type: "delete", variable });
+															onAction={async () => {
+																await handleVariableAction({ type: "delete", variable });
 																return true;
 															}}
 															variant={"destructive"}

@@ -79,7 +79,7 @@ export function AppMakefile() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleCommandAction } = useCommand();
+	const { handleCommandAction, loading } = useCommand();
 
 	return (
 		// Wrapper
@@ -87,16 +87,16 @@ export function AppMakefile() {
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import Makefile */}
-					<ImportMakefile handleCommandAction={handleCommandAction}>
-						<Button variant={"outline"} type={"button"}>
+					<ImportMakefile handleCommandAction={handleCommandAction} loading={loading}>
+						<Button variant={"outline"} type={"button"} disabled={loading}>
 							<FileUp />
 							Import makefile
 						</Button>
 					</ImportMakefile>
 
 					{/* Add command */}
-					<CreateCommand handleCommandAction={handleCommandAction}>
-						<Button variant={"default"} type={"button"}>
+					<CreateCommand handleCommandAction={handleCommandAction} loading={loading}>
+						<Button variant={"default"} type={"button"} disabled={loading}>
 							<Plus />
 							Add command
 						</Button>
@@ -113,7 +113,7 @@ export function AppMakefile() {
 							addonText={<Search className="h-4 w-4" />}
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							readOnly={project.commands.length === 0}
+							readOnly={project.commands.length === 0 || loading}
 						/>
 
 						{project.commands.length > 0 && (
@@ -130,6 +130,7 @@ export function AppMakefile() {
 											variant={"outline"}
 											size={"default"}
 											type={"button"}
+											disabled={loading}
 										>
 											<Trash className="h-4 w-4" />
 											Delete commands
@@ -147,15 +148,16 @@ export function AppMakefile() {
 										</AlertDialogHeader>
 										<AlertDialogBody>
 											<AlertDialogFooter>
-												<AlertDialogCancel>Cancel</AlertDialogCancel>
+												<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 												<AlertDialogAction
-													onAction={() => {
-														handleCommandAction({ type: "delete-all" });
+													onAction={async () => {
+														await handleCommandAction({ type: "delete-all" });
 														return true;
 													}}
+													disabled={loading}
 													variant={"destructive"}
 												>
-													<Trash />
+													{loading ? <Loader2 className="animate-spin" /> : <Trash />}
 													Delete
 												</AlertDialogAction>
 											</AlertDialogFooter>
@@ -168,7 +170,7 @@ export function AppMakefile() {
 				</SmoothResize>
 			</div>
 
-			<CommandList search={search} handleCommandAction={handleCommandAction} />
+			<CommandList search={search} handleCommandAction={handleCommandAction} loading={loading}/>
 		</div>
 	);
 }
@@ -176,18 +178,18 @@ export function AppMakefile() {
 export function ImportMakefile({
 	handleCommandAction,
 	children,
+	loading=false,
 }: {
 	handleCommandAction: (action: CommandAction) => void;
 	children: React.ReactNode;
+	loading?: boolean;
 }) {
 	// States
 	const [makefilePreview, setMakefilePreview] = useState<string>("");
-	const [loading, setLoading] = useState<boolean>(false);
 	const [isDragActive, setIsDragActive] = useState(false);
 
 	// Refs
 	const inputFileRef = useRef<HTMLInputElement>(null);
-	const closeRef = useRef<HTMLButtonElement>(null);
 
 	// Custom Hooks
 	const { project } = useProject();
@@ -206,8 +208,6 @@ export function ImportMakefile({
 		const isValid = await MakefileTextForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
 		const data = MakefileTextForm.getValues();
 
 		return handleUpdate(data.textarea);
@@ -217,8 +217,6 @@ export function ImportMakefile({
 		const isValid = await MakefileForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
 		const data = MakefileForm.getValues();
 
 		// On récupère le contenu du fichier
@@ -227,7 +225,6 @@ export function ImportMakefile({
 			MakefileForm.setError("file", {
 				message: "An error occured importing the file.",
 			});
-			setLoading(false);
 			return false;
 		}
 		const text = await file.text();
@@ -235,7 +232,7 @@ export function ImportMakefile({
 		return handleUpdate(text);
 	}
 
-	function handleUpdate(text: string) {
+	async function handleUpdate(text: string) {
 		// On parse le contenu du fichier
 		const parsedCommands = parseCommandsFromMakefile({
 			content: text,
@@ -246,18 +243,14 @@ export function ImportMakefile({
 			MakefileForm.setError("file", {
 				message: "No valid commands found in the file.",
 			});
-			setLoading(false);
 			return false;
 		} else {
 			setMakefilePreview("");
 			MakefileForm.reset();
 		}
 
-		handleCommandAction({ type: "create-multiple", commands: parsedCommands });
+		await handleCommandAction({ type: "create-multiple", commands: parsedCommands });
 
-		setLoading(false);
-
-		closeRef.current?.click();
 		return true;
 	}
 
@@ -413,6 +406,7 @@ export function ImportMakefile({
 															type={"button"}
 															variant={"outline"}
 															onClick={() => setMakefilePreview("")}
+															disabled={loading}
 														>
 															<Trash />
 															Remove file
@@ -421,11 +415,11 @@ export function ImportMakefile({
 												)}
 											</AnimatePresence>
 										</div>
-										<AlertDialogCancel ref={closeRef}>Close</AlertDialogCancel>
+										<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 										<AlertDialogAction
 											onAction={onSubmitMakefile}
 											disabled={!makefilePreview || loading}
-											type="submit"
+											type={"submit"}
 										>
 											{loading ? <Loader2 className="animate-spin" /> : <FileUp />}
 											Import file
@@ -471,7 +465,7 @@ export function ImportMakefile({
 									</AlertDialogBody>
 
 									<AlertDialogFooter className="mt-4">
-										<AlertDialogCancel>Close</AlertDialogCancel>
+										<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 										<AlertDialogAction
 											onAction={onSubmitText}
 											disabled={!MakefileTextForm.formState.isValid || loading}
@@ -494,12 +488,12 @@ export function ImportMakefile({
 export function CreateCommand({
 	handleCommandAction,
 	children,
+	loading=false,
 }: {
 	handleCommandAction: (action: CommandAction) => void;
 	children: React.ReactNode;
+	loading?: boolean;
 }) {
-	// States
-	const [loading, setLoading] = useState<boolean>(false);
 
 	// Custom hooks
 	const { project } = useProject();
@@ -519,7 +513,6 @@ export function CreateCommand({
 		const isValid = await CommandForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
 
 		const data = CommandForm.getValues();
 
@@ -528,14 +521,12 @@ export function CreateCommand({
 		);
 		if (targetExists) {
 			CommandForm.setError("target", { message: "Command already exists" });
-			setLoading(false);
 			return false;
 		}
 
-		handleCommandAction({ type: "create", command: data });
+		await handleCommandAction({ type: "create", command: data });
 
 		CommandForm.reset();
-		setLoading(false);
 		return true; // Retourne true pour fermer le Dialog
 	}
 
@@ -568,6 +559,7 @@ export function CreateCommand({
 											<Input
 												id="target"
 												placeholder="eg: start"
+												readOnly={loading}
 												autoFocus={true}
 												{...field}
 												comment="Must start with a lowercase letter or underscore, and can only contain lowercase letters, numbers and underscores."
@@ -587,6 +579,7 @@ export function CreateCommand({
 											<Input
 												id="description"
 												placeholder="eg: Starts all containers in detached mode"
+												readOnly={loading}
 												{...field}
 												comment="The description of the command."
 											/>
@@ -625,7 +618,7 @@ export function CreateCommand({
 							/>
 						</AlertDialogBody>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!CommandForm.formState.isValid || loading}
@@ -645,12 +638,12 @@ export function CreateCommand({
 export function EditCommand({
 	command,
 	handleCommandAction,
+	loading=false,
 }: {
 	command: Command;
 	handleCommandAction: (action: CommandAction) => void;
+	loading?: boolean;
 }) {
-	// States
-	const [loading, setLoading] = useState<boolean>(false);
 
 	// Variables
 	const CommandForm = useForm<z.infer<typeof CommandSchema>>({
@@ -676,14 +669,11 @@ export function EditCommand({
 		const isValid = await CommandForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
 		const data = CommandForm.getValues();
 
-		handleCommandAction({ type: "update", command: data });
+		await handleCommandAction({ type: "update", command: data });
 
 		CommandForm.reset();
-		setLoading(false);
 		return true;
 	}
 
@@ -739,6 +729,7 @@ export function EditCommand({
 											<Input
 												id="description"
 												placeholder="eg: Starts all containers in detached mode"
+												readOnly={loading}
 												autoFocus={true}
 												{...field}
 												comment="The description of the command."
@@ -768,7 +759,7 @@ export function EditCommand({
 							/>
 						</AlertDialogBody>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!CommandForm.formState.isValid || loading}
@@ -788,19 +779,21 @@ export function EditCommand({
 function CommandList({
 	search,
 	handleCommandAction,
+	loading=false,
 }: {
 	search: string;
 	handleCommandAction: (action: CommandAction) => void;
+	loading?: boolean;
 }) {
 	// Custom hooks
 	const { project } = useProject();
 
 	// Custom methods
-	function handleDelete(target: string) {
+	async function handleDelete(target: string) {
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		handleCommandAction({ type: "delete", command: command });
+		await handleCommandAction({ type: "delete", command: command });
 		return true;
 	}
 
@@ -838,10 +831,11 @@ function CommandList({
 										<EditCommand
 											command={command}
 											handleCommandAction={handleCommandAction}
+											loading={loading}
 										/>
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
-												<Button variant={"ghost"} size={"icon"} type={"button"}>
+												<Button variant={"ghost"} size={"icon"} type={"button"} disabled={loading}>
 													<Trash className="h-4 w-4 text-muted-foreground" />
 												</Button>
 											</AlertDialogTrigger>
@@ -861,13 +855,14 @@ function CommandList({
 												</AlertDialogHeader>
 												<AlertDialogBody>
 													<AlertDialogFooter>
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 														<AlertDialogAction
-															onAction={() => handleDelete(command.target)}
+															onAction={async () => handleDelete(command.target)}
 															variant={"destructive"}
 															type={"button"}
+															disabled={loading}
 														>
-															<Trash />
+															{loading ? <Loader2 className="animate-spin" /> : <Trash />}
 															Delete
 														</AlertDialogAction>
 													</AlertDialogFooter>
