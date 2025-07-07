@@ -95,30 +95,11 @@ function Content() {
 	return (
 		<Tabs
 			className="flex flex-row items-start justify-between gap-4"
-			defaultValue={"commands"}
+			defaultValue={"settings"}
 		>
 			{/* Header + TabsContent */}
 			<div className="flex flex-col w-full gap-4">
 				<SmoothItem delay={0.1} layout={false}>
-					{/* <Card className="bg-transparent border-0 shadow-none rounded-none">
-						
-						<CardHeader className="px-2 py-4">
-							
-							<CardTitle className="text-2xl"></CardTitle>
-							<CardDescription>
-								
-							</CardDescription>
-							<CardAction>
-								<Link href={route("projects.index")}>
-									<Button variant={"outline"} className="w-full">
-										<ArrowLeft />
-										Go back to projects
-									</Button>
-								</Link>
-							</CardAction>
-						</CardHeader>
-					</Card> */}
-
 					<Card>
 						<CardHeader>
 							<div className="flex items-center gap-3">
