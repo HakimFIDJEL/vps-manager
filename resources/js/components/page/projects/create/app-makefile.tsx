@@ -26,6 +26,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormDescription,
 } from "@/components/ui/form";
 import {
 	Tabs,
@@ -47,6 +48,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+
 
 // Icons
 import {
@@ -386,6 +388,9 @@ export function ImportMakefile({
 																}}
 															/>
 														</FormControl>
+														<FormDescription className="mt-2">
+															Drop a Makefile here or click to select it.
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												);
@@ -454,9 +459,11 @@ export function ImportMakefile({
 																		: field.value
 																}
 																onChange={field.onChange}
-																comment="Each target must be in the form 'target:'. Comments before a target will be used as its description."
 															/>
 														</FormControl>
+														<FormDescription>
+															Each target must be in the form 'target:'. Comments before a target will be used as its description.
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												);
@@ -562,9 +569,11 @@ export function CreateCommand({
 												readOnly={loading}
 												autoFocus={true}
 												{...field}
-												comment="Must start with a lowercase letter or underscore, and can only contain lowercase letters, numbers and underscores."
 											/>
 										</FormControl>
+										<FormDescription>
+											Must start with a lowercase letter or underscore, and can only contain lowercase letters, numbers and underscores.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -581,9 +590,11 @@ export function CreateCommand({
 												placeholder="eg: Starts all containers in detached mode"
 												readOnly={loading}
 												{...field}
-												comment="The description of the command."
 											/>
 										</FormControl>
+										<FormDescription>
+											A short description of what the command does.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -595,11 +606,6 @@ export function CreateCommand({
 									<FormItem>
 										<FormLabel>Command</FormLabel>
 										<FormControl>
-											{/* <Input
-												id="command"
-												placeholder="eg: docker-compose up -d"
-												{...field}
-											/> */}
 											<CodeEditor
 												className="max-h-64 w-full"
 												value={
@@ -608,10 +614,11 @@ export function CreateCommand({
 														: field.value
 												}
 												onChange={field.onChange}
-												// {...field}
-												comment="The command(s) to run."
 											/>
 										</FormControl>
+										<FormDescription>
+											The command(s) to run when the target is called. You can use multiple lines.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -711,10 +718,12 @@ export function EditCommand({
 												id="target"
 												placeholder="eg: start"
 												readOnly={true}
-												comment="You can't change the target."
 												{...field}
 											/>
 										</FormControl>
+										<FormDescription>
+											You can't change the target of a command.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -732,9 +741,11 @@ export function EditCommand({
 												readOnly={loading}
 												autoFocus={true}
 												{...field}
-												comment="The description of the command."
 											/>
 										</FormControl>
+										<FormDescription>
+											A short description of what the command does.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -750,9 +761,11 @@ export function EditCommand({
 												value={field.value}
 												onChange={field.onChange}
 												className="max-h-64 w-full"
-												comment="The command(s) to run."
 											/>
 										</FormControl>
+										<FormDescription>
+											The command(s) to run when the target is called. You can use multiple lines.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}

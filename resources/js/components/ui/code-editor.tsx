@@ -23,6 +23,7 @@ import { useAppearance } from "@/hooks/use-appearance";
 import { autocompletion } from "@codemirror/autocomplete";
 import { StreamLanguage } from "@codemirror/language";
 import { Button } from "@/components/ui/button";
+import { EditorView } from "@codemirror/view";
 import { motion, AnimatePresence } from "framer-motion";
 
 type CodeBlockProps = {
@@ -224,6 +225,7 @@ type CodeEditorProps = {
 		type?: string;
 		detail?: string;
 	}>;
+	disabled?: boolean;
 };
 
 export const CodeEditor = ({
@@ -236,6 +238,7 @@ export const CodeEditor = ({
 	className = "",
 	customVariables = [],
 	keywords = [],
+	disabled = true,
 }: CodeEditorProps) => {
 	const [theme, setTheme] =
 		React.useState<ReactCodeMirrorProps["theme"]>(dracula);
@@ -270,7 +273,7 @@ export const CodeEditor = ({
 		if (appearance === "dark") {
 			setTheme(dracula);
 		} else {
-			setTheme(githubLight);
+			setTheme(githubLight); 
 		}
 	}, [appearance]);
 
@@ -301,8 +304,11 @@ export const CodeEditor = ({
 				<CodeMirror
 					value={value}
 					height="auto"
-					className="bg-background rounded-lg overflow-hidden"
+					className="bg-background"
 					theme={theme}
+
+					
+					
 					extensions={[
 						getLanguageExtension(language),
 						lintGutter(),
@@ -325,6 +331,8 @@ export const CodeEditor = ({
 						highlightActiveLineGutter: true,
 					}}
 					style={{
+						opacity: disabled ? 0.6 : 1,
+						pointerEvents: disabled ? "none" : "auto", // empêche même le curseur
 						"--cm-selection-background": "rgba(255, 255, 255, 0.2)",
 						"--cm-selectionMatch-background": "rgba(255, 255, 255, 0.2)",
 					} as React.CSSProperties}

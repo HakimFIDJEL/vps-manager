@@ -31,6 +31,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormDescription,
 } from "@/components/ui/form";
 import {
 	Tabs,
@@ -291,7 +292,7 @@ export function VariablesList({
 							<TableRow key={variable.key} className="group">
 								<TableCell>
 									<div className="flex items-center gap-2">
-										<Lock className="h-4 w-4" />
+										<Lock className="h-3 w-3 text-muted-foreground" />
 										{variable.key}
 									</div>
 								</TableCell>
@@ -462,9 +463,11 @@ export function CreateVariable({
 												placeholder="eg: MY_KEY"
 												autoFocus={true}
 												{...field}
-												comment="Must be in uppercase and not contain spaces."
 											/>
 										</FormControl>
+										<FormDescription>
+											You can use letters, numbers and underscores. Must not contain spaces.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -481,9 +484,11 @@ export function CreateVariable({
 												readOnly={loading}
 												placeholder="eg: My_value"
 												{...field}
-												comment="Must not contain spaces."
 											/>
 										</FormControl>
+										<FormDescription>
+											Must not contain spaces.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -580,10 +585,12 @@ export function EditVariable({
 												id="key"
 												placeholder="eg: MY_KEY"
 												readOnly={true}
-												comment="You can't change the key."
 												{...field}
 											/>
 										</FormControl>
+										<FormDescription>
+											You can't change the key.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -602,10 +609,12 @@ export function EditVariable({
 												placeholder="eg: My_value"
 												showPasswordToggle={true}
 												readOnly={loading}
-												comment="Must not contain spaces."
 												{...field}
 											/>
 										</FormControl>
+										<FormDescription>
+											Must not contain spaces.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -846,6 +855,11 @@ export function ImportEnv({
 																}}
 															/>
 														</FormControl>
+														<FormDescription className="mt-2">
+															Drop a .env file here or click to select it. The file must be in the
+															following format: <code>KEY=VALUE</code>. Lines starting with{"#"} are
+															ignored. 
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												);
@@ -913,9 +927,13 @@ export function ImportEnv({
 																		: field.value
 																}
 																onChange={field.onChange}
-																comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
 															/>
 														</FormControl>
+														<FormDescription>
+															You can paste the content of a .env file here. Each line must be in
+															the form <code>KEY=VALUE</code>. Lines starting with <code>#</code> are
+															ignored.
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												);

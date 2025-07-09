@@ -21,6 +21,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from "@/components/ui/carousel";
 
 // Icons
 import {
@@ -43,6 +50,7 @@ import {
 	EditCommand,
 	ImportMakefile,
 } from "../create/app-makefile";
+import { Command } from "@/lib/commands/type";
 
 export function AppMakefile() {
 	// States
@@ -195,14 +203,16 @@ export function AppMakefile() {
 	);
 }
 
-function CommandList({
-	search,
+export function CommandList({
+	search = "",
 	handleCommandAction,
 	loading = false,
+	carrousel = false,
 }: {
-	search: string;
+	search?: string;
 	handleCommandAction: (action: CommandAction) => void;
 	loading?: boolean;
+	carrousel?: boolean;
 }) {
 	// Custom hooks
 	const { project } = useProject();
@@ -230,136 +240,181 @@ function CommandList({
 	});
 
 	return (
-		<>
-			<SmoothAnimate>
-				<h3 className="text-sm font-medium mb-2 mt-8">Commands</h3>
+		<SmoothAnimate>
+			<h3 className="text-sm font-medium mb-2 mt-8">Commands</h3>
 
-				{filteredCommands.length === 0 ? (
-					<div className="flex items-center justify-center border border-border border-dashed rounded-md px-4 py-4 bg-muted/50">
-						<p className="text-sm text-muted-foreground">
-							No commands added yet. Click on "Add command" to create one.
-						</p>
-					</div>
-				) : (
-					<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-						{filteredCommands.map((command) => (
-							<div
-								key={command.target}
-								className="group relative rounded-md border border-border bg-card p-4 transition-all hover:border-primary/50 flex items-center w-full"
-							>
-								<div className="flex items-center justify-between gap-2 w-full">
-									<div className="flex-grow-0 max-w-[250px]">
-										<p className="font-mono">{command.target}</p>
-										<p className="text-sm text-muted-foreground mt-1">
-											{command.description}
-										</p>
-									</div>
-									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-										<AlertDialog>
-											<AlertDialogTrigger asChild>
-												<Button
-													variant={"ghost"}
-													size={"icon"}
-													type={"button"}
-													disabled={loading}
-												>
-													<Play className="h-4 w-4 text-muted-foreground" />
-												</Button>
-											</AlertDialogTrigger>
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle className="flex items-center gap-2">
-														<OctagonAlert className="w-4 h-4 text-primary" />
-														Run command
-													</AlertDialogTitle>
-													<AlertDialogDescription>
-														Are you sure you want to run
-														<Badge variant={"outline"} className="font-mono mx-2">
-															{command.target}
-														</Badge>
-														command ?
-													</AlertDialogDescription>
-												</AlertDialogHeader>
-												<AlertDialogBody>
-													<AlertDialogFooter>
-														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-														<AlertDialogAction
-															onAction={async () => {
-																await handleRun(command.target);
-																return true;
-															}}
-															variant={"default"}
-															type={"button"}
-															disabled={loading}
-														>
-															{loading ? <Loader2 className="animate-spin" /> : <Play />}
-															Run
-														</AlertDialogAction>
-													</AlertDialogFooter>
-												</AlertDialogBody>
-											</AlertDialogContent>
-										</AlertDialog>
-										<EditCommand
-											command={command}
-											handleCommandAction={handleCommandAction}
-											loading={loading}
-										/>
-										<AlertDialog>
-											<AlertDialogTrigger asChild>
-												<Button
-													variant={"ghost"}
-													size={"icon"}
-													type={"button"}
-													disabled={loading}
-												>
-													<Trash className="h-4 w-4 text-muted-foreground" />
-												</Button>
-											</AlertDialogTrigger>
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle className="flex items-center gap-2">
-														<OctagonAlert className="w-4 h-4 text-destructive" />
-														Delete command
-													</AlertDialogTitle>
-													<AlertDialogDescription>
-														Are you sure you want to delete
-														<Badge variant={"outline"} className="font-mono mx-2">
-															{command.target}
-														</Badge>
-														command ?
-													</AlertDialogDescription>
-												</AlertDialogHeader>
-												<AlertDialogBody>
-													<AlertDialogFooter>
-														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-														<AlertDialogAction
-															onAction={async () => {
-																await handleDelete(command.target);
-																return true;
-															}}
-															variant={"destructive"}
-															type={"button"}
-															disabled={loading}
-														>
-															{loading ? <Loader2 className="animate-spin" /> : <Trash />}
-															Delete
-														</AlertDialogAction>
-													</AlertDialogFooter>
-												</AlertDialogBody>
-											</AlertDialogContent>
-										</AlertDialog>
-									</div>
-								</div>
-							</div>
+			{filteredCommands.length === 0 ? (
+				<div className="flex items-center justify-center border border-border border-dashed rounded-md px-4 py-4 bg-muted/50">
+					<p className="text-sm text-muted-foreground">
+						No commands added yet. Click on "Add command" to create one.
+					</p>
+				</div>
+			) : carrousel ? (
+				<Carousel className="space-y-2">
+					<CarouselContent>
+						{filteredCommands.map((command, index) => (
+							<CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+								<CommandCard
+									key={command.target}
+									command={command}
+									loading={loading}
+									handleRun={handleRun}
+									handleDelete={handleDelete}
+									handleCommandAction={handleCommandAction}
+								/>
+							</CarouselItem>
 						))}
-					</SmoothAnimate>
-				)}
-			</SmoothAnimate>
-		</>
+					</CarouselContent>
+					{filteredCommands.length > 3 && (
+						<div className="relative flex items-center justify-between gap-2">
+							<CarouselPrevious className="relative left-0 top-0 rounded-md translate-y-0 w-1/2" />
+							<CarouselNext className="relative right-0 top-0 rounded-md translate-y-0  w-1/2" />
+						</div>
+					)}
+				</Carousel>
+			) : (
+				<SmoothAnimate className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+					{filteredCommands.map((command) => (
+						<CommandCard
+							key={command.target}
+							command={command}
+							loading={loading}
+							handleRun={handleRun}
+							handleDelete={handleDelete}
+							handleCommandAction={handleCommandAction}
+						/>
+					))}
+				</SmoothAnimate>
+			)}
+		</SmoothAnimate>
 	);
 }
 
-function ExportMakeFile({ loading=false } : { loading?: boolean; }) {
+function CommandCard({
+	command,
+	loading,
+	handleRun,
+	handleDelete,
+	handleCommandAction,
+	...props
+}: {
+	command: Command;
+	loading?: boolean;
+	handleRun: (target: string) => Promise<boolean>;
+	handleDelete: (target: string) => Promise<boolean>;
+	handleCommandAction: (action: CommandAction) => void;
+}) {
+	return (
+		<div
+			key={command.target}
+			className="group relative rounded-md border border-border bg-card p-4 transition-all hover:border-primary/50 flex items-center w-full"
+		>
+			<div className="flex items-center justify-between gap-2 w-full">
+				<div className="flex-grow-0 max-w-[250px]">
+					<p className="font-mono">{command.target}</p>
+					<p className="text-sm text-muted-foreground mt-1">{command.description}</p>
+				</div>
+				<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+					<AlertDialog>
+						<AlertDialogTrigger asChild>
+							<Button
+								variant={"ghost"}
+								size={"icon"}
+								type={"button"}
+								disabled={loading}
+							>
+								<Play className="h-4 w-4 text-muted-foreground" />
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle className="flex items-center gap-2">
+									<OctagonAlert className="w-4 h-4 text-primary" />
+									Run command
+								</AlertDialogTitle>
+								<AlertDialogDescription>
+									Are you sure you want to run
+									<Badge variant={"outline"} className="font-mono mx-2">
+										{command.target}
+									</Badge>
+									command ?
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogBody>
+								<AlertDialogFooter>
+									<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+									<AlertDialogAction
+										onAction={async () => {
+											await handleRun(command.target);
+											return true;
+										}}
+										variant={"default"}
+										type={"button"}
+										disabled={loading}
+									>
+										{loading ? <Loader2 className="animate-spin" /> : <Play />}
+										Run
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogBody>
+						</AlertDialogContent>
+					</AlertDialog>
+					<EditCommand
+						command={command}
+						handleCommandAction={handleCommandAction}
+						loading={loading}
+					/>
+					<AlertDialog>
+						<AlertDialogTrigger asChild>
+							<Button
+								variant={"ghost"}
+								size={"icon"}
+								type={"button"}
+								disabled={loading}
+							>
+								<Trash className="h-4 w-4 text-muted-foreground" />
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle className="flex items-center gap-2">
+									<OctagonAlert className="w-4 h-4 text-destructive" />
+									Delete command
+								</AlertDialogTitle>
+								<AlertDialogDescription>
+									Are you sure you want to delete
+									<Badge variant={"outline"} className="font-mono mx-2">
+										{command.target}
+									</Badge>
+									command ?
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogBody>
+								<AlertDialogFooter>
+									<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+									<AlertDialogAction
+										onAction={async () => {
+											await handleDelete(command.target);
+											return true;
+										}}
+										variant={"destructive"}
+										type={"button"}
+										disabled={loading}
+									>
+										{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+										Delete
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogBody>
+						</AlertDialogContent>
+					</AlertDialog>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function ExportMakeFile({ loading = false }: { loading?: boolean }) {
 	// Custom Hooks
 	const { project } = useProject();
 

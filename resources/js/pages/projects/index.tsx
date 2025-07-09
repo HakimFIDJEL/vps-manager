@@ -189,13 +189,6 @@ export default function Page() {
 							</TabsBody>
 						</CardContent>
 
-						<Separator />
-						<CardFooter className="text-sm text-muted-foreground flex items-center gap-2">
-							<TriangleAlert />
-							All projects are fetched from the server itself without a database, if a
-							project is not found, try reloading the page, check the server logs or
-							access the sever via SSH.
-						</CardFooter>
 					</Card>
 				</SmoothItem>
 			</Tabs>

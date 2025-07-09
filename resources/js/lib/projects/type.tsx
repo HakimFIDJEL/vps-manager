@@ -5,8 +5,7 @@ import { CommandSchema, type Command } from "@/lib/commands/type";
 
 // Types
 export type Project = {
-	name: string;
-	folderPath: string;
+	path: string;
 	variables: Variable[];
 	commands: Command[];
 	docker: DockerCompose;
@@ -20,8 +19,7 @@ export type ProjectContextType = {
 };
 
 export const DEFAULT_PROJECT: Project = {
-	name: "",
-	folderPath: "",
+	path: "",
 	variables: [],
 	commands: [],
 	docker: {
@@ -37,27 +35,26 @@ export const DEFAULT_PROJECT: Project = {
 	isCreated: false,
 };
 
-// Schemas
-export const ProjectSchema = z.object({
-	name: z.string().nonempty(),
-	folderPath: z.string()
-	.min(6, "Folder path must be at least 6 characters long")
-	.nonempty("Folder path is required"),
-	variables: z.array(VariableSchema),
-	commands: z.array(CommandSchema),
-	docker: DockerComposeStateSchema,
-});
-
 // min 6 caracters
 export const FolderSchema = z.object({
 	path: z.string()
 	.min(6, "Folder path must be at least 6 characters long")
 	.nonempty("Folder path is required")
+	.regex(/^[a-zA-Z0-9_\-\/]+$/, "Folder path can only contain alphanumeric characters, underscores, hyphens, and slashes"),
 });
 
+
+// Schemas
+export const ProjectSchema = z.object({
+	path: FolderSchema.shape.path,
+	variables: z.array(VariableSchema),
+	commands: z.array(CommandSchema),
+	docker: DockerComposeStateSchema,
+});
+
+
 export const ProjectExample: Project = {
-	name: "Example Project",
-	folderPath: "example-project",
+	path: "example-project",
 	variables: [
 		{
 			key: "EXAMPLE_VAR",

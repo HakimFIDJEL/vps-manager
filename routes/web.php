@@ -30,6 +30,8 @@ Route::prefix('/projects')->name('projects.')->controller(ProjectController::cla
     Route::get('/show/{inode}', 'show')->name('show');
 
     Route::post('/store', 'store')->name('store');
+
+    Route::delete('/{inode}', 'destroy')->name('destroy');
 });
 
 // AUTH ROUTES

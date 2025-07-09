@@ -8,19 +8,27 @@ export function useVariableActionsRemote() {
   return async (action: VariableAction): Promise<void> => {
     switch (action.type) {
       case "create":
-        toast.info("Creating variable...");
+        toast.loading("Creating variable...", {
+          id: `create-variable-${action.variable.key}`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
         updateProject("variables", [...project.variables, action.variable]);
+        toast.dismiss(`create-variable-${action.variable.key}`);
         toast.success(`Variable ${action.variable.key} created successfully!`);
         break;
       case "create-multiple":
-        toast.info("Importing variables...");
+        toast.loading("Importing variables...", {
+          id: `import-variables`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
         updateProject("variables", [...action.variables, ...project.variables]);
+        toast.dismiss(`import-variables`);
         toast.success(`${action.variables.length} variables imported successfully!`);
         break;
       case "update":
-        toast.info("Updating variable...");
+        toast.loading("Updating variable...", {
+          id: `update-variable-${action.variable.key}`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
         updateProject(
           "variables",
@@ -28,21 +36,28 @@ export function useVariableActionsRemote() {
             v.key === action.variable.key ? action.variable : v
           )
         );
+        toast.dismiss(`update-variable-${action.variable.key}`);
         toast.success(`Variable ${action.variable.key} updated successfully!`);
         break;
       case "delete":
-        toast.info("Deleting variable...");
+        toast.loading("Deleting variable...", {
+          id: `delete-variable-${action.variable.key}`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
         updateProject(
           "variables",
           project.variables.filter((v) => v.key !== action.variable.key)
         );
+        toast.dismiss(`delete-variable-${action.variable.key}`);
         toast.success(`Variable ${action.variable.key} deleted successfully!`);
         break;
       case "delete-all":
-        toast.info("Deleting all variables...");
+        toast.loading("Deleting all variables...", {
+          id: `delete-all-variables`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
         updateProject("variables", []);
+        toast.dismiss(`delete-all-variables`);
         toast.success("All variables deleted successfully!");
         break;
       case "toggle-visibility":

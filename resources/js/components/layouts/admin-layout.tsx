@@ -53,8 +53,7 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 						<div className="@container/main flex flex-1 flex-col gap-4 relative py-6 px-2">
 							{children}
 
-							<Toaster richColors closeButton />
-
+							<Toaster closeButton />
 						</div>
 					</div>
 				</SidebarInset>

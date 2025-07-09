@@ -119,7 +119,7 @@ export function AppDocker() {
 	];
 
 	return (
-		<TabsContent value="containers" className="space-y-12">
+		<TabsContent value="containers" className="flex flex-col gap-12">
 			{/* Quick actions */}
 			<QuickActions
 				handleDockerAction={handleDockerAction}
@@ -127,7 +127,9 @@ export function AppDocker() {
 				loading={loading}
 			/>
 
-			<SmoothAnimate className="space-y-2">
+			<SmoothAnimate className="flex flex-col gap-2">
+				<h3 className="text-sm font-medium">Status</h3>
+
 				{/* Strict mode */}
 				{!project.docker.isStrict && (
 					<StrictMode
@@ -144,6 +146,10 @@ export function AppDocker() {
 						handleDockerAction={handleDockerAction}
 						loading={loading}
 					/>
+				)}
+
+				{project.docker.isStrict && project.docker.isSaved && (
+					<GoodDockerConfiguration />
 				)}
 			</SmoothAnimate>
 
@@ -185,8 +191,8 @@ function QuickActions({
 		(containers_running.length / initialContainers.length) * 100;
 
 	return (
-		<>
-			<h3 className="text-sm font-medium mb-2">Actions</h3>
+		<div className="flex flex-col gap-2">
+			<h3 className="text-sm font-medium">Actions</h3>
 			<div className="grid gap-2 grid-cols-3">
 				<div className="h-auto w-full bg-background flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 relative overflow-hidden">
 					<div className="p-2 bg-primary/10 rounded-md">
@@ -450,7 +456,7 @@ function QuickActions({
 					</div>
 				</Button>
 			</div>
-		</>
+		</div>
 	);
 }
 
@@ -464,40 +470,40 @@ function StrictMode({
 	loading?: boolean;
 }) {
 	return (
-		<>
-			{/* <h3 className="text-sm font-medium mb-2">Strict mode</h3> */}
-			{project.docker.isStrict ? (
-				<Alert variant={"default"}>
-					<Check />
-					<AlertTitle>
-						Since strict mode is enabled in your Docker configuration, the file
-						undergoes full validation.
-					</AlertTitle>
-				</Alert>
-			) : (
-				<Alert
-					variant={"destructive"}
-					className="flex justify-between items-center gap-2"
-				>
-					<div className="flex justify-between items-center gap-2">
-						<AlertCircleIcon className="h-4 w-4" />
-						<AlertTitle>
-							Since strict mode is disabled in your Docker configuration, the file is
-							not validated in any way.
-						</AlertTitle>
-					</div>
-					<Button
-						variant={"outline"}
-						size={"sm"}
-						onClick={() => handleDockerAction({ type: "strict-toggle" })}
-						disabled={loading}
-					>
-						{loading && <Loader2 className="w-4 h-4 animate-spin" />}
-						Enable strict mode
-					</Button>
-				</Alert>
-			)}
-		</>
+		<Alert
+			variant={"destructive"}
+			className="flex justify-between items-center gap-2"
+		>
+			<div className="flex justify-between items-center gap-2">
+				<AlertCircleIcon className="h-4 w-4" />
+				<AlertTitle>
+					Since strict mode is disabled in your Docker configuration, the file is not
+					validated in any way.
+				</AlertTitle>
+			</div>
+			<Button
+				variant={"outline"}
+				size={"sm"}
+				onClick={() => handleDockerAction({ type: "strict-toggle" })}
+				disabled={loading}
+			>
+				{loading && <Loader2 className="w-4 h-4 animate-spin" />}
+				Enable strict mode
+			</Button>
+		</Alert>
+	);
+}
+
+function GoodDockerConfiguration() {
+	return (
+		<Alert variant={"default"} className="flex justify-between items-center gap-2">
+			<div className="flex justify-between items-center gap-2">
+				<Check className="h-4 w-4" />
+				<AlertTitle>
+					Your Docker configuration is valid and saved. You can now run your containers in total safety.
+				</AlertTitle>
+			</div>
+		</Alert>
 	);
 }
 
@@ -511,46 +517,33 @@ function SaveProject({
 	loading?: boolean;
 }) {
 	return (
-		<>
-			{/* <h3 className="text-sm font-medium mb-2">Save project</h3> */}
-			{project.docker.isSaved ? (
-				<Alert variant={"default"}>
-					<Check />
-					<AlertTitle>
-						Since strict mode is enabled in your Docker configuration, the file
-						undergoes full validation.
-					</AlertTitle>
-				</Alert>
-			) : (
-				<Alert
-					variant={"destructive"}
-					className="flex justify-between items-center gap-2"
-				>
-					<div className="flex justify-between items-center gap-2">
-						<AlertCircleIcon className="h-4 w-4" />
-						<AlertTitle>
-							Since strict mode is disabled in your Docker configuration, the file is
-							not validated in any way.
-						</AlertTitle>
-					</div>
-					<Button
-						variant={"outline"}
-						size={"sm"}
-						onClick={async () => {
-							await handleDockerAction({ type: "save" });
-						}}
-						disabled={loading}
-					>
-						{loading && <Loader2 className="w-4 h-4 animate-spin" />}
-						Save project
-					</Button>
-				</Alert>
-			)}
-		</>
+		<Alert
+			variant={"destructive"}
+			className="flex justify-between items-center gap-2"
+		>
+			<div className="flex justify-between items-center gap-2">
+				<AlertCircleIcon className="h-4 w-4" />
+				<AlertTitle>
+					Since strict mode is disabled in your Docker configuration, the file is not
+					validated in any way.
+				</AlertTitle>
+			</div>
+			<Button
+				variant={"outline"}
+				size={"sm"}
+				onClick={async () => {
+					await handleDockerAction({ type: "save" });
+				}}
+				disabled={loading}
+			>
+				{loading && <Loader2 className="w-4 h-4 animate-spin" />}
+				Save project
+			</Button>
+		</Alert>
 	);
 }
 
-function ContainersList({
+export function ContainersList({
 	// project,
 	handleDockerAction,
 	initialContainers,
@@ -579,8 +572,8 @@ function ContainersList({
 	});
 
 	return (
-		<>
-			<h3 className="text-sm font-medium mb-2">Containers</h3>
+		<div className="flex flex-col gap-2">
+			<h3 className="text-sm font-medium">Containers</h3>
 
 			<div className="border rounded-md overflow-hidden">
 				<Table>
@@ -729,6 +722,6 @@ function ContainersList({
 					</TableBody>
 				</Table>
 			</div>
-		</>
+		</div>
 	);
 }

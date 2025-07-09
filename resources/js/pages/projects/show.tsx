@@ -108,7 +108,7 @@ function Content() {
 								</div>
 								<div>
 									<CardTitle className="flex items-center gap-2 text-xl">
-										{project.name}
+										{project.path}
 									</CardTitle>
 									<CardDescription>
 										Here you can view details, manage settings, and perform actions
@@ -130,8 +130,11 @@ function Content() {
 				</SmoothItem>
 
 				<SmoothItem delay={0.3} layout={false} className="!flex-grow-0 w-full">
-					<TabsNavigation tabs={tabs} className="mb-12" />
+					<TabsNavigation tabs={tabs} />
 
+				</SmoothItem>
+
+				<SmoothItem delay={0.5} layout={false} className="!flex-grow-0 w-full">
 					<TabsBody className="mt-4">
 						<AppOverview />
 						<AppMakefile />

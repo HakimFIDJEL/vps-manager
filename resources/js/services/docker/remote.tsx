@@ -36,16 +36,25 @@ export function useDockerActionsRemote() {
       case "save": {
 
         
-        toast.info("Saving docker configuration...");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
+        
+        
         // TODO: Replace with real server call
         const save_parsed = parseDockerCompose(
           project.docker.content,
           project.docker.isStrict,
           project.variables.length
         );
+
+        
         if (save_parsed.isValid && save_parsed.updatedContent) {
+
+          toast.loading("Saving docker configuration...", {
+            id: "save-docker",
+          });
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          toast.dismiss("save-docker");
+          toast.success("Docker configuration saved");
+
           updateProject("docker", {
             content: save_parsed.updatedContent,
             isSaved: true,
@@ -56,11 +65,10 @@ export function useDockerActionsRemote() {
               networks: save_parsed.networks,
             },
           });
-          toast.success("Docker configuration saved");
         } else {
-          // toast.error("Invalid docker configuration");
           // Error toast already sent in parseDockerCompose
         }
+        
 
         break;
       }
@@ -162,51 +170,75 @@ export function useDockerActionsRemote() {
       }
       case "run":
         // TODO: Replace with real server call
-        toast.info("Running all containers...");
+        toast.loading("Running all containers...", {
+          id: "run-all-containers",
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
+        toast.dismiss("run-all-containers");
         toast.success("All containers are successfully running!");
         break;
       case "stop":
         // TODO: Replace with real server call
-        toast.info("Stopping all containers...");
+        toast.loading("Stopping all containers...", {
+          id: "stop-all-containers",
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
+        toast.dismiss("stop-all-containers");
         toast.success("All containers are successfully stopped!");
         break;
       case "remove":
         // TODO: Replace with real server call
-        toast.info("Removing all containers...");
+        toast.loading("Removing all containers...", {
+          id: "remove-all-containers",
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
+        toast.dismiss("remove-all-containers");
         toast.success("All containers are successfully removed!");
         break;
       case "prune":
         // TODO: Replace with real server call
-        toast.info("Pruning...");
+        toast.loading("Pruning...", {
+          id: "prune-containers",
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
+        toast.dismiss("prune-containers");
         toast.success("The system has been successfully pruned!");
         break;
       case "container-run":
         // TODO: Replace with real server call
-        toast.info(`Running container ${action.container_id}...`);
+        toast.loading(`Running container ${action.container_id}...`, {
+          id: `run-container-${action.container_id}`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
+        toast.dismiss(`run-container-${action.container_id}`);
         toast.success("Container is successfully running!");
         break;
       case "container-stop":
         // TODO: Replace with real server call
-        toast.info(`Stopping container ${action.container_id}...`);
+        toast.loading(`Stopping container ${action.container_id}...`, {
+          id: `stop-container-${action.container_id}`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
+        toast.dismiss(`stop-container-${action.container_id}`);
         toast.success("Container is successfully stopped!");
         break;
       case "container-restart":
         // TODO: Replace with real server call
-        toast.info(`Restarting container ${action.container_id}...`);
+        toast.loading(`Restarting container ${action.container_id}...`, {
+          id: `restart-container-${action.container_id}`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
+        toast.dismiss(`restart-container-${action.container_id}`);
         toast.success("Container is successfully restarting!");
         break;
       case "container-remove":
         // TODO: Replace with real server call
-        toast.info(`Removing container ${action.container_id}...`);
+        toast.loading(`Removing container ${action.container_id}...`, {
+          id: `remove-container-${action.container_id}`,
+        });
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.success("Container is successfully removing!");
+        toast.dismiss(`remove-container-${action.container_id}`);
+        toast.success("Container is successfully removed!");
         break;
       default:
         break;

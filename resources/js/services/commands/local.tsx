@@ -36,9 +36,12 @@ export function useCommandActionsLocal() {
 				toast.success("All commands deleted successfully!");
 				break;
 			case "run":
-				toast.info("Running command...");
+				toast.loading("Running command...", {
+					id: `run-command-${action.command.target}`,
+				});
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				// TODO : Running command
+				toast.dismiss(`run-command-${action.command.target}`);
 				toast.success(`Command ran ${action.command.target} successfully!`);
 				break;
 		}

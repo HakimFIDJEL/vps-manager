@@ -25,4 +25,10 @@ class ProjectController extends Controller
 
         return redirect()->route('projects.index')->with(['success' => 'Project created successfully!']);
     }
+
+    public function destroy(int $inode) {
+        sleep(5);
+
+        return redirect()->route('projects.index')->with(['success' => 'Project deleted successfully!']);
+    }
 }

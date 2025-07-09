@@ -42,6 +42,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+// Schemas
+import { FolderSchema } from "@/lib/projects/type";
+
 // Icons
 import {
 	ArrowLeft,
@@ -155,12 +158,12 @@ function Content() {
 
 	function handleValidateStep1() {
 		try {
-			// Validate only step 1 fields
-			ProjectSchema.pick({ name: true, folderPath: true }).parse(project);
+			console.log(project.path);
+			FolderSchema.parse({ path: project.path });
 			return true;
 		} catch (error) {
 			if (error instanceof z.ZodError) {
-				toast.error("Please fill in all required fields");
+				toast.error(error.errors[0].message || "Please fill in the project path");
 			}
 			return false;
 		}
@@ -215,17 +218,28 @@ function Content() {
 		e.preventDefault();
 
 		try {
+
+			console.log("Submitting project:", project);
+
 			// Validation de ton projet
 			ProjectSchema.parse(project);
 
-			toast.info("Creation of the project...");
+			toast.loading("Creating the project...", {
+				'id' : 'create-project',
+			});
 
 			post(route("projects.store"));
 		} catch (error) {
+			toast.dismiss('create-project');
 			if (error instanceof z.ZodError) {
-				toast.error("Please check all project fields");
+				toast.error(error.errors[0].message || "Please fill in all the required fields");
 			}
+		} 
+	}
 
+	function handleKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+		if (e.key === "Enter") {
+			e.preventDefault();
 		}
 	}
 
@@ -260,7 +274,7 @@ function Content() {
 			</SmoothItem>
 
 			<SmoothItem delay={0.5} layout={false}>
-				<form onSubmit={handleSubmit}>
+				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
 					
 					<StepperBody>
 						<StepperContent value={1}>

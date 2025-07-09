@@ -5,36 +5,40 @@ import { useProject } from "@/contexts/project-context";
 import { Badge } from "@/components/ui/badge";
 
 // Icons
-import { Folder, FileLock, Container, SquareTerminal, OctagonMinus } from "lucide-react";
+import {
+	Folder,
+	FileLock,
+	Container,
+	SquareTerminal,
+	OctagonMinus,
+} from "lucide-react";
 
 export function AppDone() {
-
 	// Custom hooks
 	const { project } = useProject();
 
 	return (
-
 		<div className="flex flex-col gap-2">
 			<h3 className="text-sm font-medium">Overview</h3>
 
 			<div className="grid grid-cols-2 gap-2">
 				{/* Project Info */}
-				<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
+				<div className="p-4 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200 flex items-center">
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-primary/5 rounded-full">
 							<Folder className="h-5 w-5 text-primary" />
 						</div>
 						<div>
-							<h4 className="font-medium">{project.name}</h4>
-							<p className="text-sm text-muted-foreground">
-								/projects/{project.folderPath}
-							</p>
+							<h4 className="font-medium">Folder path</h4>
+							<Badge variant={"outline"}>
+								/projects/{project.path}
+							</Badge>
 						</div>
 					</div>
 				</div>
 
 				{/* Variables */}
-				<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
+				<div className="p-4 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-primary/5 rounded-full">
 							<FileLock className="h-5 w-5 text-primary" />
@@ -46,7 +50,8 @@ export function AppDone() {
 									<span className="text-muted-foreground">No variables configured</span>
 								) : (
 									<span>
-										{project.variables.length} variable{project.variables.length > 1 ? "s" : ""} configured
+										{project.variables.length} variable
+										{project.variables.length > 1 ? "s" : ""} configured
 									</span>
 								)}
 							</p>
@@ -55,7 +60,7 @@ export function AppDone() {
 				</div>
 
 				{/* Docker */}
-				<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
+				<div className="p-4 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-primary/5 rounded-full">
 							<Container className="h-5 w-5 text-primary" />
@@ -83,7 +88,7 @@ export function AppDone() {
 									</>
 								) : (
 									<Badge variant="outline">
-										<OctagonMinus className="h-3 w-3"/>
+										<OctagonMinus className="h-3 w-3" />
 										Strict mode disabled
 									</Badge>
 								)}
@@ -93,7 +98,7 @@ export function AppDone() {
 				</div>
 
 				{/* Commands */}
-				<div className="p-6 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
+				<div className="p-4 rounded-lg border bg-muted/50 hover:border-primary/50 transition-all duration-200">
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-primary/5 rounded-full">
 							<SquareTerminal className="h-5 w-5 text-primary" />
@@ -105,7 +110,8 @@ export function AppDone() {
 									<span className="text-muted-foreground">No commands configured</span>
 								) : (
 									<span>
-										{project.commands.length} command{project.commands.length > 1 ? "s" : ""} configured
+										{project.commands.length} command
+										{project.commands.length > 1 ? "s" : ""} configured
 									</span>
 								)}
 							</p>

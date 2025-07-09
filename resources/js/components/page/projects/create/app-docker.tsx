@@ -659,7 +659,7 @@ function DockerContent({
 							<div className="w-7 h-7  rounded-md flex items-center justify-center">
 								<File className="h-4 w-4 text-muted-foreground" />
 							</div>
-							<span className="text-sm font-medium">Docker Compose</span>
+							<span className="text-sm font-medium mr-2">docker-compose.yaml</span>
 							{project.docker.isSaved ? (
 								<Badge variant="default" className="text-xs ">
 									<Check className="h-4 w-4" />
@@ -766,9 +766,10 @@ function DockerContent({
 					</div>
 				</div>
 
-				<SmoothAnimate className="p-4">
+				<SmoothAnimate className="pt-1">
 					<CodeEditor
 						value={project.docker.content}
+						disabled={loading}
 						onChange={(content) => handleDockerAction({ type: "un-save", content })}
 						onSave={() => handleDockerAction({ type: "save" })}
 						isSaved={project.docker.isSaved}
@@ -779,6 +780,7 @@ function DockerContent({
 							detail: variable.value,
 						}))}
 						keywords={DOCKER_COMPOSE_KEYWORDS}
+						className="!rounded-t-none rounded-b-lg  border-0"
 					/>
 				</SmoothAnimate>
 			</div>
