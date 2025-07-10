@@ -466,7 +466,8 @@ export function CreateVariable({
 											/>
 										</FormControl>
 										<FormDescription>
-											You can use letters, numbers and underscores. Must not contain spaces.
+											You can use letters, numbers and underscores. Must not contain
+											spaces.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -486,9 +487,7 @@ export function CreateVariable({
 												{...field}
 											/>
 										</FormControl>
-										<FormDescription>
-											Must not contain spaces.
-										</FormDescription>
+										<FormDescription>Must not contain spaces.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -588,9 +587,7 @@ export function EditVariable({
 												{...field}
 											/>
 										</FormControl>
-										<FormDescription>
-											You can't change the key.
-										</FormDescription>
+										<FormDescription>You can't change the key.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -612,9 +609,7 @@ export function EditVariable({
 												{...field}
 											/>
 										</FormControl>
-										<FormDescription>
-											Must not contain spaces.
-										</FormDescription>
+										<FormDescription>Must not contain spaces.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -709,16 +704,15 @@ export function ImportEnv({
 			});
 			return false;
 		} else {
+			await handleVariableAction({
+				type: "create-multiple",
+				variables: parsedVariables,
+			});
+
 			setEnvPreview("");
 			VariableEnvForm.reset();
 		}
 
-		await handleVariableAction({
-			type: "create-multiple",
-			variables: parsedVariables,
-		});
-
-		closeRef.current?.click();
 		return true;
 	}
 
@@ -856,9 +850,9 @@ export function ImportEnv({
 															/>
 														</FormControl>
 														<FormDescription className="mt-2">
-															Drop a .env file here or click to select it. The file must be in the
-															following format: <code>KEY=VALUE</code>. Lines starting with{"#"} are
-															ignored. 
+															Drop a .env file here or click to select it. The file must be in
+															the following format: <code>KEY=VALUE</code>. Lines starting with
+															{"#"} are ignored.
 														</FormDescription>
 														<FormMessage />
 													</FormItem>
@@ -930,9 +924,9 @@ export function ImportEnv({
 															/>
 														</FormControl>
 														<FormDescription>
-															You can paste the content of a .env file here. Each line must be in
-															the form <code>KEY=VALUE</code>. Lines starting with <code>#</code> are
-															ignored.
+															You can paste the content of a .env file here. Each line must be
+															in the form <code>KEY=VALUE</code>. Lines starting with{" "}
+															<code>#</code> are ignored.
 														</FormDescription>
 														<FormMessage />
 													</FormItem>

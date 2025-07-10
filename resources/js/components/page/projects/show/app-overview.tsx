@@ -7,7 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-
 // Custom components
 import { ContainersList } from "./app-docker";
 import { CommandList } from "../show/app-makefile";
@@ -71,7 +70,10 @@ function QuickActions() {
 
 			<TabsList className="grid grid-cols-2 gap-2 !bg-transparent border-0 shadow-none rounded-none w-full text-foreground h-auto">
 				{/* Project Info */}
-				<TabsTrigger className="p-4 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start" value="settings">
+				<TabsTrigger
+					className="p-4 rounded-lg border border-border bg-card hover:border-primary/50 !transition-all duration-200 group relative justify-start text-start"
+					value="settings"
+				>
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-primary/5 rounded-full">
 							<Folder className="h-4 w-4 text-primary" />

@@ -348,8 +348,8 @@ function DeleteProjectCard() {
 							</AlertDialogTitle>
 							<AlertDialogDescription>
 								This action cannot be undone. This will permanently delete{" "}
-								<strong>{project.path}</strong> project and all of its contents.
-								Do you want to proceed?
+								<strong>{project.path}</strong> project and all of its contents. Do you
+								want to proceed?
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<Form {...FolderForm}>

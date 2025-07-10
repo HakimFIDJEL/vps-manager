@@ -49,7 +49,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 
-
 // Icons
 import {
 	Search,
@@ -89,7 +88,10 @@ export function AppMakefile() {
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import Makefile */}
-					<ImportMakefile handleCommandAction={handleCommandAction} loading={loading}>
+					<ImportMakefile
+						handleCommandAction={handleCommandAction}
+						loading={loading}
+					>
 						<Button variant={"outline"} type={"button"} disabled={loading}>
 							<FileUp />
 							Import makefile
@@ -172,7 +174,11 @@ export function AppMakefile() {
 				</SmoothResize>
 			</div>
 
-			<CommandList search={search} handleCommandAction={handleCommandAction} loading={loading}/>
+			<CommandList
+				search={search}
+				handleCommandAction={handleCommandAction}
+				loading={loading}
+			/>
 		</div>
 	);
 }
@@ -180,7 +186,7 @@ export function AppMakefile() {
 export function ImportMakefile({
 	handleCommandAction,
 	children,
-	loading=false,
+	loading = false,
 }: {
 	handleCommandAction: (action: CommandAction) => void;
 	children: React.ReactNode;
@@ -247,11 +253,14 @@ export function ImportMakefile({
 			});
 			return false;
 		} else {
+			await handleCommandAction({
+				type: "create-multiple",
+				commands: parsedCommands,
+			});
+
 			setMakefilePreview("");
 			MakefileForm.reset();
 		}
-
-		await handleCommandAction({ type: "create-multiple", commands: parsedCommands });
 
 		return true;
 	}
@@ -462,7 +471,8 @@ export function ImportMakefile({
 															/>
 														</FormControl>
 														<FormDescription>
-															Each target must be in the form 'target:'. Comments before a target will be used as its description.
+															Each target must be in the form 'target:'. Comments before a
+															target will be used as its description.
 														</FormDescription>
 														<FormMessage />
 													</FormItem>
@@ -495,13 +505,12 @@ export function ImportMakefile({
 export function CreateCommand({
 	handleCommandAction,
 	children,
-	loading=false,
+	loading = false,
 }: {
 	handleCommandAction: (action: CommandAction) => void;
 	children: React.ReactNode;
 	loading?: boolean;
 }) {
-
 	// Custom hooks
 	const { project } = useProject();
 
@@ -519,7 +528,6 @@ export function CreateCommand({
 	async function onSubmit() {
 		const isValid = await CommandForm.trigger();
 		if (!isValid) return false;
-
 
 		const data = CommandForm.getValues();
 
@@ -572,7 +580,8 @@ export function CreateCommand({
 											/>
 										</FormControl>
 										<FormDescription>
-											Must start with a lowercase letter or underscore, and can only contain lowercase letters, numbers and underscores.
+											Must start with a lowercase letter or underscore, and can only
+											contain lowercase letters, numbers and underscores.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -617,7 +626,8 @@ export function CreateCommand({
 											/>
 										</FormControl>
 										<FormDescription>
-											The command(s) to run when the target is called. You can use multiple lines.
+											The command(s) to run when the target is called. You can use multiple
+											lines.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -645,13 +655,12 @@ export function CreateCommand({
 export function EditCommand({
 	command,
 	handleCommandAction,
-	loading=false,
+	loading = false,
 }: {
 	command: Command;
 	handleCommandAction: (action: CommandAction) => void;
 	loading?: boolean;
 }) {
-
 	// Variables
 	const CommandForm = useForm<z.infer<typeof CommandSchema>>({
 		resolver: zodResolver(CommandSchema),
@@ -764,7 +773,8 @@ export function EditCommand({
 											/>
 										</FormControl>
 										<FormDescription>
-											The command(s) to run when the target is called. You can use multiple lines.
+											The command(s) to run when the target is called. You can use multiple
+											lines.
 										</FormDescription>
 										<FormMessage />
 									</FormItem>
@@ -792,7 +802,7 @@ export function EditCommand({
 function CommandList({
 	search,
 	handleCommandAction,
-	loading=false,
+	loading = false,
 }: {
 	search: string;
 	handleCommandAction: (action: CommandAction) => void;
@@ -848,7 +858,12 @@ function CommandList({
 										/>
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
-												<Button variant={"ghost"} size={"icon"} type={"button"} disabled={loading}>
+												<Button
+													variant={"ghost"}
+													size={"icon"}
+													type={"button"}
+													disabled={loading}
+												>
 													<Trash className="h-4 w-4 text-muted-foreground" />
 												</Button>
 											</AlertDialogTrigger>

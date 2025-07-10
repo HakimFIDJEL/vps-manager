@@ -496,11 +496,15 @@ function StrictMode({
 
 function GoodDockerConfiguration() {
 	return (
-		<Alert variant={"default"} className="flex justify-between items-center gap-2">
+		<Alert
+			variant={"default"}
+			className="flex justify-between items-center gap-2"
+		>
 			<div className="flex justify-between items-center gap-2">
 				<Check className="h-4 w-4" />
 				<AlertTitle>
-					Your Docker configuration is valid and saved. You can now run your containers in total safety.
+					Your Docker configuration is valid and saved. You can now run your
+					containers in total safety.
 				</AlertTitle>
 			</div>
 		</Alert>
