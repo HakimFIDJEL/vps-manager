@@ -1,6 +1,9 @@
-import { ArrowRight, Monitor, Smartphone } from "lucide-react";
+// Shadcn UI Components
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+// Icons
+import { Monitor, Smartphone } from "lucide-react";
 
 export function ResponsiveBlocker() {
 	return (
