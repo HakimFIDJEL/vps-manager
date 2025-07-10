@@ -6,61 +6,59 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarGroupContent,
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarGroup,
+	SidebarGroupLabel,
+	SidebarGroupContent,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 // Icons
 import {
-    ArrowLeft,
-    Check,
-    ChevronsUpDown,
-    Container,
-    FileLock,
-    Folder,
-    LayoutGrid,
-    Settings2,
-    SquareTerminal,
+	ArrowLeft,
+	Check,
+	ChevronsUpDown,
+	Container,
+	FileLock,
+	Folder,
+	LayoutGrid,
+	Settings2,
+	SquareTerminal,
 } from "lucide-react";
 
-export function AppSidebar({ className, ...props } : { className : string }) {
-    return (
-        <ProjectSidebar className={className} {...props} />
-    );
+export function AppSidebar({ className, ...props }: { className: string }) {
+	return <ProjectSidebar className={className} {...props} />;
 }
 
-function ProjectSidebar({ className, ...props } : { className : string }) {
-    return (
-        <Sidebar
-            collapsible="none"
-            variant="floating"
-            className={`rounded-md border h-full ${className} `}
-            {...props}
-        >
-            <SidebarContent>
-                <ProjectSidebarContent />
-            </SidebarContent>
-            <Separator />
-            <SidebarFooter>
-                <ProjectSidebarFooter />
-            </SidebarFooter>
-        </Sidebar>
-    );
+function ProjectSidebar({ className, ...props }: { className: string }) {
+	return (
+		<Sidebar
+			collapsible="none"
+			variant="floating"
+			className={`rounded-md border h-full ${className} `}
+			{...props}
+		>
+			<SidebarContent>
+				<ProjectSidebarContent />
+			</SidebarContent>
+			<Separator />
+			<SidebarFooter>
+				<ProjectSidebarFooter />
+			</SidebarFooter>
+		</Sidebar>
+	);
 }
 
 function ProjectSidebarFooter({ ...props }: {}) {
@@ -121,10 +119,8 @@ function ProjectSidebarContent({ ...props }: {}) {
 	return (
 		<SidebarGroup>
 			<div className="flex items-center justify-between">
-				<SidebarGroupLabel>
-					Actions
-				</SidebarGroupLabel>
-				<SidebarTrigger className="text-muted-foreground"/>
+				<SidebarGroupLabel>Actions</SidebarGroupLabel>
+				<SidebarTrigger className="text-muted-foreground" />
 			</div>
 			<TabsList className="!bg-transparent h-auto border-none w-full">
 				<SidebarGroupContent>

@@ -30,9 +30,7 @@ export function AppDone() {
 						</div>
 						<div>
 							<h4 className="font-medium">Folder path</h4>
-							<Badge variant={"outline"}>
-								/projects/{project.path}
-							</Badge>
+							<Badge variant={"outline"}>/projects/{project.path}</Badge>
 						</div>
 					</div>
 				</div>
