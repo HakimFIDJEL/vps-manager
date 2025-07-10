@@ -18,6 +18,7 @@ import { type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { ResponsiveBlocker } from "./responsive-blocker";
+import { Check, Loader2, X } from "lucide-react";
 
 interface AdminLayoutProps {
 	children: ReactNode;
@@ -54,7 +55,19 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 						<div className="@container/main flex flex-1 flex-col gap-4 relative py-6 px-2">
 							{children}
 
-							<Toaster closeButton />
+							<Toaster
+								icons={{
+									success: <Check className="h-4 w-4 text-primary" />,
+									error: <X className="h-4 w-4 text-destructive" />,
+									loading: <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />,
+								}}
+								toastOptions={{
+									classNames: {
+										closeButton: "!right-0 !top-3 !left-auto absolute",
+									}
+								}}
+								closeButton
+							/>
 						</div>
 					</div>
 				</SidebarInset>
