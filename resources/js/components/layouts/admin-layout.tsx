@@ -17,6 +17,7 @@ import { type ReactNode } from "react";
 // Shadcn UI components
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { ResponsiveBlocker } from "./responsive-blocker";
 
 interface AdminLayoutProps {
 	children: ReactNode;
@@ -57,6 +58,7 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 						</div>
 					</div>
 				</SidebarInset>
+				<ResponsiveBlocker />
 			</SidebarProvider>
 		</TooltipProvider>
 	);
