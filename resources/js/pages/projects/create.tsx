@@ -63,10 +63,6 @@ import { CommandProvider } from "@/contexts/command-context";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
-		title: "Dashboard",
-		href: route("dashboard"),
-	},
-	{
 		title: "Projects",
 		href: route("projects.index"),
 	},

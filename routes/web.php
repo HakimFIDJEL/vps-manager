@@ -12,14 +12,14 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Middleware\AuthMiddleware;
 
 
-// Welcome Route
-Route::get('/', function() {
-    return Inertia::render('dashboard');
-})->name('dashboard');
+// // Welcome Route
+// Route::get('/', function() {
+//     return Inertia::render('dashboard');
+// })->name('dashboard');
 
-Route::get('/welcome', function() {
-    return Inertia::render('welcome');
-})->name('welcome');
+// Route::get('/welcome', function() {
+//     return Inertia::render('welcome');
+// })->name('welcome');
 
 
 // PROJECT Routes
