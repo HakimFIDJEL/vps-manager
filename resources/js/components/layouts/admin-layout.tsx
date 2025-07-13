@@ -32,6 +32,12 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 		error?: string;
 	}>();
 
+	const sidebar_toggle = document.cookie
+		.split("; ")
+		.find((row) => row.startsWith("sidebar_toggle="))
+		?.split("=")[1];
+
+
 	useEffect(() => {
 		const flashSuccess =
 			props.flash?.success ?? (props.success as string | undefined);
@@ -47,7 +53,7 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 
 	return (
 		<TooltipProvider>
-			<SidebarProvider className="bg-muted/50 dark:bg-background">
+			<SidebarProvider className="bg-muted/50 dark:bg-background" defaultOpen={sidebar_toggle === "true"}>
 				<AppSidebar variant="floating" />
 				<SidebarInset className="bg-muted/50 dark:bg-background">
 					<AppHeader breadcrumbs={breadcrumbs} />
