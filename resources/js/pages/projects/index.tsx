@@ -1,7 +1,7 @@
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
-import { Link } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
+import React from "react";
 
 // Components
 import { AdminLayout } from "@/components/layouts/admin-layout";
@@ -27,6 +27,7 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
+	useTabsContext,
 } from "@/components/ui/tabs";
 import { SmoothItem } from "@/components/ui/smooth-resized";
 
@@ -125,73 +126,91 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Page() {
+	const defaultTab =
+		document.cookie
+			.split("; ")
+			.find((row) => row.startsWith("project_index_tab="))
+			?.split("=")[1] || "list";
 	return (
 		<AdminLayout breadcrumbs={breadcrumbs}>
 			<Head title="Projects" />
 
-			<Tabs defaultValue="list" className="w-full">
-				<SmoothItem
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					delay={0.1}
-				>
-					<TabsList className="grid w-max grid-cols-2">
-						<TabsTrigger value="list">
-							<TableProperties />
-						</TabsTrigger>
-						<TabsTrigger value="grid">
-							<LayoutGrid />
-						</TabsTrigger>
-					</TabsList>
-				</SmoothItem>
-
-				<SmoothItem delay={0.3}>
-					<Card>
-						<CardHeader>
-							<div className="flex items-center gap-3">
-								<div className="bg-card border rounded-md p-2">
-									<Folder className="w-5 h-5 text-muted-foreground" />
-								</div>
-								<div>
-									<CardTitle className="flex items-center gap-2 text-xl">
-										Projects
-									</CardTitle>
-									<CardDescription>List of all projects</CardDescription>
-								</div>
-							</div>
-							<CardAction className="flex items-center gap-2">
-								<Link href={route("projects.index")}>
-									<Button variant={"secondary"}>
-										<RefreshCcw />
-									</Button>
-								</Link>
-								<Link href={route("projects.create")}>
-									<Button variant={"default"}>
-										<Plus />
-										Create a new project
-									</Button>
-								</Link>
-							</CardAction>
-						</CardHeader>
-						<Separator />
-
-						<CardContent>
-							<TabsBody>
-								<TabsContent value="grid">
-									{/* Cards */}
-									<AppGrid projects={projects} />
-								</TabsContent>
-								<TabsContent value="list">
-									{/* Table */}
-									<AppTable projects={projects} />
-								</TabsContent>
-							</TabsBody>
-						</CardContent>
-
-					</Card>
-				</SmoothItem>
+			<Tabs className="w-full" defaultValue={defaultTab || "list"}>
+				<Content />
 			</Tabs>
 		</AdminLayout>
+	);
+}
+
+function Content() {
+	const { currentValue } = useTabsContext();
+
+	React.useEffect(() => {
+		document.cookie = `project_index_tab=${currentValue}; max-age=31536000; SameSite=Lax`;
+		console.log("Current tab saved to cookie:", currentValue);
+	}, [currentValue]);
+	return (
+		<>
+			<SmoothItem
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				delay={0.1}
+			>
+				<TabsList className="grid w-max grid-cols-2">
+					<TabsTrigger value="list">
+						<TableProperties />
+					</TabsTrigger>
+					<TabsTrigger value="grid">
+						<LayoutGrid />
+					</TabsTrigger>
+				</TabsList>
+			</SmoothItem>
+
+			<SmoothItem delay={0.3}>
+				<Card>
+					<CardHeader>
+						<div className="flex items-center gap-3">
+							<div className="bg-card border rounded-md p-2">
+								<Folder className="w-5 h-5 text-muted-foreground" />
+							</div>
+							<div>
+								<CardTitle className="flex items-center gap-2 text-xl">
+									Projects
+								</CardTitle>
+								<CardDescription>List of all projects</CardDescription>
+							</div>
+						</div>
+						<CardAction className="flex items-center gap-2">
+							<Link href={route("projects.index")}>
+								<Button variant={"secondary"}>
+									<RefreshCcw />
+								</Button>
+							</Link>
+							<Link href={route("projects.create")}>
+								<Button variant={"default"}>
+									<Plus />
+									Create a new project
+								</Button>
+							</Link>
+						</CardAction>
+					</CardHeader>
+					<Separator />
+
+					<CardContent>
+						<TabsBody>
+							<TabsContent value="grid">
+								{/* Cards */}
+								<AppGrid projects={projects} />
+							</TabsContent>
+							<TabsContent value="list">
+								{/* Table */}
+								<AppTable projects={projects} />
+							</TabsContent>
+						</TabsBody>
+					</CardContent>
+				</Card>
+			</SmoothItem>
+		</>
 	);
 }
