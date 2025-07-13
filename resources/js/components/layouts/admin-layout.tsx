@@ -19,6 +19,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { ResponsiveBlocker } from "./responsive-blocker";
 import { Check, Loader2, X } from "lucide-react";
+import { Breadcrumbs } from "./header/breadcrumbs";
 
 interface AdminLayoutProps {
 	children: ReactNode;
@@ -37,7 +38,6 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 		.find((row) => row.startsWith("sidebar_toggle="))
 		?.split("=")[1];
 
-
 	useEffect(() => {
 		const flashSuccess =
 			props.flash?.success ?? (props.success as string | undefined);
@@ -53,32 +53,35 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 
 	return (
 		<TooltipProvider>
-			<SidebarProvider className="bg-muted/50 dark:bg-background" defaultOpen={sidebar_toggle === "true"}>
-				<AppSidebar variant="floating" />
-				<SidebarInset className="bg-muted/50 dark:bg-background">
-					<AppHeader breadcrumbs={breadcrumbs} />
-					<div className="flex flex-1 flex-col">
-						<div className="@container/main flex flex-1 flex-col gap-4 relative py-6 px-2">
-							{children}
+			{/* <SidebarProvider className="bg-muted/50 dark:bg-background" defaultOpen={sidebar_toggle === "true"}> */}
+			{/* <AppSidebar variant="floating" /> */}
+			{/* <SidebarInset className="bg-muted/50 dark:bg-background"> */}
+			<AppHeader breadcrumbs={breadcrumbs} />
+			<main className="@container/main  flex flex-1 flex-col container mx-auto py-6 gap-4 px-4">
+				<Breadcrumbs breadcrumbs={breadcrumbs} />
+				<div className="flex flex-1 flex-col gap-4 relative py-6 flex-shrink-0 h-full">
+					{children}
 
-							<Toaster
-								icons={{
-									success: <Check className="h-4 w-4 text-primary" />,
-									error: <X className="h-4 w-4 text-destructive" />,
-									loading: <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />,
-								}}
-								toastOptions={{
-									classNames: {
-										closeButton: "!right-0 !top-3 !left-auto absolute",
-									}
-								}}
-								closeButton
-							/>
-						</div>
-					</div>
-				</SidebarInset>
-				<ResponsiveBlocker />
-			</SidebarProvider>
+					<Toaster
+						icons={{
+							success: <Check className="h-4 w-4 text-primary" />,
+							error: <X className="h-4 w-4 text-destructive" />,
+							loading: (
+								<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+							),
+						}}
+						toastOptions={{
+							classNames: {
+								closeButton: "!right-0 !top-3 !left-auto absolute",
+							},
+						}}
+						closeButton
+					/>
+				</div>
+			</main>
+			{/* </SidebarInset> */}
+			<ResponsiveBlocker />
+			{/* </SidebarProvider> */}
 		</TooltipProvider>
 	);
 }

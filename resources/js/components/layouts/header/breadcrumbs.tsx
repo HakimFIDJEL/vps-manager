@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[] }) {
     return (
-        <>
+        <nav>
             {breadcrumbs.length > 0 && (
                 <Breadcrumb>
                     <BreadcrumbList>
@@ -40,6 +40,6 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                     </BreadcrumbList>
                 </Breadcrumb>
             )}
-        </>
+        </nav>
     );
 }

@@ -51,10 +51,6 @@ import { ProjectExample } from "@/lib/projects/type";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
-		title: "Dashboard",
-		href: route("dashboard"),
-	},
-	{
 		title: "Projects",
 		href: route("projects.index"),
 	},
