@@ -7,6 +7,7 @@ import React from "react";
 import { AdminLayout } from "@/components/layouts/admin-layout";
 import { AppTable } from "@/components/page/projects/index/app-table";
 import { AppGrid } from "@/components/page/projects/index/app-grid";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import {
@@ -19,7 +20,6 @@ import {
 	CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
 import { Separator } from "@/components/ui/separator";
 import {
 	Tabs,
@@ -29,11 +29,11 @@ import {
 	TabsTrigger,
 	useTabsContext,
 } from "@/components/ui/tabs";
-import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Icons
 import {
 	Folder,
+	Layers,
 	LayoutGrid,
 	Plus,
 	RefreshCcw,
@@ -165,19 +165,21 @@ function Content() {
 
 			<SmoothItem delay={0.3}>
 				<Card>
-					<CardHeader>
+					<CardHeader className="gap-0 gap-x-1.5">
 						<div className="flex items-center gap-3">
 							<div className="bg-card border rounded-md p-2">
-								<Folder className="w-5 h-5 text-muted-foreground" />
+								<Layers className="w-5 h-5 text-muted-foreground" />
 							</div>
 							<div>
 								<CardTitle className="flex items-center gap-2 text-xl">
 									Projects
 								</CardTitle>
-								<CardDescription>List of all projects</CardDescription>
+								<CardDescription>
+									Manage your projects and their containers. You can create, edit, and delete projects as needed.
+								</CardDescription>
 							</div>
 						</div>
-						<CardAction className="flex items-center gap-2">
+						<CardAction className="flex items-center gap-2 self-center">
 							<Link href={route("projects.index")}>
 								<Button variant={"secondary"}>
 									<RefreshCcw />

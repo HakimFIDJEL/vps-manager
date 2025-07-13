@@ -37,6 +37,7 @@ import {
 	Container,
 	FileLock,
 	Folder,
+	Layers,
 	LayoutGrid,
 	Settings2,
 	SquareTerminal,
@@ -97,10 +98,10 @@ function Content() {
 			<div className="flex flex-col w-full gap-4">
 				<SmoothItem delay={0.1} layout={false}>
 					<Card>
-						<CardHeader>
+						<CardHeader className="gap-0 gap-x-1.5">
 							<div className="flex items-center gap-3">
 								<div className="bg-card border rounded-md p-2">
-									<Folder className="w-5 h-5 text-muted-foreground" />
+									<Layers className="w-5 h-5 text-muted-foreground" />
 								</div>
 								<div>
 									<CardTitle className="flex items-center gap-2 text-xl">
@@ -113,7 +114,7 @@ function Content() {
 								</div>
 							</div>
 
-							<CardAction>
+							<CardAction className="self-center">
 								<Link href={route("projects.index")}>
 									<Button variant={"outline"}>
 										<ArrowLeft />
