@@ -10,42 +10,45 @@ import {
 
 // Functions
 import {
-	formatDate,
-	formatTraefik,
-	formatContainers,
 	formatActions,
+	formatDate,
+	formatSize,
 } from "@/lib/projects/formatter";
 
 // Types
 import { type Project } from "@/lib/projects/type";
+import { Link, router } from "@inertiajs/react";
 
 export function AppTable({ projects }: { projects: Project[] }) {
 	return (
 		<Table>
 			<TableHeader className="bg-muted/50">
 				<TableRow>
+					{/* <TableHead>Inode</TableHead> */}
+					<TableHead>Folder path</TableHead>
 					<TableHead>Inode</TableHead>
-					<TableHead>Project</TableHead>
-					<TableHead>Folder</TableHead>
-					<TableHead>Traefik</TableHead>
-					<TableHead>Containers</TableHead>
+					<TableHead>Size</TableHead>
 					<TableHead>Updated At</TableHead>
 					<TableHead>Created At</TableHead>
-					<TableHead className="text-right">Actions</TableHead>
+					<TableHead className="text-center">Actions</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
 				{projects.map((project) => (
-					<TableRow key={project.name}>
-						<TableCell className="font-mono">#{project.inode}</TableCell>
-						<TableCell>{project.name}</TableCell>
-						<TableCell className="font-mono">{project.folder}</TableCell>
-						<TableCell>{formatTraefik(project.traefik_enabled)}</TableCell>
-						<TableCell>{formatContainers(project.containers)}</TableCell>
+					<TableRow
+						key={project.path}
+						className="cursor-pointer"
+						// onClick={() => {
+						// 	router.visit(route("projects.show", { inode: project.inode }));
+						// }}
+					>
+						<TableCell className="font-mono">{project.path}</TableCell>
+						<TableCell className="font-mono">{project.inode}</TableCell>
+						<TableCell>{formatSize(project.size)}</TableCell>
 						<TableCell>{formatDate(project.updated_at)}</TableCell>
 						<TableCell>{formatDate(project.created_at)}</TableCell>
-						<TableCell className="text-right">
-							{formatActions(project.inode)}
+						<TableCell>
+							{formatActions(project.inode, 'full', "sm")}
 						</TableCell>
 					</TableRow>
 				))}

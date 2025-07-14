@@ -13,9 +13,11 @@ use App\Http\Middleware\AuthMiddleware;
 
 
 // // Welcome Route
-// Route::get('/', function() {
-//     return Inertia::render('dashboard');
-// })->name('dashboard');
+Route::get('/', function() {
+    // return Inertia::render('dashboard');
+
+    return redirect()->route('projects.index');
+})->name('dashboard');
 
 // Route::get('/welcome', function() {
 //     return Inertia::render('welcome');

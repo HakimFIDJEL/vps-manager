@@ -2,55 +2,39 @@
 import { Link } from "@inertiajs/react";
 
 // Shadcn ui components
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 
 // Icons
-import { Check, X, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
-// Types
-import { type Container } from "@/lib/projects/type";
-
-export function formatDate(date: string): string {
+export function formatDate(date: string | undefined): string {
   const opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
+  if (!date) {
+    return "N/A";
+  }
   return new Date(date).toLocaleString("en-US", opts);
 }
 
-export function formatTraefik(traefik_enabled: boolean) {
-  return traefik_enabled
-    ? <Badge variant="outline" className="flex items-center gap-2"><Check/>Enabled</Badge>
-    : <Badge variant="secondary"><X/>Disabled</Badge>;
+
+export function formatSize(size: number | undefined) {
+  if (size === undefined) {
+    return "N/A";
+  }
+  const sizeInMB = (size / (1024)).toFixed(2);
+  return `${sizeInMB} KB`;
 }
 
-export function formatContainers(containers: Container[]) {
-  const running = containers.filter(c => c.status === "running").length;
-  const total = containers.length;
-  const pct = total ? (running/total)*100 : 0;
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild><Progress value={pct} className="w-[100px]" /></TooltipTrigger>
-      <TooltipContent>
-        <p>{ running === total ? "All containers running" : `${running} sur ${total}` }</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
 
-export function formatActions(inode: number) {
+export function formatActions(inode: number | undefined, width: "full" | "auto" = "full", size: "default" | "icon" | "lg" | "sm" = "default"): React.ReactNode {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Link href={route("projects.show", { 'inode': inode })}>
-          <Button variant="outline" size="sm"><ArrowUpRight className="h-4 w-4"/></Button>
+        <Link href={route("projects.show", { 'inode': inode })} className={`w-${width}`}>
+          <Button variant="outline" className={`w-${width}`} size={size}><ArrowUpRight className="h-4 w-4"/>Show project</Button>
         </Link>
-      </TooltipTrigger>
-      <TooltipContent>Show project</TooltipContent>
-    </Tooltip>
+    // <Tooltip>
+      // <TooltipTrigger asChild> 
+    //   </TooltipTrigger>
+    //   <TooltipContent>Show project</TooltipContent>
+    // </Tooltip>
   );
-}
-
-export function formatSlug(string: string) {
-  return string.replace(/[^A-Za-z0-9-]/g, "-").toLowerCase().replace(/--+/g, "-").replace(/^-|-$/g, "");
 }

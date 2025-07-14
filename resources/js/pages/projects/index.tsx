@@ -42,77 +42,9 @@ import {
 	X,
 } from "lucide-react";
 
-const projects = [
-	{
-		inode: 1048577,
-		name: "Portfolio",
-		folder: "/projects/portfolio",
-		traefik_enabled: true,
-		updated_at: "2025-01-01 00:00:00",
-		created_at: "2025-01-01 00:00:00",
-		containers: [
-			{
-				name: "portfolio-app",
-				image: "portfolio-app:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "portfolio-db",
-				image: "mysql:8.0",
-				status: "exited",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "portfolio-phpmyadmin",
-				image: "phpmyadmin:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-		],
-	},
-	{
-		inode: 1048578,
-		name: "Jcoaching",
-		folder: "/projects/jcoaching",
-		traefik_enabled: false,
-		updated_at: "2025-01-01 00:00:00",
-		created_at: "2025-01-01 00:00:00",
-		containers: [
-			{
-				name: "jcoaching-app",
-				image: "jcoaching-app:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-db",
-				image: "mysql:8.0",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-phpmyadmin",
-				image: "phpmyadmin:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-websocket",
-				image: "jcoaching-app:latest",
-				status: "exited",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-		],
-	},
-];
+// Projects
+import { ProjectListExample } from "@/lib/projects/type"; 
+
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
@@ -199,11 +131,11 @@ function Content() {
 						<TabsBody>
 							<TabsContent value="grid">
 								{/* Cards */}
-								<AppGrid projects={projects} />
+								<AppGrid projects={ProjectListExample} />
 							</TabsContent>
 							<TabsContent value="list">
 								{/* Table */}
-								<AppTable projects={projects} />
+								<AppTable projects={ProjectListExample} />
 							</TabsContent>
 						</TabsBody>
 					</CardContent>

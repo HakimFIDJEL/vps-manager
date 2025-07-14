@@ -6,14 +6,14 @@ import {
 	CardDescription,
 	CardHeader,
 	CardContent,
+	CardFooter,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 // Functions
 import {
 	formatDate,
-	formatTraefik,
-	formatContainers,
+	formatSize,
 	formatActions,
 } from "@/lib/projects/formatter";
 
@@ -25,10 +25,12 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{projects.map((project) => (
 				<Card key={project.inode} className="gap-0 pt-0">
-					<CardHeader className="p-6 bg-muted/50">
-						<CardTitle>{project.name}</CardTitle>
-						<CardDescription>{project.folder}</CardDescription>
-						<CardAction>{formatActions(project.inode)}</CardAction>
+					<CardHeader className="p-6 bg-muted/50 font-medium flex justify-between">
+						{/* <CardTitle className="font-mono font-medium "> */}
+						<p>Path</p>
+						<p className="font-mono">{project.path}</p>
+
+						{/* </CardTitle> */}
 					</CardHeader>
 					<Separator />
 					<CardContent className="grid gap-2 pt-6">
@@ -37,12 +39,8 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 							<p className="font-mono">#{project.inode}</p>
 						</div>
 						<div className="flex items-center justify-between">
-							<p>Traefik</p>
-							{formatTraefik(project.traefik_enabled)}
-						</div>
-						<div className="flex items-center justify-between">
-							<p>Containers</p>
-							{formatContainers(project.containers)}
+							<p>Size</p>
+							{formatSize(project.size)}
 						</div>
 						<div className="flex items-center justify-between text-sm">
 							<p>Updated At</p>
@@ -53,6 +51,8 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 							<p>{formatDate(project.created_at)}</p>
 						</div>
 					</CardContent>
+					<Separator />
+					<CardFooter>{formatActions(project.inode, "full")}</CardFooter>
 				</Card>
 			))}
 			{projects.length === 0 && (
