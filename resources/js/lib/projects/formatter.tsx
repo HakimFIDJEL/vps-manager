@@ -26,7 +26,7 @@ export function formatSize(size: number | undefined) {
 		return "N/A";
 	}
 	const sizeInMB = (size / 1024).toFixed(2);
-	return `${sizeInMB} KB`;
+	return `${sizeInMB} MB`;
 }
 
 export function formatActions(

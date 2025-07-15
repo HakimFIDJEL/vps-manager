@@ -1,4 +1,5 @@
 // Shadcn ui components
+import { Button } from "@/components/ui/button";
 import {
 	Table,
 	TableBody,
@@ -17,7 +18,7 @@ import {
 
 // Types
 import { type Project } from "@/lib/projects/type";
-import { Link, router } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 
 export function AppTable({ projects }: { projects: Project[] }) {
 	return (
@@ -45,9 +46,9 @@ export function AppTable({ projects }: { projects: Project[] }) {
 					</TableRow>
 				))}
 				{projects.length === 0 && (
-					<TableRow className="h-24 text-center">
-						<TableCell colSpan={8} className="text-muted-foreground">
-							No projects found.
+					<TableRow>
+						<TableCell colSpan={6} className="text-center py-4 bg-muted/50 text-muted-foreground">
+							No projects added yet. Click on "Create a new project" to get started.
 						</TableCell>
 					</TableRow>
 				)}

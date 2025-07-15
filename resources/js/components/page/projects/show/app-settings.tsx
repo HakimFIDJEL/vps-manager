@@ -97,7 +97,6 @@ function FolderPathCard() {
 	async function checkPathAvailability(path: string): Promise<boolean> {
 		if (loading) return false;
 
-
 		// No need to check if the path is the same as the current project folder path
 		if (!path || path === project.path) {
 			setAvailabilityState("");
@@ -121,7 +120,7 @@ function FolderPathCard() {
 
 			setAvailabilityState(isAvailable ? "success" : "error");
 			return isAvailable;
-		} catch (error){
+		} catch (error) {
 			setAvailabilityState("error");
 			return false;
 		}

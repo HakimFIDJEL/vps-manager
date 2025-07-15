@@ -27,7 +27,6 @@ export function AppProject() {
 	}, [path]);
 
 	async function checkPathAvailability(path: string): Promise<boolean> {
-
 		// TODO : Check if the path is available on the server
 		if (false) {
 			setAvailabilityState("error");
