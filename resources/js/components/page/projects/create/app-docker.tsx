@@ -678,7 +678,7 @@ function DockerContent({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
-										variant="outline"
+										variant={"outline"}
 										size="icon"
 										type="button"
 										className="h-8 px-2"
