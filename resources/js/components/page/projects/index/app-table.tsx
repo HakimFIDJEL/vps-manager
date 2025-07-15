@@ -42,7 +42,7 @@ export function AppTable({ projects }: { projects: Project[] }) {
 						<TableCell>{formatSize(project.size)}</TableCell>
 						<TableCell>{formatDate(project.updated_at)}</TableCell>
 						<TableCell>{formatDate(project.created_at)}</TableCell>
-						<TableCell>{formatActions(project.inode, "full", "sm")}</TableCell>
+						<TableCell className="w-[12rem]">{formatActions(project.inode, "full", "sm")}</TableCell>
 					</TableRow>
 				))}
 				{projects.length === 0 && (

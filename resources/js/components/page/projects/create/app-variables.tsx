@@ -180,220 +180,216 @@ export function VariablesList({
 		});
 
 	return (
-		<>
-			<div className="rounded-md border overflow-hidden">
-				<Table>
-					<TableHeader className="bg-card">
-						<TableRow>
-							<TableHead>
-								<Button
-									type="button"
-									variant="ghost"
-									size="sm"
-									onClick={() =>
-										setSortKey(
-											sortKey === "desc" ? "asc" : sortKey === "asc" ? "none" : "desc",
-										)
-									}
-								>
-									{sortKey === "desc" && (
-										<ArrowDownNarrowWide className="w-4 h-4 text-muted-foreground" />
-									)}
-									{sortKey === "asc" && (
-										<ArrowUpNarrowWide className="w-4 h-4 text-muted-foreground" />
-									)}
-									{sortKey === "none" && (
-										<ArrowUpDown className="w-4 h-4 text-muted-foreground" />
-									)}
-									Key
-								</Button>
-							</TableHead>
-							<TableHead>Value</TableHead>
-							<TableHead className="flex items-center gap-4 justify-end">
-								<span className="mr-2">Actions</span>
-								<div className="h-[70%]">
-									<Separator orientation="vertical" />
-								</div>
-								<div className="flex items-center gap-2">
-									<Tooltip>
+		<Table>
+			<TableHeader className="bg-card">
+				<TableRow>
+					<TableHead>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={() =>
+								setSortKey(
+									sortKey === "desc" ? "asc" : sortKey === "asc" ? "none" : "desc",
+								)
+							}
+						>
+							{sortKey === "desc" && (
+								<ArrowDownNarrowWide className="w-4 h-4 text-muted-foreground" />
+							)}
+							{sortKey === "asc" && (
+								<ArrowUpNarrowWide className="w-4 h-4 text-muted-foreground" />
+							)}
+							{sortKey === "none" && (
+								<ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+							)}
+							Key
+						</Button>
+					</TableHead>
+					<TableHead>Value</TableHead>
+					<TableHead className="flex items-center gap-4 justify-end">
+						<span className="mr-2">Actions</span>
+						<div className="h-[70%]">
+							<Separator orientation="vertical" />
+						</div>
+						<div className="flex items-center gap-2">
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										type={"button"}
+										variant={"ghost"}
+										size={"icon"}
+										disabled={project.variables.length === 0}
+										onClick={() =>
+											handleVariableAction({
+												type: "toggle-visibility-all",
+											})
+										}
+									>
+										{project.variables.every((v) => v.visible) ? <EyeOff /> : <Eye />}
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									{project.variables.every((v) => v.visible)
+										? "Hide all variables"
+										: "Show all variables"}
+								</TooltipContent>
+							</Tooltip>
+							<AlertDialog>
+								<Tooltip>
+									<AlertDialogTrigger asChild>
 										<TooltipTrigger asChild>
 											<Button
 												type={"button"}
 												variant={"ghost"}
 												size={"icon"}
-												disabled={project.variables.length === 0}
-												onClick={() =>
-													handleVariableAction({
-														type: "toggle-visibility-all",
-													})
-												}
+												disabled={project.variables.length === 0 || loading}
 											>
-												{project.variables.every((v) => v.visible) ? <EyeOff /> : <Eye />}
+												<div className="flex items-center justify-center">
+													<Trash />
+												</div>
 											</Button>
 										</TooltipTrigger>
-										<TooltipContent>
-											{project.variables.every((v) => v.visible)
-												? "Hide all variables"
-												: "Show all variables"}
-										</TooltipContent>
-									</Tooltip>
-									<AlertDialog>
-										<Tooltip>
-											<AlertDialogTrigger asChild>
-												<TooltipTrigger asChild>
-													<Button
-														type={"button"}
-														variant={"ghost"}
-														size={"icon"}
-														disabled={project.variables.length === 0 || loading}
-													>
-														<div className="flex items-center justify-center">
-															<Trash />
-														</div>
-													</Button>
-												</TooltipTrigger>
-											</AlertDialogTrigger>
-											<TooltipContent>Delete all variables</TooltipContent>
-										</Tooltip>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle className="flex items-center gap-2">
-													<OctagonAlert className="w-4 h-4 text-destructive" />
-													Delete all variables
-												</AlertDialogTitle>
-												<AlertDialogDescription>
-													Are you sure you want to delete all variables?
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogBody>
-												<AlertDialogFooter>
-													<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-													<AlertDialogAction
-														onAction={async () => {
-															await handleVariableAction({ type: "delete-all" });
-															return true;
-														}}
-														disabled={loading}
-														variant={"destructive"}
-													>
-														{loading ? <Loader2 className="animate-spin" /> : <Trash />}
-														Delete
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogBody>
-										</AlertDialogContent>
-									</AlertDialog>
-								</div>
-							</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody className="bg-transparent">
-						{filteredVariables.map((variable) => (
-							<TableRow key={variable.key} className="group">
-								<TableCell>
-									<div className="flex items-center gap-2">
-										<Lock className="h-3 w-3 text-muted-foreground" />
-										{variable.key}
-									</div>
-								</TableCell>
-								<TableCell>
-									<span className="font-mono text-muted-foreground relative overflow-hidden rounded-md">
-										<div
-											className={`absolute inset-0 bg-muted transition-opacity duration-200 z-1 rounded-xs ${
-												!variable.visible ? "opacity-100" : "opacity-0"
-											}`}
-										/>
-										<span className="relative">{variable.value}</span>
-									</span>
-								</TableCell>
-								<TableCell className="text-right opacity-0 group-hover:opacity-100 transition-opacity">
-									<div className="flex items-center justify-end gap-2">
+									</AlertDialogTrigger>
+									<TooltipContent>Delete all variables</TooltipContent>
+								</Tooltip>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle className="flex items-center gap-2">
+											<OctagonAlert className="w-4 h-4 text-destructive" />
+											Delete all variables
+										</AlertDialogTitle>
+										<AlertDialogDescription>
+											Are you sure you want to delete all variables?
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogBody>
+										<AlertDialogFooter>
+											<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+											<AlertDialogAction
+												onAction={async () => {
+													await handleVariableAction({ type: "delete-all" });
+													return true;
+												}}
+												disabled={loading}
+												variant={"destructive"}
+											>
+												{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+												Delete
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogBody>
+								</AlertDialogContent>
+							</AlertDialog>
+						</div>
+					</TableHead>
+				</TableRow>
+			</TableHeader>
+			<TableBody className="bg-transparent">
+				{filteredVariables.map((variable) => (
+					<TableRow key={variable.key} className="group">
+						<TableCell>
+							<div className="flex items-center gap-2">
+								<Lock className="h-3 w-3 text-muted-foreground" />
+								{variable.key}
+							</div>
+						</TableCell>
+						<TableCell>
+							<span className="font-mono text-muted-foreground relative overflow-hidden rounded-md">
+								<div
+									className={`absolute inset-0 bg-muted transition-opacity duration-200 z-1 rounded-xs ${
+										!variable.visible ? "opacity-100" : "opacity-0"
+									}`}
+								/>
+								<span className="relative">{variable.value}</span>
+							</span>
+						</TableCell>
+						<TableCell className="text-right opacity-0 group-hover:opacity-100 transition-opacity">
+							<div className="flex items-center justify-end gap-2">
+								<Button
+									type={"button"}
+									variant={"ghost"}
+									size="icon"
+									onClick={() =>
+										handleVariableAction({
+											type: "toggle-visibility",
+											variable,
+										})
+									}
+								>
+									{variable.visible ? (
+										<EyeOff className="h-4 w-4" />
+									) : (
+										<Eye className="h-4 w-4" />
+									)}
+								</Button>
+
+								<EditVariable
+									variable={variable}
+									handleVariableAction={handleVariableAction}
+									loading={loading}
+								/>
+
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
 										<Button
 											type={"button"}
 											variant={"ghost"}
-											size="icon"
-											onClick={() =>
-												handleVariableAction({
-													type: "toggle-visibility",
-													variable,
-												})
-											}
+											size={"icon"}
+											disabled={loading}
 										>
-											{variable.visible ? (
-												<EyeOff className="h-4 w-4" />
-											) : (
-												<Eye className="h-4 w-4" />
-											)}
+											<Trash className="h-4 w-4" />
 										</Button>
-
-										<EditVariable
-											variable={variable}
-											handleVariableAction={handleVariableAction}
-											loading={loading}
-										/>
-
-										<AlertDialog>
-											<AlertDialogTrigger asChild>
-												<Button
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle className="flex items-center gap-2">
+												<OctagonAlert className="w-4 h-4 text-destructive" />
+												Delete variable
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Are you sure you want to delete
+												<Badge variant={"outline"} className="font-mono mx-2">
+													{variable.key}
+												</Badge>
+												?
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogBody>
+											<AlertDialogFooter>
+												<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+												<AlertDialogAction
+													onAction={async () => {
+														await handleVariableAction({ type: "delete", variable });
+														return true;
+													}}
+													variant={"destructive"}
 													type={"button"}
-													variant={"ghost"}
-													size={"icon"}
 													disabled={loading}
 												>
-													<Trash className="h-4 w-4" />
-												</Button>
-											</AlertDialogTrigger>
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle className="flex items-center gap-2">
-														<OctagonAlert className="w-4 h-4 text-destructive" />
-														Delete variable
-													</AlertDialogTitle>
-													<AlertDialogDescription>
-														Are you sure you want to delete
-														<Badge variant={"outline"} className="font-mono mx-2">
-															{variable.key}
-														</Badge>
-														?
-													</AlertDialogDescription>
-												</AlertDialogHeader>
-												<AlertDialogBody>
-													<AlertDialogFooter>
-														<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-														<AlertDialogAction
-															onAction={async () => {
-																await handleVariableAction({ type: "delete", variable });
-																return true;
-															}}
-															variant={"destructive"}
-															type={"button"}
-															disabled={loading}
-														>
-															{loading ? <Loader2 className="animate-spin" /> : <Trash />}
-															Delete
-														</AlertDialogAction>
-													</AlertDialogFooter>
-												</AlertDialogBody>
-											</AlertDialogContent>
-										</AlertDialog>
-									</div>
-								</TableCell>
-							</TableRow>
-						))}
-						{filteredVariables.length === 0 && (
-							<TableRow>
-								<TableCell
-									colSpan={3}
-									className="text-center py-4 bg-muted/50 text-muted-foreground"
-								>
-									No variables added yet. Click on "Add Variable" to create one.
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
-		</>
+													{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+													Delete
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogBody>
+									</AlertDialogContent>
+								</AlertDialog>
+							</div>
+						</TableCell>
+					</TableRow>
+				))}
+				{filteredVariables.length === 0 && (
+					<TableRow>
+						<TableCell
+							colSpan={3}
+							className="text-center py-4 bg-muted/50 text-muted-foreground"
+						>
+							No variables added yet. Click on "Add Variable" to create one.
+						</TableCell>
+					</TableRow>
+				)}
+			</TableBody>
+		</Table>
 	);
 }
 

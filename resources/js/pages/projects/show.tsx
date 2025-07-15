@@ -92,7 +92,7 @@ function Content() {
 	return (
 		<Tabs
 			className="flex flex-row items-start justify-between gap-4"
-			defaultValue={"overview"}
+			defaultValue={"settings"}
 		>
 			{/* Header + TabsContent */}
 			<div className="flex flex-col w-full gap-4">

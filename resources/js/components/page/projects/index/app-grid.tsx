@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-// Functions
+// Formatter
 import {
 	formatDate,
 	formatSize,
@@ -27,28 +27,35 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 				<Card key={project.inode} className="gap-0 pt-0">
 					<CardHeader className="p-6 bg-muted/50 font-medium flex justify-between">
 						{/* <CardTitle className="font-mono font-medium "> */}
-						<p>Path</p>
+						<p>Folder path</p>
 						<p className="font-mono">{project.path}</p>
 
 						{/* </CardTitle> */}
 					</CardHeader>
 					<Separator />
-					<CardContent className="grid gap-2 pt-6">
+					<CardContent className="grid gap-2.5 pt-6">
 						<div className="flex items-center justify-between">
-							<p>Inode</p>
-							<p className="font-mono">#{project.inode}</p>
+							<p className="text-muted-foreground text-sm">Inode</p>
+							{/* <Separator className="mx-4 w-auto flex-1" /> */}
+							<p className="text-sm">{project.inode}</p>
 						</div>
+						{/* <Separator /> */}
 						<div className="flex items-center justify-between">
-							<p>Size</p>
-							{formatSize(project.size)}
+							<p className="text-muted-foreground text-sm">Size</p>
+							{/* <Separator className="mx-4 w-auto flex-1" /> */}
+							<p className="text-sm">{formatSize(project.size)}</p>
 						</div>
+						{/* <Separator /> */}
 						<div className="flex items-center justify-between text-sm">
-							<p>Updated At</p>
-							<p>{formatDate(project.updated_at)}</p>
+							<p className="text-muted-foreground text-sm">Updated At</p>
+							{/* <Separator className="mx-4 w-auto flex-1" /> */}
+							<p className="text-sm">{formatDate(project.updated_at)}</p>
 						</div>
+						{/* <Separator /> */}
 						<div className="flex items-center justify-between text-sm">
-							<p>Created At</p>
-							<p>{formatDate(project.created_at)}</p>
+							<p className="text-muted-foreground text-sm">Created At</p>
+							{/* <Separator className="mx-4 w-auto flex-1" /> */}
+							<p className="text-sm">{formatDate(project.created_at)}</p>
 						</div>
 					</CardContent>
 					<Separator />
