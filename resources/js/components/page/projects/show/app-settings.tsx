@@ -56,6 +56,7 @@ import {
 	Check,
 	X,
 	Trash2,
+	File,
 } from "lucide-react";
 
 // Contexts
@@ -64,11 +65,19 @@ import { useProject } from "@/contexts/project-context";
 // Types
 type PathState = "" | "loading" | "success" | "error";
 
+// Formatter
+import {
+	formatDate,
+	formatSize,
+	formatActions,
+} from "@/lib/projects/formatter";
+
 export function AppSettings() {
 	return (
 		<TabsContent value="settings">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<FolderPathCard />
+				<ProjectInfoCard />
 				<DeleteProjectCard />
 			</div>
 		</TabsContent>
@@ -103,7 +112,12 @@ function FolderPathCard() {
 			return true;
 		}
 
-		if (!FolderForm.formState.isValid) {
+		// If the state is already success, no need to check again
+		if (availabilityState === "success") {
+			return true;
+		}
+
+		if (FolderSchema.safeParse({ path }).success === false) {
 			setAvailabilityState("");
 			return false;
 		}
@@ -115,7 +129,7 @@ function FolderPathCard() {
 
 			setAvailabilityState(isAvailable ? "success" : "error");
 			return isAvailable;
-		} catch {
+		} catch (error) {
 			setAvailabilityState("error");
 			return false;
 		}
@@ -248,6 +262,55 @@ function FolderPathCard() {
 						</Button>
 					</form>
 				</Form>
+			</CardContent>
+		</Card>
+	);
+}
+
+function ProjectInfoCard() {
+
+	const { project } = useProject();
+
+	return (
+		<Card className="col-span-1">
+			<CardHeader>
+				<div className="flex items-center gap-3">
+					<div className="bg-card border rounded-md p-2">
+						<File className="w-5 h-5 text-muted-foreground" />
+					</div>
+					<div>
+						<CardTitle className="flex items-center gap-2 text-xl">
+							Project information
+						</CardTitle>
+						<CardDescription>A little recap of your project.</CardDescription>
+					</div>
+				</div>
+			</CardHeader>
+			<Separator />
+			<CardContent className="grid gap-2.5 pt-6">
+				<div className="flex items-center justify-between">
+					<p className="text-muted-foreground text-sm">Inode</p>
+					<Separator className="mx-4 w-auto flex-1" />
+					<p className="text-sm">{project.inode}</p>
+				</div>
+				{/* <Separator /> */}
+				<div className="flex items-center justify-between">
+					<p className="text-muted-foreground text-sm">Size</p>
+					<Separator className="mx-4 w-auto flex-1" />
+					<p className="text-sm">{formatSize(project.size)}</p>
+				</div>
+				{/* <Separator /> */}
+				<div className="flex items-center justify-between text-sm">
+					<p className="text-muted-foreground text-sm">Updated At</p>
+					<Separator className="mx-4 w-auto flex-1" />
+					<p className="text-sm">{formatDate(project.updated_at)}</p>
+				</div>
+				{/* <Separator /> */}
+				<div className="flex items-center justify-between text-sm">
+					<p className="text-muted-foreground text-sm">Created At</p>
+					<Separator className="mx-4 w-auto flex-1" />
+					<p className="text-sm">{formatDate(project.created_at)}</p>
+				</div>
 			</CardContent>
 		</Card>
 	);

@@ -7,6 +7,7 @@ import React from "react";
 import { AdminLayout } from "@/components/layouts/admin-layout";
 import { AppTable } from "@/components/page/projects/index/app-table";
 import { AppGrid } from "@/components/page/projects/index/app-grid";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import {
@@ -19,7 +20,6 @@ import {
 	CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
 import { Separator } from "@/components/ui/separator";
 import {
 	Tabs,
@@ -29,11 +29,11 @@ import {
 	TabsTrigger,
 	useTabsContext,
 } from "@/components/ui/tabs";
-import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Icons
 import {
 	Folder,
+	Layers,
 	LayoutGrid,
 	Plus,
 	RefreshCcw,
@@ -42,77 +42,9 @@ import {
 	X,
 } from "lucide-react";
 
-const projects = [
-	{
-		inode: 1048577,
-		name: "Portfolio",
-		folder: "/projects/portfolio",
-		traefik_enabled: true,
-		updated_at: "2025-01-01 00:00:00",
-		created_at: "2025-01-01 00:00:00",
-		containers: [
-			{
-				name: "portfolio-app",
-				image: "portfolio-app:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "portfolio-db",
-				image: "mysql:8.0",
-				status: "exited",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "portfolio-phpmyadmin",
-				image: "phpmyadmin:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-		],
-	},
-	{
-		inode: 1048578,
-		name: "Jcoaching",
-		folder: "/projects/jcoaching",
-		traefik_enabled: false,
-		updated_at: "2025-01-01 00:00:00",
-		created_at: "2025-01-01 00:00:00",
-		containers: [
-			{
-				name: "jcoaching-app",
-				image: "jcoaching-app:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-db",
-				image: "mysql:8.0",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-phpmyadmin",
-				image: "phpmyadmin:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-websocket",
-				image: "jcoaching-app:latest",
-				status: "exited",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-		],
-	},
-];
+// Projects
+import { ProjectListExample } from "@/lib/projects/type"; 
+
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
@@ -165,19 +97,21 @@ function Content() {
 
 			<SmoothItem delay={0.3}>
 				<Card>
-					<CardHeader>
+					<CardHeader className="gap-0 gap-x-1.5">
 						<div className="flex items-center gap-3">
 							<div className="bg-card border rounded-md p-2">
-								<Folder className="w-5 h-5 text-muted-foreground" />
+								<Layers className="w-5 h-5 text-muted-foreground" />
 							</div>
 							<div>
 								<CardTitle className="flex items-center gap-2 text-xl">
 									Projects
 								</CardTitle>
-								<CardDescription>List of all projects</CardDescription>
+								<CardDescription>
+									Manage your projects and their containers. You can create, edit, and delete projects as needed.
+								</CardDescription>
 							</div>
 						</div>
-						<CardAction className="flex items-center gap-2">
+						<CardAction className="flex items-center gap-2 self-center">
 							<Link href={route("projects.index")}>
 								<Button variant={"secondary"}>
 									<RefreshCcw />
@@ -197,11 +131,11 @@ function Content() {
 						<TabsBody>
 							<TabsContent value="grid">
 								{/* Cards */}
-								<AppGrid projects={projects} />
+								<AppGrid projects={ProjectListExample} />
 							</TabsContent>
 							<TabsContent value="list">
 								{/* Table */}
-								<AppTable projects={projects} />
+								<AppTable projects={ProjectListExample} />
 							</TabsContent>
 						</TabsBody>
 					</CardContent>

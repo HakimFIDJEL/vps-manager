@@ -579,153 +579,146 @@ export function ContainersList({
 		<div className="flex flex-col gap-2">
 			<h3 className="text-sm font-medium">Containers</h3>
 
-			<div className="border rounded-md overflow-hidden">
-				<Table>
-					<TableHeader className="bg-card">
-						<TableRow>
-							<TableHead className="sticky left-0 z-1 bg-card after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border ">
-								Name
-							</TableHead>
-							<TableHead>Image</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>State</TableHead>
-							<TableHead>Ports</TableHead>
-							<TableHead className="text-center px-4">Actions</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody className="bg-background">
-						{filteredContainers.map((container) => (
-							<TableRow key={container.container_id}>
-								<TableCell className="sticky left-0 z-1 bg-background after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border">
-									{container.name}
-								</TableCell>
-								<TableCell className="font-mono">
-									<Badge variant={"outline"}>{container.image}</Badge>
-								</TableCell>
-								<TableCell>{container.status}</TableCell>
-								<TableCell>
-									{formatContainerState({ state: container.state })}
-								</TableCell>
-								<TableCell>
-									{formatContainerPort({ mapping: container.ports })}
-								</TableCell>
-								<TableCell className="text-center">
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button
-												variant="outline"
-												size="icon"
-												type="button"
-												className="h-8 px-2"
-												disabled={loading}
+			<Table>
+				<TableHeader className="bg-card">
+					<TableRow>
+						<TableHead className="sticky left-0 z-1 bg-card after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border ">
+							Name
+						</TableHead>
+						<TableHead>Image</TableHead>
+						<TableHead>Status</TableHead>
+						<TableHead>State</TableHead>
+						<TableHead>Ports</TableHead>
+						<TableHead className="text-center px-4">Actions</TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody className="bg-background">
+					{filteredContainers.map((container) => (
+						<TableRow key={container.container_id}>
+							<TableCell className="sticky left-0 z-1 bg-background after:absolute after:top-0 after:right-0 after:h-full after:w-px after:bg-border">
+								{container.name}
+							</TableCell>
+							<TableCell className="font-mono">
+								<Badge variant={"outline"}>{container.image}</Badge>
+							</TableCell>
+							<TableCell>{container.status}</TableCell>
+							<TableCell>{formatContainerState({ state: container.state })}</TableCell>
+							<TableCell>
+								{formatContainerPort({ mapping: container.ports })}
+							</TableCell>
+							<TableCell className="text-center">
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											variant="outline"
+											size="icon"
+											type="button"
+											className="h-8 px-2"
+											disabled={loading}
+										>
+											<Ellipsis className="h-4 w-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="end" className="">
+										{/* Container */}
+
+										{/* Actions */}
+										<DropdownMenuGroup>
+											<DropdownMenuItem
+												onClick={async () => {
+													await handleDockerAction({
+														type: "container-run",
+														container_id: container.container_id,
+													});
+												}}
+												className="flex items-center gap-2"
+												disabled={container.state == "running"}
 											>
-												<Ellipsis className="h-4 w-4" />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="end" className="">
-											{/* Container */}
+												<Play className="h-4 w-4" />
+												<span>Run</span>
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={async () => {
+													await handleDockerAction({
+														type: "container-stop",
+														container_id: container.container_id,
+													});
+												}}
+												className="flex items-center gap-2"
+												disabled={container.state == "exited"}
+											>
+												<OctagonMinus className="h-4 w-4" />
+												<span>Stop</span>
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={async () => {
+													await handleDockerAction({
+														type: "container-restart",
+														container_id: container.container_id,
+													});
+												}}
+												className="flex items-center gap-2"
+												disabled={container.state != "running"}
+											>
+												<RefreshCcw className="h-4 w-4" />
+												<span>Restart</span>
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={async () => {
+													await handleDockerAction({
+														type: "container-remove",
+														container_id: container.container_id,
+													});
+												}}
+												className="flex items-center gap-2"
+											>
+												<Eraser className="h-4 w-4" />
+												<span>Remove</span>
+											</DropdownMenuItem>
+										</DropdownMenuGroup>
 
-											{/* Actions */}
-											<DropdownMenuGroup>
-												<DropdownMenuItem
-													onClick={async () => {
-														await handleDockerAction({
-															type: "container-run",
-															container_id: container.container_id,
-														});
-													}}
-													className="flex items-center gap-2"
-													disabled={container.state == "running"}
-												>
-													<Play className="h-4 w-4" />
-													<span>Run</span>
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													onClick={async () => {
-														await handleDockerAction({
-															type: "container-stop",
-															container_id: container.container_id,
-														});
-													}}
-													className="flex items-center gap-2"
-													disabled={container.state == "exited"}
-												>
-													<OctagonMinus className="h-4 w-4" />
-													<span>Stop</span>
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													onClick={async () => {
-														await handleDockerAction({
-															type: "container-restart",
-															container_id: container.container_id,
-														});
-													}}
-													className="flex items-center gap-2"
-													disabled={container.state != "running"}
-												>
-													<RefreshCcw className="h-4 w-4" />
-													<span>Restart</span>
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													onClick={async () => {
-														await handleDockerAction({
-															type: "container-remove",
-															container_id: container.container_id,
-														});
-													}}
-													className="flex items-center gap-2"
-												>
-													<Eraser className="h-4 w-4" />
-													<span>Remove</span>
-												</DropdownMenuItem>
-											</DropdownMenuGroup>
+										<DropdownMenuSeparator />
 
-											<DropdownMenuSeparator />
-
-											<DropdownMenuGroup>
-												<div className="px-2 py-1.5 space-y-1">
-													<div className="flex items-center justify-between gap-2">
-														<span className="text-xs text-muted-foreground">ID:</span>
-														<span
-															className="text-xs font-mono"
-															title={container.container_id}
-														>
-															{container.container_id}
-														</span>
-													</div>
-													<div className="flex items-center justify-between gap-2">
-														<span className="text-xs text-muted-foreground">Image:</span>
-														<span className="text-xs" title={container.image}>
-															{container.image}
-														</span>
-													</div>
-													<div className="flex items-center justify-between gap-2">
-														<span className="text-xs text-muted-foreground">Created:</span>
-														<span className="text-xs">
-															{formatContainerDate({ date: container.created_at })}
-														</span>
-													</div>
+										<DropdownMenuGroup>
+											<div className="px-2 py-1.5 space-y-1">
+												<div className="flex items-center justify-between gap-2">
+													<span className="text-xs text-muted-foreground">ID:</span>
+													<span className="text-xs font-mono" title={container.container_id}>
+														{container.container_id}
+													</span>
 												</div>
-											</DropdownMenuGroup>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</TableCell>
-							</TableRow>
-						))}
+												<div className="flex items-center justify-between gap-2">
+													<span className="text-xs text-muted-foreground">Image:</span>
+													<span className="text-xs" title={container.image}>
+														{container.image}
+													</span>
+												</div>
+												<div className="flex items-center justify-between gap-2">
+													<span className="text-xs text-muted-foreground">Created:</span>
+													<span className="text-xs">
+														{formatContainerDate({ date: container.created_at })}
+													</span>
+												</div>
+											</div>
+										</DropdownMenuGroup>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							</TableCell>
+						</TableRow>
+					))}
 
-						{filteredContainers.length === 0 && (
-							<TableRow>
-								<TableCell
-									colSpan={6}
-									className="text-center py-4 bg-muted/50 text-muted-foreground"
-								>
-									No containers found.
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
+					{filteredContainers.length === 0 && (
+						<TableRow>
+							<TableCell
+								colSpan={6}
+								className="text-center py-4 bg-muted/50 text-muted-foreground"
+							>
+								No containers found.
+							</TableCell>
+						</TableRow>
+					)}
+				</TableBody>
+			</Table>
 		</div>
 	);
 }

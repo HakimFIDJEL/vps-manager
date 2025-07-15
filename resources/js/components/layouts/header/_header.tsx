@@ -1,11 +1,20 @@
-import { type BreadcrumbItem } from "@/types";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+// Necessary imports
+import { Link } from "@inertiajs/react";
+
+// Custom components
 import { Breadcrumbs } from "@/components/layouts/header/breadcrumbs";
 import AppearanceToggleDropdown from "@/components/layouts/header/theme";
+
+// Shadcn UI components
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Folder, LogOut } from "lucide-react";
-import { Link } from "@inertiajs/react";
+
+// Icons
+import { Folder, Layers, LogOut } from "lucide-react";
+
+// Types
+import { type BreadcrumbItem } from "@/types";
 
 interface AppHeaderProps {
 	breadcrumbs?: BreadcrumbItem[];
@@ -30,9 +39,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 							<Button
 								variant={"ghost"}
 								size={"sm"}
-								className={`${!(route().current("projects.*") && !route().current("projects.show")) ? "text-muted-foreground" : ""}`}
+								className={`${!route().current("projects.*") ? "text-muted-foreground" : ""} gap-3`}
 							>
-								<Folder className="h-4 w-4" />
+								<Layers className="h-4 w-4" />
 								<span className="hidden lg:inline">Projects</span>
 							</Button>
 						</Link>
@@ -54,11 +63,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 							className="data-[orientation=vertical]:h-4"
 						/>
 						<Link href={route("auth.logout")}>
-							<Button
-								size={"sm"}
-								variant={"default"}
-								className="ml-2"
-							>
+							<Button size={"sm"} variant={"default"} className="ml-2">
 								<LogOut className="h-4 w-4" />
 								<span className="hidden lg:inline">Log out</span>
 							</Button>
