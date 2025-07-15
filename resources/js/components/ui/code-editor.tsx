@@ -270,10 +270,21 @@ export const CodeEditor = ({
 	}, [customVariables, keywords]);
 
 	React.useEffect(() => {
-		if (appearance === "dark") {
-			setTheme(dracula);
-		} else {
-			setTheme(githubLight); 
+		const sysPrefersDark = window.matchMedia(
+			"(prefers-color-scheme: dark)",
+		).matches;
+
+		switch (appearance) {
+			case "dark":
+				setTheme(dracula); // ou "dark"
+				break;
+			case "light":
+				setTheme(githubLight); // ou "light"
+				break;
+			case "system":
+			default:
+				setTheme(sysPrefersDark ? dracula : githubLight); // adapte au thème OS
+				break;
 		}
 	}, [appearance]);
 
@@ -306,9 +317,6 @@ export const CodeEditor = ({
 					height="auto"
 					className="bg-background"
 					theme={theme}
-
-					
-					
 					extensions={[
 						getLanguageExtension(language),
 						lintGutter(),
@@ -330,35 +338,41 @@ export const CodeEditor = ({
 						drawSelection: true,
 						highlightActiveLineGutter: true,
 					}}
-					style={{
-						opacity: disabled ? 0.6 : 1,
-						pointerEvents: disabled ? "none" : "auto", // empêche même le curseur
-						"--cm-selection-background": "rgba(255, 255, 255, 0.2)",
-						"--cm-selectionMatch-background": "rgba(255, 255, 255, 0.2)",
-					} as React.CSSProperties}
+					style={
+						{
+							opacity: disabled ? 0.6 : 1,
+							pointerEvents: disabled ? "none" : "auto", // empêche même le curseur
+							"--cm-selection-background": "rgba(255, 255, 255, 0.2)",
+							"--cm-selectionMatch-background": "rgba(255, 255, 255, 0.2)",
+						} as React.CSSProperties
+					}
 				/>
 
 				<AnimatePresence>
-					{getLanguageExtension(language) == null && showError && value.length == 0 && (
-						<motion.div
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-							transition={{ duration: 0.2 }}
-							className="absolute flex items-center justify-center text-sm bg-card border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
-						>
-							<p className="whitespace-nowrap">The format is currently not supported</p>
-							<Button
-								variant={"outline"}
-								size={"icon"}
-								type="button"
-								onClick={() => setShowError(false)}
-								className="absolute top-1/2 right-[-0.5rem] translate-x-[100%] translate-y-[-50%] rounded-full !bg-card"
+					{getLanguageExtension(language) == null &&
+						showError &&
+						 (
+							<motion.div
+								initial={{ opacity: 0, y: -10 }}
+								animate={{ opacity: 1, y: 0 }}
+								exit={{ opacity: 0, y: -10 }}
+								transition={{ duration: 0.2 }}
+								className="absolute flex items-center justify-center text-sm bg-card border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
 							>
-								<X size={14} />
-							</Button>
-						</motion.div>
-					)}
+								<p className="whitespace-nowrap">
+									The format is currently not supported
+								</p>
+								<Button
+									variant={"outline"}
+									size={"icon"}
+									type={"button"}
+									onClick={() => setShowError(false)}
+									className="absolute top-1/2 right-[-0.5rem] translate-x-[100%] translate-y-[-50%] rounded-full !bg-card"
+								>
+									<X size={14} />
+								</Button>
+							</motion.div>
+						)}
 				</AnimatePresence>
 			</div>
 			{comment && <p className="mt-1 text-xs text-muted-foreground">{comment}</p>}
