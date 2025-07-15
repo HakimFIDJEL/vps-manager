@@ -35,21 +35,13 @@ export function AppTable({ projects }: { projects: Project[] }) {
 			</TableHeader>
 			<TableBody>
 				{projects.map((project) => (
-					<TableRow
-						key={project.path}
-						className="cursor-pointer"
-						// onClick={() => {
-						// 	router.visit(route("projects.show", { inode: project.inode }));
-						// }}
-					>
+					<TableRow key={project.path}>
 						<TableCell className="font-mono">{project.path}</TableCell>
 						<TableCell className="font-mono">{project.inode}</TableCell>
 						<TableCell>{formatSize(project.size)}</TableCell>
 						<TableCell>{formatDate(project.updated_at)}</TableCell>
 						<TableCell>{formatDate(project.created_at)}</TableCell>
-						<TableCell>
-							{formatActions(project.inode, 'full', "sm")}
-						</TableCell>
+						<TableCell>{formatActions(project.inode, "full", "sm")}</TableCell>
 					</TableRow>
 				))}
 				{projects.length === 0 && (

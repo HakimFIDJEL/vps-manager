@@ -20,7 +20,6 @@ export function AppProject() {
 
 	// States
 	const [path, setFolderPath] = useState<string>(project.path);
-	const [loading, setLoading] = useState(false);
 	const [availabilityState, setAvailabilityState] = useState<PathState>("");
 
 	useEffect(() => {
@@ -28,11 +27,15 @@ export function AppProject() {
 	}, [path]);
 
 	async function checkPathAvailability(path: string): Promise<boolean> {
-		if (loading) return false;
 
-		// No need to check if the path is the same as the current project folder path
-		if (!path || path === project.path) {
-			setAvailabilityState("");
+		// TODO : Check if the path is available on the server
+		if (false) {
+			setAvailabilityState("error");
+			return true;
+		}
+
+		// If the state is already success, no need to check again
+		if (availabilityState === "success") {
 			return true;
 		}
 
@@ -101,13 +104,12 @@ export function AppProject() {
 						required={true}
 						id={"path"}
 						name={"path"}
-						readOnly={loading}
 						placeholder={"folder-path"}
 						autoFocus={true}
 						addonText={"/projects/"}
 						value={path}
 						onChange={(e) => {
-							setFolderPath(e.target.value);
+							setFolderPath(formatSlug(e.target.value));
 						}}
 						onBlur={(e) => {
 							checkPathAvailability(e.target.value);

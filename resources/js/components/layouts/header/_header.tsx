@@ -39,7 +39,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 							<Button
 								variant={"ghost"}
 								size={"sm"}
-								className={`${!(route().current("projects.*") && !route().current("projects.show")) ? "text-muted-foreground" : ""} gap-3`}
+								className={`${!route().current("projects.*") ? "text-muted-foreground" : ""} gap-3`}
 							>
 								<Layers className="h-4 w-4" />
 								<span className="hidden lg:inline">Projects</span>
@@ -63,11 +63,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 							className="data-[orientation=vertical]:h-4"
 						/>
 						<Link href={route("auth.logout")}>
-							<Button
-								size={"sm"}
-								variant={"default"}
-								className="ml-2"
-							>
+							<Button size={"sm"} variant={"default"} className="ml-2">
 								<LogOut className="h-4 w-4" />
 								<span className="hidden lg:inline">Log out</span>
 							</Button>

@@ -97,13 +97,19 @@ function FolderPathCard() {
 	async function checkPathAvailability(path: string): Promise<boolean> {
 		if (loading) return false;
 
+
 		// No need to check if the path is the same as the current project folder path
 		if (!path || path === project.path) {
 			setAvailabilityState("");
 			return true;
 		}
 
-		if (!FolderForm.formState.isValid) {
+		// If the state is already success, no need to check again
+		if (availabilityState === "success") {
+			return true;
+		}
+
+		if (FolderSchema.safeParse({ path }).success === false) {
 			setAvailabilityState("");
 			return false;
 		}
@@ -115,7 +121,7 @@ function FolderPathCard() {
 
 			setAvailabilityState(isAvailable ? "success" : "error");
 			return isAvailable;
-		} catch {
+		} catch (error){
 			setAvailabilityState("error");
 			return false;
 		}
