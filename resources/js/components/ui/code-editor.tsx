@@ -240,11 +240,14 @@ export const CodeEditor = ({
 	keywords = [],
 	disabled = false,
 }: CodeEditorProps) => {
+	// State
 	const [theme, setTheme] =
 		React.useState<ReactCodeMirrorProps["theme"]>(dracula);
+
+	// Hook
 	const { appearance } = useAppearance();
 
-	// Création de l'extension d'autocomplétion personnalisée
+	// autocompletion
 	const customCompletion = React.useMemo(() => {
 		return autocompletion({
 			override: [
@@ -269,6 +272,7 @@ export const CodeEditor = ({
 		});
 	}, [customVariables, keywords]);
 
+	// Theme
 	React.useEffect(() => {
 		const sysPrefersDark = window.matchMedia(
 			"(prefers-color-scheme: dark)",
@@ -276,18 +280,19 @@ export const CodeEditor = ({
 
 		switch (appearance) {
 			case "dark":
-				setTheme(dracula); // ou "dark"
+				setTheme(dracula);
 				break;
 			case "light":
-				setTheme(githubLight); // ou "light"
+				setTheme(githubLight);
 				break;
 			case "system":
 			default:
-				setTheme(sysPrefersDark ? dracula : githubLight); // adapte au thème OS
+				setTheme(sysPrefersDark ? dracula : githubLight);
 				break;
 		}
 	}, [appearance]);
 
+	// Keydown handler for saving
 	const handleKeyDown = React.useCallback(
 		(event: KeyboardEvent) => {
 			if ((event.ctrlKey || event.metaKey) && event.key === "s") {
@@ -300,6 +305,7 @@ export const CodeEditor = ({
 		[isSaved, onSave],
 	);
 
+	// Effect to add keydown listener
 	React.useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
@@ -310,7 +316,16 @@ export const CodeEditor = ({
 	return (
 		<>
 			<div
-				className={`relative w-full rounded-lg overflow-auto border ${className}`}
+				className={`
+					relative w-full rounded-lg overflow-auto border
+					border-input          
+					transition-[color,box-shadow]
+					focus-within:border-ring     
+					focus-within:ring-ring/50    
+					focus-within:ring-3          
+					focus-within:ring-offset-0   
+					${className}
+				`}
 			>
 				<CodeMirror
 					value={value}
@@ -348,7 +363,7 @@ export const CodeEditor = ({
 					}
 				/>
 
-				<AnimatePresence>
+				{/* <AnimatePresence>
 					{getLanguageExtension(language) == null &&
 						showError &&
 						 (
@@ -373,7 +388,7 @@ export const CodeEditor = ({
 								</Button>
 							</motion.div>
 						)}
-				</AnimatePresence>
+				</AnimatePresence> */}
 			</div>
 			{comment && <p className="mt-1 text-xs text-muted-foreground">{comment}</p>}
 		</>
