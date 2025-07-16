@@ -414,9 +414,11 @@ function TemplateLink({
 function DockerSidebar({
 	handleDockerAction,
 	loading = false,
+	className = "",
 }: {
 	handleDockerAction: (action: DockerAction) => void;
 	loading?: boolean;
+	className?: string;
 }) {
 	// Custom hooks
 	const { project } = useProject();
@@ -434,7 +436,7 @@ function DockerSidebar({
 	};
 
 	return (
-		<SmoothAnimate className="col-span-3 flex flex-col gap-4 items-center">
+		<SmoothAnimate className={`${className}`}>
 			{(project.docker.isStrict || project.variables.length > 0) && (
 				<Accordion
 					type="single"
@@ -597,9 +599,9 @@ function DockerSidebar({
 										</SmoothAnimate>
 									</div>
 								</AccordionTrigger>
-								<AccordionContent className="px-0 pt-0">
-									<Separator className="mb-6" />
-									<SmoothAnimate className="px-4 pb-2 flex flex-wrap gap-2">
+								<AccordionContent className="px-0 pt-0 pb-2">
+									<Separator className="mb-4" />
+									<SmoothAnimate className="px-4 pb-0	flex flex-wrap gap-2">
 										{project.variables.map((variable) => (
 											<div
 												key={variable.key}
@@ -677,16 +679,18 @@ function DockerSidebar({
 function DockerContent({
 	handleDockerAction,
 	loading = false,
+	className = "",
 }: {
 	handleDockerAction: (action: DockerAction) => void;
 	loading?: boolean;
+	className?: string;
 }) {
 	// Custom hooks
 	const { project } = useProject();
 	const { setCurrentValue } = useTabsContext();
 
 	return (
-		<div className="col-span-9">
+		<div className={`${className}`}>
 			<div className="rounded-lg border bg-card">
 				<div className="border-b">
 					<div className="flex items-center justify-between px-4 py-3">
@@ -801,7 +805,7 @@ function DockerContent({
 					</div>
 				</div>
 
-				<SmoothAnimate className="pt-1">
+				<SmoothAnimate>
 					<CodeEditor
 						value={project.docker.content}
 						disabled={loading}
@@ -831,10 +835,18 @@ export function DockerConfiguration({
 	loading?: boolean;
 }) {
 	return (
-		<div className="grid gap-4">
-			<div className="grid grid-cols-12 gap-4">
-				<DockerContent handleDockerAction={handleDockerAction} loading={loading} />
-				<DockerSidebar handleDockerAction={handleDockerAction} loading={loading} />
+		<div className="grid gap-4 relative">
+			<div className="grid grid-cols-12 gap-4 relative items-start">
+				<DockerContent
+					handleDockerAction={handleDockerAction}
+					loading={loading}
+					className="col-span-9"
+				/>
+				<DockerSidebar
+					handleDockerAction={handleDockerAction}
+					loading={loading}
+					className="!sticky top-[4rem] self-start col-span-3 flex flex-col gap-4 items-center"
+				/>
 			</div>
 		</div>
 	);
