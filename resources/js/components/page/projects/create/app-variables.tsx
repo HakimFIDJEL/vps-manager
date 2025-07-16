@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Dispatch, SetStateAction } from "react";
-
+import { toast } from "sonner";
 
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/variables/parser";
@@ -94,25 +94,41 @@ import { CodeEditor } from "@/components/ui/code-editor";
 import { useVariable } from "@/contexts/variable-context";
 import { VariableAction } from "@/contexts/variable-context";
 
-export function AppVariables({ setValidate }: { setValidate: Dispatch<SetStateAction<() => Promise<boolean>>> }) {
+// Types
+import { ProjectSchema } from "@/lib/projects/type";
+
+export function AppVariables({
+	setValidate,
+}: {
+	setValidate: Dispatch<SetStateAction<() => Promise<boolean>>>;
+}) {
 	// States
 	const [search, setSearch] = useState<string>("");
+
+	// Custom Hooks
+	const { project } = useProject();
+	const { handleVariableAction, loading } = useVariable();
 
 	// Refs
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const validator = async () => {
-		// votre logique de validation…
+		// Check if the schema is valid
+		const result = ProjectSchema.shape.variables.safeParse(project.variables);
+
+		if (!result.success) {
+			toast.error(result.error.errors[0].message);
+			return false;
+		}
+
+		// await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async validation
+
 		return true;
-	}
-	
+	};
+
 	useEffect(() => {
 		setValidate(() => validator);
-	}, [setValidate]);
-
-	// Custom Hooks
-	const { project } = useProject();
-	const { handleVariableAction, loading } = useVariable();
+	}, [setValidate, project.variables]);
 
 	return (
 		// Wrapper
@@ -421,9 +437,6 @@ export function CreateVariable({
 			value: "",
 		},
 	});
-
-	// Refs
-	const closeRef = useRef<HTMLButtonElement>(null);
 
 	async function onSubmit() {
 		const isValid = await VariableForm.trigger();
