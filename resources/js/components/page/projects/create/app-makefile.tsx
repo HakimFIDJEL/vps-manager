@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 
 // Custom components
 import {
@@ -63,14 +65,19 @@ import {
 
 // Types
 import { type Command, CommandSchema } from "@/lib/commands/type";
-
-// Contexts
-import { useProject } from "@/contexts/project-context";
 import { parseCommandsFromMakefile } from "@/lib/commands/parser";
 import { MakefileSchema, MakefileTextSchema } from "@/lib/commands/type";
 import { CommandAction, useCommand } from "@/contexts/command-context";
+import { ProjectSchema } from "@/lib/projects/type";
 
-export function AppMakefile() {
+// Contexts
+import { useProject } from "@/contexts/project-context";
+
+export function AppMakefile({
+	setValidate,
+}: {
+	setValidate: Dispatch<SetStateAction<() => Promise<boolean>>>;
+}) {
 	// States
 	const [search, setSearch] = useState<string>("");
 
@@ -81,6 +88,22 @@ export function AppMakefile() {
 	// Custom Hooks
 	const { project } = useProject();
 	const { handleCommandAction, loading } = useCommand();
+
+	const validator = async () => {
+		// Check if the schema is valid
+		const result = ProjectSchema.shape.commands.safeParse(project.commands);
+
+		if (!result.success) {
+			toast.error(result.error.errors[0].message);
+			return false;
+		}
+
+		return true;
+	};
+
+	useEffect(() => {
+		setValidate(() => validator);
+	}, [setValidate, project.commands]);
 
 	return (
 		// Wrapper

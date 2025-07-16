@@ -1,6 +1,8 @@
 // Necessary imports
 import { useEffect, useState } from "react";
 import { useProject } from "@/contexts/project-context";
+import { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 
 // Shadcn UI components
 import { Input } from "@/components/ui/input";
@@ -11,21 +13,50 @@ import { formatSlug } from "@/lib/projects/formatter";
 import { Check, Loader2, X } from "lucide-react";
 
 // Types
-import { FolderSchema } from "@/lib/projects/type";
+import { ProjectSchema } from "@/lib/projects/type";
 type PathState = "" | "loading" | "success" | "error";
 
-export function AppProject() {
+export function AppProject({
+	setValidate,
+}: {
+	setValidate: Dispatch<SetStateAction<() => Promise<boolean>>>;
+}) {
 	// Custom hooks
 	const { project, updateProject } = useProject();
 
 	// States
-	const [path, setFolderPath] = useState<string>(project.path);
+	const [path, setFolderPath] = useState<string>(project.path || "");
 	const [availabilityState, setAvailabilityState] = useState<PathState>("");
 
+	// Hooks
 	useEffect(() => {
-		setAvailabilityState("");
-	}, [path]);
+		setFolderPath(project.path || "");
+	}, [project.path]);
 
+	// Validator
+	const validator = async () => {
+		// Check if the path matchs the regex
+		const result = ProjectSchema.shape.path.safeParse(path);
+
+		if (!result.success) {
+			setAvailabilityState("");
+			toast.error(result.error.errors[0].message);
+			return false;
+		}
+
+		// Check if the path is available
+		if (availabilityState !== "success") {
+			return await checkPathAvailability(path);
+		}
+
+		return true;
+	};
+
+	useEffect(() => {
+		setValidate(() => validator);
+	}, [setValidate, path, availabilityState]);
+
+	// Functions
 	async function checkPathAvailability(path: string): Promise<boolean> {
 		// TODO : Check if the path is available on the server
 		if (false) {
@@ -39,14 +70,14 @@ export function AppProject() {
 		}
 
 		// Check if it matches the regex
-		if (FolderSchema.safeParse({ path }).success === false) {
+		if (!ProjectSchema.shape.path.safeParse(path).success) {
 			setAvailabilityState("");
 			return false;
 		}
 
 		setAvailabilityState("loading");
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			// await new Promise((resolve) => setTimeout(resolve, 1000));
 			const isAvailable = true;
 
 			setAvailabilityState(isAvailable ? "success" : "error");
@@ -56,13 +87,6 @@ export function AppProject() {
 			return false;
 		}
 	}
-
-	// Hooks
-	useEffect(() => {
-		if (project.path !== path) {
-			updateProject("path", path);
-		}
-	}, [path]);
 
 	return (
 		// Wrapper
@@ -108,11 +132,11 @@ export function AppProject() {
 						addonText={"/projects/"}
 						value={path}
 						onChange={(e) => {
-							setFolderPath(formatSlug(e.target.value));
+							const slug = formatSlug(e.target.value);
+							setFolderPath(slug);
+							updateProject("path", slug);
 						}}
-						onBlur={(e) => {
-							checkPathAvailability(e.target.value);
-						}}
+						onBlur={() => checkPathAvailability(path)}
 					/>
 					<p className="text-xs text-muted-foreground">
 						Must be at least 6 characters long and can only contain letters, numbers,

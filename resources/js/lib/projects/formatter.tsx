@@ -47,11 +47,19 @@ export function formatActions(
 	);
 }
 
-export function formatSlug(slug: string): string {
-  return slug
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .concat(slug.endsWith(" ") ? "-" : "");
+export function formatSlug(input: string): string {
+	const keepDashAtEnd = input.endsWith(" ") || input.endsWith("-");
+
+	let slug = input
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9_\/-]+/g, "-")
+		.replace(/-{2,}/g, "-")
+		.replace(/^-+/g, "");
+
+	if (keepDashAtEnd && !slug.endsWith("-")) {
+		slug += "-";
+	}
+
+	return slug;
 }

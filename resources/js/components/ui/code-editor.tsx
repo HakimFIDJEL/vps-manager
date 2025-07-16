@@ -238,7 +238,7 @@ export const CodeEditor = ({
 	className = "",
 	customVariables = [],
 	keywords = [],
-	disabled = true,
+	disabled = false,
 }: CodeEditorProps) => {
 	const [theme, setTheme] =
 		React.useState<ReactCodeMirrorProps["theme"]>(dracula);
