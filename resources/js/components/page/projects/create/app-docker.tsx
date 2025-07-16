@@ -2,22 +2,15 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useProject } from "@/contexts/project-context";
-import { useDocker } from "@/contexts/docker-context";
-import type { DockerAction } from "@/lib/docker/type";
-import { Dispatch, SetStateAction } from "react";
 
 // Libs
 import { DOCKER_COMPOSE_KEYWORDS } from "@/lib/docker/keywords";
 import { parseDockerCompose } from "@/lib/docker/parser";
 import { formatServiceImage, formatDockerDriver } from "@/lib/docker/formatter";
 import { DOCKER_TEMPLATES } from "@/lib/docker/templates";
-
-// Types
-import { DockerComposeFileSchema } from "@/lib/docker/type";
 
 // Custom components
 import { SmoothAnimate } from "@/components/ui/smooth-resized";
@@ -33,6 +26,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
+	DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import {
 	Form,
@@ -83,7 +77,15 @@ import {
 	Ellipsis,
 	Upload,
 } from "lucide-react";
-import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
+
+// Contexts
+import { useProject } from "@/contexts/project-context";
+import { useDocker } from "@/contexts/docker-context";
+
+// Types
+import { type DockerAction } from "@/lib/docker/type";
+import { ProjectSchema } from "@/lib/projects/type";
+import { DockerComposeFileSchema } from "@/lib/docker/type";
 
 export function AppDocker({
 	setValidate,
@@ -95,13 +97,32 @@ export function AppDocker({
 	const { handleDockerAction, loading } = useDocker();
 
 	const validator = async () => {
-		// votre logique de validation…
+		// Check if the content is not empty
+		if (project.docker.content.length === 0) {
+			toast.error("Your docker configuration must not be empty");
+			return false;
+		}
+
+		// Check if the schema is valid
+		const result = ProjectSchema.shape.docker.safeParse(project.docker);
+
+		if (!result.success) {
+			toast.error(result.error.errors[0].message);
+			return false;
+		}
+
+		// Check if the docker configuration is saved
+		if (!project.docker.isSaved) {
+			toast.error("You must save your docker configuration");
+			return false;
+		}
+
 		return true;
 	};
 
 	useEffect(() => {
 		setValidate(() => validator);
-	}, [setValidate]);
+	}, [setValidate, project.docker]);
 
 	return (
 		<Tabs defaultValue={project.docker.content ? "docker" : "empty"}>

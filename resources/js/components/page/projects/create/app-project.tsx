@@ -39,7 +39,7 @@ export function AppProject({
 		const result = ProjectSchema.shape.path.safeParse(path);
 
 		if (!result.success) {
-			setAvailabilityState("error");
+			setAvailabilityState("");
 			toast.error(result.error.errors[0].message);
 			return false;
 		}
@@ -71,7 +71,7 @@ export function AppProject({
 
 		// Check if it matches the regex
 		if (!ProjectSchema.shape.path.safeParse(path).success) {
-			setAvailabilityState("error");
+			setAvailabilityState("");
 			return false;
 		}
 

@@ -121,8 +121,6 @@ export function AppVariables({
 			return false;
 		}
 
-		// await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async validation
-
 		return true;
 	};
 

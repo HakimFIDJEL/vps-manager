@@ -107,36 +107,36 @@ export default function Page() {
 			<Head title="Create a project" />
 			{/* Project provider has every providers needed (commands, variables, docker etc..) */}
 			<ProjectProvider>
-					<SmoothItem delay={0.1}>
-						<Card>
-							<CardHeader className="gap-0 gap-x-1.5">
-
-								<div className="flex items-center gap-3">
-									<div className="bg-card border rounded-md p-2">
-										<Layers className="w-5 h-5 text-muted-foreground" />
-									</div>
-									<div>
-										<CardTitle className="flex items-center gap-2 text-xl">
-											Create a project
-										</CardTitle>
-										<CardDescription>Finally a new project! It took you a while.. Let's get started.</CardDescription>
-									</div>
+				<SmoothItem delay={0.1}>
+					<Card>
+						<CardHeader className="gap-0 gap-x-1.5">
+							<div className="flex items-center gap-3">
+								<div className="bg-card border rounded-md p-2">
+									<Layers className="w-5 h-5 text-muted-foreground" />
 								</div>
+								<div>
+									<CardTitle className="flex items-center gap-2 text-xl">
+										Create a project
+									</CardTitle>
+									<CardDescription>
+										Finally a new project! It took you a while.. Let's get started.
+									</CardDescription>
+								</div>
+							</div>
 
+							<CardAction className="self-center">
+								<Link href={route("projects.index")}>
+									<Button variant={"outline"}>
+										<ArrowLeft />
+										Go back to projects
+									</Button>
+								</Link>
+							</CardAction>
+						</CardHeader>
+					</Card>
+				</SmoothItem>
 
-								<CardAction className="self-center">
-									<Link href={route("projects.index")}>
-										<Button variant={"outline"}>
-											<ArrowLeft />
-											Go back to projects
-										</Button>
-									</Link>
-								</CardAction>
-							</CardHeader>
-						</Card>
-					</SmoothItem>
-
-					<Content />
+				<Content />
 			</ProjectProvider>
 		</AdminLayout>
 	);
@@ -146,85 +146,48 @@ function Content() {
 	const { project, updateProject } = useProject();
 
 	const { data, setData, post, processing, errors } = useForm({
-		project: project,	
-	})
+		project: project,
+	});
 
 	useEffect(() => {
-		setData('project', project);
+		setData("project", project);
 	}, [project, setData]);
 
-	const [validateStep1, setValidateStep1] = useState<() => Promise<boolean>>(() => async () => true);
-	const [validateStep2, setValidateStep2] = useState<() => Promise<boolean>>(() => async () => true);
-	const [validateStep3, setValidateStep3] = useState<() => Promise<boolean>>(() => async () => true);
-	const [validateStep4, setValidateStep4] = useState<() => Promise<boolean>>(() => async () => true);
-
-
-	// function handleValidateStep2() {
-	// 	try {
-	// 		// Validate only variables
-	// 		ProjectSchema.pick({ variables: true }).parse(project);
-	// 		return true;
-	// 	} catch (error) {
-	// 		if (error instanceof z.ZodError) {
-	// 			toast.error("Please configure at least one variable");
-	// 		}
-	// 		return false;
-	// 	}
-	// }
-
-	// function handleValidateStep3() {
-	// 	try {
-	// 		ProjectSchema.pick({ docker: true }).parse(project);
-
-	// 		// Check if the content is saved
-	// 		if (!project.docker.isSaved) {
-	// 			toast.error("Please save your docker configuration");
-	// 			return false;
-	// 		}
-
-	// 		return true;
-	// 	} catch (error) {
-	// 		if (error instanceof z.ZodError) {
-	// 			toast.error("Please configure your docker configuration");
-	// 		}
-	// 		return false;
-	// 	}
-	// }
-
-	// function handleValidateStep4() {
-	// 	try {
-	// 		// Validate only commands
-	// 		ProjectSchema.pick({ commands: true }).parse(project);
-	// 		return true;
-	// 	} catch (error) {
-	// 		if (error instanceof z.ZodError) {
-	// 			toast.error("Please add at least one command");
-	// 		}
-	// 		return false;
-	// 	}
-	// }
+	const [validateStep1, setValidateStep1] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
+	const [validateStep2, setValidateStep2] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
+	const [validateStep3, setValidateStep3] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
+	const [validateStep4, setValidateStep4] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
 		try {
-
 			console.log("Submitting project:", project);
 
 			// Validation de ton projet
 			ProjectSchema.parse(project);
 
 			toast.loading("Creating the project...", {
-				'id' : 'create-project',
+				id: "create-project",
 			});
 
 			post(route("projects.store"));
 		} catch (error) {
-			toast.dismiss('create-project');
+			toast.dismiss("create-project");
 			if (error instanceof z.ZodError) {
-				toast.error(error.errors[0].message || "Please fill in all the required fields");
+				toast.error(
+					error.errors[0].message || "Please fill in all the required fields",
+				);
 			}
-		} 
+		}
 	}
 
 	function handleKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
@@ -265,19 +228,17 @@ function Content() {
 
 			<SmoothItem delay={0.5} layout={false}>
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
-					
 					<StepperBody>
 						<StepperContent value={1}>
 							<Card>
 								<CardHeader>
-
 									<div className="flex items-center gap-3">
 										<div className="bg-card border rounded-md p-2">
 											<File className="w-5 h-5 text-muted-foreground" />
 										</div>
 										<div>
 											<CardTitle className="flex items-center gap-2 text-xl">
-											Project details
+												Project details
 											</CardTitle>
 											<CardDescription>
 												Fill in the details below to create a new project.
@@ -285,21 +246,19 @@ function Content() {
 										</div>
 									</div>
 
-
 									<CardAction>
 										<StepperNavigation onNext={validateStep1} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppProject setValidate={setValidateStep1}/>
+									<AppProject setValidate={setValidateStep1} />
 								</CardContent>
 							</Card>
 						</StepperContent>
 						<StepperContent value={2}>
 							<Card>
 								<CardHeader>
-
 									<div className="flex items-center gap-3">
 										<div className="bg-card border rounded-md p-2">
 											<FileLock className="w-5 h-5 text-muted-foreground" />
@@ -314,7 +273,6 @@ function Content() {
 										</div>
 									</div>
 
-
 									<CardAction>
 										<StepperNavigation onNext={validateStep2} />
 									</CardAction>
@@ -328,7 +286,6 @@ function Content() {
 						<StepperContent value={3}>
 							<Card>
 								<CardHeader>
-
 									<div className="flex items-center gap-3">
 										<div className="bg-card border rounded-md p-2">
 											<Container className="w-5 h-5 text-muted-foreground" />
@@ -344,7 +301,6 @@ function Content() {
 										</div>
 									</div>
 
-
 									<CardAction>
 										<StepperNavigation onNext={validateStep3} />
 									</CardAction>
@@ -358,7 +314,6 @@ function Content() {
 						<StepperContent value={4}>
 							<Card>
 								<CardHeader>
-
 									<div className="flex items-center gap-3">
 										<div className="bg-card border rounded-md p-2">
 											<SquareTerminal className="w-5 h-5 text-muted-foreground" />
@@ -373,7 +328,6 @@ function Content() {
 										</div>
 									</div>
 
-
 									<CardAction>
 										<StepperNavigation onNext={validateStep4} />
 									</CardAction>
@@ -387,7 +341,6 @@ function Content() {
 						<StepperContent value={5}>
 							<Card>
 								<CardHeader>
-
 									<div className="flex items-center gap-3">
 										<div className="bg-card border rounded-md p-2">
 											<Check className="w-5 h-5 text-muted-foreground" />
@@ -401,7 +354,6 @@ function Content() {
 											</CardDescription>
 										</div>
 									</div>
-
 
 									<CardAction>
 										<StepperNavigation
