@@ -2,12 +2,13 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useProject } from "@/contexts/project-context";
 import { useDocker } from "@/contexts/docker-context";
 import type { DockerAction } from "@/lib/docker/type";
+import { Dispatch, SetStateAction } from "react";
 
 // Libs
 import { DOCKER_COMPOSE_KEYWORDS } from "@/lib/docker/keywords";
@@ -84,10 +85,23 @@ import {
 } from "lucide-react";
 import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
 
-export function AppDocker() {
+export function AppDocker({
+	setValidate,
+}: {
+	setValidate: Dispatch<SetStateAction<() => Promise<boolean>>>;
+}) {
 	// Custom hooks
 	const { project } = useProject();
 	const { handleDockerAction, loading } = useDocker();
+
+	const validator = async () => {
+		// votre logique de validation…
+		return true;
+	};
+
+	useEffect(() => {
+		setValidate(() => validator);
+	}, [setValidate]);
 
 	return (
 		<Tabs defaultValue={project.docker.content ? "docker" : "empty"}>

@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Dispatch, SetStateAction } from "react";
+
 
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/variables/parser";
@@ -92,12 +94,21 @@ import { CodeEditor } from "@/components/ui/code-editor";
 import { useVariable } from "@/contexts/variable-context";
 import { VariableAction } from "@/contexts/variable-context";
 
-export function AppVariables() {
+export function AppVariables({ setValidate }: { setValidate: Dispatch<SetStateAction<() => Promise<boolean>>> }) {
 	// States
 	const [search, setSearch] = useState<string>("");
 
 	// Refs
 	const inputRef = useRef<HTMLInputElement>(null);
+
+	const validator = async () => {
+		// votre logique de validation…
+		return true;
+	}
+	
+	useEffect(() => {
+		setValidate(() => validator);
+	}, [setValidate]);
 
 	// Custom Hooks
 	const { project } = useProject();

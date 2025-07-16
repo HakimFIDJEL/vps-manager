@@ -153,63 +153,56 @@ function Content() {
 		setData('project', project);
 	}, [project, setData]);
 
-	function handleValidateStep1() {
-		try {
-			console.log(project.path);
-			FolderSchema.parse({ path: project.path });
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error(error.errors[0].message || "Please fill in the project path");
-			}
-			return false;
-		}
-	}
+	const [validateStep1, setValidateStep1] = useState<() => Promise<boolean>>(() => async () => true);
+	const [validateStep2, setValidateStep2] = useState<() => Promise<boolean>>(() => async () => true);
+	const [validateStep3, setValidateStep3] = useState<() => Promise<boolean>>(() => async () => true);
+	const [validateStep4, setValidateStep4] = useState<() => Promise<boolean>>(() => async () => true);
 
-	function handleValidateStep2() {
-		try {
-			// Validate only variables
-			ProjectSchema.pick({ variables: true }).parse(project);
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error("Please configure at least one variable");
-			}
-			return false;
-		}
-	}
 
-	function handleValidateStep3() {
-		try {
-			ProjectSchema.pick({ docker: true }).parse(project);
+	// function handleValidateStep2() {
+	// 	try {
+	// 		// Validate only variables
+	// 		ProjectSchema.pick({ variables: true }).parse(project);
+	// 		return true;
+	// 	} catch (error) {
+	// 		if (error instanceof z.ZodError) {
+	// 			toast.error("Please configure at least one variable");
+	// 		}
+	// 		return false;
+	// 	}
+	// }
 
-			// Check if the content is saved
-			if (!project.docker.isSaved) {
-				toast.error("Please save your docker configuration");
-				return false;
-			}
+	// function handleValidateStep3() {
+	// 	try {
+	// 		ProjectSchema.pick({ docker: true }).parse(project);
 
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error("Please configure your docker configuration");
-			}
-			return false;
-		}
-	}
+	// 		// Check if the content is saved
+	// 		if (!project.docker.isSaved) {
+	// 			toast.error("Please save your docker configuration");
+	// 			return false;
+	// 		}
 
-	function handleValidateStep4() {
-		try {
-			// Validate only commands
-			ProjectSchema.pick({ commands: true }).parse(project);
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error("Please add at least one command");
-			}
-			return false;
-		}
-	}
+	// 		return true;
+	// 	} catch (error) {
+	// 		if (error instanceof z.ZodError) {
+	// 			toast.error("Please configure your docker configuration");
+	// 		}
+	// 		return false;
+	// 	}
+	// }
+
+	// function handleValidateStep4() {
+	// 	try {
+	// 		// Validate only commands
+	// 		ProjectSchema.pick({ commands: true }).parse(project);
+	// 		return true;
+	// 	} catch (error) {
+	// 		if (error instanceof z.ZodError) {
+	// 			toast.error("Please add at least one command");
+	// 		}
+	// 		return false;
+	// 	}
+	// }
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -243,7 +236,7 @@ function Content() {
 	return (
 		<Stepper defaultValue={1} totalSteps={steps.length}>
 			<SmoothItem delay={0.3}>
-				<Card className="bg-muted/50 dark:bg-background  border-0 shadow-none mb-4">
+				<Card className="bg-background  border-0 shadow-none mb-4">
 					<CardContent className="px-4 py-2">
 						<div className="space-y-8 text-center">
 							<StepperList>
@@ -260,7 +253,7 @@ function Content() {
 											</div>
 										</StepperTrigger>
 										{step < steps.length && (
-											<StepperSeparator className="max-md:mt-3.5 md:mx-4" />
+											<StepperSeparator className="max-md:mt-3.5 md:mx-4 bg-border" />
 										)}
 									</StepperItem>
 								))}
@@ -294,12 +287,12 @@ function Content() {
 
 
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep1} />
+										<StepperNavigation onNext={validateStep1} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppProject />
+									<AppProject setValidate={setValidateStep1}/>
 								</CardContent>
 							</Card>
 						</StepperContent>
@@ -323,12 +316,12 @@ function Content() {
 
 
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep2} />
+										<StepperNavigation onNext={validateStep2} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppVariables />
+									<AppVariables setValidate={setValidateStep2} />
 								</CardContent>
 							</Card>
 						</StepperContent>
@@ -353,12 +346,12 @@ function Content() {
 
 
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep3} />
+										<StepperNavigation onNext={validateStep3} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppDocker />
+									<AppDocker setValidate={setValidateStep3} />
 								</CardContent>
 							</Card>
 						</StepperContent>
@@ -382,12 +375,12 @@ function Content() {
 
 
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep4} />
+										<StepperNavigation onNext={validateStep4} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppMakefile />
+									<AppMakefile setValidate={setValidateStep4} />
 								</CardContent>
 							</Card>
 						</StepperContent>

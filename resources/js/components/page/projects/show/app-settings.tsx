@@ -385,7 +385,7 @@ function DeleteProjectCard() {
 				</div>
 			</CardHeader>
 			<Separator />
-			<CardContent className="flex flex-col justify-between gap-2 h-full">
+			<CardContent className="flex flex-col justify-between gap-4 h-full">
 				<p className="text-muted-foreground text-sm">
 					Caution, if you delete the project, the entire folder will be gone, same
 					for every variables, docker configuration, commands. This action is

@@ -67,7 +67,7 @@ export function useCommandActionsRemote() {
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				// TODO : Running command
 				toast.dismiss(`run-command-${action.command.target}`);
-				toast.success(`Command ran ${action.command.target} successfully!`);
+				toast.success(`Command ${action.command.target} ran successfully!`);
 				break;
 		}
 	};

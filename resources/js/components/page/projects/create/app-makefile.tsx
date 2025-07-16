@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Dispatch, SetStateAction } from "react";
+
 
 // Custom components
 import {
@@ -70,13 +72,22 @@ import { parseCommandsFromMakefile } from "@/lib/commands/parser";
 import { MakefileSchema, MakefileTextSchema } from "@/lib/commands/type";
 import { CommandAction, useCommand } from "@/contexts/command-context";
 
-export function AppMakefile() {
+export function AppMakefile({ setValidate }: { setValidate: Dispatch<SetStateAction<() => Promise<boolean>>> }) {
 	// States
 	const [search, setSearch] = useState<string>("");
 
 	// Refs
 	const inputRef = useRef<HTMLInputElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
+
+	const validator = async () => {
+		// votre logique de validation…
+		return true;
+	}
+	
+	useEffect(() => {
+		setValidate(() => validator);
+	}, [setValidate]);
 
 	// Custom Hooks
 	const { project } = useProject();
