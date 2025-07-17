@@ -162,7 +162,7 @@ export function AppDocker() {
 
 			{/* Edition of docker compose */}
 			{/* Edit current docker-compose (modal from create) */}
-			<div>
+			<div className="relative">
 				<h3 className="text-sm font-medium mb-2">Docker configuration</h3>
 				<DockerConfiguration
 					handleDockerAction={handleDockerAction}

@@ -126,8 +126,8 @@ export default function Page() {
 
 							<CardAction className="self-center">
 								<Link href={route("projects.index")}>
-									<Button variant={"outline"}>
-										<ArrowLeft />
+									<Button variant={"outline"} className="group">
+										<ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.75 transition-transform duration-300" />
 										Go back to projects
 									</Button>
 								</Link>
@@ -284,7 +284,7 @@ function Content() {
 							</Card>
 						</StepperContent>
 						<StepperContent value={3}>
-							<Card>
+							<Card className="overflow-visible">
 								<CardHeader>
 									<div className="flex items-center gap-3">
 										<div className="bg-card border rounded-md p-2">

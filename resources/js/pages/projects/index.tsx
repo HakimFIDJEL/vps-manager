@@ -29,22 +29,23 @@ import {
 	TabsTrigger,
 	useTabsContext,
 } from "@/components/ui/tabs";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Icons
 import {
-	Folder,
 	Layers,
 	LayoutGrid,
 	Plus,
 	RefreshCcw,
 	TableProperties,
-	TriangleAlert,
-	X,
 } from "lucide-react";
 
 // Projects
-import { ProjectListExample } from "@/lib/projects/type"; 
-
+import { ProjectListExample } from "@/lib/projects/type";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
@@ -107,19 +108,29 @@ function Content() {
 									Projects
 								</CardTitle>
 								<CardDescription>
-									Manage your projects and their containers. You can create, edit, and delete projects as needed.
+									Manage your projects and their containers. You can create, edit, and
+									delete projects as needed.
 								</CardDescription>
 							</div>
 						</div>
 						<CardAction className="flex items-center gap-2 self-center">
-							<Link href={route("projects.index")}>
-								<Button variant={"secondary"}>
-									<RefreshCcw />
-								</Button>
-							</Link>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Link href={route("projects.index")}>
+										<Button variant={"secondary"} className="group">
+											<RefreshCcw 
+												className="h-4 w-4 group-hover:-rotate-180 transition-transform duration-300"
+											/>
+										</Button>
+									</Link>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>Refresh the project list</p>
+								</TooltipContent>
+							</Tooltip>
 							<Link href={route("projects.create")}>
-								<Button variant={"default"}>
-									<Plus />
+								<Button variant={"default"} className="group">
+									<Plus  />
 									Create a new project
 								</Button>
 							</Link>
