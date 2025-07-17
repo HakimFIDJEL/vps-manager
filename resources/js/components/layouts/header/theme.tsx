@@ -28,7 +28,7 @@ export default function AppearanceToggleDropdown({
 			case "dark":
 				return <Moon className="h-5 w-5" />;
 			case "light":
-				return <Sun className="h-5 w-5" />;
+				return <Sun className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />;
 			default:
 				return <Monitor className="h-5 w-5" />;
 		}
@@ -40,7 +40,7 @@ export default function AppearanceToggleDropdown({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<TooltipTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-9 w-9 rounded-md">
+							<Button variant="ghost" size="icon" className="h-9 w-9 rounded-md group">
 								{getCurrentIcon()}
 								<span className="sr-only">Toggle theme</span>
 							</Button>

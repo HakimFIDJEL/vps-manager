@@ -117,8 +117,10 @@ function Content() {
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Link href={route("projects.index")}>
-										<Button variant={"secondary"}>
-											<RefreshCcw />
+										<Button variant={"secondary"} className="group">
+											<RefreshCcw 
+												className="h-4 w-4 group-hover:-rotate-180 transition-transform duration-300"
+											/>
 										</Button>
 									</Link>
 								</TooltipTrigger>
@@ -127,8 +129,8 @@ function Content() {
 								</TooltipContent>
 							</Tooltip>
 							<Link href={route("projects.create")}>
-								<Button variant={"default"}>
-									<Plus />
+								<Button variant={"default"} className="group">
+									<Plus  />
 									Create a new project
 								</Button>
 							</Link>

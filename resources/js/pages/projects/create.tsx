@@ -126,8 +126,8 @@ export default function Page() {
 
 							<CardAction className="self-center">
 								<Link href={route("projects.index")}>
-									<Button variant={"outline"}>
-										<ArrowLeft />
+									<Button variant={"outline"} className="group">
+										<ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.75 transition-transform duration-300" />
 										Go back to projects
 									</Button>
 								</Link>
