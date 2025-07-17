@@ -72,7 +72,7 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 						}}
 						toastOptions={{
 							classNames: {
-								closeButton: "!right-0 !top-3 !left-auto absolute",
+								closeButton: "!right-0 !top-3 !left-auto absolute hover:!bg-accent hover:!border-border",
 							},
 						}}
 						closeButton

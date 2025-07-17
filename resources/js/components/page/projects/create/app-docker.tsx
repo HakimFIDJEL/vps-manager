@@ -599,7 +599,7 @@ function DockerSidebar({
 										</SmoothAnimate>
 									</div>
 								</AccordionTrigger>
-								<AccordionContent className="px-0 pt-0 pb-2">
+								<AccordionContent className="pt-0 px-0">
 									<Separator className="mb-4" />
 									<SmoothAnimate className="px-4 pb-0	flex flex-wrap gap-2">
 										{project.variables.map((variable) => (
@@ -648,8 +648,8 @@ function DockerSidebar({
 								<p className="font-medium text-foreground">Environment file</p>
 							</div>
 							<p>
-								Even if deleted, all services will have a .env file containing all
-								variables associated with them.
+								Even if the line is deleted, all services will be associated with an .env file containing all
+								variables.
 							</p>
 						</div>
 					</div>
