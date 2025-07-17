@@ -4,9 +4,9 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
+import { cn, isCookieConsent, setCookie } from "@/lib/utils";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -80,7 +80,6 @@ const SidebarProvider = React.forwardRef<
 		const [openMobile, setOpenMobile] = React.useState(false);
 		const [openMenu, setOpenMenu] = React.useState<string | null>(null);
 
-
 		// This is the internal state of the sidebar.
 		// We use openProp and setOpenProp for control from outside the component.
 		const [_open, _setOpen] = React.useState(defaultOpen);
@@ -95,7 +94,9 @@ const SidebarProvider = React.forwardRef<
 				}
 
 				// This sets the cookie to keep the sidebar state.
-				document.cookie = `${SIDEBAR_COOKIE_NAME_OPEN}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+				if(isCookieConsent()) {
+					setCookie(SIDEBAR_COOKIE_NAME_OPEN, openState);
+				}
 			},
 			[setOpenProp, open],
 		);
@@ -106,9 +107,9 @@ const SidebarProvider = React.forwardRef<
 				setOpenMenu(null); // Ferme les menus sur desktop
 			}
 
-      console.log('Toggling sidebar', open);
-
-      document.cookie = `${SIDEBAR_COOKIE_NAME_TOGGLE}=${!open}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+			if(isCookieConsent()) {
+				setCookie(SIDEBAR_COOKIE_NAME_TOGGLE, !open);
+			}
 
 			return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
 		}, [isMobile, setOpen, setOpenMobile, setOpenMenu]);
@@ -643,7 +644,7 @@ const SidebarMenuAction = React.forwardRef<
 			<Comp
 				ref={ref}
 				data-sidebar="menu-action"
-        disabled={disabled}
+				disabled={disabled}
 				className={cn(
 					"cursor-pointer absolute right-1 !top-[0.25rem] flex aspect-square w-6 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground border border-transparent hover:border-border focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
 					// Increases the hit area of the button on mobile.

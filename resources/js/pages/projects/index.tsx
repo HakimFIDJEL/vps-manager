@@ -2,6 +2,7 @@
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import React from "react";
+import { getCookie, isCookieConsent, setCookie } from "@/lib/utils";
 
 // Components
 import { AdminLayout } from "@/components/layouts/admin-layout";
@@ -17,7 +18,6 @@ import {
 	CardDescription,
 	CardHeader,
 	CardContent,
-	CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -55,11 +55,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Page() {
-	const defaultTab =
-		document.cookie
-			.split("; ")
-			.find((row) => row.startsWith("project_index_tab="))
-			?.split("=")[1] || "list";
+	const defaultTab = isCookieConsent() ? getCookie("project_index_tab") : "list";
 	return (
 		<AdminLayout breadcrumbs={breadcrumbs}>
 			<Head title="Projects" />
@@ -75,8 +71,9 @@ function Content() {
 	const { currentValue } = useTabsContext();
 
 	React.useEffect(() => {
-		document.cookie = `project_index_tab=${currentValue}; max-age=31536000; SameSite=Lax`;
-		console.log("Current tab saved to cookie:", currentValue);
+		if (isCookieConsent()) {
+			setCookie("project_index_tab", currentValue);
+		}
 	}, [currentValue]);
 	return (
 		<>
@@ -118,9 +115,7 @@ function Content() {
 								<TooltipTrigger asChild>
 									<Link href={route("projects.index")}>
 										<Button variant={"secondary"} className="group">
-											<RefreshCcw 
-												className="h-4 w-4 group-hover:-rotate-180 transition-transform duration-300"
-											/>
+											<RefreshCcw className="h-4 w-4 group-hover:-rotate-180 transition-transform duration-300" />
 										</Button>
 									</Link>
 								</TooltipTrigger>
@@ -130,7 +125,7 @@ function Content() {
 							</Tooltip>
 							<Link href={route("projects.create")}>
 								<Button variant={"default"} className="group">
-									<Plus  />
+									<Plus />
 									Create a new project
 								</Button>
 							</Link>
