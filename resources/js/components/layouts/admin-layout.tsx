@@ -1,6 +1,8 @@
 // Necessary imports
 import { usePage } from "@inertiajs/react";
 import { useEffect } from "react";
+import { getCookie, isCookieConsent } from "@/lib/utils";
+import { toast } from "sonner";
 
 // Providers
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -14,12 +16,16 @@ import { AppHeader } from "@/components/layouts/header/_header";
 import { type BreadcrumbItem } from "@/types";
 import { type ReactNode } from "react";
 
-// Shadcn UI components
-import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
-import { ResponsiveBlocker } from "./responsive-blocker";
-import { Check, Loader2, X } from "lucide-react";
+// Custom components
 import { Breadcrumbs } from "./header/breadcrumbs";
+import { ResponsiveBlocker } from "./responsive-blocker";
+
+// Shadcn UI components
+import { CookieConsent } from "@/components/ui/cookie-consent";
+import { Toaster } from "@/components/ui/sonner";
+
+// Icons
+import { Check, Info, Loader2, X } from "lucide-react";
 
 interface AdminLayoutProps {
 	children: ReactNode;
@@ -33,10 +39,9 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 		error?: string;
 	}>();
 
-	const sidebar_toggle = document.cookie
-		.split("; ")
-		.find((row) => row.startsWith("sidebar_toggle="))
-		?.split("=")[1];
+	const sidebar_toggle = isCookieConsent()
+		? getCookie("sidebar_toggle") || "true"
+		: "true";
 
 	useEffect(() => {
 		const flashSuccess =
@@ -66,13 +71,15 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 						icons={{
 							success: <Check className="h-4 w-4 text-primary" />,
 							error: <X className="h-4 w-4 text-destructive" />,
+							info: <Info className="h-4 w-4 text-muted-foreground" />,
 							loading: (
 								<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
 							),
 						}}
 						toastOptions={{
 							classNames: {
-								closeButton: "!right-0 !top-3 !left-auto absolute hover:!bg-accent hover:!border-border",
+								closeButton:
+									"!right-0 !top-3 !left-auto absolute hover:!bg-accent hover:!border-border",
 							},
 						}}
 						closeButton
@@ -81,6 +88,7 @@ export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
 			</main>
 			{/* </SidebarInset> */}
 			<ResponsiveBlocker />
+			<CookieConsent variant={"mini"} />
 			{/* </SidebarProvider> */}
 		</TooltipProvider>
 	);
