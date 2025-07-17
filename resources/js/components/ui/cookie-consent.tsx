@@ -4,13 +4,14 @@
 import * as React from "react";
 import {
 	clearAllCookies,
-	clearCookie,
 	cn,
 	getCookie,
 	isCookieConsent,
 	setCookie,
 } from "@/lib/utils";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { Link } from "@inertiajs/react";
 
 // Shadcn UI Components
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,6 @@ import {
 
 // Icons
 import { Check, Cookie, X } from "lucide-react";
-import { Link } from "@inertiajs/react";
 
 // Define prop types
 interface CookieConsentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -45,22 +45,31 @@ const ExpandButton = ({
 	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
 	const cookie_consent = isCookieConsent();
+	const [hovered, setHovered] = React.useState(false);
 
 	return (
 		<Button
 			variant="outline"
 			className={cn(
-				"fixed bottom-4 left-4 z-50 h-9 rounded-lg transition-all duration-300 !bg-card hover:!bg-muted",
+				"fixed bottom-4 left-4 z-50 rounded-full transition-all duration-300 !bg-card hover:!bg-muted !p-[9px]",
 				isOpen ? "translate-y-full opacity-0" : "translate-y-0 opacity-100",
+				hovered ? "gap-2" : "gap-0",
 			)}
 			onClick={() => {
 				setIsOpen(true);
 			}}
+			onMouseEnter={() => setHovered(true)}
+			onMouseLeave={() => setHovered(false)}
 		>
 			<Cookie className="h-5 w-5" />
-			{cookie_consent ? <>Cookies enabled</> : <>Cookies disabled</>}
-
-			<span className="sr-only">Open Cookie Consent</span>
+			<motion.span
+				className={`overflow-hidden whitespace-nowrap ${hovered ? "pr-1" : ""}`}
+				initial={{ width: 0, opacity: 0 }}
+				animate={{ width: hovered ? "auto" : 0, opacity: hovered ? 1 : 0 }}
+				transition={{ duration: 0.2, ease: "easeInOut" }}
+			>
+				{cookie_consent ? "Cookies enabled" : "Cookies disabled"}
+			</motion.span>
 		</Button>
 	);
 };
