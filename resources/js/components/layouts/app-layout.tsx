@@ -27,12 +27,12 @@ import { Toaster } from "@/components/ui/sonner";
 // Icons
 import { Check, Info, Loader2, X } from "lucide-react";
 
-interface AdminLayoutProps {
+interface AppLayoutProps {
 	children: ReactNode;
 	breadcrumbs?: BreadcrumbItem[];
 }
 
-export function AdminLayout({ children, breadcrumbs = [] }: AdminLayoutProps) {
+export function AppLayout({ children, breadcrumbs = [] }: AppLayoutProps) {
 	const { props } = usePage<{
 		flash?: { success?: string; error?: string };
 		success?: string;

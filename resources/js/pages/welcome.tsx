@@ -4,7 +4,7 @@ import { Head } from "@inertiajs/react";
 import { useState, useRef, useEffect } from "react";
 
 // Admin Layout
-import { AdminLayout } from "@/components/layouts/admin-layout";
+import { AppLayout } from "@/components/layouts/app-layout";
 
 // Shadcn UI components
 import {
@@ -58,7 +58,7 @@ export default function Page() {
 	];
 
 	return (
-		<AdminLayout breadcrumbs={breadcrumbs}>
+		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Dashboard" />
 			<div className="w-full flex justify-center items-center flex-col gap-12">
 				{/* Example */}
@@ -135,7 +135,7 @@ export default function Page() {
 					</Card>
 				</div>
 			</div>
-		</AdminLayout>
+		</AppLayout>
 	);
 }
 

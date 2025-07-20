@@ -4,7 +4,7 @@ import * as React from "react";
 import { Link } from "@inertiajs/react";
 
 // Components
-import { AdminLayout } from "@/components/layouts/admin-layout";
+import { AppLayout } from "@/components/layouts/app-layout";
 import { AppSidebar } from "@/components/page/projects/show/app-sidebar";
 import { AppOverview } from "@/components/page/projects/show/app-overview";
 import { AppMakefile } from "@/components/page/projects/show/app-makefile";
@@ -63,14 +63,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Page() {
 	return (
-		<AdminLayout breadcrumbs={breadcrumbs}>
+		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="The name of the project" />
 			<ProjectProvider>
 				{/* Content */}
 
 				<Content />
 			</ProjectProvider>
-		</AdminLayout>
+		</AppLayout>
 	);
 }
 
