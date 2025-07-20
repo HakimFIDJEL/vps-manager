@@ -53,7 +53,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 				<div className="mx-auto flex w-full items-center justify-between gap-2 p-4">
 					<div className="flex w-full items-center gap-1 lg:gap-2">
 						<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg mr-2">
-							<span className="text-xl text-white italic font-bold -translate-x-[0.5px] -translate-y-[0.5px]">H</span>
+							<span className="text-xl text-white italic font-bold -translate-x-[0.5px] -translate-y-[0.5px]">
+								H
+							</span>
 						</div>
 					</div>
 					<div className="flex items-center gap-1 lg:gap-2">

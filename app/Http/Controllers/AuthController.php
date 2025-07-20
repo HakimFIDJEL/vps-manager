@@ -37,16 +37,16 @@ class AuthController extends Controller
         // If user is already logged in, redirect to home
         // if(Auth::check()) {
 
-            // return redirect()->route('projects.index')->with(['success' => 'You are logged in']);
-            
+        // return redirect()->route('projects.index')->with(['success' => 'You are logged in']);
+
         // }
 
         // If user is not logged in,
-        
+
         return Inertia::render('auth/login');
     }
 
-  
+
     // Get Logout
     public function logout()
     {
@@ -62,7 +62,7 @@ class AuthController extends Controller
         // }
     }
 
-   
+
     // Post Login
     public function loginPost(Request $request)
     {
@@ -91,11 +91,4 @@ class AuthController extends Controller
         // }
 
     }
-
-
-  
-
-
-    
-
 }
