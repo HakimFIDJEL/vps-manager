@@ -9,7 +9,7 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 
 // Components
-import { AdminLayout } from "@/components/layouts/admin-layout";
+import { AppLayout } from "@/components/layouts/app-layout";
 
 import { AppProject } from "@/components/page/projects/create/app-project";
 import { AppVariables } from "@/components/page/projects/create/app-variables";
@@ -103,7 +103,7 @@ const steps = [
 
 export default function Page() {
 	return (
-		<AdminLayout breadcrumbs={breadcrumbs}>
+		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Create a project" />
 			{/* Project provider has every providers needed (commands, variables, docker etc..) */}
 			<ProjectProvider>
@@ -138,7 +138,7 @@ export default function Page() {
 
 				<Content />
 			</ProjectProvider>
-		</AdminLayout>
+		</AppLayout>
 	);
 }
 

@@ -5,7 +5,7 @@ import React from "react";
 import { getCookie, isCookieConsent, setCookie } from "@/lib/utils";
 
 // Components
-import { AdminLayout } from "@/components/layouts/admin-layout";
+import { AppLayout } from "@/components/layouts/app-layout";
 import { AppTable } from "@/components/page/projects/index/app-table";
 import { AppGrid } from "@/components/page/projects/index/app-grid";
 import { SmoothItem } from "@/components/ui/smooth-resized";
@@ -57,13 +57,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Page() {
 	const defaultTab = isCookieConsent() ? getCookie("project_index_tab") : "list";
 	return (
-		<AdminLayout breadcrumbs={breadcrumbs}>
+		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Projects" />
 
 			<Tabs className="w-full" defaultValue={defaultTab || "list"}>
 				<Content />
 			</Tabs>
-		</AdminLayout>
+		</AppLayout>
 	);
 }
 

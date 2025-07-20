@@ -10,11 +10,12 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   addonText?: string | React.ReactNode
   addonPosition?: "start" | "end"
   comment?: string
+  error?: boolean
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, type, showPasswordToggle, addonText, addonPosition = "start", readOnly, comment, ...props },
+    { className, type, showPasswordToggle, addonText, addonPosition = "start", readOnly, comment, error=false, ...props },
     ref,
   ) => {
     const [showPassword, setShowPassword] = React.useState(false)
@@ -26,19 +27,41 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const shouldShowToggle = showPasswordToggle && (type === "password" || type === "text")
 
     // Style commun pour disabled et readonly
-    const disabledOrReadonlyStyle = "pointer-events-none cursor-not-allowed opacity-50"
+    const disabledOrReadonlyStyle = "pointer-events-none cursor-not-allowed opacity-50 border-input !ring-0  "
 
     // Styles pour l'input
+    // const inputStyles = cn(
+    //   // Styles de base
+    //   "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground",
+    //   "dark:bg-input/30 bg-background text-base shadow-xs outline-none md:text-sm",
+    //   "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium border",
+    //   "h-9 min-w-0 px-3 py-1 transition-[color,box-shadow, border] duration-200",
+
+    //   // Styles conditionnels
+    //   !addonText && "border-input rounded-md w-full",
+    //   addonText && "border-transparent flex-1 rounded-tl-md rounded-bl-md",
+    //   error && "border-destructive ring-destructive/20 dark:ring-destructive/40 focus-visible:ring-0 focus:!border-transparent",
+    //   shouldShowToggle && "pr-10",
+
+    //   // États
+    //   !readOnly && "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+    //   "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+    //   readOnly && disabledOrReadonlyStyle,
+
+    //   // Classes personnalisées
+    //   className,
+    // )
+
     const inputStyles = cn(
       // Styles de base
       "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground",
       "dark:bg-input/30 bg-background text-base shadow-xs outline-none md:text-sm",
       "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium",
-      "h-9 min-w-0 px-3 py-1 transition-[color,box-shadow]",
+      "h-9 min-w-0 px-3 py-1 transition-[color,box-shadow, border] duration-200",
 
       // Styles conditionnels
-      !addonText && "border-input border rounded-md w-full",
-      addonText && "border-0 flex-1",
+      !addonText && "border border-input rounded-md w-full",
+      addonText && "border-0 flex-1 rounded-tl-md rounded-bl-md",
       shouldShowToggle && "pr-10",
 
       // États
@@ -59,6 +82,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "flex items-center w-full rounded-md border border-input overflow-hidden h-9",
               !readOnly && "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] transition-[color,box-shadow]",
               "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+              error && "border-destructive ring-destructive/20 dark:ring-destructive/40 ring-[3px] focus-within:!ring-ring/50",
+              readOnly && disabledOrReadonlyStyle,
             )}
           >
             {/* Addon au début */}

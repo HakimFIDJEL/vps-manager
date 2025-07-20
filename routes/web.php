@@ -43,17 +43,8 @@ Route::prefix('/auth')->name('auth.')->controller(AuthController::class)->group(
     Route::get('/login', 'login')->name('login');
     Route::get('/logout', 'logout')->name('logout');
 
-    Route::post('/login', 'loginPost')->name('toLogin');
+    Route::post('/login', 'loginPost')->name('login');
 
-    // Passwords
-    Route::prefix('/password')->name('password.')->group(function()
-    {
-        Route::get('/forget', 'forget')->name('forget');
-        Route::get('/reset/{password_token?}', 'reset')->name('reset');
-
-        Route::post('/forget', 'forgetPost')->name('toForget');
-        Route::post('/reset', 'resetPost')->name('toReset');
-    });
 });
 
 
