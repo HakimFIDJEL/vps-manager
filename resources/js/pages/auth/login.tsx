@@ -61,11 +61,11 @@ export default function Page({ className, ...props }: { className?: string }) {
 							<div className="flex flex-col gap-4">
 								<div className="flex flex-col items-center text-center">
 									<h1 className="text-2xl font-bold">Welcome back</h1>
-									<p className="text-muted-foreground text-balance">
+									<p className="text-muted-foreground">
 										Time to manage some projects!
 									</p>
 								</div>
-								<div className="grid gap-2">
+								<div className="grid gap-2 mt-1">
 									<Label htmlFor="username">Username</Label>
 									<Input
 										id="username"
@@ -96,7 +96,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 										error={!!errors.password}
 									/>
 								</div>
-								<div className="flex items-center gap-3">
+								<div className="flex items-center gap-2">
 									<Checkbox id="remember" />
 									<Label htmlFor="remember">Remember me?</Label>
 								</div>
@@ -112,7 +112,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</Button>
 								<Separator />
 								<span className="text-muted-foreground text-center text-sm">
-									Login as whatever user there is on your VPS, root included.
+									Login as whatever user there is on your VPS, root excluded.
 								</span>
 							</div>
 						</form>
@@ -127,7 +127,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 				</Card>
 				<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
 					By clicking login, you acknowledge that the application may require root
-					permissions to run properly.
+					permissions to run properly, login as a user with those permissions.
 				</div>
 			</div>
 		</AuthLayout>

@@ -41,30 +41,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		// Style commun pour disabled et readonly
 		const disabledOrReadonlyStyle =
 			"pointer-events-none cursor-not-allowed opacity-50 border-input !ring-0  ";
-
-		// Styles pour l'input
-		// const inputStyles = cn(
-		//   // Styles de base
-		//   "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground",
-		//   "dark:bg-input/30 bg-background text-base shadow-xs outline-none md:text-sm",
-		//   "file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium border",
-		//   "h-9 min-w-0 px-3 py-1 transition-[color,box-shadow, border] duration-200",
-
-		//   // Styles conditionnels
-		//   !addonText && "border-input rounded-md w-full",
-		//   addonText && "border-transparent flex-1 rounded-tl-md rounded-bl-md",
-		//   error && "border-destructive ring-destructive/20 dark:ring-destructive/40 focus-visible:ring-0 focus:!border-transparent",
-		//   shouldShowToggle && "pr-10",
-
-		//   // États
-		//   !readOnly && "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-		//   "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-		//   readOnly && disabledOrReadonlyStyle,
-
-		//   // Classes personnalisées
-		//   className,
-		// )
-
+		
+			// Styles de l'input
 		const inputStyles = cn(
 			// Styles de base
 			"file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground",
@@ -74,8 +52,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 			// Styles conditionnels
 			!addonText && "border border-input rounded-md w-full",
-			addonText && "border-0 flex-1 rounded-tl-md rounded-bl-md",
+			addonText && "border-0 flex-1 rounded-md",
 			shouldShowToggle && "pr-10",
+			addonPosition === "start" && "!rounded-tl-none !rounded-bl-none",
+			addonPosition === "end" && "!rounded-tr-none !rounded-br-none",
 
 			// États
 			!readOnly &&

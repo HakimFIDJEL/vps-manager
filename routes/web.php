@@ -9,23 +9,17 @@ use App\Http\Controllers\ProjectController;
 
 
 // Middlewares
-use App\Http\Middleware\AuthMiddleware;
+use App\Http\Middleware\Authentication;
 
 
 // // Welcome Route
 Route::get('/', function() {
-    // return Inertia::render('dashboard');
-
-    return redirect()->route('projects.index');
+    return redirect()->route('auth.login');
 })->name('dashboard');
-
-// Route::get('/welcome', function() {
-//     return Inertia::render('welcome');
-// })->name('welcome');
 
 
 // PROJECT Routes
-Route::prefix('/projects')->name('projects.')->controller(ProjectController::class)->group(function()
+Route::prefix('/projects')->name('projects.')->middleware(Authentication::class)->controller(ProjectController::class)->group(function()
 {
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
