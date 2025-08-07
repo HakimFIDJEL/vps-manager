@@ -12,13 +12,10 @@ import { type ReactNode } from "react";
 // Custom components
 import { ResponsiveBlocker } from "./responsive-blocker";
 import AppearanceToggleDropdown from "@/components/layouts/header/theme";
+import { CustomToaster } from "./custom-toaster";
 
 // Shadcn UI components
 import { CookieConsent } from "@/components/ui/cookie-consent";
-import { Toaster } from "@/components/ui/sonner";
-
-// Icons
-import { Check, Info, Loader2, X } from "lucide-react";
 
 interface AuthLayoutProps {
 	children: ReactNode;
@@ -30,21 +27,6 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 		success?: string;
 		error?: string;
 	}>();
-
-	useEffect(() => {
-		const flashSuccess =
-			props.flash?.success ?? (props.success as string | undefined);
-		const flashError = props.flash?.error ?? (props.error as string | undefined);
-
-		console.log("Flash messages:", { flashSuccess, flashError });
-
-		if (flashSuccess) {
-			toast.success(flashSuccess);
-		}
-		if (flashError) {
-			toast.error(flashError);
-		}
-	}, [props]);
 
 	return (
 		<TooltipProvider>
@@ -68,23 +50,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 			<main className="@container/main  flex flex-1 flex-col container mx-auto h-[100vh] align-center justify-center  ">
 				<div className="w-full max-w-sm md:max-w-3xl mx-auto">{children}</div>
 
-				<Toaster
-					icons={{
-						success: <Check className="h-4 w-4 text-primary" />,
-						error: <X className="h-4 w-4 text-destructive" />,
-						info: <Info className="h-4 w-4 text-muted-foreground" />,
-						loading: (
-							<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						),
-					}}
-					toastOptions={{
-						classNames: {
-							closeButton:
-								"!right-0 !top-3 !left-auto absolute hover:!bg-accent hover:!border-border",
-						},
-					}}
-					closeButton
-				/>
+				<CustomToaster {...props}/>
 			</main>
 
 			<ResponsiveBlocker />

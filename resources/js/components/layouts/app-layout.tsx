@@ -18,14 +18,12 @@ import { type ReactNode } from "react";
 
 // Custom components
 import { Breadcrumbs } from "./header/breadcrumbs";
+import { CustomToaster } from "./custom-toaster";
 import { ResponsiveBlocker } from "./responsive-blocker";
 
 // Shadcn UI components
 import { CookieConsent } from "@/components/ui/cookie-consent";
-import { Toaster } from "@/components/ui/sonner";
 
-// Icons
-import { Check, Info, Loader2, X } from "lucide-react";
 
 interface AppLayoutProps {
 	children: ReactNode;
@@ -43,18 +41,6 @@ export function AppLayout({ children, breadcrumbs = [] }: AppLayoutProps) {
 		? getCookie("sidebar_toggle") || "true"
 		: "true";
 
-	useEffect(() => {
-		const flashSuccess =
-			props.flash?.success ?? (props.success as string | undefined);
-		const flashError = props.flash?.error ?? (props.error as string | undefined);
-
-		if (flashSuccess) {
-			toast.success(flashSuccess);
-		}
-		if (flashError) {
-			toast.error(flashError);
-		}
-	}, [props]);
 
 	return (
 		<TooltipProvider>
@@ -67,23 +53,7 @@ export function AppLayout({ children, breadcrumbs = [] }: AppLayoutProps) {
 				<div className="flex flex-1 flex-col gap-4 relative py-6 flex-shrink-0 h-full">
 					{children}
 
-					<Toaster
-						icons={{
-							success: <Check className="h-4 w-4 text-primary" />,
-							error: <X className="h-4 w-4 text-destructive" />,
-							info: <Info className="h-4 w-4 text-muted-foreground" />,
-							loading: (
-								<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-							),
-						}}
-						toastOptions={{
-							classNames: {
-								closeButton:
-									"!right-0 !top-3 !left-auto absolute hover:!bg-accent hover:!border-border",
-							},
-						}}
-						closeButton
-					/>
+					<CustomToaster {...props}/>
 				</div>
 			</main>
 			{/* </SidebarInset> */}
