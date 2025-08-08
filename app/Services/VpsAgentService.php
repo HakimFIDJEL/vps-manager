@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Process;
+use Illuminate\Process\ProcessResult;
 
 class VpsAgentService
 {
@@ -15,6 +16,13 @@ class VpsAgentService
         $this->scriptsPath = base_path('scripts');
     }
 
+    /**
+     * Authenticate a user using a Python script.
+     *
+     * @param  string  $username  The username to authenticate
+     * @param  string  $password  The password for the user
+     * @return array{auth:bool, error?:string} Authentication result
+     */
     public function authenticate(string $username, string $password): array
     {
         $script = escapeshellarg("{$this->scriptsPath}/authenticate.py");
@@ -47,19 +55,87 @@ class VpsAgentService
         ];
     }
 
-    public function executeAsUser(string $username, string $command): object
+    /**
+     * Execute a command as a specific user.
+     *
+     * @param  string  $command   The command to execute
+     * @return ProcessResult
+     * 
+     * @throws \RuntimeException If the user session is not found or the command fails
+     */
+    public function execute(string $command): ProcessResult
     {
-        $script = escapeshellarg("{$this->scriptsPath}/execute.py");
-        $userArg = escapeshellarg($username);
-        $args = array_map('escapeshellarg', explode(' ', $command));
+        $user = session('vps_user');
 
-        $fullCmd = implode(' ', [
-            escapeshellarg($this->pythonPath),
-            $script,
-            $userArg,
-            ...$args
-        ]);
+        if (!$user) {
+            throw new \RuntimeException('No user session found.');
+        }
 
-        return Process::run($fullCmd);
+        $script = escapeshellarg($this->scriptsPath . '/execute.py');
+        $userArg = escapeshellarg($user);
+        $commandArg = escapeshellarg($command);
+
+        return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
+    }
+
+
+    /**
+     * Retrieve a list of folders in the /projects directory.
+     * 
+     * @return array<string> List of folder paths
+     */
+    public function getFolders(): array
+    {
+        $result = $this->execute('ls /projects');
+
+        $output = trim($result->output());
+
+        if ($result->successful()) {
+            return array_values(array_filter(
+                array_map(fn($folder) => "/projects/{$folder}", explode("\n", $output))
+            ));
+        }
+
+        return [];
+    }
+
+    /**
+     * Retrieve information about a folder.
+     *
+     * @param  string  $path   Path to the folder
+     * @return array{inode:int, size:int, updated_at:\DateTimeImmutable, created_at:\DateTimeImmutable}
+     *
+     * @throws \RuntimeException If the system command fails or returns an unexpected format
+     */
+    public function getFolderInfo(string $path): array
+    {
+        $escapedPath = escapeshellarg($path);
+
+        // On récupère inode, taille, date de modif Unix timestamp et date de création Unix timestamp
+        $cmd = sprintf('stat -c "%%i %%s %%Y %%W" %s', $escapedPath);
+        $result = $this->execute($cmd);
+
+        if (! $result->successful()) {
+            throw new \RuntimeException(
+                "Impossible d'exécuter stat sur « {$path} » : " . $result->errorOutput()
+            );
+        }
+
+        $output = trim($result->output());
+        $parts  = preg_split('/\s+/', $output, 4);
+
+        if (count($parts) !== 4 || ! ctype_digit($parts[0]) || ! ctype_digit($parts[1])) {
+            throw new \RuntimeException("Format de sortie inattendu : « {$output} »");
+        }
+
+        [$inode, $size, $updatedTs, $createdTs] = $parts;
+
+        return [
+            'path'       => $path,
+            'inode'      => (int) $inode,
+            'size'       => (int) $size,
+            'updated_at' => (new \DateTimeImmutable())->setTimestamp((int) $updatedTs),
+            'created_at' => (new \DateTimeImmutable())->setTimestamp((int) $createdTs),
+        ];
     }
 }

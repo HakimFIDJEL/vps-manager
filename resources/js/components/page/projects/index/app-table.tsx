@@ -26,7 +26,7 @@ export function AppTable({ projects }: { projects: Project[] }) {
 			<TableHeader className="bg-muted/50">
 				<TableRow>
 					{/* <TableHead>Inode</TableHead> */}
-					<TableHead>Folder path</TableHead>
+					<TableHead>Path</TableHead>
 					<TableHead>Inode</TableHead>
 					<TableHead>Size</TableHead>
 					<TableHead>Updated At</TableHead>
@@ -42,12 +42,17 @@ export function AppTable({ projects }: { projects: Project[] }) {
 						<TableCell>{formatSize(project.size)}</TableCell>
 						<TableCell>{formatDate(project.updated_at)}</TableCell>
 						<TableCell>{formatDate(project.created_at)}</TableCell>
-						<TableCell className="w-[12rem]">{formatActions(project.inode, "full", "sm")}</TableCell>
+						<TableCell className="w-[12rem]">
+							{formatActions(project.inode, "full", "sm")}
+						</TableCell>
 					</TableRow>
 				))}
 				{projects.length === 0 && (
 					<TableRow>
-						<TableCell colSpan={6} className="text-center py-4 bg-muted/50 text-muted-foreground">
+						<TableCell
+							colSpan={6}
+							className="text-center py-4 bg-muted/50 text-muted-foreground"
+						>
 							No projects added yet. Click on "Create a new project" to get started.
 						</TableCell>
 					</TableRow>

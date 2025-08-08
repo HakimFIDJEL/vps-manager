@@ -45,7 +45,8 @@ import {
 } from "lucide-react";
 
 // Projects
-import { ProjectListExample } from "@/lib/projects/type";
+import { Project } from "@/lib/projects/type";
+// import { ProjectListExample } from "@/lib/projects/type";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
@@ -54,20 +55,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 	},
 ];
 
-export default function Page() {
+export default function Page({ projects }: { projects: Project[] }) {
 	const defaultTab = isCookieConsent() ? getCookie("project_index_tab") : "list";
 	return (
 		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Projects" />
 
 			<Tabs className="w-full" defaultValue={defaultTab || "list"}>
-				<Content />
+				<Content projects={projects} />
 			</Tabs>
 		</AppLayout>
 	);
 }
 
-function Content() {
+function Content({ projects }: { projects: Project[] }) {
 	const { currentValue } = useTabsContext();
 
 	React.useEffect(() => {
@@ -137,11 +138,11 @@ function Content() {
 						<TabsBody>
 							<TabsContent value="grid">
 								{/* Cards */}
-								<AppGrid projects={ProjectListExample} />
+								<AppGrid projects={projects} />
 							</TabsContent>
 							<TabsContent value="list">
 								{/* Table */}
-								<AppTable projects={ProjectListExample} />
+								<AppTable projects={projects} />
 							</TabsContent>
 						</TabsBody>
 					</CardContent>

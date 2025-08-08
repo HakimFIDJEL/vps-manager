@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 // Icons
 import { ArrowUpRight } from "lucide-react";
 
-export function formatDate(date: string | undefined): string {
+export function formatDate({ date }: { date: string | undefined }): string {
 	const opts: Intl.DateTimeFormatOptions = {
 		year: "numeric",
 		month: "2-digit",
@@ -26,7 +26,7 @@ export function formatSize(size: number | undefined) {
 		return "N/A";
 	}
 	const sizeInMB = (size / 1024).toFixed(2);
-	return `${sizeInMB} MB`;
+	return `${sizeInMB} KB`;
 }
 
 export function formatActions(

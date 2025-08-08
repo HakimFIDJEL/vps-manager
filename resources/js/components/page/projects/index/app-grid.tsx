@@ -27,8 +27,8 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 				<Card key={project.inode} className="gap-0 pt-0">
 					<CardHeader className="p-6 bg-muted/50 font-medium flex justify-between">
 						{/* <CardTitle className="font-mono font-medium "> */}
-						<p>Folder path</p>
-						<p className="font-mono">{project.path}</p>
+						<span>Path</span>
+						<span className="font-mono">{project.path}</span>
 
 						{/* </CardTitle> */}
 					</CardHeader>
@@ -37,25 +37,25 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 						<div className="flex items-center justify-between">
 							<p className="text-muted-foreground text-sm">Inode</p>
 							{/* <Separator className="mx-4 w-auto flex-1" /> */}
-							<p className="text-sm">{project.inode}</p>
+							<p className="text-sm font-mono">{project.inode}</p>
 						</div>
 						{/* <Separator /> */}
 						<div className="flex items-center justify-between">
 							<p className="text-muted-foreground text-sm">Size</p>
 							{/* <Separator className="mx-4 w-auto flex-1" /> */}
-							<p className="text-sm">{formatSize(project.size)}</p>
+							<p className="text-sm font-mono">{formatSize(project.size)}</p>
 						</div>
 						{/* <Separator /> */}
 						<div className="flex items-center justify-between text-sm">
 							<p className="text-muted-foreground text-sm">Updated At</p>
 							{/* <Separator className="mx-4 w-auto flex-1" /> */}
-							<p className="text-sm">{formatDate(project.updated_at)}</p>
+							<p className="text-sm font-mono">{formatDate(project.updated_at)}</p>
 						</div>
 						{/* <Separator /> */}
 						<div className="flex items-center justify-between text-sm">
 							<p className="text-muted-foreground text-sm">Created At</p>
 							{/* <Separator className="mx-4 w-auto flex-1" /> */}
-							<p className="text-sm">{formatDate(project.created_at)}</p>
+							<p className="text-sm font-mono">{formatDate(project.created_at)}</p>
 						</div>
 					</CardContent>
 					<Separator />

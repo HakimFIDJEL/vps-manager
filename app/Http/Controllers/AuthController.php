@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
 
 // Requests
 use App\Http\Requests\auth\LoginRequest;
@@ -25,8 +28,8 @@ class AuthController extends Controller
     // Get Logout
     public function logout()
     {
-        session()->forget('vps_user');
-        cookie()->queue(cookie()->forget('vps_user_remember'));
+        Session::forget('vps_user');
+        Cookie::queue(Cookie::forget('vps_user_remember'));
 
         return redirect()->route('auth.login')->with(['success' => [
             'title' => 'Logout successful',

@@ -1,28 +1,27 @@
+#!/usr/bin/env python3
 import sys
-import json
 import subprocess
 
 if len(sys.argv) < 3:
-    print(json.dumps({'error': 'missing arguments'}))
-    exit(1)
+    sys.exit(1)
 
 user = sys.argv[1]
-command = sys.argv[2:]
+command = sys.argv[2:] 
 
-cmd = ['sudo', '-u', user] + command
+cmd_str = f"sudo -u {user} " + ' '.join(command)
 
 try:
     result = subprocess.run(
-        cmd,
+        cmd_str,
+        shell=True,
         capture_output=True,
         text=True,
         timeout=10
     )
-    print(json.dumps({
-        'stdout': result.stdout,
-        'stderr': result.stderr,
-        'returncode': result.returncode,
-        'successful': result.returncode == 0
-    }))
+    sys.stdout.write(result.stdout)
+    sys.stderr.write(result.stderr)
+    sys.exit(result.returncode)
+
 except Exception as e:
-    print(json.dumps({'error': str(e)}))
+    sys.stderr.write(str(e))
+    sys.exit(1)
