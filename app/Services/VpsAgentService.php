@@ -90,7 +90,7 @@ class VpsAgentService
 
         $output = trim($result->output());
 
-        if ($result->successful()) {
+        if ($result->successful() && !empty($output)) {
             return array_values(array_filter(
                 array_map(fn($folder) => "/projects/{$folder}", explode("\n", $output))
             ));
