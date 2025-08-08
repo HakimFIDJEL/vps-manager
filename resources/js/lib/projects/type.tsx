@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { VariableSchema, type Variable } from "@/lib/variables/type";
-import { type DockerCompose, DockerComposeStateSchema } from "@/lib/docker/type";
+import {
+	type DockerCompose,
+	DockerComposeStateSchema,
+} from "@/lib/docker/type";
 import { CommandSchema, type Command } from "@/lib/commands/type";
 
 // Types
@@ -8,8 +11,8 @@ export type Project = {
 	// Optional properties
 	inode?: number;
 	size?: number;
-	updated_at?: string;
-	created_at?: string;
+	updated_at: { date: string | undefined };
+	created_at: { date: string | undefined };
 
 	// Required properties
 	path: string;
@@ -40,16 +43,21 @@ export const DEFAULT_PROJECT: Project = {
 		},
 	},
 	isCreated: false,
+	created_at: { date: undefined },
+	updated_at: { date: undefined },
 };
 
 // min 6 caracters
 export const FolderSchema = z.object({
-	path: z.string()
-	.min(6, "Folder path must be at least 6 characters long")
-	.nonempty("Folder path is required")
-	.regex(/^[a-zA-Z0-9_\-\/]+$/, "Folder path can only contain alphanumeric characters, underscores, hyphens, and slashes"),
+	path: z
+		.string()
+		.min(6, "Folder path must be at least 6 characters long")
+		.nonempty("Folder path is required")
+		.regex(
+			/^[a-zA-Z0-9_\-\/]+$/,
+			"Folder path can only contain alphanumeric characters, underscores, hyphens, and slashes",
+		),
 });
-
 
 // Schemas
 export const ProjectSchema = z.object({
@@ -59,12 +67,11 @@ export const ProjectSchema = z.object({
 	docker: DockerComposeStateSchema,
 });
 
-
 export const ProjectExample: Project = {
 	inode: 1234197,
 	size: 2048,
-	updated_at: "2023-10-01T12:00:00Z",
-	created_at: "2023-09-01T12:00:00Z",
+	updated_at: { date: "2023-10-01T12:00:00Z" },
+	created_at: { date: "2023-09-01T12:00:00Z" },
 
 	path: "example-project",
 	variables: [
@@ -91,15 +98,15 @@ export const ProjectExample: Project = {
 		},
 	},
 	isCreated: true,
-}
+};
 
 // Create 3 example projects with possible datas, those are mockups for testing
 export const ProjectListExample: Project[] = [
 	{
 		inode: 1234567,
 		size: 1224,
-		updated_at: "2023-10-01T12:00:00Z",
-		created_at: "2023-09-01T12:00:00Z",
+		updated_at: { date: "2023-10-01T12:00:00Z" },
+		created_at: { date: "2023-09-01T12:00:00Z" },
 
 		path: "/projects/portfolio",
 		variables: [
@@ -107,17 +114,24 @@ export const ProjectListExample: Project[] = [
 			{ key: "DEBUG", value: "true" },
 		],
 		commands: [
-			{ target: "start", command: "npm start", description: "Start the development server" },
-			{ target: "build", command: "npm run build", description: "Build the project" },
+			{
+				target: "start",
+				command: "npm start",
+				description: "Start the development server",
+			},
+			{
+				target: "build",
+				command: "npm run build",
+				description: "Build the project",
+			},
 		],
 		docker: {
-			content: "version: '3.8'\nservices:\n  app:\n    image: portfolio-app:latest",
+			content:
+				"version: '3.8'\nservices:\n  app:\n    image: portfolio-app:latest",
 			isSaved: true,
 			isStrict: false,
 			parsed: {
-				services: [
-					{ name: "app", image: "portfolio-app:latest" },
-				],
+				services: [{ name: "app", image: "portfolio-app:latest" }],
 				volumes: [],
 				networks: [],
 			},
@@ -127,8 +141,8 @@ export const ProjectListExample: Project[] = [
 	{
 		inode: 1234568,
 		size: 4096,
-		updated_at: "2023-10-02T12:00:00Z",
-		created_at: "2023-09-02T12:00:00Z",
+		updated_at: { date: "2023-10-02T12:00:00Z" },
+		created_at: { date: "2023-09-02T12:00:00Z" },
 
 		path: "/projects/ecommerce",
 		variables: [
@@ -137,16 +151,18 @@ export const ProjectListExample: Project[] = [
 		],
 		commands: [
 			{ target: "test", command: "npm test", description: "Run tests" },
-			{ target: "deploy", command: "npm run deploy", description: "Deploy the project" },
+			{
+				target: "deploy",
+				command: "npm run deploy",
+				description: "Deploy the project",
+			},
 		],
 		docker: {
 			content: "version: '3.8'\nservices:\n  db:\n    image: mysql:8.0",
 			isSaved: false,
 			isStrict: true,
 			parsed: {
-				services: [
-					{ name: "db", image: "mysql:8.0" },
-				],
+				services: [{ name: "db", image: "mysql:8.0" }],
 				volumes: [],
 				networks: [],
 			},
@@ -156,8 +172,8 @@ export const ProjectListExample: Project[] = [
 	{
 		inode: 1234569,
 		size: 2048,
-		updated_at: "2023-10-03T12:00:00Z",
-		created_at: "2023-09-03T12:00:00Z",
+		updated_at: { date: "2023-10-03T12:00:00Z" },
+		created_at: { date: "2023-09-03T12:00:00Z" },
 
 		path: "/projects/blog",
 		variables: [
@@ -165,17 +181,23 @@ export const ProjectListExample: Project[] = [
 			{ key: "BLOG_THEME", value: "dark" },
 		],
 		commands: [
-			{ target: "serve", command: "npm run serve", description: "Serve the blog locally" },
-			{ target: "publish", command: "npm run publish", description: "Publish the blog" },
+			{
+				target: "serve",
+				command: "npm run serve",
+				description: "Serve the blog locally",
+			},
+			{
+				target: "publish",
+				command: "npm run publish",
+				description: "Publish the blog",
+			},
 		],
 		docker: {
 			content: "version: '3.8'\nservices:\n  web:\n    image: nginx:latest",
 			isSaved: true,
 			isStrict: false,
 			parsed: {
-				services: [
-					{ name: "web", image: "nginx:latest" },
-				],
+				services: [{ name: "web", image: "nginx:latest" }],
 				volumes: [],
 				networks: [],
 			},
@@ -183,5 +205,3 @@ export const ProjectListExample: Project[] = [
 		isCreated: true,
 	},
 ];
-		
-			
