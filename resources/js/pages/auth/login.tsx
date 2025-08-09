@@ -75,7 +75,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 										placeholder="Enter a username"
 										required
 										autoFocus
-										addonPosition={"end"}
+										addonPosition={"start"}
 										addonText={<User className="h-4 w-4" />}
 										readOnly={processing}
 										onChange={handleChange}
@@ -90,11 +90,12 @@ export default function Page({ className, ...props }: { className?: string }) {
 										type="password"
 										placeholder="Enter a password"
 										required
-										addonPosition={"end"}
+										addonPosition={"start"}
 										addonText={<Lock className="h-4 w-4" />}
 										readOnly={processing}
 										onChange={handleChange}
 										error={!!errors.password}
+										showPasswordToggle={true}
 									/>
 								</div>
 								<div className="flex items-center gap-2">
