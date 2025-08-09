@@ -22,9 +22,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string',
-            'password' => 'required|string',
-            'remember' => 'boolean',
+            'username' => ['required', 'string', 'not_in:root'],
+            'password' => ['required', 'string'],
+            'remember' => ['boolean'],
         ];
     }
 
@@ -37,11 +37,12 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            // "*.required" => "This field is required.",
-            // "*.string" => "This field must be a string.",
-            // "*.max" => "This field may not be greater than the maximum allowed characters.",
-            // "*.min" => "This field must be at least the minimum required characters.",
-            // "*.boolean" => "This field must be true or false.",
+            "*.required"    => "The field :attribute is required.",
+            "*.string"      => "The field :attribute must be a string.",
+            // "*.min"         => "The field :attribute must be at least :min characters.",
+            // "*.max"         => "The field :attribute must not exceed :max characters.",
+            "*.not_in"      => "The field :attribute must not be :values.",
+            "*.boolean"     => "The field :attribute must be true or false.",
         ];
     }
 }

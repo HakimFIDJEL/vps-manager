@@ -4,6 +4,7 @@ import { Link } from "@inertiajs/react";
 // Custom components
 import { Breadcrumbs } from "@/components/layouts/header/breadcrumbs";
 import AppearanceToggleDropdown from "@/components/layouts/header/theme";
+import { Logo } from "../logo";
 
 // Shadcn UI components
 import { Separator } from "@/components/ui/separator";
@@ -25,9 +26,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 		<header className="sticky top-0 bg-muted/50 dark:bg-background backdrop-blur-2xl z-10 w-full group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
 			<div className="container mx-auto flex w-full items-center justify-between gap-2 px-4">
 				<div className="flex w-full items-center gap-1 lg:gap-2">
-					<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md mr-2">
+					{/* <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md mr-2">
 						<span className="text-xl text-white italic font-bold -translate-x-[0.5px] -translate-y-[0.5px]">H</span>
-					</div>
+					</div> */}
+					<Logo />
 
 					<Separator
 						orientation="vertical"

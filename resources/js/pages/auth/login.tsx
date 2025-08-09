@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 // Icons
 import { Lock, LogIn, User, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Logo } from "@/components/layouts/logo";
 
 export default function Page({ className, ...props }: { className?: string }) {
 	const { data, setData, processing, errors, post } = useForm({
@@ -60,9 +61,9 @@ export default function Page({ className, ...props }: { className?: string }) {
 						<form className="p-6 md:p-8" onSubmit={(e) => handleSubmit(e)}>
 							<div className="flex flex-col gap-4">
 								<div className="flex flex-col items-center text-center">
-									<h1 className="text-2xl font-bold">Welcome back</h1>
+									<h1 className="text-2xl font-bold">Welcome back!</h1>
 									<p className="text-muted-foreground">
-										Time to manage some projects!
+										Manage your VPS projects with ease.
 									</p>
 								</div>
 								<div className="grid gap-2 mt-1">
@@ -112,22 +113,19 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</Button>
 								<Separator />
 								<span className="text-muted-foreground text-center text-sm">
-									Login as whatever user there is on your VPS, root excluded.
+									Log in using as non-root user on your VPS.
 								</span>
 							</div>
 						</form>
-						<div className="bg-muted relative hidden md:block">
-							<img
-								src="/placeholder.svg"
-								alt="Image"
-								className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-							/>
+						<div className="relative hidden md:block border-border border-l bg-gradient-to-r from-muted to-primary/70 ">
+							<Logo variant="default" className="absolute bottom-4 right-5" />
 						</div>
 					</CardContent>
 				</Card>
 				<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-					By clicking login, you acknowledge that the application may require root
-					permissions to run properly, login as a user with those permissions.
+					By clicking "Login", you acknowledge that the application may require some
+					root privileges to function correctly. Please ensure your VPS user has the
+					necessary permissions as described in the README.
 				</div>
 			</div>
 		</AuthLayout>
