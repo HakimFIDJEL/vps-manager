@@ -114,7 +114,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</Button>
 								<Separator />
 								<span className="text-muted-foreground text-center text-sm">
-									Log in using as non-root user on your VPS.
+									Log in as any non-root user on your VPS.
 								</span>
 							</div>
 						</form>
