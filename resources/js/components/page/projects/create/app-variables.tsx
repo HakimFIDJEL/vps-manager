@@ -501,11 +501,11 @@ export function CreateVariable({
 											<Input
 												id="value"
 												readOnly={loading}
-												placeholder="eg: My_value"
+												placeholder="eg: My value"
 												{...field}
 											/>
 										</FormControl>
-										<FormDescription>Must not contain spaces.</FormDescription>
+										<FormDescription>This is the value of the variable.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}

@@ -145,7 +145,7 @@ export default function Page() {
 function Content() {
 	const { project, updateProject } = useProject();
 
-	const { data, setData, post, processing, errors } = useForm({
+	const { data, setData, post, processing, errors, wasSuccessful } = useForm({
 		project: project,
 	});
 
@@ -170,16 +170,25 @@ function Content() {
 		e.preventDefault();
 
 		try {
-			console.log("Submitting project:", project);
+			// console.log("Submitting project:", project);
 
-			// Validation de ton projet
 			ProjectSchema.parse(project);
 
 			toast.loading("Creating the project...", {
 				id: "create-project",
 			});
 
-			post(route("projects.store"));
+			post(route("projects.store"), {
+				onError: (errors) => {
+					toast.dismiss("create-project");
+					const messages = Object.values(errors).flat();
+					if (messages.length) {
+						toast.error("An error occured", { description: messages.join("\n") });
+					} else {
+						toast.error("An unknown error occurred");
+					}
+				},
+			});
 		} catch (error) {
 			toast.dismiss("create-project");
 			if (error instanceof z.ZodError) {

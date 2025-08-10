@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cookie;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Process;
 use Inertia\Inertia;
 
 // Requests
 use App\Http\Requests\projects\PathRequest;
+use App\Http\Requests\projects\StoreRequest;
 
 // Services
 use App\Services\VpsAgentService;
@@ -69,9 +71,30 @@ class ProjectController extends Controller
         return Inertia::render('projects/show');
     }
 
-    public function store(Request $request)
+    public function store(StoreRequest $request, VpsAgentService $agent)
     {
-        sleep(2);
+        $data = $request->validated();
+
+        // Step 1 - Create the folder
+        $path = $data['project']['path'];
+
+        $availability = $agent->checkPathAvailability($path);
+
+        if (!$availability) {
+            throw ValidationException::withMessages([
+                'project.path' => 'Project path is not available.',
+            ]);    
+        } else {
+            $result = $agent->createFolder($path);
+
+            if (!$result->successful()) {
+                throw ValidationException::withMessages([
+                    'project.path' => $result->errorOutput() ?? 'Failed to create project folder.',
+                ]);
+            }
+        }
+
+        dd($data);
 
         return redirect()->route('projects.index')->with(['success' => 'Project created successfully!']);
     }

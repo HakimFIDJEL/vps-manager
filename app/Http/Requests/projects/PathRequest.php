@@ -3,15 +3,22 @@
 namespace App\Http\Requests\projects;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\RedirectResponse;
 
 class PathRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
+    public function authorize(): bool | RedirectResponse
     {
-        return session()->has('vps_user');
+        if(session()->has('vps_user')) {
+            return true;
+        }
+        return redirect()->route('auth.login')->with(['error' => [
+            'title' => 'Unauthorized',
+            'description' => 'You must be logged in to create a project.'
+        ]]);
     }
 
     /**

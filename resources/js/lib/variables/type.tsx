@@ -20,7 +20,7 @@ export const VariableSchema = z.object({
 		.string({
 			message: "The field is required",
 		})
-		.regex(/^\S+$/, { message: "Value must not contain spaces" }),
+		// .regex(/^\S+$/, { message: "Value must not contain spaces" }),
 });
 
 export const VariableTextSchema = z.object({

@@ -154,4 +154,19 @@ class VpsAgentService
 
         return !$result->successful();
     }
+
+    /**
+     * Create a folder.
+     *
+     * @param  string  $path   The folder path to create
+     * @return ProcessResult   The result of the folder creation process
+     */
+    public function createFolder(string $path): ProcessResult
+    {
+        $path = "/projects/" . ltrim($path, '/');
+
+        $result = $this->execute("sudo mkdir -p " . escapeshellarg($path));
+
+        return $result;
+    }
 }
