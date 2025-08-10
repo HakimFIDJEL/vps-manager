@@ -25,6 +25,8 @@ Route::prefix('/projects')->name('projects.')->middleware(Authentication::class)
     Route::get('/create', 'create')->name('create');
     Route::get('/show/{inode}', 'show')->name('show');
 
+    Route::get('/verify-path-availability', 'verifyPathAvailability')->name('verify-path-availability');
+
     Route::post('/store', 'store')->name('store');
 
     Route::delete('/{inode}', 'destroy')->name('destroy');

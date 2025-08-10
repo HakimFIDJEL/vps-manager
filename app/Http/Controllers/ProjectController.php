@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Process;
 use Inertia\Inertia;
 
+// Requests
+use App\Http\Requests\projects\PathRequest;
+
 // Services
 use App\Services\VpsAgentService;
 
@@ -78,5 +81,20 @@ class ProjectController extends Controller
         sleep(5);
 
         return redirect()->route('projects.index')->with(['success' => 'Project deleted successfully!']);
+    }
+
+
+    // API
+    public function verifyPathAvailability(PathRequest $request, VpsAgentService $agent)
+    {
+        $data = $request->validated();
+
+        $availability = $agent->checkPathAvailability($data['path']);
+
+        return response()->json([
+            'message'           => "",
+            'path'              => $data['path'],
+            'availability'      => $availability,
+        ], 200);
     }
 }

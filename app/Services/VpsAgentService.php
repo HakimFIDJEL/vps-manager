@@ -138,4 +138,20 @@ class VpsAgentService
             'created_at' => (new \DateTimeImmutable())->setTimestamp((int) $createdTs),
         ];
     }
+
+
+    /**
+     * Check if a folder path is available.
+     *
+     * @param  string  $path   The folder path to check
+     * @return bool           True if the path is available which means it doesn't exist yet, false otherwise
+     */
+    public function checkPathAvailability(string $path): bool
+    {
+        $path = "/projects/" . ltrim($path, '/');
+
+        $result = $this->execute("test -d " . escapeshellarg($path));
+
+        return !$result->successful();
+    }
 }
