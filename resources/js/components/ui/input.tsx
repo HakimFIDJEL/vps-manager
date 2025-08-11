@@ -4,6 +4,7 @@ import * as React from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
 export interface InputProps
 	extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -165,10 +166,12 @@ function PasswordToggle({
 	readOnly: boolean | undefined;
 }) {
 	return (
-		<button
+		<Button
 			type="button"
+			variant={"ghost"}
+			size={"icon"}
 			className={cn(
-				"absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer hover:bg-muted-foreground/10 transition-colors duration-200 p-1 rounded-md",
+				"h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer hover:bg-muted-foreground/10 transition-colors duration-200 p-1 rounded-md",
 				readOnly && "opacity-50 pointer-events-none",
 			)}
 			onClick={() => setShowPassword(!showPassword)}
@@ -179,7 +182,7 @@ function PasswordToggle({
 			tabIndex={readOnly ? -1 : undefined}
 		>
 			{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-		</button>
+		</Button>
 	);
 }
 

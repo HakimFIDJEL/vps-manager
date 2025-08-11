@@ -79,7 +79,7 @@ function QuickActions() {
 							<Folder className="h-4 w-4 text-primary" />
 						</div>
 						<div>
-							<h4 className="font-medium">Project information</h4>
+							<h4 className="font-medium text-base">Project information</h4>
 							<div className="flex items-center gap-2">
 								<Badge variant={"outline"}>{project.path}</Badge>
 							</div>

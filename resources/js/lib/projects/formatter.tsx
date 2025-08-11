@@ -39,7 +39,7 @@ export function formatActions(
 			href={route("projects.show", { inode: inode })}
 			className={`w-${width}`}
 		>
-			<Button variant="outline" className={`w-${width} group`} size={size}>
+			<Button variant={"outline"} className={`w-${width} group`} size={size}>
 				<ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform duration-300" />
 				Show project
 			</Button>

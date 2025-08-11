@@ -18,7 +18,8 @@ use App\Http\Requests\projects\StoreRequest;
 
 // Services
 use App\Services\VpsAgentService;
-
+use Exception;
+use RuntimeException;
 
 class ProjectController extends Controller
 {
@@ -94,7 +95,7 @@ class ProjectController extends Controller
             }
         }
 
-        dd($data);
+        // dd($data);
 
         return redirect()->route('projects.index')->with(['success' => 'Project created successfully!']);
     }

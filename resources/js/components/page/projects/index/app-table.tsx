@@ -22,26 +22,26 @@ import { Link } from "@inertiajs/react";
 
 export function AppTable({ projects }: { projects: Project[] }) {
 	return (
-		<Table>
+		<Table className="border-0">
 			<TableHeader className="bg-muted/50">
 				<TableRow>
 					{/* <TableHead>Inode</TableHead> */}
-					<TableHead>Path</TableHead>
-					<TableHead>Inode</TableHead>
-					<TableHead>Size</TableHead>
-					<TableHead>Updated At</TableHead>
-					<TableHead>Created At</TableHead>
-					<TableHead className="text-center">Actions</TableHead>
+					<TableHead className="p-4">Path</TableHead>
+					<TableHead className="p-4">Inode</TableHead>
+					<TableHead className="p-4">Size</TableHead>
+					<TableHead className="p-4">Updated At</TableHead>
+					<TableHead className="p-4">Created At</TableHead>
+					<TableHead className="text-center p-4">Actions</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
 				{projects.map((project) => (
 					<TableRow key={project.path}>
-						<TableCell className="font-mono">{project.path}</TableCell>
-						<TableCell className="font-mono">{project.inode}</TableCell>
-						<TableCell>{formatSize(project.size)}</TableCell>
-						<TableCell>{formatDate(project.updated_at)}</TableCell>
-						<TableCell>{formatDate(project.created_at)}</TableCell>
+						<TableCell className="font-mono p-4">{project.path}</TableCell>
+						<TableCell className="font-mono p-4">{project.inode}</TableCell>
+						<TableCell className="p-4">{formatSize(project.size)}</TableCell>
+						<TableCell className="p-4">{formatDate(project.updated_at)}</TableCell>
+						<TableCell className="p-4">{formatDate(project.created_at)}</TableCell>
 						<TableCell className="w-[12rem]">
 							{formatActions(project.inode, "full", "sm")}
 						</TableCell>
