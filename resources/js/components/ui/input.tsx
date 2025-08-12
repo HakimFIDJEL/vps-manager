@@ -4,6 +4,7 @@ import * as React from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
 export interface InputProps
 	extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -51,7 +52,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			"h-9 min-w-0 px-3  transition-[color,box-shadow, border] duration-200",
 
 			// Styles conditionnels
-			!addonText && "border border-input rounded-md w-full",
+			// !addonText && "border border-input rounded-md w-full",
 			addonText && "border-0 flex-1 rounded-md",
 			shouldShowToggle && "pr-10",
 			addonPosition === "start" &&
@@ -70,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		);
 
 		const wrapperStyles = cn(
-			"flex items-center w-full rounded-md border border-input overflow-hidden h-9 relative",
+			"flex items-center w-full rounded-md overflow-hidden border border-input h-9 border relative",
 			!readOnly &&
 				"focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] transition-[color,box-shadow]",
 			// !readOnly && "focus-within:border-ring focus-within:ring-0 transition-[color,box-shadow]",
@@ -81,6 +82,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			// error && "border-destructive ring-destructive/20 dark:ring-destructive/40 ring-[3px]",
 
 			readOnly && disabledOrReadonlyStyle,
+
+			className,
 		);
 
 		return (
@@ -153,8 +156,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	},
 );
 
-function InputBase() {}
-
 function PasswordToggle({
 	showPassword,
 	setShowPassword,
@@ -165,10 +166,12 @@ function PasswordToggle({
 	readOnly: boolean | undefined;
 }) {
 	return (
-		<button
+		<Button
 			type="button"
+			variant={"ghost"}
+			size={"icon"}
 			className={cn(
-				"absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer hover:bg-muted-foreground/10 transition-colors duration-200 p-1 rounded-md",
+				"h-6 w-6 absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none cursor-pointer hover:bg-muted-foreground/10 transition-colors duration-200 p-1 rounded-md",
 				readOnly && "opacity-50 pointer-events-none",
 			)}
 			onClick={() => setShowPassword(!showPassword)}
@@ -179,7 +182,7 @@ function PasswordToggle({
 			tabIndex={readOnly ? -1 : undefined}
 		>
 			{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-		</button>
+		</Button>
 	);
 }
 

@@ -24,7 +24,7 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 	return (
 		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{projects.map((project) => (
-				<Card key={project.inode} className="gap-0 pt-0">
+				<Card key={project.inode} className="gap-0 pt-0 shadow-none">
 					<CardHeader className="p-6 bg-muted/50 font-medium flex justify-between">
 						{/* <CardTitle className="font-mono font-medium "> */}
 						<span>Path</span>
@@ -63,8 +63,8 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 				</Card>
 			))}
 			{projects.length === 0 && (
-				<Card className="col-span-1 md:col-span-2 lg:col-span-3">
-					<CardContent className="text-center py-4 bg-muted/50 text-muted-foreground text-sm">
+				<Card className="col-span-1 md:col-span-2 lg:col-span-3 shadow-none">
+					<CardContent className="text-center py-6 bg-muted/50 text-muted-foreground text-sm">
 						No projects added yet. Click on "Create a new project" to get started.
 					</CardContent>
 				</Card>

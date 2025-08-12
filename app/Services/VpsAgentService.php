@@ -138,4 +138,112 @@ class VpsAgentService
             'created_at' => (new \DateTimeImmutable())->setTimestamp((int) $createdTs),
         ];
     }
+
+
+    /**
+     * Check if a folder path is available.
+     *
+     * @param  string  $path   The folder path to check
+     * @return bool           True if the path is available which means it doesn't exist yet, false otherwise
+     */
+    public function checkPathAvailability(string $path): bool
+    {
+        $path = '/projects/' . ltrim($path, '/');
+
+        $result = $this->execute("test -d " . escapeshellarg($path));
+
+        return !$result->successful();
+    }
+
+    /**
+     * Create a folder.
+     *
+     * @param  string  $path   The folder path to create
+     * @return ProcessResult   The result of the folder creation process
+     */
+    public function createFolder(string $path): ProcessResult
+    {
+        $path = '/projects/' . ltrim($path, '/');
+
+        $result = $this->execute("sudo mkdir -p " . escapeshellarg($path));
+
+        return $result;
+    }
+
+    /**
+     * Creates a .env file in a folder.
+     *
+     * @param string $path      The folder path
+     * @param array $variables  The environment variables to include
+     * @return ProcessResult    The result of the environment file creation process
+     */
+    public function createEnvFile(string $path, array $variables): ProcessResult
+    {
+        $envFilePath = "/projects/{$path}/.env";
+
+        $envContent = '';
+        foreach ($variables as $variable) {
+            $envContent .= "{$variable['key']}={$variable['value']}\n";
+        }
+
+        return $this->execute("echo " . escapeshellarg($envContent) . " | sudo tee " . escapeshellarg($envFilePath) . " > /dev/null");
+    }
+
+    /**
+     * Create a docker-compose.yaml file in a folder.
+     *
+     * @param string $path      The folder path
+     * @param string $content   The content of the docker-compose.yaml file
+     * @return ProcessResult    The result of the docker-compose file creation process
+     */
+    public function createDockerComposeFile(string $path, string $content): ProcessResult
+    {
+        $dockerFilePath = "/projects/{$path}/docker-compose.yaml";
+
+        return $this->execute("echo " . escapeshellarg($content) . " | sudo tee " . escapeshellarg($dockerFilePath) . " > /dev/null");
+    }
+
+    /**
+     * Create a Makefile in a folder.
+     *
+     * @param string $path      The folder path
+     * @param array $commands   The commands to include in the Makefile
+     * @return ProcessResult    The result of the Makefile creation process
+     */
+    public function createMakefile(string $path, array $commands): ProcessResult
+    {
+        $makefilePath = "/projects/{$path}/Makefile";
+
+        $makefileContent = '';
+        foreach ($commands as $c) {
+            $target      = $c['target'];
+            $description = $c['description'] ?? 'Unknown description';
+            $cmds        = (array) $c['command']; 
+
+            $makefileContent .= "# {$description}\n";
+            $makefileContent .= "{$target}:\n";
+
+            foreach ($cmds as $cmd) {
+                $makefileContent .= "\t{$cmd}\n";
+            }
+
+            $makefileContent .= "\n";
+        }
+
+
+        return $this->execute("echo " . escapeshellarg($makefileContent) . " | sudo tee " . escapeshellarg($makefilePath) . " > /dev/null");
+    }
+
+    /**
+     * Delete a folder.
+     *
+     * @param  string  $path   The folder path to delete
+     * @return ProcessResult   The result of the folder deletion process
+     */
+    public function deleteFolder(string $path): ProcessResult
+    {
+        $path = '/projects/' . ltrim($path, '/');
+
+        return $this->execute("sudo rm -rf " . escapeshellarg($path));   
+    }
 }

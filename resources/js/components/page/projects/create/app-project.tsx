@@ -14,6 +14,10 @@ import { Check, Loader2, X } from "lucide-react";
 
 // Types
 import { ProjectSchema } from "@/lib/projects/type";
+
+// Services
+import { verifyPathAvailability } from "@/services/projects/remote";
+
 type PathState = "" | "loading" | "success" | "error";
 
 export function AppProject({
@@ -58,11 +62,6 @@ export function AppProject({
 
 	// Functions
 	async function checkPathAvailability(path: string): Promise<boolean> {
-		// TODO : Check if the path is available on the server
-		if (false) {
-			setAvailabilityState("error");
-			return true;
-		}
 
 		// If the state is already success, no need to check again
 		if (availabilityState === "success") {
@@ -77,8 +76,7 @@ export function AppProject({
 
 		setAvailabilityState("loading");
 		try {
-			// await new Promise((resolve) => setTimeout(resolve, 1000));
-			const isAvailable = true;
+			const isAvailable = await verifyPathAvailability(path);
 
 			setAvailabilityState(isAvailable ? "success" : "error");
 			return isAvailable;

@@ -8,20 +8,14 @@ export type Variable = {
 
 // Schemas
 export const VariableSchema = z.object({
-	key: z
-		.string({
-			message: "The field is required",
-		})
-		.regex(/^[A-Z][A-Z0-9_]*$/, {
-			message: "Key must be uppercase and separated by an underscore",
-		}),
-
-	value: z
-		.string({
-			message: "The field is required",
-		})
-		.regex(/^\S+$/, { message: "Value must not contain spaces" }),
+  key: z.string({ message: "The field is required" })
+        .regex(/^[A-Z][A-Z0-9_]*$/, { message: "Key must be uppercase and separated by an underscore" }),
+  value: z.string({ message: "The field is required" })
+        .trim()
+        .min(1, { message: "Value is required" })
+        // .regex(/^\S+$/, { message: "Value must not contain spaces" }),
 });
+
 
 export const VariableTextSchema = z.object({
 	textarea: z

@@ -78,24 +78,8 @@ function Content({ projects }: { projects: Project[] }) {
 	}, [currentValue]);
 	return (
 		<>
-			<SmoothItem
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
-				delay={0.1}
-			>
-				<TabsList className="grid w-max grid-cols-2">
-					<TabsTrigger value="list">
-						<TableProperties />
-					</TabsTrigger>
-					<TabsTrigger value="grid">
-						<LayoutGrid />
-					</TabsTrigger>
-				</TabsList>
-			</SmoothItem>
-
-			<SmoothItem delay={0.3}>
-				<Card>
+			<SmoothItem delay={0.1}>
+				<Card className="mb-4">
 					<CardHeader className="gap-0 gap-x-1.5">
 						<div className="flex items-center gap-3">
 							<div className="bg-card border rounded-md p-2">
@@ -115,7 +99,7 @@ function Content({ projects }: { projects: Project[] }) {
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Link href={route("projects.index")}>
-										<Button variant={"secondary"} className="group">
+										<Button variant={"outline"} className="group">
 											<RefreshCcw className="h-4 w-4 group-hover:-rotate-180 transition-transform duration-300" />
 										</Button>
 									</Link>
@@ -132,21 +116,40 @@ function Content({ projects }: { projects: Project[] }) {
 							</Link>
 						</CardAction>
 					</CardHeader>
-					<Separator />
-
-					<CardContent>
-						<TabsBody>
-							<TabsContent value="grid">
-								{/* Cards */}
-								<AppGrid projects={projects} />
-							</TabsContent>
-							<TabsContent value="list">
-								{/* Table */}
-								<AppTable projects={projects} />
-							</TabsContent>
-						</TabsBody>
-					</CardContent>
 				</Card>
+			</SmoothItem>
+
+			<SmoothItem
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				delay={0.3}
+			>
+				<TabsList className="grid w-max grid-cols-2">
+					<TabsTrigger value="list">
+						<TableProperties />
+					</TabsTrigger>
+					<TabsTrigger value="grid">
+						<LayoutGrid />
+					</TabsTrigger>
+				</TabsList>
+			</SmoothItem>
+
+			<SmoothItem delay={0.5}>
+				<TabsBody>
+					<TabsContent value="grid">
+						{/* Cards */}
+						<AppGrid projects={projects} />
+					</TabsContent>
+					<TabsContent value="list">
+						{/* Table */}
+						<Card className="border-0 overflow-visible">
+							<CardContent className="p-0">
+								<AppTable projects={projects} />
+							</CardContent>
+						</Card>
+					</TabsContent>
+				</TabsBody>
 			</SmoothItem>
 		</>
 	);

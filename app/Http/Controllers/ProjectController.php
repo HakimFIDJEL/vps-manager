@@ -8,12 +8,18 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cookie;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Process;
 use Inertia\Inertia;
 
+// Requests
+use App\Http\Requests\projects\PathRequest;
+use App\Http\Requests\projects\StoreRequest;
+
 // Services
 use App\Services\VpsAgentService;
-
+use Exception;
+use RuntimeException;
 
 class ProjectController extends Controller
 {
@@ -66,9 +72,85 @@ class ProjectController extends Controller
         return Inertia::render('projects/show');
     }
 
-    public function store(Request $request)
+    public function store(StoreRequest $request, VpsAgentService $agent)
     {
-        sleep(2);
+        $data = $request->validated();
+
+        // Step 1 - Create the folder
+        $path = $data['project']['path'];
+
+        $availability = $agent->checkPathAvailability($path);
+
+        if (!$availability) {
+            throw ValidationException::withMessages([
+                'project.path' => 'Project path is not available.',
+            ]);
+        } else {
+            $result = $agent->createFolder($path);
+
+            if (!$result->successful()) {
+                throw ValidationException::withMessages([
+                    'project.path' => $result->errorOutput() ?? 'Failed to create project folder.',
+                ]);
+            }
+        }
+
+        // Step 2 - Create .env file
+        $variables = $data['project']['variables'];
+
+        if (!empty($variables)) {
+            $res = $agent->createEnvFile($path, $variables);
+
+            if (!$res->successful()) {
+                $errors = [
+                    'project.variables' => trim($res->errorOutput()) ?: 'Failed to create .env file.',
+                ];
+
+                $del = $agent->deleteFolder($path);
+                if (!$del->successful()) {
+                    $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+                }
+
+                throw ValidationException::withMessages($errors);
+            }
+        }
+
+
+        // Step 3 - Create docker-compose.yaml
+        $docker     = $data['project']['docker'];
+        $content    = $docker['content'];
+
+        $res = $agent->createDockerComposeFile($path, $content);
+
+        if (!$res->successful()) {
+
+            $errors = [
+                'project.docker' => $res->errorOutput() ?? 'Failed to create docker-compose.yaml file.',
+            ];
+
+            $del = $agent->deleteFolder($path);
+            if (!$del->successful()) {
+                $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+            }
+
+            throw ValidationException::withMessages($errors);
+        }
+
+        // Step 4 - Create makefile
+        $commands = $data['project']['commands'];
+
+        if (!empty($commands)) {
+            $res = $agent->createMakefile($path, $commands);
+
+            $errors['project.commands'] = $res->errorOutput() ?? 'Failed to create Makefile.';
+
+            $del = $agent->deleteFolder($path);
+            if (!$del->successful()) {
+                $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+            }
+
+            throw ValidationException::withMessages($errors);
+        }
 
         return redirect()->route('projects.index')->with(['success' => 'Project created successfully!']);
     }
@@ -78,5 +160,20 @@ class ProjectController extends Controller
         sleep(5);
 
         return redirect()->route('projects.index')->with(['success' => 'Project deleted successfully!']);
+    }
+
+
+    // API
+    public function verifyPathAvailability(PathRequest $request, VpsAgentService $agent)
+    {
+        $data = $request->validated();
+
+        $availability = $agent->checkPathAvailability($data['path']);
+
+        return response()->json([
+            'message'           => "",
+            'path'              => $data['path'],
+            'availability'      => $availability,
+        ], 200);
     }
 }

@@ -630,7 +630,7 @@ function DockerSidebar({
 									<p className="font-medium text-foreground">Variables usage</p>
 								</div>
 								<p>Variables are defined in a docker-compose.yml file like this:</p>
-								<code className="block px-3 py-2 bg-background rounded-md border border-border/50 text-center">
+								<code className="block px-3 py-2 bg-background/50 rounded-md border border-border/50 text-center">
 									$&#123;VARIABLE_NAME&#125;
 								</code>
 							</div>
