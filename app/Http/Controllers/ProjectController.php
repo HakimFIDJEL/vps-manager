@@ -76,7 +76,7 @@ class ProjectController extends Controller
     {
         $data = $request->validated();
 
-        // Step 1 - Create the folder - DONE
+        // Step 1 - Create the folder
         $path = $data['project']['path'];
 
         $availability = $agent->checkPathAvailability($path);
@@ -84,7 +84,7 @@ class ProjectController extends Controller
         if (!$availability) {
             throw ValidationException::withMessages([
                 'project.path' => 'Project path is not available.',
-            ]);    
+            ]);
         } else {
             $result = $agent->createFolder($path);
 
@@ -95,40 +95,62 @@ class ProjectController extends Controller
             }
         }
 
-        // Step 2 - Create .env file - DONE
+        // Step 2 - Create .env file
         $variables = $data['project']['variables'];
 
-        if(!empty($variables)) {
-            $result = $agent->createEnvFile($path, $variables);
+        if (!empty($variables)) {
+            $res = $agent->createEnvFile($path, $variables);
 
-            if (!$result->successful()) {
-                throw ValidationException::withMessages([
-                    'project.variables' => $result->errorOutput() ?? 'Failed to create .env file.',
-                ]);
+            if (!$res->successful()) {
+                $errors = [
+                    'project.variables' => trim($res->errorOutput()) ?: 'Failed to create .env file.',
+                ];
+
+                $del = $agent->deleteFolder($path);
+                if (!$del->successful()) {
+                    $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+                }
+
+                throw ValidationException::withMessages($errors);
             }
         }
 
-        // Step 3 - Create docker-compose.yaml - DONE
+
+        // Step 3 - Create docker-compose.yaml
         $docker     = $data['project']['docker'];
         $content    = $docker['content'];
 
-        $result = $agent->createDockerComposeFile($path, $content);
+        $res = $agent->createDockerComposeFile($path, $content);
 
-        if (!$result->successful()) {
-            throw ValidationException::withMessages([
-                'project.docker' => $result->errorOutput() ?? 'Failed to create docker-compose.yaml file.',
-            ]);
+        if (!$res->successful()) {
+
+            $errors = [
+                'project.docker' => $res->errorOutput() ?? 'Failed to create docker-compose.yaml file.',
+            ];
+
+            $del = $agent->deleteFolder($path);
+            if (!$del->successful()) {
+                $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+            }
+
+            throw ValidationException::withMessages($errors);
         }
 
-        // Step 4 - Create makefile - TODO
-        $makefile = $data['project']['makefile'];
+        // Step 4 - Create makefile
+        $commands = $data['project']['commands'];
 
-        if(!empty($makefile)) {
-            // 
+        if (!empty($commands)) {
+            $res = $agent->createMakefile($path, $commands);
+
+            $errors['project.commands'] = $res->errorOutput() ?? 'Failed to create Makefile.';
+
+            $del = $agent->deleteFolder($path);
+            if (!$del->successful()) {
+                $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+            }
+
+            throw ValidationException::withMessages($errors);
         }
-
-
-        // dd($data);
 
         return redirect()->route('projects.index')->with(['success' => 'Project created successfully!']);
     }

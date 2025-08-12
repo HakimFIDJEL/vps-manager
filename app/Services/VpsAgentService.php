@@ -202,4 +202,48 @@ class VpsAgentService
 
         return $this->execute("echo " . escapeshellarg($content) . " | sudo tee " . escapeshellarg($dockerFilePath) . " > /dev/null");
     }
+
+    /**
+     * Create a Makefile in a folder.
+     *
+     * @param string $path      The folder path
+     * @param array $commands   The commands to include in the Makefile
+     * @return ProcessResult    The result of the Makefile creation process
+     */
+    public function createMakefile(string $path, array $commands): ProcessResult
+    {
+        $makefilePath = "/projects/{$path}/Makefile";
+
+        $makefileContent = '';
+        foreach ($commands as $c) {
+            $target      = $c['target'];
+            $description = $c['description'] ?? 'Unknown description';
+            $cmds        = (array) $c['command']; 
+
+            $makefileContent .= "# {$description}\n";
+            $makefileContent .= "{$target}:\n";
+
+            foreach ($cmds as $cmd) {
+                $makefileContent .= "\t{$cmd}\n";
+            }
+
+            $makefileContent .= "\n";
+        }
+
+
+        return $this->execute("echo " . escapeshellarg($makefileContent) . " | sudo tee " . escapeshellarg($makefilePath) . " > /dev/null");
+    }
+
+    /**
+     * Delete a folder.
+     *
+     * @param  string  $path   The folder path to delete
+     * @return ProcessResult   The result of the folder deletion process
+     */
+    public function deleteFolder(string $path): ProcessResult
+    {
+        $path = '/projects/' . ltrim($path, '/');
+
+        return $this->execute("sudo rm -rf " . escapeshellarg($path));   
+    }
 }
