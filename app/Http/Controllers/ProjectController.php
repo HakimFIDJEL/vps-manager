@@ -76,7 +76,7 @@ class ProjectController extends Controller
     {
         $data = $request->validated();
 
-        // Step 1 - Create the folder
+        // Step 1 - Create the folder - DONE
         $path = $data['project']['path'];
 
         $availability = $agent->checkPathAvailability($path);
@@ -94,6 +94,32 @@ class ProjectController extends Controller
                 ]);
             }
         }
+
+        // Step 2 - Create .env file - DONE
+        $variables = $data['project']['variables'];
+
+        if(!empty($variables)) {
+            $result = $agent->createEnvFile($path, $variables);
+
+            if (!$result->successful()) {
+                throw ValidationException::withMessages([
+                    'project.variables' => $result->errorOutput() ?? 'Failed to create .env file.',
+                ]);
+            }
+        }
+
+        // Step 3 - Create docker-compose.yaml - TODO
+        $docker     = $data['project']['docker'];
+        $content    = $docker['content'];
+
+
+        // Step 4 - Create makefile - TODO
+        $makefile = $data['project']['makefile'];
+
+        if(!empty($makefile)) {
+            // 
+        }
+
 
         // dd($data);
 

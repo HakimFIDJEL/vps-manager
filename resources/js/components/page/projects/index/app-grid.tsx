@@ -64,7 +64,7 @@ export function AppGrid({ projects }: { projects: Project[] }) {
 			))}
 			{projects.length === 0 && (
 				<Card className="col-span-1 md:col-span-2 lg:col-span-3 shadow-none">
-					<CardContent className="text-center py-4 bg-muted/50 text-muted-foreground text-sm">
+					<CardContent className="text-center py-6 bg-muted/50 text-muted-foreground text-sm">
 						No projects added yet. Click on "Create a new project" to get started.
 					</CardContent>
 				</Card>

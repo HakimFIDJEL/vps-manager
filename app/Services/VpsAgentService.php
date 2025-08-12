@@ -148,7 +148,7 @@ class VpsAgentService
      */
     public function checkPathAvailability(string $path): bool
     {
-        $path = "/projects/" . ltrim($path, '/');
+        $path = '/projects/' . ltrim($path, '/');
 
         $result = $this->execute("test -d " . escapeshellarg($path));
 
@@ -163,10 +163,30 @@ class VpsAgentService
      */
     public function createFolder(string $path): ProcessResult
     {
-        $path = "/projects/" . ltrim($path, '/');
+        $path = '/projects/' . ltrim($path, '/');
 
         $result = $this->execute("sudo mkdir -p " . escapeshellarg($path));
 
         return $result;
     }
+
+    /**
+     * Creates a .env file in a folder.
+     *
+     * @param string $path      The folder path
+     * @param array $variables  The environment variables to include
+     * @return ProcessResult    The result of the environment file creation process
+     */
+    public function createEnvFile(string $path, array $variables): ProcessResult
+    {
+        $envFilePath = "/projects/{$path}/.env";
+
+        $envContent = '';
+        foreach ($variables as $variable) {
+            $envContent .= "{$variable['key']}={$variable['value']}\n";
+        }
+
+        return $this->execute("echo " . escapeshellarg($envContent) . " | sudo tee " . escapeshellarg($envFilePath) . " > /dev/null");
+    }
+
 }

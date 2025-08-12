@@ -45,7 +45,7 @@ PYTHON_PATH=/path/to/vps-manager/.venv/bin/python
 
 ```
 sudo visudo -f /etc/sudoers.d/vps-manager
-<my_user> ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm
+<my_user> ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm, /bin/echo
 ```
 
 En utilisation sur le VPS (via apache par exemple), vérifier quel utilisateur système utilise Laravel par exemple :
