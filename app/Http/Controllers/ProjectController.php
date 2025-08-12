@@ -108,10 +108,17 @@ class ProjectController extends Controller
             }
         }
 
-        // Step 3 - Create docker-compose.yaml - TODO
+        // Step 3 - Create docker-compose.yaml - DONE
         $docker     = $data['project']['docker'];
         $content    = $docker['content'];
 
+        $result = $agent->createDockerComposeFile($path, $content);
+
+        if (!$result->successful()) {
+            throw ValidationException::withMessages([
+                'project.docker' => $result->errorOutput() ?? 'Failed to create docker-compose.yaml file.',
+            ]);
+        }
 
         // Step 4 - Create makefile - TODO
         $makefile = $data['project']['makefile'];

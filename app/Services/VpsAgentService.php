@@ -189,4 +189,17 @@ class VpsAgentService
         return $this->execute("echo " . escapeshellarg($envContent) . " | sudo tee " . escapeshellarg($envFilePath) . " > /dev/null");
     }
 
+    /**
+     * Create a docker-compose.yaml file in a folder.
+     *
+     * @param string $path      The folder path
+     * @param string $content   The content of the docker-compose.yaml file
+     * @return ProcessResult    The result of the docker-compose file creation process
+     */
+    public function createDockerComposeFile(string $path, string $content): ProcessResult
+    {
+        $dockerFilePath = "/projects/{$path}/docker-compose.yaml";
+
+        return $this->execute("echo " . escapeshellarg($content) . " | sudo tee " . escapeshellarg($dockerFilePath) . " > /dev/null");
+    }
 }
