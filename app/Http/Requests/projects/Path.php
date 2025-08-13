@@ -5,7 +5,7 @@ namespace App\Http\Requests\projects;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\RedirectResponse;
 
-class PathRequest extends FormRequest
+class Path extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

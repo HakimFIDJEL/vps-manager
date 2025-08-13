@@ -118,7 +118,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</span>
 							</div>
 						</form>
-						<div className="relative hidden md:block border-border border-l bg-gradient-to-r from-muted to-primary/70 ">
+						<div className="relative hidden md:block border-border border-l bg-gradient-to-r  dark:from-primary/15 from-muted to-primary/70 ">
 							<Logo variant="default" className="absolute bottom-4 right-5" />
 						</div>
 					</CardContent>

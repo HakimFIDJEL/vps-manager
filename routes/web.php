@@ -1,15 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 // Controllers
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\Authentication as ControlleAuthentication;
+use App\Http\Controllers\Project as ControllerProjects;
 
 
 // Middlewares
-use App\Http\Middleware\Authentication;
+use App\Http\Middleware\Authentication as MiddlewareAuthentication;
 
 
 // // Welcome Route
@@ -19,7 +18,7 @@ Route::get('/', function() {
 
 
 // PROJECT Routes
-Route::prefix('/projects')->name('projects.')->middleware(Authentication::class)->controller(ProjectController::class)->group(function()
+Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthentication::class)->controller(ControllerProjects::class)->group(function()
 {
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
@@ -33,7 +32,7 @@ Route::prefix('/projects')->name('projects.')->middleware(Authentication::class)
 });
 
 // AUTH ROUTES
-Route::prefix('/auth')->name('auth.')->controller(AuthController::class)->group(function()
+Route::prefix('/auth')->name('auth.')->controller(ControlleAuthentication::class)->group(function()
 {
     // Authentification
     Route::get('/login', 'login')->name('login');
