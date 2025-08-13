@@ -64,6 +64,10 @@ import { CommandProvider } from "@/contexts/command-context";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
+		title: "VPS Manager",
+		link: false,
+	},
+	{
 		title: "Projects",
 		href: route("projects.index"),
 	},

@@ -20,6 +20,7 @@ use App\Http\Requests\projects\Store as RequestsStore;
 // Services
 use App\Services\System as ServicesSystem;
 use App\Services\Project as ServicesProject;
+use PHPUnit\Event\Runtime\Runtime;
 
 /**
  * Class Project 
@@ -89,14 +90,72 @@ class Project extends Controller
     /**
      * Display the specified resource.
      *
-     * @param string $path      The folder path of the project
-     * @param int $inode        The folder inode of the project
-     * 
-     * @return InertiaResponse  The response
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesProject $project      The project service instance
+     * @param int $inode                    The folder inode of the project
+     *
+     * @return InertiaResponse | RedirectResponse  The response
      */
-    public function show(string $path, int $inode): InertiaResponse
+    public function show(int $inode, ServicesSystem $system, ServicesProject $project): RedirectResponse | InertiaResponse
     {
-        return Inertia::render('projects/show');
+        // Step 0 - Get the folder path from its inode
+        $path = $system->getFolderPathFromInode($inode);
+
+        if (!$path) {
+            return redirect()->route('projects.index')->with(['error' => [
+                'title' => 'An error occured',
+                'description' => "The folder with inode {$inode} could not be found."
+            ]]);
+        }
+
+        // Step 1 - Verify that the folder exists
+        $return_project = $system->getFolderInfo($path);
+
+        if(empty($return_project)) {
+            return redirect()->route('projects.index')->with(['error' => [
+                'title' => 'An error occured',
+                'description' => "The folder with inode {$inode} could not be found."
+            ]]);
+        }
+
+        // Step 2 - Get the variables from the .env
+        try {
+            $variables = $project->getVariablesFromEnvFile($path, $system);
+
+            $return_project['variables'] = $variables;
+        } catch (RuntimeException $e) {
+            return redirect()->route('projects.index')->with(['error' => [
+                'title' => 'An error occured',
+                'description' => "Failed to read the .env file: " . $e->getMessage()
+            ]]);
+        }
+
+        // Step 3 - Get the docker configuration from the docker-compose.yaml file
+        try {
+            //
+        } catch (RuntimeException $e) {
+            return redirect()->route('projects.index')->with(['error' => [
+                'title' => 'An error occured',
+                'description' => "Failed to read the docker-compose.yaml file: " . $e->getMessage()
+            ]]);
+        }
+
+        // Step 4 - Get the commands from the Makefile
+        try {
+            $commands = $project->getCommandsFromMakefile($path, $system);
+
+            $return_project['commands'] = $commands;
+        } catch (RuntimeException $e) {
+            return redirect()->route('projects.index')->with(['error' => [
+                'title' => 'An error occured',
+                'description' => "Failed to read the Makefile: " . $e->getMessage()
+            ]]);
+        }
+
+        // Remove /projects from path
+        $return_project['path'] = str_replace('/projects/', '', $return_project['path']);
+
+        return Inertia::render('projects/show', ['project' => $return_project]);
     }
 
     /**
@@ -129,7 +188,7 @@ class Project extends Controller
 
             if (!$res->successful()) {
                 throw ValidationException::withMessages([
-                    'project.path' => trim($res->errorOutput()) ?: 'Failed to create project folder.',
+                    'project.path' => trim($res->errorOutput() ?? '') ?: 'Failed to create project folder.',
                 ]);
             }
         }
@@ -142,12 +201,12 @@ class Project extends Controller
 
             if (!$res->successful()) {
                 $errors = [
-                    'project.variables' => trim($res->errorOutput()) ?: 'Failed to create .env file.',
+                    'project.variables' => trim($res->errorOutput() ?? '') ?: 'Failed to create .env file.',
                 ];
 
                 $del = $system->deleteFolder($path);
                 if (!$del->successful()) {
-                    $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+                    $errors['project.path'] = trim($del->errorOutput() ?? '') ?: 'Failed to delete project folder.';
                 }
 
                 throw ValidationException::withMessages($errors);
@@ -164,12 +223,12 @@ class Project extends Controller
         if (!$res->successful()) {
 
             $errors = [
-                'project.docker' => trim($res->errorOutput()) ?: 'Failed to create docker-compose.yaml file.',
+                'project.docker' => trim($res->errorOutput() ?? '') ?: 'Failed to create docker-compose.yaml file.',
             ];
 
             $del = $system->deleteFolder($path);
             if (!$del->successful()) {
-                $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+                $errors['project.path'] = trim($del->errorOutput() ?? '') ?: 'Failed to delete project folder.';
             }
 
             throw ValidationException::withMessages($errors);
@@ -182,11 +241,11 @@ class Project extends Controller
             $res = $project->createMakefile($path, $commands, $system);
 
             if (!$res->successful()) {
-                $errors['project.commands'] = trim($res->errorOutput()) ?: 'Failed to create Makefile.';
+                $errors['project.commands'] = trim($res->errorOutput() ?? '') ?: 'Failed to create Makefile.';
 
                 $del = $system->deleteFolder($path);
                 if (!$del->successful()) {
-                    $errors['project.path'] = trim($del->errorOutput()) ?: 'Failed to delete project folder.';
+                    $errors['project.path'] = trim($del->errorOutput() ?? '') ?: 'Failed to delete project folder.';
                 }
 
                 throw ValidationException::withMessages($errors);

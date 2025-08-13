@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Process;
 use Illuminate\Process\ProcessResult;
+use RuntimeException;
 
 // Services
 use App\Services\System as ServicesSystem;
@@ -58,6 +59,35 @@ class Project
     }
 
     /**
+     * Retrieves the variables from a .env file in a folder.
+     *
+     * @param string $path              The folder path
+     * @param  ServicesSystem $system   The system service instance
+     * @return array                    An array of environment variables
+     *
+     * @throws RuntimeException         If the .env file cannot be read or is not formatted correctly
+     */
+    public function getVariablesFromEnvFile(string $path, ServicesSystem $system): array
+    {
+        $result = $system->execute("cat " . escapeshellarg($path) . '/.env');
+
+        if (!$result->successful()) {
+            throw new RuntimeException('Failed to read the .env file: ' . $result->errorOutput());
+        }
+
+        $variables = [];
+        foreach (explode("\n", trim($result->output())) as $line) {
+            if (empty($line) || str_starts_with($line, '#')) {
+                continue; // Skip empty lines and comments
+            }
+            [$key, $value] = explode('=', $line, 2);
+            $variables[] = ['key' => $key, 'value' => $value];
+        }
+
+        return $variables;
+    }
+
+    /**
      * Create a docker-compose.yaml file in a folder.
      *
      * @param string $path              The folder path
@@ -81,21 +111,101 @@ class Project
     public function createMakefile(string $path, array $commands, ServicesSystem $system): ProcessResult
     {
         $makefileContent = '';
+
         foreach ($commands as $c) {
             $target      = $c['target'];
             $description = $c['description'] ?? 'Unknown description';
-            $cmds        = (array) $c['command'];
+            $cmds        = $c['command'];
 
             $makefileContent .= "# {$description}\n";
             $makefileContent .= "{$target}:\n";
 
-            foreach ($cmds as $cmd) {
-                $makefileContent .= "\t{$cmd}\n";
+            $lines = is_string($cmds)
+                ? preg_split('/\r\n|\n|\r/', $cmds)
+                : (array) $cmds;
+
+            foreach ($lines as $line) {
+                $line = rtrim($line, "\r\n");
+                if ($line === '') {
+                    continue;
+                }
+                $makefileContent .= "\t{$line}\n";
             }
 
             $makefileContent .= "\n";
         }
 
-        return $system->execute("echo " . escapeshellarg($makefileContent) . " | sudo tee " . escapeshellarg($path) . '/Makefile' . " > /dev/null");
+        $cmd = "printf %s " . escapeshellarg($makefileContent)
+            . " | sudo tee " . escapeshellarg($path . '/Makefile') . " > /dev/null";
+
+        return $system->execute($cmd);
+    }
+
+
+    /**
+     * Retrieves the commands from a Makefile in a folder.
+     *
+     * @param string $path              The folder path
+     * @param  ServicesSystem $system   The system service instance
+     * @return array                    An array of commands
+     *
+     * @throws RuntimeException         If the Makefile cannot be read or is not formatted correctly
+     */
+    public function getCommandsFromMakefile(string $path, ServicesSystem $system): array
+    {
+        $result = $system->execute("cat " . escapeshellarg($path) . '/Makefile');
+
+        if (!$result->successful()) {
+            throw new RuntimeException('Failed to read the Makefile: ' . $result->errorOutput());
+        }
+
+        $content = rtrim($result->output(), "\r\n");
+        $lines = preg_split('/\r\n|\n|\r/', $content);
+
+        $commands = [];
+        $pendingDesc = null;
+
+        $currentTarget = null;
+        $currentDesc = null;
+        $cmdBuffer = '';
+
+        foreach ($lines as $raw) {
+            $line = rtrim($raw);
+
+            if (preg_match('/^\s*#\s?(.*)$/', $line, $m)) {
+                $pendingDesc = trim($m[1]) ?: null;
+                continue;
+            }
+
+            if (preg_match('/^([A-Za-z0-9._-]+)\s*:\s*$/', $line, $m)) {
+                if ($currentTarget !== null) {
+                    $commands[] = [
+                        'target' => $currentTarget,
+                        'description' => $currentDesc ?? 'Unknown description',
+                        'command' => rtrim($cmdBuffer, "\n"),
+                    ];
+                }
+                $currentTarget = $m[1];
+                $currentDesc = $pendingDesc ?? 'Unknown description';
+                $cmdBuffer = '';
+                $pendingDesc = null;
+                continue;
+            }
+
+            if ($currentTarget !== null && preg_match('/^\t(.*)$/', $line, $m)) {
+                $cmdBuffer .= $m[1] . "\n";
+                continue;
+            }
+        }
+
+        if ($currentTarget !== null) {
+            $commands[] = [
+                'target' => $currentTarget,
+                'description' => $currentDesc ?? 'Unknown description',
+                'command' => rtrim($cmdBuffer, "\n"),
+            ];
+        }
+
+        return $commands;
     }
 }

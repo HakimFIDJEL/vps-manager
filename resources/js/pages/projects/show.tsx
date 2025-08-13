@@ -48,34 +48,40 @@ import { useProject, ProjectProvider } from "@/contexts/project-context";
 
 // Libs
 import { type BreadcrumbItem } from "@/types";
-import { ProjectExample } from "@/lib/projects/type";
+import { Project, ProjectExample } from "@/lib/projects/type";
 
-const breadcrumbs: BreadcrumbItem[] = [
-	{
-		title: "Projects",
-		href: route("projects.index"),
-	},
-	{
-		title: "The name of the project",
-		href: route("projects.show", { inode: 1048577 }),
-	},
-];
 
-export default function Page() {
+export default function Page({ project } : { project: Project }) {
+
+	const breadcrumbs: BreadcrumbItem[] = [
+		{
+			title: "VPS Manager",
+			link: false,
+		},
+		{
+			title: "Projects",
+			href: route("projects.index"),
+		},
+		{
+			title: project.path,
+			href: route("projects.show", { inode: project.inode }),
+		},
+	];
+
 	return (
 		<AppLayout breadcrumbs={breadcrumbs}>
-			<Head title="The name of the project" />
+			<Head title={project.path} />
 			<ProjectProvider>
 				{/* Content */}
 
-				<Content />
+				<Content project={project} />
 			</ProjectProvider>
 		</AppLayout>
 	);
 }
 
-function Content() {
-	const { project, setProject, updateProject } = useProject();
+function Content({ project } : { project: Project }) {
+	const { setProject, updateProject } = useProject();
 
 	const tabs = [
 		{ value: "overview", label: "Overview", icon: <LayoutGrid /> },

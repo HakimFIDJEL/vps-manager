@@ -87,6 +87,23 @@ class System
     }
 
     /**
+     * Get the folder path from its inode.
+     *
+     * @param int $inode The folder inode
+     * @return null|string The folder path or null if not found
+     */
+    public function getFolderPathFromInode(int $inode): null | string
+    {
+        $result = $this->execute("find /projects -type d -inum {$inode}");
+
+        if ($result->successful()) {
+            return trim($result->output());
+        }
+
+        return null;
+    }
+
+    /**
      * Retrieve a list of folders in the /projects directory.
      * 
      * @return array<string> List of folder paths

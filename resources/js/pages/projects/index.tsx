@@ -50,6 +50,10 @@ import { Project } from "@/lib/projects/type";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
+		title: "VPS Manager",
+		link: false,
+	},
+	{
 		title: "Projects",
 		href: route("projects.index"),
 	},
