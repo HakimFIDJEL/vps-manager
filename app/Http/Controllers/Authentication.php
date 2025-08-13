@@ -3,20 +3,33 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response as InertiaResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cookie;
 
 // Requests
-use App\Http\Requests\auth\LoginRequest;
+use App\Http\Requests\auth\Login as RequestsLogin;
 
 // Services
-use App\Services\VpsAgentService;
+use App\Services\Authentication as ServicesAuthentication;
 
-class AuthController extends Controller
+/**
+ * Class Authentication 
+ *
+ * Controller that manages authentication
+ *
+ * @package App\Http\Controllers
+ */
+class Authentication extends Controller
 {
-    // Get Login
-    public function login()
+    /**
+     * Show the login form.
+     *
+     * @return Response | RedirectResponse  The response
+     */
+    public function login(): InertiaResponse | RedirectResponse
     {
         if (session()->has('vps_user')) {
             return redirect()->route('projects.index');
@@ -25,8 +38,12 @@ class AuthController extends Controller
     }
 
 
-    // Get Logout
-    public function logout()
+    /**
+     * Logout the user.
+     *
+     * @return RedirectResponse The response
+     */
+    public function logout(): RedirectResponse
     {
         Session::forget('vps_user');
         Cookie::queue(Cookie::forget('vps_user_remember'));
@@ -38,29 +55,36 @@ class AuthController extends Controller
     }
 
 
-    // Post Login
-    public function loginPost(LoginRequest $request, VpsAgentService $agent)
+    /**
+     * Handle the login form submission.
+     *
+     * @param RequestsLogin $request        The login request
+     * @param ServicesAuthentication $auth  The authentication service
+     * 
+     * @return RedirectResponse             The response
+     */
+    public function loginPost(RequestsLogin $request, ServicesAuthentication $auth): RedirectResponse
     {
         $data = $request->validated();
-        $result = $agent->authenticate($data['username'], $data['password']);
+        $res = $auth->authenticate($data['username'], $data['password']);
 
         if (!($result['auth'] ?? false)) {
             return redirect()->route('auth.login')->with(['error' => [
                 'title' => 'Authentication failed',
-                'description' => $result['error'] ?? 'Invalid username or password'
+                'description' => trim($res['error']) ?: 'Invalid username or password'
             ]]);
         }
 
         $remember = $data['remember'] ?? false;
 
-        session(['vps_user' => $result['username']]);
+        session(['vps_user' => $res['username']]);
 
         if ($remember) {
 
             cookie()->queue(
                 cookie(
                     'vps_user_remember',
-                    $result['username'],
+                    $res['username'],
                     60 * 24 * 30 * 6, // 6 months
                     path: '/',
                     domain: null,
@@ -74,7 +98,7 @@ class AuthController extends Controller
 
         return redirect()->route('projects.index')->with(['success' => [
             'title' => 'Authentication successful',
-            'description' => "Logged in as {$result['username']}"
+            'description' => "Logged in as {$res['username']}"
         ]]);
     }
 }
