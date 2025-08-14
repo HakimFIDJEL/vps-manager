@@ -80,9 +80,9 @@ function QuickActions() {
 						</div>
 						<div>
 							<h4 className="font-medium text-base">Project information</h4>
-							<div className="flex items-center gap-2">
+							{/* <div className="flex items-center gap-2">
 								<Badge variant={"outline"}>{project.path}</Badge>
-							</div>
+							</div> */}
 						</div>
 					</div>
 					<ArrowRight className="h-4 w-4 text-primary opacity-0 absolute top-4 right-6 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
