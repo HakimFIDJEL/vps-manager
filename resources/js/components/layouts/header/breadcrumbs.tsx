@@ -28,7 +28,7 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                                             </AnimatePresence>
                                         ) : (
                                             
-                                            !item.link ? (
+                                            item.link ? (
                                                 <BreadcrumbLink asChild>
                                                     <Link href={item.href ?? "#"}>{item.title}</Link>
                                                 </BreadcrumbLink>

@@ -69,19 +69,23 @@ class Project
      */
     public function getVariablesFromEnvFile(string $path, ServicesSystem $system): array
     {
-        $result = $system->execute("cat " . escapeshellarg($path) . '/.env');
-
-        if (!$result->successful()) {
-            throw new RuntimeException('Failed to read the .env file: ' . $result->errorOutput());
-        }
-
+        $file = $system->pathExists($path . "/.env");
         $variables = [];
-        foreach (explode("\n", trim($result->output())) as $line) {
-            if (empty($line) || str_starts_with($line, '#')) {
-                continue; // Skip empty lines and comments
+
+        if ($file) {
+            $result = $system->execute("cat " . escapeshellarg($path) . '/.env');
+
+            if (!$result->successful()) {
+                throw new RuntimeException('Failed to read the .env file: ' . $result->errorOutput());
             }
-            [$key, $value] = explode('=', $line, 2);
-            $variables[] = ['key' => $key, 'value' => $value];
+
+            foreach (explode("\n", trim($result->output())) as $line) {
+                if (empty($line) || str_starts_with($line, '#')) {
+                    continue; // Skip empty lines and comments
+                }
+                [$key, $value] = explode('=', $line, 2);
+                $variables[] = ['key' => $key, 'value' => $value];
+            }
         }
 
         return $variables;
@@ -93,11 +97,81 @@ class Project
      * @param string $path              The folder path
      * @param string $content           The content of the docker-compose.yaml file
      * @param  ServicesSystem $system   The system service instance
+     *
+     * @throws RuntimeException         If the docker-compose.yaml file cannot be created
+     *
      * @return ProcessResult            The result of the docker-compose file creation process
      */
-    public function createDockerComposeFile(string $path, string $content, ServicesSystem $system): ProcessResult
+    public function createDockerConfiguration(string $path, array $docker, ServicesSystem $system): ProcessResult
     {
+        // Create the docker-log file
+        $strict = $docker['isStrict'] ? 'true' : 'false';
+        $logContent = "isStrict={$strict}\n";
+
+        $res = $system->execute("echo " . escapeshellarg($logContent) . " | sudo tee " . escapeshellarg($path) . '/docker-log.txt' . " > /dev/null");
+
+        if (!$res->successful()) {
+            throw new RuntimeException('Failed to create docker-log.txt: ' . $res->errorOutput());
+        }
+
+        // Create the content for the docker-compose.yaml file
+        $content = $docker['content'];
         return $system->execute("echo " . escapeshellarg($content) . " | sudo tee " . escapeshellarg($path) . '/docker-compose.yaml' . " > /dev/null");
+    }
+
+    /**
+     * Retrieves the Docker configuration from a folder.
+     *
+     * @param string $path              The folder path
+     * @param  ServicesSystem $system   The system service instance
+     *
+     * @throws RuntimeException         If the Docker configuration cannot be read
+     * 
+     * @return array                    An array containing the Docker configuration
+     */
+    public function getDockerConfiguration(string $path, ServicesSystem $system): array
+    {
+        $docker = [];
+        $docker['isSaved']  = true;
+        $docker['isStrict'] = false;
+        $docker['content'] = "";
+        $docker['parsed'] = [];
+        $docker['parsed']['services'] = [];
+        $docker['parsed']['volumes'] = [];
+        $docker['parsed']['networks'] = [];
+
+
+        $log_file = $system->pathExists($path . "/docker-log.txt");
+
+        if ($log_file) {
+            $res_logs = $system->execute("cat " . escapeshellarg($path) . '/docker-log.txt');
+
+            if (!$res_logs->successful()) {
+                throw new RuntimeException('Failed to read docker-log.txt: ' . $res_logs->errorOutput());
+            }
+
+            $lines = explode("\n", trim($res_logs->output()));
+            foreach ($lines as $line) {
+                if (str_starts_with($line, 'isStrict=')) {
+                    $docker['isStrict'] = filter_var(substr($line, 9), FILTER_VALIDATE_BOOLEAN);
+                }
+            }
+        } 
+
+        $docker_file = $system->pathExists($path . "/docker-compose.yaml");
+
+        if ($docker_file) {
+
+            $res_content = $system->execute("cat " . escapeshellarg($path) . '/docker-compose.yaml');
+
+            if (!$res_content->successful()) {
+                throw new RuntimeException('Failed to read docker-compose.yaml: ' . $res_content->errorOutput());
+            }
+
+            $docker['content'] = $res_content->output();
+        }
+
+        return $docker;
     }
 
     /**
@@ -153,58 +227,64 @@ class Project
      */
     public function getCommandsFromMakefile(string $path, ServicesSystem $system): array
     {
-        $result = $system->execute("cat " . escapeshellarg($path) . '/Makefile');
-
-        if (!$result->successful()) {
-            throw new RuntimeException('Failed to read the Makefile: ' . $result->errorOutput());
-        }
-
-        $content = rtrim($result->output(), "\r\n");
-        $lines = preg_split('/\r\n|\n|\r/', $content);
-
         $commands = [];
-        $pendingDesc = null;
 
-        $currentTarget = null;
-        $currentDesc = null;
-        $cmdBuffer = '';
+        $file = $system->pathExists($path . "/Makefile");
 
-        foreach ($lines as $raw) {
-            $line = rtrim($raw);
-
-            if (preg_match('/^\s*#\s?(.*)$/', $line, $m)) {
-                $pendingDesc = trim($m[1]) ?: null;
-                continue;
+        if($file) {
+            $result = $system->execute("cat " . escapeshellarg($path) . '/Makefile');
+    
+            if (!$result->successful()) {
+                throw new RuntimeException('Failed to read the Makefile: ' . $result->errorOutput());
             }
-
-            if (preg_match('/^([A-Za-z0-9._-]+)\s*:\s*$/', $line, $m)) {
-                if ($currentTarget !== null) {
-                    $commands[] = [
-                        'target' => $currentTarget,
-                        'description' => $currentDesc ?? 'Unknown description',
-                        'command' => rtrim($cmdBuffer, "\n"),
-                    ];
+    
+            $content = rtrim($result->output(), "\r\n");
+            $lines = preg_split('/\r\n|\n|\r/', $content);
+    
+            $pendingDesc = null;
+    
+            $currentTarget = null;
+            $currentDesc = null;
+            $cmdBuffer = '';
+    
+            foreach ($lines as $raw) {
+                $line = rtrim($raw);
+    
+                if (preg_match('/^\s*#\s?(.*)$/', $line, $m)) {
+                    $pendingDesc = trim($m[1]) ?: null;
+                    continue;
                 }
-                $currentTarget = $m[1];
-                $currentDesc = $pendingDesc ?? 'Unknown description';
-                $cmdBuffer = '';
-                $pendingDesc = null;
-                continue;
+    
+                if (preg_match('/^([A-Za-z0-9._-]+)\s*:\s*$/', $line, $m)) {
+                    if ($currentTarget !== null) {
+                        $commands[] = [
+                            'target' => $currentTarget,
+                            'description' => $currentDesc ?? 'Unknown description',
+                            'command' => rtrim($cmdBuffer, "\n"),
+                        ];
+                    }
+                    $currentTarget = $m[1];
+                    $currentDesc = $pendingDesc ?? 'Unknown description';
+                    $cmdBuffer = '';
+                    $pendingDesc = null;
+                    continue;
+                }
+    
+                if ($currentTarget !== null && preg_match('/^\t(.*)$/', $line, $m)) {
+                    $cmdBuffer .= $m[1] . "\n";
+                    continue;
+                }
             }
-
-            if ($currentTarget !== null && preg_match('/^\t(.*)$/', $line, $m)) {
-                $cmdBuffer .= $m[1] . "\n";
-                continue;
+    
+            if ($currentTarget !== null) {
+                $commands[] = [
+                    'target' => $currentTarget,
+                    'description' => $currentDesc ?? 'Unknown description',
+                    'command' => rtrim($cmdBuffer, "\n"),
+                ];
             }
         }
 
-        if ($currentTarget !== null) {
-            $commands[] = [
-                'target' => $currentTarget,
-                'description' => $currentDesc ?? 'Unknown description',
-                'command' => rtrim($cmdBuffer, "\n"),
-            ];
-        }
 
         return $commands;
     }

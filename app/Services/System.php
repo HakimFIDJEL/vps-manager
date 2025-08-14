@@ -161,4 +161,16 @@ class System
 
         return $this->execute("sudo rm -rf " . escapeshellarg($path));
     }
+
+    /**
+     * Check if a path exists.
+     *
+     * @param  string  $path   The path to check
+     * @return bool            True if the path exists, false otherwise
+     */
+    public function pathExists(string $path): bool
+    {
+        $result = $this->execute("test -e " . escapeshellarg($path));
+        return $result->successful();
+    }
 }

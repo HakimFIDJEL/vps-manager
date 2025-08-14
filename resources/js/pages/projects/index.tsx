@@ -56,6 +56,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 	{
 		title: "Projects",
 		href: route("projects.index"),
+		link: true,
 	},
 ];
 

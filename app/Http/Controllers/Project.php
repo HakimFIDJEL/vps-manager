@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Illuminate\Http\RedirectResponse;
 use RuntimeException;
+use Illuminate\Http\Request;
 
 // Requests
 use App\Http\Requests\projects\Path as RequestsPath;
@@ -20,7 +21,6 @@ use App\Http\Requests\projects\Store as RequestsStore;
 // Services
 use App\Services\System as ServicesSystem;
 use App\Services\Project as ServicesProject;
-use PHPUnit\Event\Runtime\Runtime;
 
 /**
  * Class Project 
@@ -132,7 +132,9 @@ class Project extends Controller
 
         // Step 3 - Get the docker configuration from the docker-compose.yaml file
         try {
-            //
+            $docker = $project->getDockerConfiguration($path, $system);
+
+            $return_project['docker'] = $docker;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
                 'title' => 'An error occured',
@@ -216,14 +218,27 @@ class Project extends Controller
 
         // Step 3 - Create docker-compose.yaml
         $docker     = $data['project']['docker'];
-        $content    = $docker['content'];
 
-        $res = $project->createDockerComposeFile($path, $content, $system);
-
-        if (!$res->successful()) {
+        try {
+            $res = $project->createDockerConfiguration($path, $docker, $system);
+    
+            if (!$res->successful()) {
+    
+                $errors = [
+                    'project.docker' => trim($res->errorOutput() ?? '') ?: 'Failed to create docker-compose.yaml file.',
+                ];
+    
+                $del = $system->deleteFolder($path);
+                if (!$del->successful()) {
+                    $errors['project.path'] = trim($del->errorOutput() ?? '') ?: 'Failed to delete project folder.';
+                }
+    
+                throw ValidationException::withMessages($errors);
+            }
+        } catch (RuntimeException $e) {
 
             $errors = [
-                'project.docker' => trim($res->errorOutput() ?? '') ?: 'Failed to create docker-compose.yaml file.',
+                'project.docker' => trim($e->getMessage() ?? '') ?: 'Failed to create docker-compose.yaml file.',
             ];
 
             $del = $system->deleteFolder($path);

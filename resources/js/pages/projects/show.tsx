@@ -50,9 +50,10 @@ import { useProject, ProjectProvider } from "@/contexts/project-context";
 import { type BreadcrumbItem } from "@/types";
 import { Project, ProjectExample } from "@/lib/projects/type";
 
+// Functions
+import { parseDockerCompose } from "@/lib/docker/parser";
 
-export default function Page({ project } : { project: Project }) {
-
+export default function Page({ project }: { project: Project }) {
 	const breadcrumbs: BreadcrumbItem[] = [
 		{
 			title: "VPS Manager",
@@ -61,10 +62,12 @@ export default function Page({ project } : { project: Project }) {
 		{
 			title: "Projects",
 			href: route("projects.index"),
+			link: true,
 		},
 		{
 			title: project.path,
 			href: route("projects.show", { inode: project.inode }),
+			link: true,
 		},
 	];
 
@@ -80,7 +83,7 @@ export default function Page({ project } : { project: Project }) {
 	);
 }
 
-function Content({ project } : { project: Project }) {
+function Content({ project }: { project: Project }) {
 	const { setProject, updateProject } = useProject();
 
 	const tabs = [
@@ -92,7 +95,28 @@ function Content({ project } : { project: Project }) {
 	];
 
 	React.useEffect(() => {
-		setProject(ProjectExample);
+		setProject(project);
+
+		if (project.docker.isStrict) {
+			const save_parsed = parseDockerCompose(
+				project.docker.content,
+				project.docker.isStrict,
+				project.variables.length,
+			);
+
+			if (save_parsed.isValid && save_parsed.updatedContent) {
+				updateProject("docker", {
+					content: save_parsed.updatedContent,
+					isSaved: true,
+					isStrict: project.docker.isStrict,
+					parsed: {
+						services: save_parsed.services,
+						volumes: save_parsed.volumes,
+						networks: save_parsed.networks,
+					},
+				});
+			}
+		}
 	}, []);
 
 	return (
@@ -134,7 +158,6 @@ function Content({ project } : { project: Project }) {
 
 				<SmoothItem delay={0.3} layout={false} className="!flex-grow-0 w-full">
 					<TabsNavigation tabs={tabs} />
-
 				</SmoothItem>
 
 				<SmoothItem delay={0.5} layout={false} className="!flex-grow-0 w-full">

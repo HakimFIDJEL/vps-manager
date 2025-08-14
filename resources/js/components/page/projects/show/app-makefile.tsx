@@ -309,105 +309,108 @@ function CommandCard({
 			key={command.target}
 			className="group relative rounded-md border border-border bg-card p-4 transition-all hover:border-primary/50 flex items-center w-full"
 		>
-			<div className="flex items-center justify-between gap-2 w-full">
-				<div className="flex-grow-0 max-w-[250px]">
+			<div className="flex items-center justify-between gap-2 w-full relative">
+				<div className="flex-grow-0">
 					<p className="font-mono">{command.target}</p>
 					<p className="text-sm text-muted-foreground mt-1">{command.description}</p>
 				</div>
-				<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button
-								variant={"ghost"}
-								size={"icon"}
-								type={"button"}
-								disabled={loading}
-							>
-								<Play className="h-4 w-4 text-muted-foreground" />
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle className="flex items-center gap-2">
-									<OctagonAlert className="w-4 h-4 text-primary" />
-									Run command
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Are you sure you want to run
-									<Badge variant={"outline"} className="font-mono mx-2">
-										{command.target}
-									</Badge>
-									command ?
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogBody>
-								<AlertDialogFooter>
-									<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-									<AlertDialogAction
-										onAction={async () => {
-											await handleRun(command.target);
-											return true;
-										}}
-										variant={"default"}
-										type={"button"}
-										disabled={loading}
-									>
-										{loading ? <Loader2 className="animate-spin" /> : <Play />}
-										Run
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogBody>
-						</AlertDialogContent>
-					</AlertDialog>
-					<EditCommand
-						command={command}
-						handleCommandAction={handleCommandAction}
-						loading={loading}
-					/>
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button
-								variant={"ghost"}
-								size={"icon"}
-								type={"button"}
-								disabled={loading}
-							>
-								<Trash className="h-4 w-4 text-muted-foreground" />
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle className="flex items-center gap-2">
-									<OctagonAlert className="w-4 h-4 text-destructive" />
-									Delete command
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Are you sure you want to delete
-									<Badge variant={"outline"} className="font-mono mx-2">
-										{command.target}
-									</Badge>
-									command ?
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogBody>
-								<AlertDialogFooter>
-									<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-									<AlertDialogAction
-										onAction={async () => {
-											await handleDelete(command.target);
-											return true;
-										}}
-										variant={"destructive"}
-										type={"button"}
-										disabled={loading}
-									>
-										{loading ? <Loader2 className="animate-spin" /> : <Trash />}
-										Delete
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogBody>
-						</AlertDialogContent>
-					</AlertDialog>
+				<div className="absolute top-0 bottom-0 right-0 flex items-center bg-gradient-to-l from-card via-card to-transparent opacity-0 group-hover:opacity-100 transition-opacity pl-[150px]">
+
+					<div className=" flex items-center gap-1  ">
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									variant={"ghost"}
+									size={"icon"}
+									type={"button"}
+									disabled={loading}
+								>
+									<Play className="h-4 w-4 text-muted-foreground" />
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle className="flex items-center gap-2">
+										<OctagonAlert className="w-4 h-4 text-primary" />
+										Run command
+									</AlertDialogTitle>
+									<AlertDialogDescription>
+										Are you sure you want to run
+										<Badge variant={"outline"} className="font-mono mx-2">
+											{command.target}
+										</Badge>
+										command ?
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogBody>
+									<AlertDialogFooter>
+										<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+										<AlertDialogAction
+											onAction={async () => {
+												await handleRun(command.target);
+												return true;
+											}}
+											variant={"default"}
+											type={"button"}
+											disabled={loading}
+										>
+											{loading ? <Loader2 className="animate-spin" /> : <Play />}
+											Run
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogBody>
+							</AlertDialogContent>
+						</AlertDialog>
+						<EditCommand
+							command={command}
+							handleCommandAction={handleCommandAction}
+							loading={loading}
+						/>
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									variant={"ghost"}
+									size={"icon"}
+									type={"button"}
+									disabled={loading}
+								>
+									<Trash className="h-4 w-4 text-muted-foreground" />
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle className="flex items-center gap-2">
+										<OctagonAlert className="w-4 h-4 text-destructive" />
+										Delete command
+									</AlertDialogTitle>
+									<AlertDialogDescription>
+										Are you sure you want to delete
+										<Badge variant={"outline"} className="font-mono mx-2">
+											{command.target}
+										</Badge>
+										command ?
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogBody>
+									<AlertDialogFooter>
+										<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+										<AlertDialogAction
+											onAction={async () => {
+												await handleDelete(command.target);
+												return true;
+											}}
+											variant={"destructive"}
+											type={"button"}
+											disabled={loading}
+										>
+											{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+											Delete
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogBody>
+							</AlertDialogContent>
+						</AlertDialog>
+					</div>
 				</div>
 			</div>
 		</div>
