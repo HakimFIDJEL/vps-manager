@@ -196,7 +196,7 @@ function QuickActions({
 			<h3 className="text-sm font-medium">Actions</h3>
 			<div className="grid gap-2 grid-cols-3">
 				<div
-					className={`h-auto w-full bg-background flex items-center gap-4 p-4 rounded-lg border ${initialContainers.length == 0 ? "hover:!border-destructive/50" : "hover:!border-primary/50"} transition-all duration-200 relative overflow-hidden`}
+					className={`h-auto w-full bg-background flex items-center gap-4 p-4 rounded-lg border ${containers_running.length == 0 ? "hover:!border-destructive/50" : "hover:!border-primary/50"} transition-all duration-200 relative overflow-hidden`}
 				>
 					<div
 						className={`p-2 ${containers_running.length == 0 ? "bg-destructive/10" : "bg-primary/10"} rounded-md`}
@@ -347,7 +347,6 @@ function QuickActions({
 							variant={"outline"}
 							disabled={
 								loading ||
-								containers_running.length == 0 ||
 								initialContainers.length == 0
 							}
 							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"

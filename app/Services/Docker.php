@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Process\ProcessResult;
+use Illuminate\Support\Facades\Process;
 use RuntimeException;
 
 // Services
@@ -46,7 +47,7 @@ class Docker
         $res = $system->execute(
             "sudo /usr/bin/docker compose -f " . escapeshellarg($compose) .
                 " --project-directory " . escapeshellarg($path) .
-                " ps --format json"
+                " ps --all --format json"
         );
         if (!$res->successful()) throw new \RuntimeException("Failed to list containers: " . $res->errorOutput());
 
@@ -62,6 +63,8 @@ class Docker
             if (!is_array($c)) {
                 throw new \RuntimeException("Invalid JSON line from docker compose ps");
             }
+
+            // dd($c);
             $rows[] = [
                 'container_id' => $c['ID'] ?? '',
                 'image'        => $c['Image'] ?? '',
@@ -171,6 +174,7 @@ class Docker
 
         if ($path) {
             // Run a specific container for the given inode
+            return Process::run('ls');
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }
@@ -181,6 +185,7 @@ class Docker
 
         if ($path) {
             // Stop a specific container for the given inode
+            return Process::run('ls');
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }
@@ -191,6 +196,7 @@ class Docker
 
         if ($path) {
             // Restart a specific container for the given inode
+            return Process::run('ls');
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }
@@ -201,6 +207,7 @@ class Docker
 
         if ($path) {
             // Remove a specific container for the given inode
+            return Process::run('ls');
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }

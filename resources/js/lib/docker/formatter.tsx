@@ -96,44 +96,46 @@ export function formatContainerDate({ date }: { date: string }): string {
 		hour: "2-digit",
 		minute: "2-digit",
 	};
-	return new Date(date).toLocaleString("en-US", opts);
+
+	// On garde seulement la partie ISO + timezone numérique
+	const clean = date.replace(/ \w+$/, ""); // supprime " CEST"
+	return new Date(clean).toLocaleString("en-US", opts);
 }
 
-export function formatContainerPort({
-	mapping,
-}: {
-	mapping: string;
-}): React.ReactNode {
-	const formatMapping = (mappingStr: string) => {
-		const match = mappingStr.match(/(\d+)\/(tcp|udp)\s*->\s*([^:]+):(\d+)/);
-		if (!match) return mappingStr;
 
-		const [, containerPort, protocol, hostIp, hostPort] = match;
+export function formatContainerPort({ mapping }: { mapping: string }): React.ReactNode {
+	const parseMapping = (mappingStr: string) => {
+		// Exemple attendu : "0.0.0.0:8080->80/tcp"
+		const match = mappingStr.trim().match(/^([^:]+):(\d+)->(\d+)\/(tcp|udp)$/);
+		if (!match) return null;
+
+		const [, hostIp, hostPort, containerPort, protocol] = match;
 		const host = hostIp === "0.0.0.0" ? "localhost" : hostIp;
-
-		return { containerPort, host, hostPort };
+		return { containerPort, host, hostPort, protocol };
 	};
 
-	const parsed = formatMapping(mapping);
-
-	if (typeof parsed === "string") {
-		if (parsed.length == 0) {
-			return (
-				<span className="font-mono text-sm text-muted-foreground">Unkown</span>
-			);
-		}
-		return (
-			<span className="font-mono text-sm text-muted-foreground">{parsed}</span>
-		);
+	if (!mapping || mapping.trim().length === 0) {
+		return <span className="font-mono text-sm text-muted-foreground">Unknown</span>;
 	}
 
+	const parts = mapping.split(/,\s*/);
+	const parsedList = parts.map(parseMapping);
+
 	return (
-		<div className="inline-flex items-center gap-2 font-mono text-sm">
-			<span className="text-foreground font-medium">{parsed.containerPort}</span>
-			<span className="text-muted-foreground">→</span>
-			<span className="text-muted-foreground">
-				{parsed.host}:{parsed.hostPort}
-			</span>
+		<div className="flex flex-col gap-1 font-mono text-sm">
+			{parsedList.map((p, i) =>
+				p ? (
+					<div key={i} className="inline-flex items-center gap-2">
+						<span className="text-foreground font-medium">{p.containerPort}/{p.protocol}</span>
+						<span className="text-muted-foreground">→</span>
+						<span className="text-muted-foreground">
+							{p.host}:{p.hostPort}
+						</span>
+					</div>
+				) : (
+					<span key={i} className="text-muted-foreground">{parts[i]}</span>
+				)
+			)}
 		</div>
 	);
 }

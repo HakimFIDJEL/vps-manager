@@ -49,6 +49,14 @@ class Docker extends Controller
 
     public function containers_stop(int $inode, ServicesDocker $docker, ServicesSystem $system) {
         // Stop all containers for the given inode
+        $res = $docker->containers_stop($inode, $system);
+
+        if(!$res->successful()) {
+            return redirect()->route('projects.show', ['inode' => $inode])
+                ->withErrors(['docker_stop' => 'Failed to stop containers: ' . $res->errorOutput()]);
+        }
+
+        return redirect()->route('projects.show', ['inode' => $inode]);
     }
 
     public function containers_remove(int $inode, ServicesDocker $docker, ServicesSystem $system) {

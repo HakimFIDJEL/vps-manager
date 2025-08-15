@@ -97,7 +97,7 @@ export function useRemoteDockerService(): DockerService {
 						toast.success("All containers running!");
 						ok = true;
 					},
-					onError: (e) => toast.error("Error", { description: e?.message }),
+					onError: (e) => toast.error("An error occured", { description: e?.message }),
 					onFinish: () => {
 						toast.dismiss("run-all");
 						resolve();
@@ -109,19 +109,30 @@ export function useRemoteDockerService(): DockerService {
 	}
 
 	async function docker_containers_stop() {
-		toast.loading("Stopping containers...", { id: "stop-all" });
-		await new Promise((r) => setTimeout(r, 1000));
-		toast.dismiss("stop-all");
-		toast.success("All containers have been successfully stopped!");
-		return true;
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.containers.stop", { inode: project.inode }),
+				{},
+				{
+					onStart: () =>
+						toast.loading("Stopping containers...", { id: "stop-all" }),
+					onSuccess: () => {
+						toast.success("All containers stopped!");
+						ok = true;
+					},
+					onError: (e) => toast.error("An error occured", { description: e?.message }),
+					onFinish: () => {
+						toast.dismiss("stop-all");
+						resolve();
+					},
+				},
+			);
+		});
+		return ok;
 	}
 
 	async function docker_containers_remove() {
-		// toast.loading("Removing containers...", { id: "rm-all" });
-		// await new Promise((r) => setTimeout(r, 1000));
-		// toast.dismiss("rm-all");
-		// toast.success("All containers have been successfully removed!");
-		// return true;
 		let ok = false;
 		await new Promise<void>((resolve) => {
 			router.post(
@@ -134,7 +145,7 @@ export function useRemoteDockerService(): DockerService {
 						toast.success("All containers removed!");
 						ok = true;
 					},
-					onError: (e) => toast.error("Error", { description: e?.message }),
+					onError: (e) => toast.error("An error occured", { description: e?.message }),
 					onFinish: () => {
 						toast.dismiss("rm-all");
 						resolve();
