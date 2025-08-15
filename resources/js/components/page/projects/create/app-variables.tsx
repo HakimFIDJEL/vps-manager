@@ -92,9 +92,9 @@ import {
 import { useProject } from "@/contexts/project-context";
 import { CodeEditor } from "@/components/ui/code-editor";
 import { useVariable } from "@/contexts/variable-context";
-import { VariableAction } from "@/contexts/variable-context";
 
 // Types
+import { type VariableAction } from "@/lib/variables/type";
 import { ProjectSchema } from "@/lib/projects/type";
 
 export function AppVariables({
@@ -107,7 +107,7 @@ export function AppVariables({
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleVariableAction, loading } = useVariable();
+	const { handleVariable, loading } = useVariable();
 
 	// Refs
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -117,7 +117,7 @@ export function AppVariables({
 		const result = ProjectSchema.shape.variables.safeParse(project.variables);
 
 		if (!result.success) {
-			toast.error(result.error.errors[0].message);
+			toast.error("An error occured", { description: result.error.errors[0].message });
 			return false;
 		}
 
@@ -134,7 +134,7 @@ export function AppVariables({
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import .env */}
-					<ImportEnv handleVariableAction={handleVariableAction} loading={loading}>
+					<ImportEnv handleVariable={handleVariable} loading={loading}>
 						<Button variant={"outline"} type={"button"} disabled={loading}>
 							<FileUp />
 							Import variables
@@ -143,7 +143,7 @@ export function AppVariables({
 
 					{/* Add variable */}
 					<CreateVariable
-						handleVariableAction={handleVariableAction}
+						handleVariable={handleVariable}
 						loading={loading}
 					>
 						<Button variant={"default"} type={"button"} disabled={loading}>
@@ -171,7 +171,7 @@ export function AppVariables({
 				<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
 				<VariablesList
 					search={search}
-					handleVariableAction={handleVariableAction}
+					handleVariable={handleVariable}
 				/>
 			</>
 		</div>
@@ -180,11 +180,11 @@ export function AppVariables({
 
 export function VariablesList({
 	search,
-	handleVariableAction,
+	handleVariable,
 	loading = false,
 }: {
 	search: string;
-	handleVariableAction: (action: VariableAction) => Promise<void>;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	// States
@@ -246,8 +246,8 @@ export function VariablesList({
 										size={"icon"}
 										disabled={project.variables.length === 0}
 										onClick={() =>
-											handleVariableAction({
-												type: "toggle-visibility-all",
+											handleVariable({
+												type: "variable-toggle-visibility-all",
 											})
 										}
 									>
@@ -293,8 +293,7 @@ export function VariablesList({
 											<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 											<AlertDialogAction
 												onAction={async () => {
-													await handleVariableAction({ type: "delete-all" });
-													return true;
+													return await handleVariable({ type: "variable-delete-all" });
 												}}
 												disabled={loading}
 												variant={"destructive"}
@@ -336,8 +335,8 @@ export function VariablesList({
 									variant={"ghost"}
 									size="icon"
 									onClick={() =>
-										handleVariableAction({
-											type: "toggle-visibility",
+										handleVariable({
+											type: "variable-toggle-visibility",
 											variable,
 										})
 									}
@@ -351,7 +350,7 @@ export function VariablesList({
 
 								<EditVariable
 									variable={variable}
-									handleVariableAction={handleVariableAction}
+									handleVariable={handleVariable}
 									loading={loading}
 								/>
 
@@ -385,8 +384,8 @@ export function VariablesList({
 												<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 												<AlertDialogAction
 													onAction={async () => {
-														await handleVariableAction({ type: "delete", variable });
-														return true;
+														return await handleVariable({ type: "variable-delete", variable });
+
 													}}
 													variant={"destructive"}
 													type={"button"}
@@ -420,11 +419,11 @@ export function VariablesList({
 
 export function CreateVariable({
 	children,
-	handleVariableAction,
+	handleVariable,
 	loading = false,
 }: {
 	children: React.ReactNode;
-	handleVariableAction: (action: VariableAction) => Promise<void>;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	// Variables
@@ -440,8 +439,8 @@ export function CreateVariable({
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
-		await handleVariableAction({
-			type: "create",
+		await handleVariable({
+			type: "variable-create",
 			variable: VariableForm.getValues(),
 		});
 
@@ -531,11 +530,11 @@ export function CreateVariable({
 
 export function EditVariable({
 	variable,
-	handleVariableAction,
+	handleVariable,
 	loading = false,
 }: {
 	variable: Variable;
-	handleVariableAction: (action: VariableAction) => Promise<void>;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	// Variables
@@ -559,8 +558,8 @@ export function EditVariable({
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
-		await handleVariableAction({
-			type: "update",
+		await handleVariable({
+			type: "variable-update",
 			variable: { ...variable, value: VariableForm.getValues().value },
 		});
 
@@ -653,11 +652,11 @@ export function EditVariable({
 
 export function ImportEnv({
 	children,
-	handleVariableAction,
+	handleVariable,
 	loading = false,
 }: {
 	children: React.ReactNode;
-	handleVariableAction: (action: VariableAction) => Promise<void>;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	// States
@@ -722,8 +721,8 @@ export function ImportEnv({
 			});
 			return false;
 		} else {
-			await handleVariableAction({
-				type: "create-multiple",
+			await handleVariable({
+				type: "variable-create-multiple",
 				variables: parsedVariables,
 			});
 

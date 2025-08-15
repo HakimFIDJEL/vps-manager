@@ -14,6 +14,9 @@ use Illuminate\Http\RedirectResponse;
 use RuntimeException;
 use Illuminate\Http\Request;
 
+// Controllers
+use App\Http\Controllers\Docker as ControllersDocker;
+
 // Requests
 use App\Http\Requests\projects\Path as RequestsPath;
 use App\Http\Requests\projects\Store as RequestsStore;
@@ -21,6 +24,7 @@ use App\Http\Requests\projects\Store as RequestsStore;
 // Services
 use App\Services\System as ServicesSystem;
 use App\Services\Project as ServicesProject;
+use App\Services\Docker as ServicesDocker;
 
 /**
  * Class Project 
@@ -96,8 +100,9 @@ class Project extends Controller
      *
      * @return InertiaResponse | RedirectResponse  The response
      */
-    public function show(int $inode, ServicesSystem $system, ServicesProject $project): RedirectResponse | InertiaResponse
+    public function show(int $inode, ServicesSystem $system, ServicesProject $project, ServicesDocker $docker): RedirectResponse | InertiaResponse
     {
+
         // Step 0 - Get the folder path from its inode
         $path = $system->getFolderPathFromInode($inode);
 
@@ -120,9 +125,9 @@ class Project extends Controller
 
         // Step 2 - Get the variables from the .env
         try {
-            $variables = $project->getVariablesFromEnvFile($path, $system);
+            $project_variables = $project->getVariablesFromEnvFile($path, $system);
 
-            $return_project['variables'] = $variables;
+            $return_project['variables'] = $project_variables;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
                 'title' => 'An error occured',
@@ -132,9 +137,9 @@ class Project extends Controller
 
         // Step 3 - Get the docker configuration from the docker-compose.yaml file
         try {
-            $docker = $project->getDockerConfiguration($path, $system);
+            $project_docker = $project->getDockerConfiguration($path, $system);
 
-            $return_project['docker'] = $docker;
+            $return_project['docker'] = $project_docker;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
                 'title' => 'An error occured',
@@ -144,9 +149,9 @@ class Project extends Controller
 
         // Step 4 - Get the commands from the Makefile
         try {
-            $commands = $project->getCommandsFromMakefile($path, $system);
+            $project_commands = $project->getCommandsFromMakefile($path, $system);
 
-            $return_project['commands'] = $commands;
+            $return_project['commands'] = $project_commands;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
                 'title' => 'An error occured',
@@ -154,10 +159,24 @@ class Project extends Controller
             ]]);
         }
 
-        // Remove /projects from path
-        $return_project['path'] = str_replace('/projects/', '', $return_project['path']);
+        // Step 5 - Retrieve all containers and their status
+        try {
+            $containers = $docker->containers_list($inode, $system);
 
-        return Inertia::render('projects/show', ['project' => $return_project]);
+            // dd($containers);
+
+        } catch (RuntimeException $e) {
+            return redirect()->route('projects.index')->with(['error' => [
+                'title' => 'An error occured',
+                'description' => "Failed to retrieve containers: " . $e->getMessage()
+            ]]);
+        }
+
+        // Remove /projects from path
+        $return_project['path']         = str_replace('/projects/', '', $return_project['path']);
+        $return_project['isCreated']    = true;
+
+        return Inertia::render('projects/show', ['project' => $return_project, 'containers' => $containers]);
     }
 
     /**
@@ -287,6 +306,10 @@ class Project extends Controller
         return redirect()->route('projects.index')->with(['success' => 'Project deleted successfully!']);
     }
 
+    // ============================================================================ //
+    //                                    API                                       //
+    // ============================================================================ //
+
     /**
      * Verify the availability of a project path.
      *
@@ -296,7 +319,7 @@ class Project extends Controller
      *
      * @return JsonResponse
      */
-    public function verifyPathAvailability(RequestsPath $request, ServicesProject $project, ServicesSystem $system)
+    public function verify_path_availability(RequestsPath $request, ServicesProject $project, ServicesSystem $system)
     {
         $data = $request->validated();
 

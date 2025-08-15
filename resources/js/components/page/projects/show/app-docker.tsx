@@ -37,6 +37,10 @@ import {
 	DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 
+// Custom components
+import { DockerConfiguration } from "../create/app-docker";
+import { SmoothAnimate } from "@/components/ui/smooth-resized";
+
 // Icons
 import {
 	Download,
@@ -59,23 +63,23 @@ import { useDocker } from "@/contexts/docker-context";
 import type { DockerAction } from "@/lib/docker/type";
 
 // Libs
-import { type Project } from "@/lib/projects/type";
-import { type tempContainer } from "@/lib/docker/type";
 import {
 	formatContainerDate,
 	formatContainerPort,
 	formatContainerState,
 } from "@/lib/docker/formatter";
-import { DockerConfiguration } from "../create/app-docker";
-import { SmoothAnimate } from "@/components/ui/smooth-resized";
 
-export function AppDocker() {
+// Types
+import { type Project } from "@/lib/projects/type";
+import { type DockerContainer } from "@/lib/docker/type";
+
+export function AppDocker({ containers }: { containers: DockerContainer[] }) {
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleDockerAction, loading } = useDocker();
+	const { handleDocker, loading } = useDocker();
 
 	// Variables
-	const initialContainers: tempContainer[] = [
+	const initialContainers: DockerContainer[] = [
 		{
 			container_id: "a1b2c3d4e5f6",
 			image: "containrrr/watchtower:latest",
@@ -122,8 +126,8 @@ export function AppDocker() {
 		<TabsContent value="containers" className="flex flex-col gap-12">
 			{/* Quick actions */}
 			<QuickActions
-				handleDockerAction={handleDockerAction}
-				initialContainers={initialContainers}
+				handleDocker={handleDocker}
+				initialContainers={containers}
 				loading={loading}
 			/>
 
@@ -134,7 +138,7 @@ export function AppDocker() {
 				{!project.docker.isStrict && (
 					<StrictMode
 						project={project}
-						handleDockerAction={handleDockerAction}
+						handleDocker={handleDocker}
 						loading={loading}
 					/>
 				)}
@@ -143,7 +147,7 @@ export function AppDocker() {
 				{!project.docker.isSaved && (
 					<SaveProject
 						project={project}
-						handleDockerAction={handleDockerAction}
+						handleDocker={handleDocker}
 						loading={loading}
 					/>
 				)}
@@ -155,8 +159,8 @@ export function AppDocker() {
 
 			{/* Table of all containers */}
 			<ContainersList
-				handleDockerAction={handleDockerAction}
-				initialContainers={initialContainers}
+				handleDocker={handleDocker}
+				initialContainers={containers}
 				loading={loading}
 			/>
 
@@ -164,10 +168,7 @@ export function AppDocker() {
 			{/* Edit current docker-compose (modal from create) */}
 			<div className="relative">
 				<h3 className="text-sm font-medium mb-2">Docker configuration</h3>
-				<DockerConfiguration
-					handleDockerAction={handleDockerAction}
-					loading={loading}
-				/>
+				<DockerConfiguration handleDocker={handleDocker} loading={loading} />
 			</div>
 
 			{/* TODO : Logs */}
@@ -176,12 +177,12 @@ export function AppDocker() {
 }
 
 function QuickActions({
-	handleDockerAction,
+	handleDocker,
 	initialContainers,
 	loading = false,
 }: {
-	handleDockerAction: (action: DockerAction) => Promise<void>;
-	initialContainers: tempContainer[];
+	handleDocker: (action: DockerAction) => Promise<boolean>;
+	initialContainers: DockerContainer[];
 	loading?: boolean;
 }) {
 	const containers_running = initialContainers.filter(
@@ -194,20 +195,30 @@ function QuickActions({
 		<div className="flex flex-col gap-2">
 			<h3 className="text-sm font-medium">Actions</h3>
 			<div className="grid gap-2 grid-cols-3">
-				<div className="h-auto w-full bg-background flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 relative overflow-hidden">
-					<div className="p-2 bg-primary/10 rounded-md">
-						<ChartPie className="h-5 w-5 text-primary" />
+				<div
+					className={`h-auto w-full bg-background flex items-center gap-4 p-4 rounded-lg border ${initialContainers.length == 0 ? "hover:!border-destructive/50" : "hover:!border-primary/50"} transition-all duration-200 relative overflow-hidden`}
+				>
+					<div
+						className={`p-2 ${containers_running.length == 0 ? "bg-destructive/10" : "bg-primary/10"} rounded-md`}
+					>
+						<ChartPie
+							className={`h-5 w-5 ${containers_running.length == 0 ? "text-destructive" : "text-primary"} `}
+						/>
 					</div>
 					<div className="flex-1 text-left">
-						<div className="font-medium text-foreground text-sm flex  flex-wrap items-center gap-2 gap-y-0">
-							Containers status
+						<div className="font-medium text-foreground text-sm flex  flex-wrap items-center gap-2 gap-y-0 justify-between">
+							<span>Containers status</span>
 							<div className="text-xs text-muted-foreground">
-								{containers_running.length == initialContainers.length ? (
-									<>All containers are running!</>
+								{initialContainers.length != 0 ? (
+									containers_running.length == initialContainers.length ? (
+										<>All containers are running!</>
+									) : (
+										<>
+											({containers_running.length}/{initialContainers.length} running)
+										</>
+									)
 								) : (
-									<>
-										({containers_running.length}/{initialContainers.length} running)
-									</>
+									<>No containers found.</>
 								)}
 							</div>
 						</div>
@@ -260,8 +271,7 @@ function QuickActions({
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										await handleDockerAction({ type: "run" });
-										return true;
+										return await handleDocker({ type: "docker-containers-run" });
 									}}
 									variant={"default"}
 								>
@@ -279,7 +289,11 @@ function QuickActions({
 						<Button
 							type={"button"}
 							variant={"outline"}
-							disabled={loading}
+							disabled={
+								loading ||
+								containers_running.length == 0 ||
+								initialContainers.length == 0
+							}
 							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 						>
 							<div className="p-2 bg-primary/10 rounded-md">
@@ -313,8 +327,7 @@ function QuickActions({
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										await handleDockerAction({ type: "stop" });
-										return true;
+										return await handleDocker({ type: "docker-containers-stop" });
 									}}
 									variant={"destructive"}
 								>
@@ -332,7 +345,11 @@ function QuickActions({
 						<Button
 							type={"button"}
 							variant={"outline"}
-							disabled={loading}
+							disabled={
+								loading ||
+								containers_running.length == 0 ||
+								initialContainers.length == 0
+							}
 							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 						>
 							<div className="p-2 bg-primary/10 rounded-md">
@@ -366,8 +383,7 @@ function QuickActions({
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										await handleDockerAction({ type: "remove" });
-										return true;
+										return await handleDocker({ type: "docker-containers-remove" });
 									}}
 									variant={"destructive"}
 								>
@@ -410,7 +426,7 @@ function QuickActions({
 						<AlertDialogHeader>
 							<AlertDialogTitle className="flex items-center gap-2">
 								<Eraser className="w-4 h-4 text-destructive" />
-								Prune everything
+								Aggressive prune
 							</AlertDialogTitle>
 							<AlertDialogDescription>
 								Are you sure you want to remove all containers, volumes and networks by
@@ -427,8 +443,7 @@ function QuickActions({
 								<AlertDialogAction
 									disabled={loading}
 									onAction={async () => {
-										await handleDockerAction({ type: "prune" });
-										return true;
+										return await handleDocker({ type: "docker-prune" });
 									}}
 									variant={"destructive"}
 								>
@@ -462,11 +477,11 @@ function QuickActions({
 
 function StrictMode({
 	project,
-	handleDockerAction,
+	handleDocker,
 	loading = false,
 }: {
 	project: Project;
-	handleDockerAction: (action: DockerAction) => void;
+	handleDocker: (action: DockerAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	return (
@@ -484,7 +499,7 @@ function StrictMode({
 			<Button
 				variant={"outline"}
 				size={"sm"}
-				onClick={() => handleDockerAction({ type: "strict-toggle" })}
+				onClick={() => handleDocker({ type: "docker-strict-toggle" })}
 				disabled={loading}
 			>
 				{loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -513,11 +528,11 @@ function GoodDockerConfiguration() {
 
 function SaveProject({
 	project,
-	handleDockerAction,
+	handleDocker,
 	loading = false,
 }: {
 	project: Project;
-	handleDockerAction: (action: DockerAction) => void;
+	handleDocker: (action: DockerAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	return (
@@ -536,7 +551,7 @@ function SaveProject({
 				variant={"outline"}
 				size={"sm"}
 				onClick={async () => {
-					await handleDockerAction({ type: "save" });
+					await handleDocker({ type: "docker-save" });
 				}}
 				disabled={loading}
 			>
@@ -549,13 +564,13 @@ function SaveProject({
 
 export function ContainersList({
 	// project,
-	handleDockerAction,
+	handleDocker,
 	initialContainers,
 	loading = false,
 }: {
 	// project: Project;
-	handleDockerAction: (action: DockerAction) => Promise<void>;
-	initialContainers: tempContainer[];
+	handleDocker: (action: DockerAction) => Promise<boolean>;
+	initialContainers: DockerContainer[];
 	loading?: boolean;
 }) {
 	// States
@@ -626,8 +641,8 @@ export function ContainersList({
 										<DropdownMenuGroup>
 											<DropdownMenuItem
 												onClick={async () => {
-													await handleDockerAction({
-														type: "container-run",
+													await handleDocker({
+														type: "docker-container-run",
 														container_id: container.container_id,
 													});
 												}}
@@ -639,8 +654,8 @@ export function ContainersList({
 											</DropdownMenuItem>
 											<DropdownMenuItem
 												onClick={async () => {
-													await handleDockerAction({
-														type: "container-stop",
+													await handleDocker({
+														type: "docker-container-stop",
 														container_id: container.container_id,
 													});
 												}}
@@ -652,8 +667,8 @@ export function ContainersList({
 											</DropdownMenuItem>
 											<DropdownMenuItem
 												onClick={async () => {
-													await handleDockerAction({
-														type: "container-restart",
+													await handleDocker({
+														type: "docker-container-restart",
 														container_id: container.container_id,
 													});
 												}}
@@ -665,8 +680,8 @@ export function ContainersList({
 											</DropdownMenuItem>
 											<DropdownMenuItem
 												onClick={async () => {
-													await handleDockerAction({
-														type: "container-remove",
+													await handleDocker({
+														type: "docker-container-remove",
 														container_id: container.container_id,
 													});
 												}}
@@ -713,7 +728,8 @@ export function ContainersList({
 								colSpan={6}
 								className="text-center py-4 bg-muted/50 text-muted-foreground"
 							>
-								No containers found.
+								No containers added yet. Click on "Run all containers" in the
+								"Containers" tab to start them.
 							</TableCell>
 						</TableRow>
 					)}

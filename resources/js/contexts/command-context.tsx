@@ -1,42 +1,32 @@
-import { createContext, useContext, useCallback, ReactNode, useState } from "react";
-import { useProject } from "./project-context";
-import { type Command } from "@/lib/commands/type";
-import { useCommandActionsRemote } from "@/services/commands/remote";
-import { useCommandActionsLocal } from "@/services/commands/local";
-
-
-export type CommandAction =
-	| { type: "create"; command: Command }
-	| { type: "create-multiple"; commands: Command[] }
-	| { type: "update"; command: Command }
-	| { type: "delete"; command: Command }
-	| { type: "run"; command: Command }
-	| { type: "delete-all" };
+import { createContext, useContext, useState, useCallback } from "react";
+import type { CommandAction, CommandService } from "@/lib/commands/type";
+import { useCommandServiceFactory } from "@/services/commands/factory";
 
 interface CommandContextType {
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 	loading: boolean;
 }
 
 const CommandContext = createContext<CommandContextType | undefined>(undefined);
 
-export function CommandProvider({ children }: { children: ReactNode }) {
-	const { project } = useProject();
+export function CommandProvider({ children }: { children: React.ReactNode }) {
+	const service: CommandService = useCommandServiceFactory();
 	const [loading, setLoading] = useState(false);
 
-
-	const handleCommandActionImpl = project.isCreated
-		? useCommandActionsRemote()
-		: useCommandActionsLocal();
-
-	const handleCommandAction = useCallback(async (action: CommandAction) => {
-		setLoading(true);
-		await handleCommandActionImpl(action);
-		setLoading(false);
-	}, [handleCommandActionImpl]);
+	const handleCommand = useCallback(
+		async (action: CommandAction) => {
+			setLoading(true);
+			try {
+				return await service.handleCommand(action);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[service],
+	);
 
 	return (
-		<CommandContext.Provider value={{ handleCommandAction, loading }}>
+		<CommandContext.Provider value={{ handleCommand, loading }}>
 			{children}
 		</CommandContext.Provider>
 	);
@@ -45,7 +35,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
 export function useCommand() {
 	const context = useContext(CommandContext);
 	if (!context) {
-		throw new Error("useCommand must be used within CommandProvider");
+		throw new Error("useCommand must be used within a CommandProvider");
 	}
 	return context;
 }

@@ -49,11 +49,12 @@ import { useProject, ProjectProvider } from "@/contexts/project-context";
 // Libs
 import { type BreadcrumbItem } from "@/types";
 import { Project, ProjectExample } from "@/lib/projects/type";
+import { DockerContainer } from "@/lib/docker/type";
 
 // Functions
 import { parseDockerCompose } from "@/lib/docker/parser";
 
-export default function Page({ project }: { project: Project }) {
+export default function Page({ project, containers }: { project: Project, containers: DockerContainer[] }) {
 	const breadcrumbs: BreadcrumbItem[] = [
 		{
 			title: "VPS Manager",
@@ -77,13 +78,13 @@ export default function Page({ project }: { project: Project }) {
 			<ProjectProvider>
 				{/* Content */}
 
-				<Content project={project} />
+				<Content project={project} containers={containers} />
 			</ProjectProvider>
 		</AppLayout>
 	);
 }
 
-function Content({ project }: { project: Project }) {
+function Content({ project, containers }: { project: Project, containers: DockerContainer[] }) {
 	const { setProject, updateProject } = useProject();
 
 	const tabs = [
@@ -162,10 +163,10 @@ function Content({ project }: { project: Project }) {
 
 				<SmoothItem delay={0.5} layout={false} className="!flex-grow-0 w-full">
 					<TabsBody className="mt-4">
-						<AppOverview />
+						<AppOverview containers={containers} />
 						<AppMakefile />
 						<AppVariables />
-						<AppDocker />
+						<AppDocker containers={containers}/>
 						<AppSettings />
 					</TabsBody>
 				</SmoothItem>

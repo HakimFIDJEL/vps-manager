@@ -16,7 +16,7 @@ export function parseCommandsFromMakefile({
   let currentCommand: string[] = [];
   let isCollectingCommand = false;
 
-  console.log("Parsing Makefile content...");
+  // console.log("Parsing Makefile content...");
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -37,9 +37,9 @@ export function parseCommandsFromMakefile({
         const result = CommandSchema.safeParse(command);
         if (!result.success) {
           const errors = result.error.errors.map(err => err.message).join(", ");
-          toast.error(`1 - Invalid command format for target ${currentTarget}: ${errors}`);
+          toast.error("An error occured", { description: `Invalid command format for target ${currentTarget}: ${errors}` });
         } else if (commands.some((c) => c.target === currentTarget)) {
-          toast.error(`Target already exists: "${currentTarget}"`);
+          toast.error("An error occured", { description: `Target already exists: "${currentTarget}"` });
         } else {
           parsed.push(command);
         }
@@ -98,18 +98,18 @@ export function parseCommandsFromMakefile({
     const result = CommandSchema.safeParse(command);
     if (!result.success) {
       const errors = result.error.errors.map(err => err.message).join(", ");
-      toast.error(`2 - Invalid command format for target ${currentTarget}: ${errors}`);
+      toast.error("An error occured", { description: `Invalid command format for target ${currentTarget}: ${errors}` });
     } else if (commands.some((c) => c.target === currentTarget)) {
-      toast.error(`Target already exists: "${currentTarget}"`);
+      toast.error("An error occured", { description: `Target already exists: "${currentTarget}"` });
     } else {
       parsed.push(command);
     }
   }
 
-  console.log("Parsed commands:", parsed);
+  // console.log("Parsed commands:", parsed);
 
   if (parsed.length === 0) {
-    toast.error("No valid commands found in the file. Make sure your targets are properly formatted and have commands.");
+    toast.error("An error occured", { description: "No valid commands found in the file. Make sure your targets are properly formatted and have commands." });
   }
 
   return parsed;

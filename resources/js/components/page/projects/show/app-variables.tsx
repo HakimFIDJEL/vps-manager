@@ -14,8 +14,8 @@ import { Search, Plus, FileUp, Download } from "lucide-react";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
-// import { CommandAction, useCommand } from "@/contexts/command-context";
-import { useVariable, VariableAction } from "@/contexts/variable-context";
+import { useVariable } from "@/contexts/variable-context";
+import { VariableAction } from "@/lib/variables/type";
 
 import {
 	CreateVariable,
@@ -33,7 +33,7 @@ export function AppVariables() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleVariableAction, loading } = useVariable();
+	const { handleVariable, loading } = useVariable();
 
 	return (
 		<TabsContent value="variables" className="space-y-12">
@@ -59,7 +59,7 @@ export function AppVariables() {
 					>
 						{/* Add command */}
 						<CreateVariable
-							handleVariableAction={handleVariableAction}
+							handleVariable={handleVariable}
 							loading={loading}
 						>
 							<Button
@@ -81,7 +81,7 @@ export function AppVariables() {
 						</CreateVariable>
 
 						{/* Import Makefile */}
-						<ImportEnv handleVariableAction={handleVariableAction}>
+						<ImportEnv handleVariable={handleVariable}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -111,7 +111,7 @@ export function AppVariables() {
 				<div className="bg-background rounded-md">
 					<VariablesList
 						search={search}
-						handleVariableAction={handleVariableAction}
+						handleVariable={handleVariable}
 						loading={loading}
 					/>
 				</div>

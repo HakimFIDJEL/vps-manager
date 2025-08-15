@@ -44,7 +44,7 @@ export function AppProject({
 
 		if (!result.success) {
 			setAvailabilityState("");
-			toast.error(result.error.errors[0].message);
+			toast.error("An error occured", { description: result.error.errors[0].message });
 			return false;
 		}
 

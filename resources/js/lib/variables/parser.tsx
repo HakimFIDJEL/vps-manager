@@ -18,7 +18,7 @@ export function parseVariablesFromEnv({
 	for (const line of lines) {
 		const match = line.match(/^\s*([^=]+?)\s*=\s*(.*)$/);
 		if (!match) {
-			toast.error(`Invalid format, line skipped: "${line}"`);
+			toast.error("An error occured", { description: `Invalid format, line skipped: "${line}"` });
 			continue;
 		}
 
@@ -29,13 +29,13 @@ export function parseVariablesFromEnv({
 		const result = VariableSchema.safeParse({ key, value });
 		if (!result.success) {
 			const errors = result.error.errors.map((err) => err.message).join(", ");
-			toast.error(`Invalid variable format for ${key}: ${errors}`);
+			toast.error("An error occured", { description: `Invalid variable format for ${key}: ${errors}` });
 			continue;
 		}
 
 		const { key: k, value: v } = result.data; 
 		if (variables.some((x) => x.key === k)) {
-			toast.error(`Key already exists, line skipped: "${key}"`);
+			toast.error("An error occured", { description: `Key already exists, line skipped: "${key}"` });
 			continue;
 		}
 

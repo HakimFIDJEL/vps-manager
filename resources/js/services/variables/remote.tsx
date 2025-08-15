@@ -1,81 +1,75 @@
-import { useProject } from "@/contexts/project-context";
+// services/variables/remote.tsx
+
+// Necessary imports
 import { toast } from "sonner";
-import { type VariableAction } from "@/contexts/variable-context";
 
-export function useVariableActionsRemote() {
-  const { project, updateProject } = useProject();
+// Services
+import { useLocalVariableService } from "./local";
 
-  return async (action: VariableAction): Promise<void> => {
-    switch (action.type) {
-      case "create":
-        toast.loading("Creating variable...", {
-          id: `create-variable-${action.variable.key}`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        updateProject("variables", [...project.variables, action.variable]);
-        toast.dismiss(`create-variable-${action.variable.key}`);
-        toast.success(`Variable ${action.variable.key} created successfully!`);
-        break;
-      case "create-multiple":
-        toast.loading("Importing variables...", {
-          id: `import-variables`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        updateProject("variables", [...action.variables, ...project.variables]);
-        toast.dismiss(`import-variables`);
-        toast.success(`${action.variables.length} variables imported successfully!`);
-        break;
-      case "update":
-        toast.loading("Updating variable...", {
-          id: `update-variable-${action.variable.key}`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        updateProject(
-          "variables",
-          project.variables.map((v) =>
-            v.key === action.variable.key ? action.variable : v
-          )
-        );
-        toast.dismiss(`update-variable-${action.variable.key}`);
-        toast.success(`Variable ${action.variable.key} updated successfully!`);
-        break;
-      case "delete":
-        toast.loading("Deleting variable...", {
-          id: `delete-variable-${action.variable.key}`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        updateProject(
-          "variables",
-          project.variables.filter((v) => v.key !== action.variable.key)
-        );
-        toast.dismiss(`delete-variable-${action.variable.key}`);
-        toast.success(`Variable ${action.variable.key} deleted successfully!`);
-        break;
-      case "delete-all":
-        toast.loading("Deleting all variables...", {
-          id: `delete-all-variables`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        updateProject("variables", []);
-        toast.dismiss(`delete-all-variables`);
-        toast.success("All variables deleted successfully!");
-        break;
-      case "toggle-visibility":
-        updateProject(
-          "variables",
-          project.variables.map((v) =>
-            v.key === action.variable.key ? { ...v, visible: !v.visible } : v
-          )
-        );
-        break;
-      case "toggle-visibility-all":
-        const allVisible = project.variables.every((v) => v.visible);
-        updateProject(
-          "variables",
-          project.variables.map((v) => ({ ...v, visible: !allVisible }))
-        );
-        break;
-    }
-  }
+// Contexts
+import { useProject } from "@/contexts/project-context";
 
-} 
+// Types
+import type { ActionOf } from "@/lib/variables/type";
+import type { VariableService, Registry } from "@/lib/variables/type";
+
+export function useRemoteVariableService(): VariableService {
+	const { project, updateProject } = useProject();
+
+  const local = useLocalVariableService();
+
+	const registry: Registry = {
+		"variable-create": variable_create,
+		"variable-create-multiple": variable_create_multiple,
+		"variable-update": variable_update,
+		"variable-delete": variable_delete,
+		"variable-delete-all": variable_delete_all,
+    "variable-toggle-visibility": local.handleVariable,
+    "variable-toggle-visibility-all": local.handleVariable,
+	};
+
+	return {
+		async handleVariable(action) {
+			const fn = registry[action.type] as any;
+			return fn ? fn(action as any) : true;
+		},
+	};
+
+	async function variable_create(a: ActionOf<"variable-create">) {
+		updateProject("variables", [...project.variables, a.variable]);
+		toast.success(`Variable ${a.variable.key} created successfully!`);
+		return true;
+	}
+
+	async function variable_create_multiple(
+		a: ActionOf<"variable-create-multiple">,
+	) {
+		updateProject("variables", [...project.variables, ...a.variables]);
+		toast.success(`${a.variables.length} variables imported successfully!`);
+		return true;
+	}
+
+	async function variable_update(a: ActionOf<"variable-update">) {
+		updateProject(
+			"variables",
+			project.variables.map((v) => (v.key === a.variable.key ? a.variable : v)),
+		);
+		toast.success(`Variable ${a.variable.key} updated successfully!`);
+		return true;
+	}
+
+	async function variable_delete(a: ActionOf<"variable-delete">) {
+		updateProject(
+			"variables",
+			project.variables.filter((v) => v.key !== a.variable.key),
+		);
+		toast.success(`Variable ${a.variable.key} deleted successfully!`);
+		return true;
+	}
+
+	async function variable_delete_all() {
+		updateProject("variables", []);
+		toast.success("All variables deleted successfully!");
+		return true;
+	}
+}

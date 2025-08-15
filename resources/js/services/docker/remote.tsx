@@ -1,247 +1,205 @@
-import { useProject } from "@/contexts/project-context";
+// services/docker/remote.tsx
+
+// Necessary imports
 import { toast } from "sonner";
-import yaml from "js-yaml";
+import { useLocalDockerService } from "./local";
+
+// Contexts
+import { useProject } from "@/contexts/project-context";
 import { parseDockerCompose } from "@/lib/docker/parser";
-import type { DockerAction } from "@/lib/docker/type";
 
-export function useDockerActionsRemote() {
-  const { project, updateProject } = useProject();
+// Types
+import type { ActionOf } from "@/lib/docker/type";
+import type { DockerService, Registry } from "@/lib/docker/type";
+import { router } from "@inertiajs/react";
 
-  return async (action: DockerAction): Promise<void> => {
-    switch (action.type) {
-      case "create":
-        // TODO: Server call not necessary
-        updateProject("docker", action.docker);
-        toast.success("Docker configuration created successfully!");
-        break;
-      case "update":
-        // TODO: Server call not necessary
-        updateProject("docker", action.docker);
-        toast.success("Docker configuration updated successfully!");
-        break;
-      case "delete":
-        // TODO: Server call not necessary
-        updateProject("docker", {
-          content: "",
-          isSaved: false,
-          isStrict: false,
-          parsed: {
-            services: [],
-            volumes: [],
-            networks: [],
-          },
-        });
-        toast.success("Docker configuration deleted successfully!");
-        break;
-      case "save": {
+export function useRemoteDockerService(): DockerService {
+	const { project, updateProject } = useProject();
+	const local = useLocalDockerService();
 
-        
-        
-        
-        // TODO: Replace with real server call
-        const save_parsed = parseDockerCompose(
-          project.docker.content,
-          project.docker.isStrict,
-          project.variables.length
-        );
+	const registry: Registry = {
+		"docker-create": docker_create,
+		"docker-update": docker_update,
+		"docker-delete": docker_delete,
+		"docker-save": docker_save,
+		"docker-un-save": local.handleDocker,
+		"docker-clear": local.handleDocker,
+		"docker-copy": local.handleDocker,
+		"docker-strict-toggle": local.handleDocker,
+		"docker-remove-type": local.handleDocker,
+		"docker-prune": docker_prune,
+		"docker-containers-run": docker_containers_run,
+		"docker-containers-stop": docker_containers_stop,
+		"docker-containers-remove": docker_containers_remove,
+		"docker-container-run": docker_container_run,
+		"docker-container-stop": docker_container_stop,
+		"docker-container-restart": docker_container_restart,
+		"docker-container-remove": docker_container_remove,
+	};
 
-        
-        if (save_parsed.isValid && save_parsed.updatedContent) {
+	return {
+		async handleDocker(action) {
+			const fn = registry[action.type] as any;
+			return fn ? fn(action as any) : true;
+		},
+	};
 
-          toast.loading("Saving docker configuration...", {
-            id: "save-docker",
-          });
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          toast.dismiss("save-docker");
-          toast.success("Docker configuration saved");
+	async function docker_create(a: ActionOf<"docker-create">) {
+		updateProject("docker", a.docker);
+		toast.success("Docker configuration created successfully!");
+		return true;
+	}
 
-          updateProject("docker", {
-            content: save_parsed.updatedContent,
-            isSaved: true,
-            isStrict: project.docker.isStrict,
-            parsed: {
-              services: save_parsed.services,
-              volumes: save_parsed.volumes,
-              networks: save_parsed.networks,
-            },
-          });
-        } else {
-          // Error toast already sent in parseDockerCompose
-        }
-        
+	async function docker_update(a: ActionOf<"docker-update">) {
+		updateProject("docker", a.docker);
+		toast.success("Docker configuration updated successfully!");
+		return true;
+	}
 
-        break;
-      }
-      case "un-save":
-        // TODO: Server call not necessary
-        updateProject("docker", {
-          ...project.docker,
-          content: action.content,
-          isSaved: false,
-        });
-        break;
-      case "clear": {
-        // TODO: Server call not necessary
-        const emptyContent = yaml.dump({
-          services: {},
-          volumes: {},
-          networks: {},
-        });
-        const parsedEmpty = parseDockerCompose(
-          emptyContent,
-          project.docker.isStrict,
-          project.variables.length
-        );
-        if (parsedEmpty.isValid && parsedEmpty.updatedContent) {
-          updateProject("docker", {
-            content: parsedEmpty.updatedContent,
-            isSaved: false,
-            isStrict: project.docker.isStrict,
-            parsed: {
-              services: [],
-              volumes: [],
-              networks: [],
-            },
-          });
-          toast.success("Docker configuration cleared");
-        }
-        break;
-      }
-      case "reset":
-        // TODO: Server call not necessary
-        updateProject("docker", {
-          content: "",
-          isSaved: false,
-          isStrict: false,
-          parsed: {
-            services: [],
-            volumes: [],
-            networks: [],
-          },
-        });
-        toast.success("Docker configuration reset successfully!");
-        break;
-      case "copy":
-        await navigator.clipboard.writeText(project.docker.content);
-        toast.success("Docker configuration file copied to clipboard");
-        break;
-      case "strict-toggle":
-        // TODO: Server call not necessary
-        updateProject("docker", {
-          ...project.docker,
-          isStrict: !project.docker.isStrict,
-          isSaved: false,
-        });
-        toast.success(
-          `Strict mode ${!project.docker.isStrict ? "enabled" : "disabled"}`
-        );
-        break;
-      case "remove-type": {
-        // TODO: Server call not necessary
-        const content = project.docker.content;
-        const parsed = yaml.load(content) as Record<string, any>;
-        if (parsed && parsed[action.elementType] && parsed[action.elementType][action.name]) {
-          delete parsed[action.elementType][action.name];
-          const newContent = yaml.dump(parsed);
-          if (action.elementType == "services" && project.docker.parsed.services.length === 1) {
-            toast.error('At least one service is required');
-            break;
-          }
-          const remove_parsed = parseDockerCompose(
-            newContent,
-            project.docker.isStrict,
-            project.variables.length
-          );
-          if (remove_parsed.isValid && remove_parsed.updatedContent) {
-            updateProject("docker", {
-              content: remove_parsed.updatedContent,
-              isSaved: false,
-              isStrict: project.docker.isStrict,
-              parsed: {
-                services: remove_parsed.services,
-                volumes: remove_parsed.volumes,
-                networks: remove_parsed.networks,
-              },
-            });
-            toast.success(`${action.elementType.slice(0, -1)} ${action.name} removed successfully!`);
-          }
-        }
-        break;
-      }
-      case "run":
-        // TODO: Replace with real server call
-        toast.loading("Running all containers...", {
-          id: "run-all-containers",
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss("run-all-containers");
-        toast.success("All containers are successfully running!");
-        break;
-      case "stop":
-        // TODO: Replace with real server call
-        toast.loading("Stopping all containers...", {
-          id: "stop-all-containers",
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss("stop-all-containers");
-        toast.success("All containers are successfully stopped!");
-        break;
-      case "remove":
-        // TODO: Replace with real server call
-        toast.loading("Removing all containers...", {
-          id: "remove-all-containers",
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss("remove-all-containers");
-        toast.success("All containers are successfully removed!");
-        break;
-      case "prune":
-        // TODO: Replace with real server call
-        toast.loading("Pruning...", {
-          id: "prune-containers",
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss("prune-containers");
-        toast.success("The system has been successfully pruned!");
-        break;
-      case "container-run":
-        // TODO: Replace with real server call
-        toast.loading(`Running container ${action.container_id}...`, {
-          id: `run-container-${action.container_id}`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss(`run-container-${action.container_id}`);
-        toast.success("Container is successfully running!");
-        break;
-      case "container-stop":
-        // TODO: Replace with real server call
-        toast.loading(`Stopping container ${action.container_id}...`, {
-          id: `stop-container-${action.container_id}`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss(`stop-container-${action.container_id}`);
-        toast.success("Container is successfully stopped!");
-        break;
-      case "container-restart":
-        // TODO: Replace with real server call
-        toast.loading(`Restarting container ${action.container_id}...`, {
-          id: `restart-container-${action.container_id}`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss(`restart-container-${action.container_id}`);
-        toast.success("Container is successfully restarting!");
-        break;
-      case "container-remove":
-        // TODO: Replace with real server call
-        toast.loading(`Removing container ${action.container_id}...`, {
-          id: `remove-container-${action.container_id}`,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.dismiss(`remove-container-${action.container_id}`);
-        toast.success("Container is successfully removed!");
-        break;
-      default:
-        break;
-    }
-  };
-} 
+	async function docker_delete() {
+		updateProject("docker", {
+			content: "",
+			isSaved: false,
+			isStrict: false,
+			parsed: { services: [], volumes: [], networks: [] },
+		});
+		toast.success("Docker configuration deleted successfully!");
+		return true;
+	}
+
+	async function docker_save() {
+		const r = parseDockerCompose(
+			project.docker.content,
+			project.docker.isStrict,
+			project.variables.length,
+		);
+		if (!r.isValid || !r.updatedContent) return false;
+		updateProject("docker", {
+			content: r.updatedContent,
+			isSaved: true,
+			isStrict: project.docker.isStrict,
+			parsed: { services: r.services, volumes: r.volumes, networks: r.networks },
+		});
+		toast.success("Docker configuration saved successfully!");
+		return true;
+	}
+
+	async function docker_containers_run() {
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.containers.run", { inode: project.inode }),
+				{},
+				{
+					onStart: () =>
+						toast.loading("Running all containers...", { id: "run-all" }),
+					onSuccess: () => {
+						toast.success("All containers running!");
+						ok = true;
+					},
+					onError: (e) => toast.error("Error", { description: e?.message }),
+					onFinish: () => {
+						toast.dismiss("run-all");
+						resolve();
+					},
+				},
+			);
+		});
+		return ok;
+	}
+
+	async function docker_containers_stop() {
+		toast.loading("Stopping containers...", { id: "stop-all" });
+		await new Promise((r) => setTimeout(r, 1000));
+		toast.dismiss("stop-all");
+		toast.success("All containers have been successfully stopped!");
+		return true;
+	}
+
+	async function docker_containers_remove() {
+		// toast.loading("Removing containers...", { id: "rm-all" });
+		// await new Promise((r) => setTimeout(r, 1000));
+		// toast.dismiss("rm-all");
+		// toast.success("All containers have been successfully removed!");
+		// return true;
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.containers.remove", { inode: project.inode }),
+				{},
+				{
+					onStart: () =>
+						toast.loading("Removing containers...", { id: "rm-all" }),
+					onSuccess: () => {
+						toast.success("All containers removed!");
+						ok = true;
+					},
+					onError: (e) => toast.error("Error", { description: e?.message }),
+					onFinish: () => {
+						toast.dismiss("rm-all");
+						resolve();
+					},
+				},
+			);
+		});
+		return ok;
+	}
+
+	async function docker_prune() {
+		toast.loading("Pruning docker system...", { id: "prune" });
+		await new Promise((r) => setTimeout(r, 1000));
+		toast.dismiss("prune");
+		toast.success("Docker system has been successfully pruned!");
+		return true;
+	}
+
+	async function docker_container_run(a: ActionOf<"docker-container-run">) {
+		toast.loading(`Running container ${a.container_id}...`, {
+			id: `run-${a.container_id}`,
+		});
+		await new Promise((r) => setTimeout(r, 800));
+		toast.dismiss(`run-${a.container_id}`);
+		toast.success(`The container ${a.container_id} is now successfully running!`);
+		return true;
+	}
+
+	async function docker_container_stop(a: ActionOf<"docker-container-stop">) {
+		toast.loading(`Stopping container ${a.container_id}...`, {
+			id: `stop-${a.container_id}`,
+		});
+		await new Promise((r) => setTimeout(r, 800));
+		toast.dismiss(`stop-${a.container_id}`);
+		toast.success(
+			`The container ${a.container_id} has been successfully stopped!`,
+		);
+		return true;
+	}
+
+	async function docker_container_restart(
+		a: ActionOf<"docker-container-restart">,
+	) {
+		toast.loading(`Restarting container ${a.container_id}...`, {
+			id: `re-${a.container_id}`,
+		});
+		await new Promise((r) => setTimeout(r, 800));
+		toast.dismiss(`re-${a.container_id}`);
+		toast.success(
+			`The container ${a.container_id} has been successfully restarted!`,
+		);
+		return true;
+	}
+
+	async function docker_container_remove(
+		a: ActionOf<"docker-container-remove">,
+	) {
+		toast.loading(`Removing container ${a.container_id}...`, {
+			id: `rm-${a.container_id}`,
+		});
+		await new Promise((r) => setTimeout(r, 800));
+		toast.dismiss(`rm-${a.container_id}`);
+		toast.success(
+			`The container ${a.container_id} has been successfully removed!`,
+		);
+		return true;
+	}
+}

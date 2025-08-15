@@ -43,7 +43,8 @@ import {
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
-import { CommandAction, useCommand } from "@/contexts/command-context";
+import { useCommand } from "@/contexts/command-context";
+import type { CommandAction } from "@/lib/commands/type";
 
 import {
 	CreateCommand,
@@ -61,7 +62,7 @@ export function AppMakefile() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleCommandAction, loading } = useCommand();
+	const { handleCommand, loading } = useCommand();
 
 	return (
 		<TabsContent value="commands" className="space-y-12">
@@ -94,10 +95,7 @@ export function AppMakefile() {
 						className={`grid gap-2 ${project.commands.length > 0 ? "grid-cols-4" : "grid-cols-3"}`}
 					>
 						{/* Add command */}
-						<CreateCommand
-							handleCommandAction={handleCommandAction}
-							loading={loading}
-						>
+						<CreateCommand handleCommand={handleCommand} loading={loading}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -117,10 +115,7 @@ export function AppMakefile() {
 						</CreateCommand>
 
 						{/* Import Makefile */}
-						<ImportMakefile
-							handleCommandAction={handleCommandAction}
-							loading={loading}
-						>
+						<ImportMakefile handleCommand={handleCommand} loading={loading}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -177,8 +172,7 @@ export function AppMakefile() {
 											<AlertDialogAction
 												disabled={loading}
 												onAction={async () => {
-													await handleCommandAction({ type: "delete-all" });
-													return true;
+													return await handleCommand({ type: "command-delete-all" });
 												}}
 												variant={"destructive"}
 											>
@@ -196,7 +190,7 @@ export function AppMakefile() {
 
 			<CommandList
 				search={search}
-				handleCommandAction={handleCommandAction}
+				handleCommand={handleCommand}
 				loading={loading}
 			/>
 		</TabsContent>
@@ -205,12 +199,12 @@ export function AppMakefile() {
 
 export function CommandList({
 	search = "",
-	handleCommandAction,
+	handleCommand,
 	loading = false,
 	carrousel = false,
 }: {
 	search?: string;
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 	loading?: boolean;
 	carrousel?: boolean;
 }) {
@@ -222,16 +216,14 @@ export function CommandList({
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		await handleCommandAction({ type: "delete", command: command });
-		return true;
+		return await handleCommand({ type: "command-delete", command: command });
 	}
 
 	async function handleRun(target: string) {
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		await handleCommandAction({ type: "run", command: command });
-		return true;
+		return await handleCommand({ type: "command-run", command: command });
 	}
 
 	// Variables
@@ -260,7 +252,7 @@ export function CommandList({
 									loading={loading}
 									handleRun={handleRun}
 									handleDelete={handleDelete}
-									handleCommandAction={handleCommandAction}
+									handleCommand={handleCommand}
 								/>
 							</CarouselItem>
 						))}
@@ -281,7 +273,7 @@ export function CommandList({
 							loading={loading}
 							handleRun={handleRun}
 							handleDelete={handleDelete}
-							handleCommandAction={handleCommandAction}
+							handleCommand={handleCommand}
 						/>
 					))}
 				</SmoothAnimate>
@@ -295,14 +287,14 @@ function CommandCard({
 	loading,
 	handleRun,
 	handleDelete,
-	handleCommandAction,
+	handleCommand,
 	...props
 }: {
 	command: Command;
 	loading?: boolean;
 	handleRun: (target: string) => Promise<boolean>;
 	handleDelete: (target: string) => Promise<boolean>;
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 }) {
 	return (
 		<div
@@ -315,7 +307,6 @@ function CommandCard({
 					<p className="text-sm text-muted-foreground mt-1">{command.description}</p>
 				</div>
 				<div className="absolute top-0 bottom-0 right-0 flex items-center bg-gradient-to-l from-card via-card to-transparent opacity-0 group-hover:opacity-100 transition-opacity pl-[150px]">
-
 					<div className=" flex items-center gap-1  ">
 						<AlertDialog>
 							<AlertDialogTrigger asChild>
@@ -347,8 +338,7 @@ function CommandCard({
 										<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 										<AlertDialogAction
 											onAction={async () => {
-												await handleRun(command.target);
-												return true;
+												return await handleRun(command.target);
 											}}
 											variant={"default"}
 											type={"button"}
@@ -363,7 +353,7 @@ function CommandCard({
 						</AlertDialog>
 						<EditCommand
 							command={command}
-							handleCommandAction={handleCommandAction}
+							handleCommand={handleCommand}
 							loading={loading}
 						/>
 						<AlertDialog>
@@ -396,8 +386,7 @@ function CommandCard({
 										<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 										<AlertDialogAction
 											onAction={async () => {
-												await handleDelete(command.target);
-												return true;
+												return await handleDelete(command.target);
 											}}
 											variant={"destructive"}
 											type={"button"}

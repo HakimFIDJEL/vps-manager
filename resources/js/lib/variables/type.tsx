@@ -70,3 +70,25 @@ export const VariableEnvSchema = z.object({
 		),
 });
 
+
+export type VariableAction =
+	| { type: "variable-create"; variable: Variable }
+	| { type: "variable-create-multiple"; variables: Variable[] }
+	| { type: "variable-update"; variable: Variable }
+	| { type: "variable-delete"; variable: Variable }
+	| { type: "variable-delete-all" }
+	| { type: "variable-toggle-visibility"; variable: Variable }
+	| { type: "variable-toggle-visibility-all" };
+
+export type ActionOf<T extends VariableAction["type"]> = Extract<
+	VariableAction,
+	{ type: T }
+>;
+export type TypedHandler<T extends VariableAction["type"]> = (
+	a: ActionOf<T>,
+) => Promise<boolean>;
+export type Registry = { [K in VariableAction["type"]]?: TypedHandler<K> };
+
+export interface VariableService {
+	handleVariable(action: VariableAction): Promise<boolean>;
+}

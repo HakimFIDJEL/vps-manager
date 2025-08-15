@@ -13,7 +13,8 @@ export const CommandSchema = z.object({
 			message: "The target is required",
 		})
 		.regex(/^[a-z_][a-z0-9_]*$/, {
-			message: "Must start with a lowercase letter or underscore, and can only contain lowercase letters, numbers and underscores.",
+			message:
+				"Must start with a lowercase letter or underscore, and can only contain lowercase letters, numbers and underscores.",
 		}),
 	description: z
 		.string({
@@ -34,9 +35,7 @@ export const MakefileTextSchema = z.object({
 		})
 		.refine(
 			(text) => {
-				const lines = text
-					.split("\n")
-					.filter((line) => line.trim() !== "");
+				const lines = text.split("\n").filter((line) => line.trim() !== "");
 				return lines.length > 0;
 			},
 			{
@@ -45,13 +44,12 @@ export const MakefileTextSchema = z.object({
 		)
 		.refine(
 			(text) => {
-				const lines = text
-					.split("\n")
-					.filter((line) => line.trim() !== "");
+				const lines = text.split("\n").filter((line) => line.trim() !== "");
 				return lines.some((line) => line.match(/^[a-z_][a-z0-9_]*:/));
 			},
 			{
-				message: "No valid target found in the text. Targets must be in the form 'target:'",
+				message:
+					"No valid target found in the text. Targets must be in the form 'target:'",
 			},
 		),
 });
@@ -59,9 +57,12 @@ export const MakefileTextSchema = z.object({
 export const MakefileSchema = z.object({
 	file: z
 		.instanceof(File)
-		.refine((file) => file.name.endsWith("Makefile") || file.name.endsWith(".mk"), {
-			message: "The file must be called Makefile or have the .mk extension",
-		})
+		.refine(
+			(file) => file.name.endsWith("Makefile") || file.name.endsWith(".mk"),
+			{
+				message: "The file must be called Makefile or have the .mk extension",
+			},
+		)
 		.refine((file) => file.size <= 1024 * 1024, {
 			message: "The file must not exceed 1 MB",
 		})
@@ -79,3 +80,25 @@ export const MakefileSchema = z.object({
 			},
 		),
 });
+
+export type CommandAction =
+	| { type: "command-create"; command: Command }
+	| { type: "command-create-multiple"; commands: Command[] }
+	| { type: "command-update"; command: Command }
+	| { type: "command-delete"; command: Command }
+	| { type: "command-delete-all" }
+	// Server only
+	| { type: "command-run"; command: Command };
+
+export type ActionOf<T extends CommandAction["type"]> = Extract<
+	CommandAction,
+	{ type: T }
+>;
+export type TypedHandler<T extends CommandAction["type"]> = (
+	a: ActionOf<T>,
+) => Promise<boolean>;
+export type Registry = { [K in CommandAction["type"]]?: TypedHandler<K> };
+
+export interface CommandService {
+	handleCommand(action: CommandAction): Promise<boolean>;
+}

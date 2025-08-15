@@ -127,7 +127,7 @@ export type DockerCompose = {
 
 // TEMP
 
-export type tempContainer = {
+export type DockerContainer = {
   container_id : string;
   image : string;
   command : string;
@@ -139,22 +139,31 @@ export type tempContainer = {
 }
 
 export type DockerAction =
-  | { type: "create"; docker: DockerCompose }
-  | { type: "update"; docker: DockerCompose }
-  | { type: "delete" }
-  | { type: "save" }
-  | { type: "clear" }
-  | { type: "reset" }
-  | { type: "copy" }
-  | { type: "strict-toggle" }
-  | { type: "un-save"; content: string }
-  | { type: "remove-type"; name: string; elementType: "services" | "volumes" | "networks" }
+  | { type: "docker-create"; docker: DockerCompose }
+  | { type: "docker-update"; docker: DockerCompose }
+  | { type: "docker-delete" }
+  | { type: "docker-save" }
+  | { type: "docker-clear" }
+  | { type: "docker-reset" }
+  | { type: "docker-copy" }
+  | { type: "docker-strict-toggle" }
+  | { type: "docker-un-save"; content: string }
+  | { type: "docker-remove-type"; name: string; elementType: "services" | "volumes" | "networks" }
   // Server only
-  | { type: "run" }
-  | { type: "stop" }
-  | { type: "remove" }
-  | { type: "prune" }
-  | { type: "container-run"; container_id: string }
-  | { type: "container-stop"; container_id: string }
-  | { type: "container-restart"; container_id: string }
-  | { type: "container-remove"; container_id: string };
+  | { type: "docker-prune" }
+  | { type: "docker-containers-run" }
+  | { type: "docker-containers-stop" }
+  | { type: "docker-containers-remove" }
+  | { type: "docker-container-run"; container_id: string }
+  | { type: "docker-container-stop"; container_id: string }
+  | { type: "docker-container-restart"; container_id: string }
+  | { type: "docker-container-remove"; container_id: string };
+
+
+export type ActionOf<T extends DockerAction["type"]> = Extract<DockerAction, { type: T }>;
+export type TypedHandler<T extends DockerAction["type"]> = (a: ActionOf<T>) => Promise<boolean>;
+export type Registry = { [K in DockerAction["type"]]?: TypedHandler<K> };
+
+export interface DockerService {
+  handleDocker(action: DockerAction): Promise<boolean>;
+}
