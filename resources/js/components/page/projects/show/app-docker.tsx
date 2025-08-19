@@ -357,7 +357,7 @@ function QuickActions({
 							<div className="flex-1 text-left">
 								<div className="font-medium text-foreground">Remove all containers</div>
 								<div className="text-xs text-muted-foreground font-mono">
-									docker compose remove
+									docker compose down
 								</div>
 							</div>
 						</Button>
@@ -371,7 +371,7 @@ function QuickActions({
 							<AlertDialogDescription>
 								Are you sure you want to remove all containers by running the{" "}
 								<Badge variant={"outline"} className="font-mono">
-									docker compose remove
+									docker compose down
 								</Badge>{" "}
 								command?
 							</AlertDialogDescription>
@@ -416,7 +416,7 @@ function QuickActions({
 									Prune all volumes, networks...
 								</div> */}
 								<div className="text-xs text-muted-foreground font-mono">
-									docker system prune -a --volumes
+									docker compose down --volumes
 								</div>
 							</div>
 						</Button>
@@ -431,7 +431,7 @@ function QuickActions({
 								Are you sure you want to remove all containers, volumes and networks by
 								running the{" "}
 								<Badge variant={"outline"} className="font-mono">
-									docker system prune -a --volumes
+									docker compose down --volumes
 								</Badge>{" "}
 								command?
 							</AlertDialogDescription>

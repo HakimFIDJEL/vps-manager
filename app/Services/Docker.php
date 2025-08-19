@@ -28,6 +28,35 @@ class Docker
     }
 
     /**
+     * Prune unused Docker objects for the given inode.
+     *
+     * @param int $inode                The inode of the project
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @throws \RuntimeException
+     *
+     * @return ProcessResult            The result of the process
+     */
+    public function docker_prune(int $inode, ServicesSystem $system): ProcessResult
+    {
+        $path = $system->getFolderPathFromInode($inode);
+        if (!$path) {
+            throw new \RuntimeException("Failed to retrieve folder path for inode {$inode}");
+        }
+
+        $compose = rtrim($path, '/') . '/docker-compose.yaml';
+        if (! $system->pathExists($compose)) {
+            throw new \RuntimeException("Missing docker-compose.yaml in {$path}");
+        }
+
+        return $system->execute(
+            "sudo /usr/bin/docker compose -f " . escapeshellarg($path . "/docker-compose.yaml") .
+                " --project-directory " . escapeshellarg($path) .
+                " down --volumes --remove-orphans"
+        );
+    }
+
+    /**
      * List all containers for the given inode.
      *
      * @param int $inode                The inode of the project
@@ -168,46 +197,97 @@ class Docker
         );
     }
 
+    /**
+     * Run a specific container for the given inode.
+     *
+     * @param int $inode                The inode of the project
+     * @param string $id                 The ID of the container
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @throws \RuntimeException
+     *
+     * @return ProcessResult            The result of the process
+     */
     public function container_run(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
-            // Run a specific container for the given inode
-            return Process::run('ls');
+            return $system->execute(
+                "sudo /usr/bin/docker start " . escapeshellarg($id)
+            );
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }
     }
+
+    /**
+     * Stop a specific container for the given inode.
+     *
+     * @param int $inode                The inode of the project
+     * @param string $id                 The ID of the container
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @throws \RuntimeException
+     *
+     * @return ProcessResult            The result of the process
+     */
     public function container_stop(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
-            // Stop a specific container for the given inode
-            return Process::run('ls');
+            return $system->execute(
+                "sudo /usr/bin/docker stop " . escapeshellarg($id)
+            );
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }
     }
+
+    /**
+     * Restart a specific container for the given inode.
+     *
+     * @param int $inode                The inode of the project
+     * @param string $id                 The ID of the container
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @throws \RuntimeException
+     *
+     * @return ProcessResult            The result of the process
+     */
     public function container_restart(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
-            // Restart a specific container for the given inode
-            return Process::run('ls');
+            return $system->execute(
+                "sudo /usr/bin/docker restart " . escapeshellarg($id)
+            );
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }
     }
+
+    /**
+     * Remove a specific container for the given inode.
+     *
+     * @param int $inode                The inode of the project
+     * @param string $id                 The ID of the container
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @throws \RuntimeException
+     *
+     * @return ProcessResult            The result of the process
+     */
     public function container_remove(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
-            // Remove a specific container for the given inode
-            return Process::run('ls');
+            return $system->execute(
+                "sudo /usr/bin/docker rm -f " . escapeshellarg($id)
+            );
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }

@@ -97,7 +97,10 @@ export function useRemoteDockerService(): DockerService {
 						toast.success("All containers running!");
 						ok = true;
 					},
-					onError: (e) => toast.error("An error occured", { description: e?.message }),
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.containers_run || "Unknown error",
+						}),
 					onFinish: () => {
 						toast.dismiss("run-all");
 						resolve();
@@ -115,13 +118,15 @@ export function useRemoteDockerService(): DockerService {
 				route("docker.containers.stop", { inode: project.inode }),
 				{},
 				{
-					onStart: () =>
-						toast.loading("Stopping containers...", { id: "stop-all" }),
+					onStart: () => toast.loading("Stopping containers...", { id: "stop-all" }),
 					onSuccess: () => {
 						toast.success("All containers stopped!");
 						ok = true;
 					},
-					onError: (e) => toast.error("An error occured", { description: e?.message }),
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.containers_stop || "Unknown error",
+						}),
 					onFinish: () => {
 						toast.dismiss("stop-all");
 						resolve();
@@ -139,13 +144,15 @@ export function useRemoteDockerService(): DockerService {
 				route("docker.containers.remove", { inode: project.inode }),
 				{},
 				{
-					onStart: () =>
-						toast.loading("Removing containers...", { id: "rm-all" }),
+					onStart: () => toast.loading("Removing containers...", { id: "rm-all" }),
 					onSuccess: () => {
 						toast.success("All containers removed!");
 						ok = true;
 					},
-					onError: (e) => toast.error("An error occured", { description: e?.message }),
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.containers_remove || "Unknown error",
+						}),
 					onFinish: () => {
 						toast.dismiss("rm-all");
 						resolve();
@@ -157,60 +164,151 @@ export function useRemoteDockerService(): DockerService {
 	}
 
 	async function docker_prune() {
-		toast.loading("Pruning docker system...", { id: "prune" });
-		await new Promise((r) => setTimeout(r, 1000));
-		toast.dismiss("prune");
-		toast.success("Docker system has been successfully pruned!");
-		return true;
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.prune", { inode: project.inode }),
+				{},
+				{
+					onStart: () =>
+						toast.loading("Removing all containers, networks and volumes...", {
+							id: "prune",
+						}),
+					onSuccess: () => {
+						toast.success("All containers, networks and volumes removed!");
+						ok = true;
+					},
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.docker_prune || "Unknown error",
+						}),
+					onFinish: () => {
+						toast.dismiss("prune");
+						resolve();
+					},
+				},
+			);
+		});
+		return ok;
 	}
 
 	async function docker_container_run(a: ActionOf<"docker-container-run">) {
-		toast.loading(`Running container ${a.container_id}...`, {
-			id: `run-${a.container_id}`,
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.containers.run.id", {
+					inode: project.inode,
+					id: a.container_id,
+				}),
+				{},
+				{
+					onStart: () => toast.loading("Running container...", { id: "run" }),
+					onSuccess: () => {
+						toast.success("Container is now running!");
+						ok = true;
+					},
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.container_run || "Unknown error",
+						}),
+					onFinish: () => {
+						toast.dismiss("run");
+						resolve();
+					},
+				},
+			);
 		});
-		await new Promise((r) => setTimeout(r, 800));
-		toast.dismiss(`run-${a.container_id}`);
-		toast.success(`The container ${a.container_id} is now successfully running!`);
-		return true;
+		return ok;
 	}
 
 	async function docker_container_stop(a: ActionOf<"docker-container-stop">) {
-		toast.loading(`Stopping container ${a.container_id}...`, {
-			id: `stop-${a.container_id}`,
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.containers.stop.id", {
+					inode: project.inode,
+					id: a.container_id,
+				}),
+				{},
+				{
+					onStart: () => toast.loading("Stopping container...", { id: "stop" }),
+					onSuccess: () => {
+						toast.success("Container has been stopped!");
+						ok = true;
+					},
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.container_stop || "Unknown error",
+						}),
+					onFinish: () => {
+						toast.dismiss("stop");
+						resolve();
+					},
+				},
+			);
 		});
-		await new Promise((r) => setTimeout(r, 800));
-		toast.dismiss(`stop-${a.container_id}`);
-		toast.success(
-			`The container ${a.container_id} has been successfully stopped!`,
-		);
-		return true;
+		return ok;
 	}
 
 	async function docker_container_restart(
 		a: ActionOf<"docker-container-restart">,
 	) {
-		toast.loading(`Restarting container ${a.container_id}...`, {
-			id: `re-${a.container_id}`,
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.containers.restart.id", {
+					inode: project.inode,
+					id: a.container_id,
+				}),
+				{},
+				{
+					onStart: () => toast.loading("Restarting container...", { id: "restart" }),
+					onSuccess: () => {
+						toast.success("Container has been restarted!");
+						ok = true;
+					},
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.container_restart || "Unknown error",
+						}),
+					onFinish: () => {
+						toast.dismiss("restart");
+						resolve();
+					},
+				},
+			);
 		});
-		await new Promise((r) => setTimeout(r, 800));
-		toast.dismiss(`re-${a.container_id}`);
-		toast.success(
-			`The container ${a.container_id} has been successfully restarted!`,
-		);
-		return true;
+		return ok;
 	}
 
 	async function docker_container_remove(
 		a: ActionOf<"docker-container-remove">,
 	) {
-		toast.loading(`Removing container ${a.container_id}...`, {
-			id: `rm-${a.container_id}`,
+		let ok = false;
+		await new Promise<void>((resolve) => {
+			router.post(
+				route("docker.containers.remove.id", {
+					inode: project.inode,
+					id: a.container_id,
+				}),
+				{},
+				{
+					onStart: () => toast.loading("Removing container...", { id: "rm" }),
+					onSuccess: () => {
+						toast.success("Container has been removed!");
+						ok = true;
+					},
+					onError: (errors: Record<string, string>) =>
+						toast.error("An error occured", {
+							description: errors.container_remove || "Unknown error",
+						}),
+					onFinish: () => {
+						toast.dismiss("rm");
+						resolve();
+					},
+				},
+			);
 		});
-		await new Promise((r) => setTimeout(r, 800));
-		toast.dismiss(`rm-${a.container_id}`);
-		toast.success(
-			`The container ${a.container_id} has been successfully removed!`,
-		);
-		return true;
+		return ok;
 	}
 }
