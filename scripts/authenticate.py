@@ -1,9 +1,15 @@
 import sys
 import json
-import pam
 import getpass
 import pwd
 import subprocess
+
+# Try import pam with a clear fallback message
+try:
+    import pam  # type: ignore
+    PAM_AVAILABLE = True
+except Exception:
+    PAM_AVAILABLE = False
 
 REQUIRED_COMMANDS = [
     '/usr/bin/docker',
@@ -27,10 +33,17 @@ def user_can_run_command(user, cmd):
     except Exception:
         return False
 
-
 if len(sys.argv) != 2:
-    print(json.dumps({'auth': False, 'error': 'missing username'}))
-    exit(1)
+    print(json.dumps({'auth': False, 'error': 'The username is required'}))
+    sys.exit(1)
+
+# If pam is missing, exit early with a clear, actionable message
+if not PAM_AVAILABLE:
+    print(json.dumps({
+        'auth': False,
+        'error': "The authentication python package pam is missing, don't forget to follow the README instructions to use the application"
+    }))
+    sys.exit(1)
 
 username = sys.argv[1]
 # password = getpass.getpass()
@@ -39,15 +52,15 @@ password = sys.stdin.readline().strip()
 auth = pam.pam()
 if not auth.authenticate(username, password):
     print(json.dumps({'auth': False}))
-    exit(0)
+    sys.exit(0)
 
 for cmd in REQUIRED_COMMANDS:
     if not user_can_run_command(username, cmd):
         print(json.dumps({
             'auth': False,
-            'error': f'user {username} cannot run {cmd}'
+            'error': f'The user {username} cannot run {cmd}'
         }))
-        exit(0)
+        sys.exit(0)
 
 try:
     user_info = pwd.getpwnam(username)
@@ -59,5 +72,5 @@ try:
         'home': user_info.pw_dir,
         'shell': user_info.pw_shell
     }))
-except:
+except Exception:
     print(json.dumps({'auth': True, 'username': username}))
