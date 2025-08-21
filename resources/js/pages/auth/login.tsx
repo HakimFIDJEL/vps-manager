@@ -63,7 +63,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 								<div className="flex flex-col items-center text-center">
 									<h1 className="text-2xl font-normal">Welcome back!</h1>
 									<p className="text-muted-foreground font-light">
-										Manage your VPS projects with ease.
+										Manage your projects with ease.
 									</p>
 								</div>
 								<div className="grid gap-2 mt-1">
@@ -100,7 +100,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</div>
 								<div className="flex items-center gap-2">
 									<Checkbox id="remember" />
-									<Label htmlFor="remember" className="font-normal hover:underline">Remember me?</Label>
+									<Label htmlFor="remember" className="font-normal hover:underline">Remember me</Label>
 								</div>
 								<Button
 									type={"submit"}
