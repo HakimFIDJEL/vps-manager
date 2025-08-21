@@ -1,5 +1,5 @@
 // Necessary imports
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Shadcn UI components
 import { Button } from "@/components/ui/button";
@@ -73,62 +73,24 @@ import {
 import { type Project } from "@/lib/projects/type";
 import { type DockerContainer } from "@/lib/docker/type";
 
-export function AppDocker({ containers }: { containers: DockerContainer[] }) {
+export function AppDocker({
+	timerPercentage,
+}: {
+	timerPercentage: number;
+}) {
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleDocker, loading } = useDocker();
-
-	// Variables
-	const initialContainers: DockerContainer[] = [
-		{
-			container_id: "a1b2c3d4e5f6",
-			image: "containrrr/watchtower:latest",
-			command: "/watchtower --cleanup",
-			created_at: "2025-06-24T06:15:00Z",
-			status: "Up 2 hours",
-			state: "running",
-			ports: "",
-			name: "webproject_watchtower",
-		},
-		{
-			container_id: "b2c3d4e5f6g7",
-			image: "node:18-alpine",
-			command: "npm start",
-			created_at: "2025-06-24T06:00:00Z",
-			status: "Up 2 hours",
-			state: "running",
-			ports: "3000/tcp -> 0.0.0.0:3000",
-			name: "webproject_app",
-		},
-		{
-			container_id: "c3d4e5f6g7h8",
-			image: "mysql:8.0",
-			command: "docker-entrypoint.sh mysqld",
-			created_at: "2025-06-24T05:45:00Z",
-			status: "Up 3 hours",
-			state: "running",
-			ports: "3306/tcp -> 0.0.0.0:3306",
-			name: "webproject_mysql",
-		},
-		{
-			container_id: "d4e5f6g7h8i9",
-			image: "phpmyadmin/phpmyadmin:latest",
-			command: "/docker-entrypoint.sh apache2-foreground",
-			created_at: "2025-06-24T05:50:00Z",
-			status: "Exited (0) 1 hour ago",
-			state: "exited",
-			ports: "8080/tcp -> 0.0.0.0:8080",
-			name: "webproject_phpmyadmin",
-		},
-	];
+	const { handleDocker, loading, containers } = useDocker();
 
 	return (
 		<TabsContent value="containers" className="flex flex-col gap-12">
 			{/* Quick actions */}
 			<QuickActions
 				handleDocker={handleDocker}
-				initialContainers={containers}
+				containers={containers}
 				loading={loading}
+				timerPercentage={timerPercentage}
+				project={project}
 			/>
 
 			<SmoothAnimate className="flex flex-col gap-2">
@@ -160,7 +122,7 @@ export function AppDocker({ containers }: { containers: DockerContainer[] }) {
 			{/* Table of all containers */}
 			<ContainersList
 				handleDocker={handleDocker}
-				initialContainers={containers}
+				containers={containers}
 				loading={loading}
 			/>
 
@@ -178,18 +140,23 @@ export function AppDocker({ containers }: { containers: DockerContainer[] }) {
 
 function QuickActions({
 	handleDocker,
-	initialContainers,
+	containers,
 	loading = false,
+	timerPercentage,
+	project,
 }: {
 	handleDocker: (action: DockerAction) => Promise<boolean>;
-	initialContainers: DockerContainer[];
+	containers: DockerContainer[];
 	loading?: boolean;
+	timerPercentage: number;
+	project: Project;
 }) {
-	const containers_running = initialContainers.filter(
+	const containers_running = containers.filter(
 		(container) => container.state == "running",
 	);
-	const percentage =
-		(containers_running.length / initialContainers.length) * 100;
+	const percentage = (containers_running.length / containers.length) * 100;
+
+	
 
 	return (
 		<div className="flex flex-col gap-2">
@@ -209,12 +176,12 @@ function QuickActions({
 						<div className="font-medium text-foreground text-sm flex  flex-wrap items-center gap-2 gap-y-0 justify-between">
 							<span>Containers status</span>
 							<div className="text-xs text-muted-foreground">
-								{initialContainers.length != 0 ? (
-									containers_running.length == initialContainers.length ? (
+								{containers.length != 0 ? (
+									containers_running.length == containers.length ? (
 										<>All containers are running!</>
 									) : (
 										<>
-											({containers_running.length}/{initialContainers.length} running)
+											({containers_running.length}/{containers.length} running)
 										</>
 									)
 								) : (
@@ -222,7 +189,7 @@ function QuickActions({
 								)}
 							</div>
 						</div>
-						{containers_running.length != initialContainers.length && (
+						{containers_running.length != containers.length && (
 							<div className="text-xs text-muted-foreground pt-1">
 								<Progress className="w-full" value={percentage} />
 							</div>
@@ -230,173 +197,42 @@ function QuickActions({
 					</div>
 				</div>
 
-				{/* Run all containers */}
-				<AlertDialog>
-					<AlertDialogTrigger asChild>
-						{/* Button */}
-						<Button
-							type={"button"}
-							variant={"outline"}
-							disabled={loading}
-							className="h-auto w-full flex gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden items-center"
-						>
-							<div className="p-2 bg-primary/10 rounded-md">
-								<Play className="h-5 w-5 text-primary" />
+				<Button
+					type={"button"}
+					variant={"outline"}
+					onClick={() => {
+						handleDocker({ type: "docker-containers-list" });
+					}}
+					disabled={loading || !project.docker.isSaved}
+					className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden group"
+				>
+					<div className="p-2 bg-primary/10 rounded-md">
+						<RefreshCcw className="h-5 w-5 text-primary group-hover:-rotate-180 transition-transform duration-300" />
+					</div>
+					<div className="flex-1 text-left">
+						<div className="font-medium text-foreground text-sm flex  flex-wrap items-center gap-2 gap-y-0 justify-between">
+							<span>Refresh containers list</span>
+							
+							<div className="text-xs text-muted-foreground">
+								{loading ? (
+									<>
+										Refreshing...
+									</>
+								) : (
+									<>
+										{Math.round((timerPercentage / 100) * 60)} seconds remaining
+									</>
+								)}
 							</div>
-							<div className="flex-1 text-left">
-								<div className="font-medium text-foreground">Run all containers</div>
-								<div className="text-xs text-muted-foreground font-mono">
-									docker compose up -d
-								</div>
+						</div>
+						{!loading && (
+							<div className="text-xs text-muted-foreground pt-1">
+								<Progress className="w-full" value={timerPercentage} />
 							</div>
-						</Button>
-					</AlertDialogTrigger>
-					<AlertDialogContent>
-						<AlertDialogHeader>
-							<AlertDialogTitle className="flex items-center gap-2">
-								<Play className="w-4 h-4 text-primary" />
-								Run all containers
-							</AlertDialogTitle>
-							<AlertDialogDescription>
-								Are you sure you want to run all containers by running the{" "}
-								<Badge variant={"outline"} className="font-mono">
-									docker-compose up -d
-								</Badge>{" "}
-								command?
-							</AlertDialogDescription>
-						</AlertDialogHeader>
-						<AlertDialogBody>
-							<AlertDialogFooter>
-								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-								<AlertDialogAction
-									disabled={loading}
-									onAction={async () => {
-										return await handleDocker({ type: "docker-containers-run" });
-									}}
-									variant={"default"}
-								>
-									{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play />}
-									Run
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogBody>
-					</AlertDialogContent>
-				</AlertDialog>
-				{/* Stop all containers */}
-				<AlertDialog>
-					<AlertDialogTrigger asChild>
-						{/* Button */}
-						<Button
-							type={"button"}
-							variant={"outline"}
-							disabled={
-								loading ||
-								containers_running.length == 0 ||
-								initialContainers.length == 0
-							}
-							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
-						>
-							<div className="p-2 bg-primary/10 rounded-md">
-								<Octagon className="h-5 w-5 text-primary" />
-							</div>
-							<div className="flex-1 text-left">
-								<div className="font-medium text-foreground">Stop all containers</div>
-								<div className="text-xs text-muted-foreground font-mono">
-									docker compose stop
-								</div>
-							</div>
-						</Button>
-					</AlertDialogTrigger>
-					<AlertDialogContent>
-						<AlertDialogHeader>
-							<AlertDialogTitle className="flex items-center gap-2">
-								<Octagon className="w-4 h-4 text-destructive" />
-								Stop all containers
-							</AlertDialogTitle>
-							<AlertDialogDescription>
-								Are you sure you want to stop all containers by running the{" "}
-								<Badge variant={"outline"} className="font-mono">
-									docker compose stop
-								</Badge>{" "}
-								command?
-							</AlertDialogDescription>
-						</AlertDialogHeader>
-						<AlertDialogBody>
-							<AlertDialogFooter>
-								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-								<AlertDialogAction
-									disabled={loading}
-									onAction={async () => {
-										return await handleDocker({ type: "docker-containers-stop" });
-									}}
-									variant={"destructive"}
-								>
-									{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Octagon />}
-									Stop
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogBody>
-					</AlertDialogContent>
-				</AlertDialog>
-				{/* Remove all containers */}
-				<AlertDialog>
-					<AlertDialogTrigger asChild>
-						{/* Button */}
-						<Button
-							type={"button"}
-							variant={"outline"}
-							disabled={
-								loading ||
-								initialContainers.length == 0
-							}
-							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
-						>
-							<div className="p-2 bg-primary/10 rounded-md">
-								<CircleMinus className="h-5 w-5 text-primary" />
-							</div>
-							<div className="flex-1 text-left">
-								<div className="font-medium text-foreground">Remove all containers</div>
-								<div className="text-xs text-muted-foreground font-mono">
-									docker compose down
-								</div>
-							</div>
-						</Button>
-					</AlertDialogTrigger>
-					<AlertDialogContent>
-						<AlertDialogHeader>
-							<AlertDialogTitle className="flex items-center gap-2">
-								<CircleMinus className="w-4 h-4 text-destructive" />
-								Remove all containers
-							</AlertDialogTitle>
-							<AlertDialogDescription>
-								Are you sure you want to remove all containers by running the{" "}
-								<Badge variant={"outline"} className="font-mono">
-									docker compose down
-								</Badge>{" "}
-								command?
-							</AlertDialogDescription>
-						</AlertDialogHeader>
-						<AlertDialogBody>
-							<AlertDialogFooter>
-								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-								<AlertDialogAction
-									disabled={loading}
-									onAction={async () => {
-										return await handleDocker({ type: "docker-containers-remove" });
-									}}
-									variant={"destructive"}
-								>
-									{loading ? (
-										<Loader2 className="w-4 h-4 animate-spin" />
-									) : (
-										<CircleMinus />
-									)}
-									Remove
-								</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogBody>
-					</AlertDialogContent>
-				</AlertDialog>
+						)}
+					</div>
+				</Button>
+
 				{/* Aggressive prune */}
 				<AlertDialog>
 					<AlertDialogTrigger asChild>
@@ -404,7 +240,7 @@ function QuickActions({
 						<Button
 							type={"button"}
 							variant={"outline"}
-							disabled={loading}
+							disabled={loading|| !project.docker.isSaved}
 							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 						>
 							<div className="p-2 bg-primary/10 rounded-md">
@@ -454,21 +290,177 @@ function QuickActions({
 					</AlertDialogContent>
 				</AlertDialog>
 
-				<Button
-					type={"button"}
-					variant={"outline"}
-					onClick={() => {}}
-					disabled={loading}
-					className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
-				>
-					<div className="p-2 bg-primary/10 rounded-md">
-						<Download className="h-5 w-5 text-primary" />
-					</div>
-					<div className="flex-1 text-left">
-						<div className="font-medium text-foreground">Export docker-compose</div>
-						<div className="text-xs text-muted-foreground">Downlaod current file</div>
-					</div>
-				</Button>
+				{/* Run all containers */}
+				<AlertDialog>
+					<AlertDialogTrigger asChild>
+						{/* Button */}
+						<Button
+							type={"button"}
+							variant={"outline"}
+							disabled={loading || !project.docker.isSaved}
+							className="h-auto w-full flex gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden items-center"
+						>
+							<div className="p-2 bg-primary/10 rounded-md">
+								<Play className="h-5 w-5 text-primary" />
+							</div>
+							<div className="flex-1 text-left">
+								<div className="font-medium text-foreground">Run all containers</div>
+								<div className="text-xs text-muted-foreground font-mono">
+									docker compose up -d
+								</div>
+							</div>
+						</Button>
+					</AlertDialogTrigger>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle className="flex items-center gap-2">
+								<Play className="w-4 h-4 text-primary" />
+								Run all containers
+							</AlertDialogTitle>
+							<AlertDialogDescription>
+								Are you sure you want to run all containers by running the{" "}
+								<Badge variant={"outline"} className="font-mono">
+									docker-compose up -d
+								</Badge>{" "}
+								command?
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogBody>
+							<AlertDialogFooter>
+								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+								<AlertDialogAction
+									disabled={loading}
+									onAction={async () => {
+										return await handleDocker({
+											type: "docker-containers-run",
+										});
+									}}
+									variant={"default"}
+								>
+									{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play />}
+									Run
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogBody>
+					</AlertDialogContent>
+				</AlertDialog>
+
+				{/* Stop all containers */}
+				<AlertDialog>
+					<AlertDialogTrigger asChild>
+						{/* Button */}
+						<Button
+							type={"button"}
+							variant={"outline"}
+							disabled={
+								loading || containers_running.length == 0 || containers.length == 0 || !project.docker.isSaved
+							}
+							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
+						>
+							<div className="p-2 bg-primary/10 rounded-md">
+								<Octagon className="h-5 w-5 text-primary" />
+							</div>
+							<div className="flex-1 text-left">
+								<div className="font-medium text-foreground">Stop all containers</div>
+								<div className="text-xs text-muted-foreground font-mono">
+									docker compose stop
+								</div>
+							</div>
+						</Button>
+					</AlertDialogTrigger>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle className="flex items-center gap-2">
+								<Octagon className="w-4 h-4 text-destructive" />
+								Stop all containers
+							</AlertDialogTitle>
+							<AlertDialogDescription>
+								Are you sure you want to stop all containers by running the{" "}
+								<Badge variant={"outline"} className="font-mono">
+									docker compose stop
+								</Badge>{" "}
+								command?
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogBody>
+							<AlertDialogFooter>
+								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+								<AlertDialogAction
+									disabled={loading}
+									onAction={async () => {
+										return await handleDocker({
+											type: "docker-containers-stop",
+										});
+									}}
+									variant={"destructive"}
+								>
+									{loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Octagon />}
+									Stop
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogBody>
+					</AlertDialogContent>
+				</AlertDialog>
+
+				{/* Remove all containers */}
+				<AlertDialog>
+					<AlertDialogTrigger asChild>
+						{/* Button */}
+						<Button
+							type={"button"}
+							variant={"outline"}
+							disabled={loading || containers.length == 0 || !project.docker.isSaved}
+							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
+						>
+							<div className="p-2 bg-primary/10 rounded-md">
+								<CircleMinus className="h-5 w-5 text-primary" />
+							</div>
+							<div className="flex-1 text-left">
+								<div className="font-medium text-foreground">Remove all containers</div>
+								<div className="text-xs text-muted-foreground font-mono">
+									docker compose down
+								</div>
+							</div>
+						</Button>
+					</AlertDialogTrigger>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle className="flex items-center gap-2">
+								<CircleMinus className="w-4 h-4 text-destructive" />
+								Remove all containers
+							</AlertDialogTitle>
+							<AlertDialogDescription>
+								Are you sure you want to remove all containers by running the{" "}
+								<Badge variant={"outline"} className="font-mono">
+									docker compose down
+								</Badge>{" "}
+								command?
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						<AlertDialogBody>
+							<AlertDialogFooter>
+								<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+								<AlertDialogAction
+									disabled={loading}
+									onAction={async () => {
+										return await handleDocker({
+											type: "docker-containers-remove",
+										});
+									}}
+									variant={"destructive"}
+								>
+									{loading ? (
+										<Loader2 className="w-4 h-4 animate-spin" />
+									) : (
+										<CircleMinus />
+									)}
+									Remove
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogBody>
+					</AlertDialogContent>
+				</AlertDialog>
+				
 			</div>
 		</div>
 	);
@@ -542,8 +534,8 @@ function SaveProject({
 			<div className="flex justify-between items-center gap-2">
 				<AlertCircleIcon className="h-4 w-4" />
 				<AlertTitle>
-					Since strict mode is disabled in your Docker configuration, the file is not
-					validated in any way.
+					Your Docker configuration is not saved. Please save it to be able to run your
+					containers.
 				</AlertTitle>
 			</div>
 			<Button
@@ -564,18 +556,18 @@ function SaveProject({
 export function ContainersList({
 	// project,
 	handleDocker,
-	initialContainers,
+	containers,
 	loading = false,
 }: {
 	// project: Project;
 	handleDocker: (action: DockerAction) => Promise<boolean>;
-	initialContainers: DockerContainer[];
+	containers: DockerContainer[];
 	loading?: boolean;
 }) {
 	// States
 	const [search, setSearch] = useState<string>("");
 
-	const filteredContainers = initialContainers.filter((container) => {
+	const filteredContainers = containers.filter((container) => {
 		const haystack = [
 			container.container_id,
 			container.image,

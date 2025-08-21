@@ -104,6 +104,18 @@ class System
     }
 
     /**
+     * Get the inode of a folder from its path.
+     *
+     * @param string $path      The folder path
+     * @return int | null       The folder inode or null if not found
+     */
+    public function getInodeFromPath(string $path): int | null
+    {
+        $info = $this->getFolderInfo($path);
+        return $info['inode'] ?? null;
+    }
+
+    /**
      * Retrieve a list of folders in the /projects directory.
      * 
      * @return array<string> List of folder paths

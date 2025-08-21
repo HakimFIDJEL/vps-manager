@@ -13,6 +13,7 @@ use Inertia\Response as InertiaResponse;
 use Illuminate\Http\RedirectResponse;
 use RuntimeException;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 // Controllers
 use App\Http\Controllers\Docker as ControllersDocker;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Docker as ControllersDocker;
 // Requests
 use App\Http\Requests\projects\Path as RequestsPath;
 use App\Http\Requests\projects\Store as RequestsStore;
+use App\Http\Requests\projects\Docker as RequestsDocker;
 
 // Services
 use App\Services\System as ServicesSystem;
@@ -116,7 +118,7 @@ class Project extends Controller
         // Step 1 - Verify that the folder exists
         $return_project = $system->getFolderInfo($path);
 
-        if(empty($return_project)) {
+        if (empty($return_project)) {
             return redirect()->route('projects.index')->with(['error' => [
                 'title' => 'An error occured',
                 'description' => "The folder with inode {$inode} could not be found."
@@ -139,6 +141,7 @@ class Project extends Controller
         try {
             $project_docker = $project->getDockerConfiguration($path, $system);
 
+
             $return_project['docker'] = $project_docker;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
@@ -147,6 +150,7 @@ class Project extends Controller
             ]]);
         }
 
+        
         // Step 4 - Get the commands from the Makefile
         try {
             $project_commands = $project->getCommandsFromMakefile($path, $system);
@@ -161,14 +165,22 @@ class Project extends Controller
 
         // Step 5 - Retrieve all containers and their status
         try {
-            $containers = $docker->containers_list($inode, $system);
+            $containers = $project_docker['content'] ? ControllersDocker::get_containers($inode, $docker, $system) : [];
+        } catch (ValidationException $e) {
+            $containers = [];
+            // return redirect()->route('projects.index')->with(['error' => [
+            //     'title' => 'An error occured',
+            //     'description' => "Failed to retrieve containers: " . $e->getMessage()
+            // ]]);
 
-            // dd($containers);
+            // Remove /projects from path
+            $return_project['path']                 = str_replace('/projects/', '', $return_project['path']);
+            $return_project['isCreated']            = true;
+            $return_project['docker']['isSaved']    = false;
 
-        } catch (RuntimeException $e) {
-            return redirect()->route('projects.index')->with(['error' => [
+            return Inertia::render('projects/show', ['project' => $return_project, 'containers' => $containers])->with(['error' => [
                 'title' => 'An error occured',
-                'description' => "Failed to retrieve containers: " . $e->getMessage()
+                'description' => $e->getMessage()
             ]]);
         }
 
@@ -240,18 +252,18 @@ class Project extends Controller
 
         try {
             $res = $project->createDockerConfiguration($path, $docker, $system);
-    
+
             if (!$res->successful()) {
-    
+
                 $errors = [
                     'project.docker' => trim($res->errorOutput() ?? '') ?: 'Failed to create docker-compose.yaml file.',
                 ];
-    
+
                 $del = $system->deleteFolder($path);
                 if (!$del->successful()) {
                     $errors['project.path'] = trim($del->errorOutput() ?? '') ?: 'Failed to delete project folder.';
                 }
-    
+
                 throw ValidationException::withMessages($errors);
             }
         } catch (RuntimeException $e) {
@@ -319,7 +331,7 @@ class Project extends Controller
      *
      * @return JsonResponse
      */
-    public function verify_path_availability(RequestsPath $request, ServicesProject $project, ServicesSystem $system)
+    public function verify_path_availability(RequestsPath $request, ServicesProject $project, ServicesSystem $system): JsonResponse
     {
         $data = $request->validated();
 
@@ -331,5 +343,65 @@ class Project extends Controller
             'path'              => $data['path'],
             'availability'      => $availability,
         ], 200);
+    }
+
+    // ---------------------------- DOCKER ---------------------------- //
+
+    /**
+     * Store the Docker configuration for a project.
+     *
+     * @param RequestsDocker $request         The Docker request instance
+     * @param ServicesProject $project       The project service instance
+     * @param ServicesSystem $system         The system service instance
+     *
+     * @return RedirectResponse
+     */
+    public function docker_store(RequestsDocker $request, ServicesProject $project, ServicesSystem $system, ServicesDocker $docker): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $path   = $data['project']['path'];
+        $path   = "/projects/{$path}";
+        $inode  = $data['inode'];
+
+        $inode = $system->getInodeFromPath($path);
+
+        if (!$inode) {
+            throw ValidationException::withMessages([
+                'project.path' => 'Project path is not valid.',
+            ]);
+        }
+
+        // Remove all containers
+        try {
+            $res = $docker->containers_remove($inode, $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'project.docker' => trim($res->errorOutput() ?? '') ?: 'Failed to remove Docker containers.',
+                ]);
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'project.docker' => trim($e->getMessage() ?? '') ?: 'Failed to remove Docker containers.',
+            ]);
+        }
+
+        // Create docker compose
+        try {
+            $res = $project->createDockerConfiguration($path, $data['project']['docker'], $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'project.docker' => trim($res->errorOutput() ?? '') ?: 'Failed to create docker-compose.yaml file.',
+                ]);
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'project.docker' => trim($e->getMessage() ?? '') ?: 'Failed to create docker-compose.yaml file.',
+            ]);
+        }
+
+        return redirect()->route('projects.show', ['inode' => $inode])->with(['success' => 'Docker configuration updated successfully!']);
     }
 }

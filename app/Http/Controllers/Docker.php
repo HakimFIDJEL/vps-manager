@@ -4,145 +4,311 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Exception;
 
 // Services
 use App\Services\Docker as ServicesDocker;
 use App\Services\System as ServicesSystem;
-
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class Docker extends Controller
 {
-    public function index()
-    {
-        // 
-    }
-
-    public function export_docker(int $inode)
-    {
-        // Export docker configuration for the given inode
-    }
-
 
     // ============================================================================ //
     //                                    API                                       //
     // ============================================================================ //
 
-    public function docker_prune(int $inode, ServicesDocker $docker, ServicesSystem $system)
+    /**
+     * Remove all containers, networks and volumes for a given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function docker_prune(int $inode, ServicesDocker $docker, ServicesSystem $system): JsonResponse
     {
-        // Prune unused Docker objects for the given inode
-        $res = $docker->docker_prune($inode, $system);
+        try {
+            $res = $docker->docker_prune($inode, $system);
 
-        if (!$res->successful()) {
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'docker_prune' => trim($res->errorOutput()) ?: 'Failed to prune Docker objects.',
+                ]);
+            }
+        } catch (\RuntimeException $e) {
             throw ValidationException::withMessages([
-                'docker_prune' => trim($res->errorOutput()) ?: 'Failed to prune Docker objects.',
+                'docker_prune' => $e->getMessage(),
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode]);
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
     }
 
     // ---------------------------- CONTAINERS ---------------------------- //
 
-    public function containers_list(int $inode, ServicesDocker $docker, ServicesSystem $system)
+    /**
+     * List all containers for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse                 The list of containers
+     */
+    public function containers_list(int $inode, ServicesDocker $docker, ServicesSystem $system): JsonResponse
     {
-        // List all containers for the given inode
-        return $docker->containers_list($inode, $system);
+        $containers = $this->get_containers($inode, $docker, $system);
+
+        return response()->json([
+            'containers' => $containers,
+        ]);
     }
 
-    public function containers_run(int $inode, ServicesDocker $docker, ServicesSystem $system)
+    /**
+     * Fetch all containers for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return array                        The list of containers
+     */
+    public static function get_containers(int $inode, ServicesDocker $docker, ServicesSystem $system): array
     {
-        // Run all containers for the given inode
-        $res = $docker->containers_run($inode, $system);
-
-        if (!$res->successful()) {
+        try {
+            $res = $docker->containers_list($inode, $system);
+        } catch (\RuntimeException $e) {
             throw ValidationException::withMessages([
-                'containers_run' => trim($res->errorOutput()) ?: 'Failed to run containers.',
+                'containers_list' => $e->getMessage(),
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode]);
+        return $res ?? [];
     }
 
-    public function containers_stop(int $inode, ServicesDocker $docker, ServicesSystem $system)
+    /**
+     * Start all containers for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function containers_run(int $inode, ServicesDocker $docker, ServicesSystem $system): JsonResponse
     {
-        // Stop all containers for the given inode
-        $res = $docker->containers_stop($inode, $system);
+        try {
+            $res = $docker->containers_run($inode, $system);
+            if (!$res->successful()) {
+                throw ValidationException::withMessages(['containers_run' => trim($res->errorOutput()) ?: 'Failed to run containers.']);
+            }
+        } catch (\RuntimeException $e) {
+            throw ValidationException::withMessages(['containers_run' => trim($e->getMessage()) ?: 'Failed to run containers.']);
+        }
 
-        if (!$res->successful()) {
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
+    }
+
+
+    /**
+     * Stop all containers for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function containers_stop(int $inode, ServicesDocker $docker, ServicesSystem $system): JsonResponse
+    {
+        try {
+            $res = $docker->containers_stop($inode, $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages(['containers_stop' => trim($res->errorOutput()) ?: 'Failed to stop containers.']);
+            }
+        } catch (\RuntimeException $e) {
+            throw ValidationException::withMessages(['containers_stop' => trim($e->getMessage()) ?: 'Failed to stop containers.']);
+        }
+
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
+    }
+
+    /**
+     * Remove all containers for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function containers_remove(int $inode, ServicesDocker $docker, ServicesSystem $system): JsonResponse
+    {
+        try {
+            $res = $docker->containers_remove($inode, $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'containers_remove' => trim($res->errorOutput()) ?: 'Failed to remove containers.',
+                ]);
+            }
+        } catch (\RuntimeException $e) {
             throw ValidationException::withMessages([
-                'containers_stop' => trim($res->errorOutput()) ?: 'Failed to stop containers.',
+                'containers_remove' => $e->getMessage(),
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode]);
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
     }
 
-    public function containers_remove(int $inode, ServicesDocker $docker, ServicesSystem $system)
+    /**
+     * Run a specific container for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param string $id                    The ID of the container
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function container_run(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system): JsonResponse
     {
-        // Remove all containers for the given inode
-        $res = $docker->containers_remove($inode, $system);
+        try {
+            $res = $docker->container_run($inode, $id, $system);
 
-        if (!$res->successful()) {
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'container_run' => trim($res->errorOutput()) ?: 'Failed to run container.',
+                ]);
+            }
+        } catch (\RuntimeException $e) {
             throw ValidationException::withMessages([
-                'containers_remove' => trim($res->errorOutput()) ?: 'Failed to remove containers.',
+                'container_run' => $e->getMessage(),
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode]);
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
     }
 
-    public function container_run(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system)
+    /**
+     * Stop a specific container for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param string $id                    The ID of the container
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function container_stop(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system): JsonResponse
     {
-        // Run a specific container for the given inode
-        $res = $docker->container_run($inode, $id, $system);
+        try {
+            $res = $docker->container_stop($inode, $id, $system);
 
-        if (!$res->successful()) {
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'container_stop' => trim($res->errorOutput()) ?: 'Failed to stop container.',
+                ]);
+            }
+        } catch (\RuntimeException $e) {
             throw ValidationException::withMessages([
-                'container_run' => trim($res->errorOutput()) ?: 'Failed to run container.',
+                'container_stop' => $e->getMessage(),
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode]);
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
     }
-    public function container_stop(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system)
-    {
-        // Stop a specific container for the given inode
-        $res = $docker->container_stop($inode, $id, $system);
 
-        if (!$res->successful()) {
+    /**
+     * Restart a specific container for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param string $id                    The ID of the container
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function container_restart(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system): JsonResponse
+    {
+        try {
+            $res = $docker->container_restart($inode, $id, $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'container_restart' => trim($res->errorOutput()) ?: 'Failed to restart container.',
+                ]);
+            }
+        } catch (\RuntimeException $e) {
             throw ValidationException::withMessages([
-                'container_stop' => trim($res->errorOutput()) ?: 'Failed to stop container.',
+                'container_restart' => $e->getMessage(),
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode]);
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
     }
-    public function container_restart(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system)
-    {
-        // Restart a specific container for the given inode
-        $res = $docker->container_restart($inode, $id, $system);
 
-        if (!$res->successful()) {
+    /**
+     * Remove a specific container for the given inode.
+     *
+     * @param int $inode                    The inode of the project
+     * @param string $id                    The ID of the container
+     * @param ServicesSystem $system        The system service instance
+     * @param ServicesDocker $docker        The Docker service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function container_remove(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system): JsonResponse
+    {
+        try {
+            $res = $docker->container_remove($inode, $id, $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'container_remove' => trim($res->errorOutput()) ?: 'Failed to remove container.',
+                ]);
+            }
+        } catch (\RuntimeException $e) {
             throw ValidationException::withMessages([
-                'container_restart' => trim($res->errorOutput()) ?: 'Failed to restart container.',
+                'container_remove' => $e->getMessage(),
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode]);
+        $containers = self::get_containers($inode, $docker, $system);
+        return response()->json(['containers' => $containers]);
     }
-    public function container_remove(int $inode, string $id, ServicesDocker $docker, ServicesSystem $system)
-    {
-        // Remove a specific container for the given inode
-        $res = $docker->container_remove($inode, $id, $system);
 
-        if (!$res->successful()) {
-            throw ValidationException::withMessages([
-                'container_remove' => trim($res->errorOutput()) ?: 'Failed to remove container.',
-            ]);
-        }
-
-        return redirect()->route('projects.show', ['inode' => $inode]);
-    }
 
     // ---------------------------- VOLUMES ---------------------------- //
 

@@ -900,7 +900,7 @@ function DockerDropdownFileUpload({
 			if (parsed.isValid && parsed.updatedContent) {
 				const newState = {
 					content: parsed.updatedContent,
-					isSaved: true,
+					isSaved: false,
 					isStrict: false,
 					parsed: {
 						services: parsed.services,
@@ -908,8 +908,6 @@ function DockerDropdownFileUpload({
 						networks: parsed.networks,
 					},
 				};
-
-				// setCurrentValue("docker");
 
 				handleDocker({ type: "docker-create", docker: newState });
 			}

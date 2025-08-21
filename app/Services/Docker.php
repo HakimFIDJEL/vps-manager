@@ -28,7 +28,7 @@ class Docker
     }
 
     /**
-     * Prune unused Docker objects for the given inode.
+     * Remove all containers, networks and volumes for a given inode.
      *
      * @param int $inode                The inode of the project
      * @param ServicesSystem $system    The system service instance
@@ -107,8 +107,6 @@ class Docker
         }
         return $rows;
     }
-
-
 
     /**
      * Start all containers for the given inode.

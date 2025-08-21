@@ -45,6 +45,7 @@ import {
 
 // Contexts
 import { useProject, ProjectProvider } from "@/contexts/project-context";
+import { useDocker } from "@/contexts/docker-context";
 
 // Libs
 import { type BreadcrumbItem } from "@/types";
@@ -54,7 +55,13 @@ import { DockerContainer } from "@/lib/docker/type";
 // Functions
 import { parseDockerCompose } from "@/lib/docker/parser";
 
-export default function Page({ project, containers }: { project: Project, containers: DockerContainer[] }) {
+export default function Page({
+	project,
+	containers,
+}: {
+	project: Project;
+	containers: DockerContainer[];
+}) {
 	const breadcrumbs: BreadcrumbItem[] = [
 		{
 			title: "VPS Manager",
@@ -78,14 +85,23 @@ export default function Page({ project, containers }: { project: Project, contai
 			<ProjectProvider>
 				{/* Content */}
 
-				<Content project={project} containers={containers} />
+				<Content project={project} containersFetched={containers} />
 			</ProjectProvider>
 		</AppLayout>
 	);
 }
 
-function Content({ project, containers }: { project: Project, containers: DockerContainer[] }) {
+function Content({
+	project,
+	containersFetched,
+}: {
+	project: Project;
+	containersFetched: DockerContainer[];
+}) {
 	const { setProject, updateProject } = useProject();
+	const { handleDocker, setContainers } = useDocker();
+	const timerRef = React.useRef<number | null>(null);
+	const [timerPercentage, setTimerPercentage] = React.useState(100);
 
 	const tabs = [
 		{ value: "overview", label: "Overview", icon: <LayoutGrid /> },
@@ -96,29 +112,58 @@ function Content({ project, containers }: { project: Project, containers: Docker
 	];
 
 	React.useEffect(() => {
+		// Updating project
 		setProject(project);
 
-		if (project.docker.isStrict) {
-			const save_parsed = parseDockerCompose(
-				project.docker.content,
-				project.docker.isStrict,
-				project.variables.length,
-			);
-
-			if (save_parsed.isValid && save_parsed.updatedContent) {
-				updateProject("docker", {
-					content: save_parsed.updatedContent,
-					isSaved: true,
-					isStrict: project.docker.isStrict,
-					parsed: {
-						services: save_parsed.services,
-						volumes: save_parsed.volumes,
-						networks: save_parsed.networks,
-					},
-				});
+		// Dynamic calculation of containers, volumes, and networks
+		if(project.docker.isSaved) {
+			if (project.docker.isStrict) {
+				const save_parsed = parseDockerCompose(
+					project.docker.content,
+					project.docker.isStrict,
+					project.variables.length,
+				);
+	
+				if (save_parsed.isValid && save_parsed.updatedContent) {
+					updateProject("docker", {
+						content: save_parsed.updatedContent,
+						isSaved: true,
+						isStrict: project.docker.isStrict,
+						parsed: {
+							services: save_parsed.services,
+							volumes: save_parsed.volumes,
+							networks: save_parsed.networks,
+						},
+					});
+				}
 			}
 		}
+
+		// Updating containers
+		setContainers(containersFetched);
 	}, []);
+
+	React.useEffect(() => {
+		let remaining = 60;
+		let timer = 60;
+		setTimerPercentage(100);
+
+		timerRef.current = window.setInterval(() => {
+			handleDocker({ type: "docker-containers-list" });
+			remaining = timer;
+			setTimerPercentage(100);
+		}, timer * 1000);
+
+		const progressInterval = window.setInterval(() => {
+			remaining--;
+			setTimerPercentage((remaining / 60) * 100);
+		}, 1000);
+
+		return () => {
+			if (timerRef.current) window.clearInterval(timerRef.current);
+			window.clearInterval(progressInterval);
+		};
+	}, [handleDocker]);
 
 	return (
 		<Tabs
@@ -163,10 +208,10 @@ function Content({ project, containers }: { project: Project, containers: Docker
 
 				<SmoothItem delay={0.5} layout={false} className="!flex-grow-0 w-full">
 					<TabsBody className="mt-4">
-						<AppOverview containers={containers} />
+						<AppOverview />
 						<AppMakefile />
 						<AppVariables />
-						<AppDocker containers={containers}/>
+						<AppDocker timerPercentage={timerPercentage} />
 						<AppSettings />
 					</TabsBody>
 				</SmoothItem>

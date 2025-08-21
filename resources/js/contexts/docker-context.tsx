@@ -1,17 +1,20 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import type { DockerAction, DockerService } from "@/lib/docker/type";
+import { DockerContainer, type DockerAction, type DockerService } from "@/lib/docker/type";
 import { useDockerServiceFactory } from "@/services/docker/factory";
 
 interface DockerContextType {
   handleDocker: (action: DockerAction) => Promise<boolean>;
   loading: boolean;
+  containers: DockerContainer[];
+  setContainers: React.Dispatch<React.SetStateAction<DockerContainer[]>>;
 }
 
 const DockerContext = createContext<DockerContextType | undefined>(undefined);
 
 export function DockerProvider({ children }: { children: React.ReactNode }) {
-  const service: DockerService = useDockerServiceFactory();
   const [loading, setLoading] = useState(false);
+  const [containers, setContainers] = useState<DockerContainer[]>([]);
+  const service: DockerService = useDockerServiceFactory({ setContainers });
 
   const handleDocker = useCallback(async (action: DockerAction) => {
     setLoading(true);
@@ -23,7 +26,7 @@ export function DockerProvider({ children }: { children: React.ReactNode }) {
   }, [service]);
 
   return (
-    <DockerContext.Provider value={{ handleDocker, loading }}>
+    <DockerContext.Provider value={{ handleDocker, loading, containers, setContainers }}>
       {children}
     </DockerContext.Provider>
   );

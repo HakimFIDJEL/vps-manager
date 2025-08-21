@@ -21,6 +21,7 @@ Route::get('/', function() {
 // PROJECT ROUTES
 Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthentication::class)->controller(ControllerProjects::class)->group(function()
 {
+    // PROJECT ROUTES
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
     Route::get('/show/{inode}', 'show')->name('show');
@@ -30,27 +31,31 @@ Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthenticati
     Route::post('/store', 'store')->name('store');
 
     Route::delete('/{inode}', 'destroy')->name('destroy');
+
+    // DOCKER ROUTES
+    Route::prefix('/docker')->name('docker.')->group(function() {
+        Route::post('/store', 'docker_store')->name('store');
+    });
 });
 
 // DOCKER ROUTES
 Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::class)->controller(ControllerDockers::class)->group(function()
 {
-    Route::post('/export/{inode}', 'export_docker')->name('export');
-    Route::post('/prune/{inode}', 'docker_prune')->name('prune');
+    Route::get('/prune/{inode}', 'docker_prune')->name('prune');
 
     // CONTAINERS ROUTES
     Route::prefix('/containers')->name('containers.')->group(function() {
 
         Route::get('/list/{inode}', 'containers_list')->name('list');
 
-        Route::post('/run/{inode}', 'containers_run')->name('run');
-        Route::post('/stop/{inode}', 'containers_stop')->name('stop');
-        Route::post('/remove/{inode}', 'containers_remove')->name('remove');
+        Route::get('/run/{inode}', 'containers_run')->name('run');
+        Route::get('/stop/{inode}', 'containers_stop')->name('stop');
+        Route::get('/remove/{inode}', 'containers_remove')->name('remove');
 
-        Route::post('/run/{inode}/{id}', 'container_run')->name('run.id');
-        Route::post('/stop/{inode}/{id}', 'container_stop')->name('stop.id');
-        Route::post('/restart/{inode}/{id}', 'container_restart')->name('restart.id');
-        Route::post('/remove/{inode}/{id}', 'container_remove')->name('remove.id');
+        Route::get('/run/{inode}/{id}', 'container_run')->name('run.id');
+        Route::get('/stop/{inode}/{id}', 'container_stop')->name('stop.id');
+        Route::get('/restart/{inode}/{id}', 'container_restart')->name('restart.id');
+        Route::get('/remove/{inode}/{id}', 'container_remove')->name('remove.id');
     });
 });
 

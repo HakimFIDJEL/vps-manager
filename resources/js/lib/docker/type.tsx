@@ -157,7 +157,8 @@ export type DockerAction =
   | { type: "docker-container-run"; container_id: string }
   | { type: "docker-container-stop"; container_id: string }
   | { type: "docker-container-restart"; container_id: string }
-  | { type: "docker-container-remove"; container_id: string };
+  | { type: "docker-container-remove"; container_id: string }
+  | { type: "docker-containers-list"; };
 
 
 export type ActionOf<T extends DockerAction["type"]> = Extract<DockerAction, { type: T }>;

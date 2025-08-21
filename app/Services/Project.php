@@ -4,6 +4,9 @@ namespace App\Services;
 
 use Illuminate\Process\ProcessResult;
 use RuntimeException;
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Illuminate\Validation\ValidationException;
 
 // Services
 use App\Services\System as ServicesSystem;
@@ -103,20 +106,45 @@ class Project
      */
     public function createDockerConfiguration(string $path, array $docker, ServicesSystem $system): ProcessResult
     {
-        // Create the docker-log file
-        $strict = $docker['isStrict'] ? 'true' : 'false';
-        $logContent = "isStrict={$strict}\n";
-
-        $res = $system->execute("echo " . escapeshellarg($logContent) . " | sudo tee " . escapeshellarg($path) . '/docker-log.txt' . " > /dev/null");
-
+        $strict = !empty($docker['isStrict']);
+        $log = "isStrict=" . ($strict ? 'true' : 'false') . "\n";
+        $res = $system->execute("echo " . escapeshellarg($log) . " | sudo tee " . escapeshellarg($path . '/docker-log.txt') . " > /dev/null");
         if (!$res->successful()) {
             throw new RuntimeException('Failed to create docker-log.txt: ' . $res->errorOutput());
         }
 
-        // Create the content for the docker-compose.yaml file
-        $content = $docker['content'];
-        return $system->execute("echo " . escapeshellarg($content) . " | sudo tee " . escapeshellarg($path) . '/docker-compose.yaml' . " > /dev/null");
+        $content = (string)($docker['content'] ?? '');
+
+        $tmp = trim($system->execute("mktemp")->output());
+        if (!$tmp) throw new RuntimeException('mktemp failed.');
+
+        $w = $system->execute(
+            "printf %s " . escapeshellarg($content) . " > " . escapeshellarg($tmp)
+        );
+        if (!$w->successful()) {
+            $system->execute("rm -f " . escapeshellarg($tmp));
+            throw new RuntimeException('Failed to write temp compose: ' . $w->errorOutput());
+        }
+
+        $chk = $system->execute(
+            "sudo /usr/bin/docker compose -f " . escapeshellarg($tmp) .
+                " --project-directory " . escapeshellarg($path) . " config"
+        );
+        if (!$chk->successful()) {
+            $system->execute("rm -f " . escapeshellarg($tmp));
+            throw new RuntimeException(trim($chk->errorOutput()) ?: 'Invalid docker-compose file.');
+        }
+
+        $mv = $system->execute(
+            "sudo /usr/bin/mv " . escapeshellarg($tmp) . " " . escapeshellarg($path . '/docker-compose.yaml')
+        );
+        if (!$mv->successful()) {
+            $system->execute("rm -f " . escapeshellarg($tmp));
+            throw new RuntimeException('Failed to move compose file: ' . $mv->errorOutput());
+        }
+        return $mv;
     }
+
 
     /**
      * Retrieves the Docker configuration from a folder.
@@ -155,7 +183,7 @@ class Project
                     $docker['isStrict'] = filter_var(substr($line, 9), FILTER_VALIDATE_BOOLEAN);
                 }
             }
-        } 
+        }
 
         $docker_file = $system->pathExists($path . "/docker-compose.yaml");
 
@@ -230,30 +258,30 @@ class Project
 
         $file = $system->pathExists($path . "/Makefile");
 
-        if($file) {
+        if ($file) {
             $result = $system->execute("cat " . escapeshellarg($path) . '/Makefile');
-    
+
             if (!$result->successful()) {
                 throw new RuntimeException('Failed to read the Makefile: ' . $result->errorOutput());
             }
-    
+
             $content = rtrim($result->output(), "\r\n");
             $lines = preg_split('/\r\n|\n|\r/', $content);
-    
+
             $pendingDesc = null;
-    
+
             $currentTarget = null;
             $currentDesc = null;
             $cmdBuffer = '';
-    
+
             foreach ($lines as $raw) {
                 $line = rtrim($raw);
-    
+
                 if (preg_match('/^\s*#\s?(.*)$/', $line, $m)) {
                     $pendingDesc = trim($m[1]) ?: null;
                     continue;
                 }
-    
+
                 if (preg_match('/^([A-Za-z0-9._-]+)\s*:\s*$/', $line, $m)) {
                     if ($currentTarget !== null) {
                         $commands[] = [
@@ -268,13 +296,13 @@ class Project
                     $pendingDesc = null;
                     continue;
                 }
-    
+
                 if ($currentTarget !== null && preg_match('/^\t(.*)$/', $line, $m)) {
                     $cmdBuffer .= $m[1] . "\n";
                     continue;
                 }
             }
-    
+
             if ($currentTarget !== null) {
                 $commands[] = [
                     'target' => $currentTarget,

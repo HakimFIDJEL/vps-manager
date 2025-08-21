@@ -28,7 +28,10 @@ import { type DockerContainer } from "@/lib/docker/type";
 import { useDocker } from "@/contexts/docker-context";
 import { useCommand } from "@/contexts/command-context";
 
-export function AppOverview({ containers } : { containers : DockerContainer[] }) {
+export function AppOverview() {
+
+	const { containers } = useDocker();
+
 	return (
 		<TabsContent value="overview" className="space-y-12">
 			{/* Overview */}
@@ -192,7 +195,7 @@ function ContainerOverview({ containers }: { containers : DockerContainer[] }) {
 	// Variables
 	return (
 		<ContainersList
-			initialContainers={containers}
+			containers={containers}
 			handleDocker={handleDocker}
 			loading={loading}
 		/>
