@@ -61,8 +61,8 @@ export default function Page({ className, ...props }: { className?: string }) {
 						<form className="p-6 md:p-8" onSubmit={(e) => handleSubmit(e)}>
 							<div className="flex flex-col gap-4">
 								<div className="flex flex-col items-center text-center">
-									<h1 className="text-2xl font-bold">Welcome back!</h1>
-									<p className="text-muted-foreground">
+									<h1 className="text-2xl font-normal">Welcome back!</h1>
+									<p className="text-muted-foreground font-light">
 										Manage your VPS projects with ease.
 									</p>
 								</div>
@@ -100,7 +100,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</div>
 								<div className="flex items-center gap-2">
 									<Checkbox id="remember" />
-									<Label htmlFor="remember">Remember me?</Label>
+									<Label htmlFor="remember" className="font-normal hover:underline">Remember me?</Label>
 								</div>
 								<Button
 									type={"submit"}
@@ -113,7 +113,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 									Login
 								</Button>
 								<Separator />
-								<span className="text-muted-foreground text-center text-sm">
+								<span className="text-muted-foreground text-center text-sm font-light">
 									Log in as any non-root user on your VPS.
 								</span>
 							</div>
@@ -123,7 +123,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 						</div>
 					</CardContent>
 				</Card>
-				<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+				<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4 font-light">
 					By clicking "Login", you acknowledge that the application may require some
 					root privileges to function correctly. Please ensure your VPS user has the
 					necessary permissions as described in the README.
