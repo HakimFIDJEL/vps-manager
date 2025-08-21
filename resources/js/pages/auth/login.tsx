@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 
 // Icons
 import { Lock, LogIn, User, Loader2 } from "lucide-react";
-import { Checkbox } from "@/components/animate-ui/base/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/layouts/logo";
 
 export default function Page({ className, ...props }: { className?: string }) {
