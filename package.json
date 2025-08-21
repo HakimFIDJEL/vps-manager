@@ -87,6 +87,7 @@
         "date-fns": "^3.6.0",
         "embla-carousel-react": "^8.6.0",
         "framer-motion": "^12.10.0",
+        "geist": "^1.4.2",
         "globals": "^15.14.0",
         "input-otp": "^1.4.2",
         "js-yaml": "^4.1.0",

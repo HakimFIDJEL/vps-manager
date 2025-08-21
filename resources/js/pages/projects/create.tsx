@@ -9,7 +9,7 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 
 // Components
-import { AppLayout } from "@/components/layouts/app-layout";
+import { AppLayout } from "@/layouts/app";
 
 import { AppProject } from "@/components/page/projects/create/app-project";
 import { AppVariables } from "@/components/page/projects/create/app-variables";

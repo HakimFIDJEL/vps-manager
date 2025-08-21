@@ -4,7 +4,7 @@ import * as React from "react";
 import { Link } from "@inertiajs/react";
 
 // Components
-import { AppLayout } from "@/components/layouts/app-layout";
+import { AppLayout } from "@/layouts/app";
 import { AppSidebar } from "@/components/page/projects/show/app-sidebar";
 import { AppOverview } from "@/components/page/projects/show/app-overview";
 import { AppMakefile } from "@/components/page/projects/show/app-makefile";

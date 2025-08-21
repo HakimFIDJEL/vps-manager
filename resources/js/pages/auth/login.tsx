@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import * as React from "react";
 
 // Layout
-import { AuthLayout } from "@/components/layouts/auth-layout";
+import { AuthLayout } from "@/layouts/auth";
 
 // Shadcn UI components
 import { Button } from "@/components/ui/button";

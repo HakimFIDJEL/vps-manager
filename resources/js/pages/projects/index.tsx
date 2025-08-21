@@ -5,7 +5,7 @@ import React from "react";
 import { getCookie, isCookieConsent, setCookie } from "@/lib/utils";
 
 // Components
-import { AppLayout } from "@/components/layouts/app-layout";
+import { AppLayout } from "@/layouts/app";
 import { AppTable } from "@/components/page/projects/index/app-table";
 import { AppGrid } from "@/components/page/projects/index/app-grid";
 import { SmoothItem } from "@/components/ui/smooth-resized";
