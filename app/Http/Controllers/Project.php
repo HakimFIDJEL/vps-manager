@@ -115,7 +115,7 @@ class Project extends Controller
 
         if (!$path) {
             return redirect()->route('projects.index')->with(['error' => [
-                'title' => 'An error occured',
+                'title' => 'An error occurred',
                 'description' => "The folder with inode {$inode} could not be found."
             ]]);
         }
@@ -125,7 +125,7 @@ class Project extends Controller
 
         if (empty($return_project)) {
             return redirect()->route('projects.index')->with(['error' => [
-                'title' => 'An error occured',
+                'title' => 'An error occurred',
                 'description' => "The folder with inode {$inode} could not be found."
             ]]);
         }
@@ -137,7 +137,7 @@ class Project extends Controller
             $return_project['variables'] = $project_variables;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
-                'title' => 'An error occured',
+                'title' => 'An error occurred',
                 'description' => "Failed to read the .env file: " . $e->getMessage()
             ]]);
         }
@@ -150,7 +150,7 @@ class Project extends Controller
             $return_project['docker'] = $project_docker;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
-                'title' => 'An error occured',
+                'title' => 'An error occurred',
                 'description' => "Failed to read the docker-compose.yaml file: " . $e->getMessage()
             ]]);
         }
@@ -163,7 +163,7 @@ class Project extends Controller
             $return_project['commands'] = $project_commands;
         } catch (RuntimeException $e) {
             return redirect()->route('projects.index')->with(['error' => [
-                'title' => 'An error occured',
+                'title' => 'An error occurred',
                 'description' => "Failed to read the Makefile: " . $e->getMessage()
             ]]);
         }
@@ -174,7 +174,7 @@ class Project extends Controller
         } catch (ValidationException $e) {
             $containers = [];
             // return redirect()->route('projects.index')->with(['error' => [
-            //     'title' => 'An error occured',
+            //     'title' => 'An error occurred',
             //     'description' => "Failed to retrieve containers: " . $e->getMessage()
             // ]]);
 
@@ -184,7 +184,7 @@ class Project extends Controller
             $return_project['docker']['isSaved']    = false;
 
             return Inertia::render('projects/show', ['project' => $return_project, 'containers' => $containers])->with(['error' => [
-                'title' => 'An error occured',
+                'title' => 'An error occurred',
                 'description' => $e->getMessage()
             ]]);
         }
@@ -375,9 +375,54 @@ class Project extends Controller
      *
      * @return RedirectResponse     The response
      */
-    public function destroy(string $path, int $inode): RedirectResponse
+    public function destroy(int $inode, ServicesSystem $system, ServicesDocker $docker): RedirectResponse
     {
-        sleep(5);
+        $path = $system->getFolderPathFromInode($inode);
+
+        if (!$path) {
+            return redirect()->back()->with(['error' => [
+                'title' => 'An error occurred',
+                'description' => 'The specified project could not be found.',
+            ]]);
+        }
+
+        // If docker-compose.yaml
+        if ($system->pathExists("{$path}/docker-compose.yaml")) {
+
+            // Remove all containers
+            try {
+                $res = $docker->containers_remove($inode, $system);
+
+                if (!$res->successful()) {
+                    return redirect()->back()->with(['error' => [
+                        'title' => 'Failed to remove Docker containers.',
+                        'description' => trim($res->errorOutput() ?? '') ?: 'Failed to remove Docker containers.',
+                    ]]);
+                }
+            } catch (RuntimeException $e) {
+                return redirect()->back()->with(['error' => [
+                    'title' => 'Failed to remove Docker containers.',
+                    'description' => trim($e->getMessage() ?? '') ?: 'Failed to remove Docker containers.',
+                ]]);
+            }
+        }
+
+        // Delete folder
+        try {
+            $res = $system->deleteFolder($path);
+
+            if (!$res->successful()) {
+                return redirect()->back()->with(['error' => [
+                    'title' => 'Failed to delete project folder.',
+                    'description' => trim($res->errorOutput() ?? '') ?: 'Failed to delete project folder.',
+                ]]);
+            }
+        } catch (RuntimeException $e) {
+            return redirect()->back()->with(['error' => [
+                'title' => 'Failed to delete project folder.',
+                'description' => trim($e->getMessage() ?? '') ?: 'Failed to delete project folder.',
+            ]]);
+        }
 
         return redirect()->route('projects.index')->with(['success' => 'Project deleted successfully!']);
     }

@@ -370,9 +370,8 @@ function DeleteProjectCard() {
 		});
 
 		try {
-			router.delete(route("projects.destroy", { inode: 1234 }));
+			router.delete(route("projects.destroy", { inode: project.inode }));
 		} catch (error) {
-			console.error("Error deleting project:", error);
 			toast.error("Failed deleting project");
 			toast.dismiss("delete-project");
 			setLoading(false);
@@ -447,7 +446,7 @@ function DeleteProjectCard() {
 													<Input
 														id={"path"}
 														readOnly={loading}
-														placeholder={"folder-path"}
+														placeholder={project.path}
 														autoFocus={true}
 														addonText={"/projects/"}
 														{...field}
