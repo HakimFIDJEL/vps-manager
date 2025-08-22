@@ -54,8 +54,8 @@ export const FolderSchema = z.object({
 		.min(6, "Folder path must be at least 6 characters long")
 		.nonempty("Folder path is required")
 		.regex(
-			/^[a-zA-Z0-9_\-\/]+$/,
-			"Folder path can only contain alphanumeric characters, underscores, hyphens, and slashes",
+			/^[a-zA-Z0-9_-]+$/,
+			"Folder path can only contain alphanumeric characters, underscores, and hyphens",
 		),
 });
 

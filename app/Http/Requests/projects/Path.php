@@ -38,7 +38,7 @@ class Path extends FormRequest
     public function rules(): array
     {
         return [
-            'path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_\-\/]+$/'],
+            'path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/'],
         ];
     }
 

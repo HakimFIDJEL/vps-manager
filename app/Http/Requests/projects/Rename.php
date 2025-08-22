@@ -38,8 +38,8 @@ class Rename extends FormRequest
     public function rules(): array
     {
         return [
-            'old_path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_\-\/]+$/'],
-            'new_path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_\-\/]+$/', 'different:old_path']
+            'old_path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/'],
+            'new_path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/', 'different:old_path']
         ];
     }
 

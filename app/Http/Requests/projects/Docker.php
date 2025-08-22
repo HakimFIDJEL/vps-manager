@@ -43,7 +43,7 @@ class Docker extends FormRequest
 
             // Project
             'project'                           => ['required', 'array'],
-            'project.path'                      => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_\-\/]+$/'],
+            'project.path'                      => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/'],
 
             // Docker
             'project.docker'                    => ['required', 'array'],

@@ -43,7 +43,7 @@ class Variables extends FormRequest
 
             // Project
             'project'                           => ['required', 'array'],
-            'project.path'                      => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_\-\/]+$/'],
+            'project.path'                      => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/'],
 
             // Variables
             'project.variables'                 => ['present', 'array'],
