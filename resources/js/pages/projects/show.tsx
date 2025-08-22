@@ -1,3 +1,5 @@
+// pages/projects/show.tsx
+
 // Necessary imports
 import { Head } from "@inertiajs/react";
 import * as React from "react";
@@ -116,14 +118,14 @@ function Content({
 		setProject(project);
 
 		// Dynamic calculation of containers, volumes, and networks
-		if(project.docker.isSaved) {
+		if (project.docker.isSaved) {
 			if (project.docker.isStrict) {
 				const save_parsed = parseDockerCompose(
 					project.docker.content,
 					project.docker.isStrict,
 					project.variables.length,
 				);
-	
+
 				if (save_parsed.isValid && save_parsed.updatedContent) {
 					updateProject("docker", {
 						content: save_parsed.updatedContent,
@@ -143,27 +145,26 @@ function Content({
 		setContainers(containersFetched);
 	}, []);
 
+	const handleDockerRef = React.useRef(handleDocker);
+	React.useEffect(() => {
+		handleDockerRef.current = handleDocker;
+	}, [handleDocker]);
 	React.useEffect(() => {
 		let remaining = 60;
-		let timer = 60;
 		setTimerPercentage(100);
-
-		timerRef.current = window.setInterval(() => {
-			handleDocker({ type: "docker-containers-list" });
-			remaining = timer;
-			setTimerPercentage(100);
-		}, timer * 1000);
-
-		const progressInterval = window.setInterval(() => {
+		const t1 = window.setInterval(
+			() => handleDockerRef.current({ type: "docker-containers-list" }),
+			60000,
+		);
+		const t2 = window.setInterval(() => {
 			remaining--;
 			setTimerPercentage((remaining / 60) * 100);
 		}, 1000);
-
 		return () => {
-			if (timerRef.current) window.clearInterval(timerRef.current);
-			window.clearInterval(progressInterval);
+			clearInterval(t1);
+			clearInterval(t2);
 		};
-	}, [handleDocker]);
+	}, []);
 
 	return (
 		<Tabs

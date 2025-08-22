@@ -1,3 +1,5 @@
+// contexts/command-context.tsx
+
 import { createContext, useContext, useState, useCallback } from "react";
 import type { CommandAction, CommandService } from "@/lib/commands/type";
 import { useCommandServiceFactory } from "@/services/commands/factory";

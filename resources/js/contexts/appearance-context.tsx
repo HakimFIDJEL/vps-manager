@@ -1,4 +1,5 @@
-// appearance-context.tsx
+// contexts/appearance-context.tsx
+
 import { isCookieConsent } from '@/lib/utils';
 import { createContext, useContext, useEffect, useState } from 'react';
 

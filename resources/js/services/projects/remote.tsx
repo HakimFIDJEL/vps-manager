@@ -1,3 +1,5 @@
+// services/projects/remote.tsx
+
 import { toast } from "sonner";
 
 export async function verifyPathAvailability(path: string): Promise<boolean> {

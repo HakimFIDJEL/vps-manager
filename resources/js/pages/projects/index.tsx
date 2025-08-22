@@ -1,3 +1,5 @@
+// pages/projects/index.tsx
+
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link } from "@inertiajs/react";

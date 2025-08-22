@@ -1,4 +1,4 @@
-// services/commands/local.ts
+// services/commands/local.tsx
 
 // Necessary imports
 import { toast } from "sonner";

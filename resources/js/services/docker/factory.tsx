@@ -1,13 +1,15 @@
-// services/docker/factory.ts
-import type { DockerService, DockerContainer } from "@/lib/docker/type";
-import { useProject } from "@/contexts/project-context";
+// services/docker/factory.tsx
+
 import { useLocalDockerService } from "@/services/docker/local";
 import { useRemoteDockerService } from "@/services/docker/remote";
+import { useProject } from "@/contexts/project-context";
+import type { DockerService, DockerContainer } from "@/lib/docker/type";
 
-
-export function useDockerServiceFactory({ setContainers } : { setContainers: (containers: DockerContainer[]) => void }): DockerService {
+export function useDockerServiceFactory({
+  setContainers,
+}: { setContainers: (c: DockerContainer[]) => void }): DockerService {
   const { project } = useProject();
-  return project.isCreated
-    ? useRemoteDockerService({ setContainers })
-    : useLocalDockerService();
+  const local = useLocalDockerService();
+  const remote = useRemoteDockerService({ setContainers });
+  return project.isCreated ? remote : local;
 }

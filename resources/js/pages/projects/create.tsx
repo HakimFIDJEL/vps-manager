@@ -1,3 +1,5 @@
+// pages/projects/create.tsx
+
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link, useForm } from "@inertiajs/react";
@@ -198,7 +200,10 @@ function Content() {
 		} catch (error) {
 			toast.dismiss("create-project");
 			if (error instanceof z.ZodError) {
-				toast.error("An error occured", { description: error.errors[0].message || "Please fill in all the required fields" });
+				toast.error("An error occured", {
+					description:
+						error.errors[0].message || "Please fill in all the required fields",
+				});
 			}
 		}
 	}

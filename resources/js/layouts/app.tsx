@@ -1,3 +1,5 @@
+// layoutes/app.tsx
+
 // Necessary imports
 import { usePage } from "@inertiajs/react";
 import { useEffect } from "react";
