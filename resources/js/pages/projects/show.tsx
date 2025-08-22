@@ -145,26 +145,28 @@ function Content({
 		setContainers(containersFetched);
 	}, []);
 
-	const handleDockerRef = React.useRef(handleDocker);
-	React.useEffect(() => {
-		handleDockerRef.current = handleDocker;
-	}, [handleDocker]);
 	React.useEffect(() => {
 		let remaining = 60;
+		let timer = 60;
 		setTimerPercentage(100);
-		const t1 = window.setInterval(
-			() => handleDockerRef.current({ type: "docker-containers-list" }),
-			60000,
-		);
-		const t2 = window.setInterval(() => {
+
+		timerRef.current = window.setInterval(() => {
+			handleDocker({ type: "docker-containers-list" });
+			remaining = timer;
+			setTimerPercentage(100);
+		}, timer * 1000);
+
+		const progressInterval = window.setInterval(() => {
 			remaining--;
 			setTimerPercentage((remaining / 60) * 100);
 		}, 1000);
+
 		return () => {
-			clearInterval(t1);
-			clearInterval(t2);
+			if (timerRef.current) window.clearInterval(timerRef.current);
+			window.clearInterval(progressInterval);
 		};
-	}, []);
+	}, [handleDocker]);
+
 
 	return (
 		<Tabs
