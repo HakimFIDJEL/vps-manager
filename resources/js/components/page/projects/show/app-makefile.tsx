@@ -43,7 +43,8 @@ import {
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
-import { CommandAction, useCommand } from "@/contexts/command-context";
+import { useCommand } from "@/contexts/command-context";
+import type { CommandAction } from "@/lib/commands/type";
 
 import {
 	CreateCommand,
@@ -61,7 +62,7 @@ export function AppMakefile() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleCommandAction, loading } = useCommand();
+	const { handleCommand, loading } = useCommand();
 
 	return (
 		<TabsContent value="commands" className="space-y-12">
@@ -91,13 +92,10 @@ export function AppMakefile() {
 						)}
 					</SmoothAnimate>
 					<SmoothAnimate
-						className={`grid gap-2 ${project.commands.length > 0 ? "grid-cols-4" : "grid-cols-3"}`}
+						className={`grid gap-2 ${project.commands.length > 0 ? "grid-cols-4" : "grid-cols-2"}`}
 					>
 						{/* Add command */}
-						<CreateCommand
-							handleCommandAction={handleCommandAction}
-							loading={loading}
-						>
+						<CreateCommand handleCommand={handleCommand} loading={loading}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -117,10 +115,7 @@ export function AppMakefile() {
 						</CreateCommand>
 
 						{/* Import Makefile */}
-						<ImportMakefile
-							handleCommandAction={handleCommandAction}
-							loading={loading}
-						>
+						<ImportMakefile handleCommand={handleCommand} loading={loading}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -139,56 +134,57 @@ export function AppMakefile() {
 							</Button>
 						</ImportMakefile>
 
-						<ExportMakeFile loading={loading} />
-
 						{project.commands.length > 0 && (
-							<AlertDialog>
-								<AlertDialogTrigger asChild>
-									<Button
-										type={"button"}
-										variant={"outline"}
-										disabled={loading}
-										className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-destructive/50  transition-all duration-200 cursor-pointer relative overflow-hidden"
-									>
-										<div className="p-2 bg-destructive/10 rounded-md">
-											<Trash className="h-5 w-5 text-destructive" />
-										</div>
-										<div className="flex-1 text-left">
-											<div className="font-medium text-foreground">Delete commands</div>
-											<div className="text-xs text-muted-foreground">
-												Remove all commands
+							<>
+								<ExportMakeFile handleCommand={handleCommand} loading={loading} />
+
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<Button
+											type={"button"}
+											variant={"outline"}
+											disabled={loading}
+											className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-destructive/50  transition-all duration-200 cursor-pointer relative overflow-hidden"
+										>
+											<div className="p-2 bg-destructive/10 rounded-md">
+												<Trash className="h-5 w-5 text-destructive" />
 											</div>
-										</div>
-									</Button>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle className="flex items-center gap-2">
-											<OctagonAlert className="w-4 h-4 text-destructive" />
-											Delete all commands
-										</AlertDialogTitle>
-										<AlertDialogDescription>
-											Are you sure you want to delete all commands?
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<AlertDialogBody>
-										<AlertDialogFooter>
-											<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-											<AlertDialogAction
-												disabled={loading}
-												onAction={async () => {
-													await handleCommandAction({ type: "delete-all" });
-													return true;
-												}}
-												variant={"destructive"}
-											>
-												{loading ? <Loader2 className="animate-spin" /> : <Trash />}
-												Delete
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogBody>
-								</AlertDialogContent>
-							</AlertDialog>
+											<div className="flex-1 text-left">
+												<div className="font-medium text-foreground">Delete commands</div>
+												<div className="text-xs text-muted-foreground">
+													Remove all commands
+												</div>
+											</div>
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle className="flex items-center gap-2">
+												<OctagonAlert className="w-4 h-4 text-destructive" />
+												Delete all commands
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Are you sure you want to delete all commands?
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogBody>
+											<AlertDialogFooter>
+												<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+												<AlertDialogAction
+													disabled={loading}
+													onAction={async () => {
+														return await handleCommand({ type: "command-delete-all" });
+													}}
+													variant={"destructive"}
+												>
+													{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+													Delete
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogBody>
+									</AlertDialogContent>
+								</AlertDialog>
+							</>
 						)}
 					</SmoothAnimate>
 				</div>
@@ -196,7 +192,7 @@ export function AppMakefile() {
 
 			<CommandList
 				search={search}
-				handleCommandAction={handleCommandAction}
+				handleCommand={handleCommand}
 				loading={loading}
 			/>
 		</TabsContent>
@@ -205,12 +201,12 @@ export function AppMakefile() {
 
 export function CommandList({
 	search = "",
-	handleCommandAction,
+	handleCommand,
 	loading = false,
 	carrousel = false,
 }: {
 	search?: string;
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 	loading?: boolean;
 	carrousel?: boolean;
 }) {
@@ -222,16 +218,14 @@ export function CommandList({
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		await handleCommandAction({ type: "delete", command: command });
-		return true;
+		return await handleCommand({ type: "command-delete", command: command });
 	}
 
 	async function handleRun(target: string) {
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		await handleCommandAction({ type: "run", command: command });
-		return true;
+		return await handleCommand({ type: "command-run", command: command });
 	}
 
 	// Variables
@@ -260,7 +254,7 @@ export function CommandList({
 									loading={loading}
 									handleRun={handleRun}
 									handleDelete={handleDelete}
-									handleCommandAction={handleCommandAction}
+									handleCommand={handleCommand}
 								/>
 							</CarouselItem>
 						))}
@@ -281,7 +275,7 @@ export function CommandList({
 							loading={loading}
 							handleRun={handleRun}
 							handleDelete={handleDelete}
-							handleCommandAction={handleCommandAction}
+							handleCommand={handleCommand}
 						/>
 					))}
 				</SmoothAnimate>
@@ -295,167 +289,139 @@ function CommandCard({
 	loading,
 	handleRun,
 	handleDelete,
-	handleCommandAction,
+	handleCommand,
 	...props
 }: {
 	command: Command;
 	loading?: boolean;
 	handleRun: (target: string) => Promise<boolean>;
 	handleDelete: (target: string) => Promise<boolean>;
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 }) {
 	return (
 		<div
 			key={command.target}
 			className="group relative rounded-md border border-border bg-card p-4 transition-all hover:border-primary/50 flex items-center w-full"
 		>
-			<div className="flex items-center justify-between gap-2 w-full">
-				<div className="flex-grow-0 max-w-[250px]">
+			<div className="flex items-center justify-between gap-2 w-full relative">
+				<div className="flex-grow-0">
 					<p className="font-mono">{command.target}</p>
 					<p className="text-sm text-muted-foreground mt-1">{command.description}</p>
 				</div>
-				<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button
-								variant={"ghost"}
-								size={"icon"}
-								type={"button"}
-								disabled={loading}
-							>
-								<Play className="h-4 w-4 text-muted-foreground" />
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle className="flex items-center gap-2">
-									<OctagonAlert className="w-4 h-4 text-primary" />
-									Run command
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Are you sure you want to run
-									<Badge variant={"outline"} className="font-mono mx-2">
-										{command.target}
-									</Badge>
-									command ?
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogBody>
-								<AlertDialogFooter>
-									<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-									<AlertDialogAction
-										onAction={async () => {
-											await handleRun(command.target);
-											return true;
-										}}
-										variant={"default"}
-										type={"button"}
-										disabled={loading}
-									>
-										{loading ? <Loader2 className="animate-spin" /> : <Play />}
-										Run
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogBody>
-						</AlertDialogContent>
-					</AlertDialog>
-					<EditCommand
-						command={command}
-						handleCommandAction={handleCommandAction}
-						loading={loading}
-					/>
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button
-								variant={"ghost"}
-								size={"icon"}
-								type={"button"}
-								disabled={loading}
-							>
-								<Trash className="h-4 w-4 text-muted-foreground" />
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle className="flex items-center gap-2">
-									<OctagonAlert className="w-4 h-4 text-destructive" />
-									Delete command
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Are you sure you want to delete
-									<Badge variant={"outline"} className="font-mono mx-2">
-										{command.target}
-									</Badge>
-									command ?
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogBody>
-								<AlertDialogFooter>
-									<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-									<AlertDialogAction
-										onAction={async () => {
-											await handleDelete(command.target);
-											return true;
-										}}
-										variant={"destructive"}
-										type={"button"}
-										disabled={loading}
-									>
-										{loading ? <Loader2 className="animate-spin" /> : <Trash />}
-										Delete
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogBody>
-						</AlertDialogContent>
-					</AlertDialog>
+				<div className="absolute top-0 bottom-0 right-0 flex items-center bg-gradient-to-l from-card via-card to-transparent opacity-0 group-hover:opacity-100 transition-opacity pl-[150px]">
+					<div className=" flex items-center gap-1  ">
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									variant={"ghost"}
+									size={"icon"}
+									type={"button"}
+									disabled={loading}
+								>
+									<Play className="h-4 w-4 text-muted-foreground" />
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle className="flex items-center gap-2">
+										<OctagonAlert className="w-4 h-4 text-primary" />
+										Run command
+									</AlertDialogTitle>
+									<AlertDialogDescription>
+										Are you sure you want to run
+										<Badge variant={"outline"} className="font-mono mx-2">
+											{command.target}
+										</Badge>
+										command ?
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogBody>
+									<AlertDialogFooter>
+										<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+										<AlertDialogAction
+											onAction={async () => {
+												return await handleRun(command.target);
+											}}
+											variant={"default"}
+											type={"button"}
+											disabled={loading}
+										>
+											{loading ? <Loader2 className="animate-spin" /> : <Play />}
+											Run
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogBody>
+							</AlertDialogContent>
+						</AlertDialog>
+						<EditCommand
+							command={command}
+							handleCommand={handleCommand}
+							loading={loading}
+						/>
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									variant={"ghost"}
+									size={"icon"}
+									type={"button"}
+									disabled={loading}
+								>
+									<Trash className="h-4 w-4 text-muted-foreground" />
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle className="flex items-center gap-2">
+										<OctagonAlert className="w-4 h-4 text-destructive" />
+										Delete command
+									</AlertDialogTitle>
+									<AlertDialogDescription>
+										Are you sure you want to delete
+										<Badge variant={"outline"} className="font-mono mx-2">
+											{command.target}
+										</Badge>
+										command ?
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<AlertDialogBody>
+									<AlertDialogFooter>
+										<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+										<AlertDialogAction
+											onAction={async () => {
+												return await handleDelete(command.target);
+											}}
+											variant={"destructive"}
+											type={"button"}
+											disabled={loading}
+										>
+											{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+											Delete
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogBody>
+							</AlertDialogContent>
+						</AlertDialog>
+					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
 
-function ExportMakeFile({ loading = false }: { loading?: boolean }) {
-	// Custom Hooks
-	const { project } = useProject();
-
-	function handleExport() {
-		// Créer le contenu du Makefile
-		const makefileContent = project.commands
-			.map((command) => {
-				// Ajouter la description en commentaire
-				const description = command.description ? `# ${command.description}\n` : "";
-
-				// Formater la commande
-				const formattedCommand = command.command
-					.split("\n")
-					.map((line) => `\t${line}`)
-					.join("\n");
-
-				return `${description}${command.target}:\n${formattedCommand}`;
-			})
-			.join("\n\n");
-
-		// Créer un blob avec le contenu
-		const blob = new Blob([makefileContent], { type: "text/plain" });
-		const url = URL.createObjectURL(blob);
-
-		// Créer un lien de téléchargement
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = "Makefile";
-		document.body.appendChild(link);
-		link.click();
-
-		// Nettoyer
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
-
+function ExportMakeFile({
+	handleCommand,
+	loading = false,
+}: {
+	handleCommand: (action: CommandAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	return (
 		<Button
 			type={"button"}
 			variant={"outline"}
-			onClick={handleExport}
+			onClick={async () => {
+				await handleCommand({ type: "command-export" });
+			}}
 			disabled={loading}
 			className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 		>

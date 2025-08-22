@@ -1,3 +1,5 @@
+// hooks/use-appearance.tsx
+
 import { useAppearance as useAppearanceContext } from '@/contexts/appearance-context';
 import type { Appearance } from '@/contexts/appearance-context';
 

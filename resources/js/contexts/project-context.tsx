@@ -1,3 +1,5 @@
+// contexts/project-context.tsx
+
 import { createContext, useContext, useState } from "react";
 import { type Project, type ProjectContextType, DEFAULT_PROJECT } from "@/lib/projects/type";
 import { CommandProvider } from "./command-context";

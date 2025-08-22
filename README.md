@@ -33,6 +33,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Installation de docker
+VER=v2.29.7
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL https://github.com/docker/compose/releases/download/${VER}/docker-compose-linux-x86_64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+docker compose version
+
 ```
 
 ## Préparation du projet et des permissions

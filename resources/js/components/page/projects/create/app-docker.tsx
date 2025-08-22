@@ -94,12 +94,12 @@ export function AppDocker({
 }) {
 	// Custom hooks
 	const { project } = useProject();
-	const { handleDockerAction, loading } = useDocker();
+	const { handleDocker, loading } = useDocker();
 
 	const validator = async () => {
 		// Check if the content is not empty
 		if (project.docker.content.length === 0) {
-			toast.error("Your docker configuration must not be empty");
+			toast.error("An error occured", { description: "Your docker configuration must not be empty" });
 			return false;
 		}
 
@@ -107,13 +107,13 @@ export function AppDocker({
 		const result = ProjectSchema.shape.docker.safeParse(project.docker);
 
 		if (!result.success) {
-			toast.error(result.error.errors[0].message);
+			toast.error("An error occured", { description: result.error.errors[0].message });
 			return false;
 		}
 
 		// Check if the docker configuration is saved
 		if (!project.docker.isSaved) {
-			toast.error("You must save your docker configuration");
+			toast.error("An error occured", { description: "You must save your docker configuration" });
 			return false;
 		}
 
@@ -133,13 +133,13 @@ export function AppDocker({
 			<TabsBody>
 				<TabsContent value="empty">
 					<EmptyDockerState
-						handleDockerAction={handleDockerAction}
+						handleDocker={handleDocker}
 						loading={loading}
 					/>
 				</TabsContent>
 				<TabsContent value="docker">
 					<DockerConfiguration
-						handleDockerAction={handleDockerAction}
+						handleDocker={handleDocker}
 						loading={loading}
 					/>
 				</TabsContent>
@@ -149,10 +149,10 @@ export function AppDocker({
 }
 
 function EmptyDockerState({
-	handleDockerAction,
+	handleDocker,
 	loading = false,
 }: {
-	handleDockerAction: (action: DockerAction) => void;
+	handleDocker: (action: DockerAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	// States
@@ -196,7 +196,7 @@ function EmptyDockerState({
 			};
 
 			setCurrentValue("docker");
-			handleDockerAction({ type: "create", docker: newState });
+			handleDocker({ type: "docker-create", docker: newState });
 		}
 	};
 
@@ -215,7 +215,7 @@ function EmptyDockerState({
 				const errors = DockerComposeForm.formState.errors;
 				if (errors.file) {
 					console.error("Form validation errors:", errors.file);
-					toast.error(errors.file.message as string);
+					toast.error("An error occured", { description: errors.file.message as string });
 				}
 				return;
 			}
@@ -244,11 +244,11 @@ function EmptyDockerState({
 
 				setCurrentValue("docker");
 
-				handleDockerAction({ type: "create", docker: newState });
+				handleDocker({ type: "docker-create", docker: newState });
 			}
 		} catch (error) {
 			console.error("Error uploading file:", error);
-			toast.error("An error occurred while importing the file");
+			toast.error("An error occured", { description: "An error occurred while importing the file" });
 		}
 	};
 
@@ -285,7 +285,7 @@ function EmptyDockerState({
 												setIsDragActive(false);
 												const file = e.dataTransfer.files?.[0];
 												if (!file) {
-													toast.error("No file was dropped");
+													toast.error("An error occured", { description: "No file was dropped" });
 													return;
 												}
 
@@ -412,11 +412,11 @@ function TemplateLink({
 }
 
 function DockerSidebar({
-	handleDockerAction,
+	handleDocker,
 	loading = false,
 	className = "",
 }: {
-	handleDockerAction: (action: DockerAction) => void;
+	handleDocker: (action: DockerAction) => Promise<boolean>;
 	loading?: boolean;
 	className?: string;
 }) {
@@ -428,8 +428,8 @@ function DockerSidebar({
 		name: string,
 		type: "services" | "volumes" | "networks",
 	) => {
-		handleDockerAction({
-			type: "remove-type",
+		handleDocker({
+			type: "docker-remove-type",
 			name: name,
 			elementType: type,
 		});
@@ -677,11 +677,11 @@ function DockerSidebar({
 }
 
 function DockerContent({
-	handleDockerAction,
+	handleDocker,
 	loading = false,
 	className = "",
 }: {
-	handleDockerAction: (action: DockerAction) => void;
+	handleDocker: (action: DockerAction) => Promise<boolean>;
 	loading?: boolean;
 	className?: string;
 }) {
@@ -729,7 +729,7 @@ function DockerContent({
 								<DropdownMenuContent align="end" className="">
 									{project.isCreated && (
 										<>
-											<DockerDropdownFileUpload handleDockerAction={handleDockerAction} />
+											<DockerDropdownFileUpload handleDocker={handleDocker} />
 											<DropdownMenuSeparator />
 										</>
 									)}
@@ -737,7 +737,7 @@ function DockerContent({
 									<DropdownMenuGroup>
 										<DropdownMenuItem
 											onClick={async () => {
-												await handleDockerAction({ type: "save" });
+												await handleDocker({ type: "docker-save" });
 											}}
 											className="flex items-center gap-2"
 											disabled={project.docker.isSaved}
@@ -747,14 +747,14 @@ function DockerContent({
 										</DropdownMenuItem>
 
 										<DropdownMenuItem
-											onClick={() => handleDockerAction({ type: "copy" })}
+											onClick={() => handleDocker({ type: "docker-copy" })}
 											className="flex items-center gap-2"
 										>
 											<Copy className="h-4 w-4" />
 											<span>Copy</span>
 										</DropdownMenuItem>
 										<DropdownMenuItem
-											onClick={() => handleDockerAction({ type: "clear" })}
+											onClick={() => handleDocker({ type: "docker-clear" })}
 											className="flex items-center gap-2"
 											disabled={project.docker.isStrict}
 										>
@@ -764,7 +764,7 @@ function DockerContent({
 										{!project.isCreated && (
 											<DropdownMenuItem
 												onClick={() => {
-													handleDockerAction({ type: "reset" });
+													handleDocker({ type: "docker-reset" });
 													if (!project.isCreated) {
 														setCurrentValue("empty");
 													}
@@ -794,7 +794,7 @@ function DockerContent({
 												className="cursor-pointer"
 												checked={project.docker.isStrict}
 												onCheckedChange={() =>
-													handleDockerAction({ type: "strict-toggle" })
+													handleDocker({ type: "docker-strict-toggle" })
 												}
 											/>
 										</div>
@@ -809,8 +809,8 @@ function DockerContent({
 					<CodeEditor
 						value={project.docker.content}
 						disabled={loading}
-						onChange={(content) => handleDockerAction({ type: "un-save", content })}
-						onSave={() => handleDockerAction({ type: "save" })}
+						onChange={(content) => handleDocker({ type: "docker-un-save", content })}
+						onSave={() => handleDocker({ type: "docker-save" })}
 						isSaved={project.docker.isSaved}
 						language="yaml"
 						customVariables={project.variables.map((variable) => ({
@@ -828,22 +828,22 @@ function DockerContent({
 }
 
 export function DockerConfiguration({
-	handleDockerAction,
+	handleDocker,
 	loading = false,
 }: {
-	handleDockerAction: (action: DockerAction) => void;
+	handleDocker: (action: DockerAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	return (
 		<div className="grid gap-4 relative">
 			<div className="grid grid-cols-12 gap-4 relative items-start">
 				<DockerContent
-					handleDockerAction={handleDockerAction}
+					handleDocker={handleDocker}
 					loading={loading}
 					className="col-span-9"
 				/>
 				<DockerSidebar
-					handleDockerAction={handleDockerAction}
+					handleDocker={handleDocker}
 					loading={loading}
 					className="!sticky top-[4rem] self-start col-span-3 flex flex-col gap-4 items-center"
 				/>
@@ -853,9 +853,9 @@ export function DockerConfiguration({
 }
 
 function DockerDropdownFileUpload({
-	handleDockerAction,
+	handleDocker,
 }: {
-	handleDockerAction: (action: DockerAction) => void;
+	handleDocker: (action: DockerAction) => Promise<boolean>;
 }) {
 	const { project } = useProject();
 
@@ -882,7 +882,7 @@ function DockerDropdownFileUpload({
 				const errors = DockerComposeForm.formState.errors;
 				if (errors.file) {
 					console.error("Form validation errors:", errors.file);
-					toast.error(errors.file.message as string);
+					toast.error("An error occured", { description: errors.file.message as string });
 				}
 				return;
 			}
@@ -900,7 +900,7 @@ function DockerDropdownFileUpload({
 			if (parsed.isValid && parsed.updatedContent) {
 				const newState = {
 					content: parsed.updatedContent,
-					isSaved: true,
+					isSaved: false,
 					isStrict: false,
 					parsed: {
 						services: parsed.services,
@@ -909,13 +909,11 @@ function DockerDropdownFileUpload({
 					},
 				};
 
-				// setCurrentValue("docker");
-
-				handleDockerAction({ type: "create", docker: newState });
+				handleDocker({ type: "docker-create", docker: newState });
 			}
 		} catch (error) {
 			console.error("Error uploading file:", error);
-			toast.error("An error occurred while importing the file");
+			toast.error("An error occured", { description: "An error occurred while importing the file" });
 		}
 	};
 

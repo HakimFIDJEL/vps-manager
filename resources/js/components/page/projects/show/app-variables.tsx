@@ -14,8 +14,8 @@ import { Search, Plus, FileUp, Download } from "lucide-react";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
-// import { CommandAction, useCommand } from "@/contexts/command-context";
-import { useVariable, VariableAction } from "@/contexts/variable-context";
+import { useVariable } from "@/contexts/variable-context";
+import { VariableAction } from "@/lib/variables/type";
 
 import {
 	CreateVariable,
@@ -33,7 +33,7 @@ export function AppVariables() {
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleVariableAction, loading } = useVariable();
+	const { handleVariable, loading } = useVariable();
 
 	return (
 		<TabsContent value="variables" className="space-y-12">
@@ -58,10 +58,7 @@ export function AppVariables() {
 						className={`grid gap-2 ${project.variables.length > 0 ? "grid-cols-3" : "grid-cols-2  mt-[-10px]"}`}
 					>
 						{/* Add command */}
-						<CreateVariable
-							handleVariableAction={handleVariableAction}
-							loading={loading}
-						>
+						<CreateVariable handleVariable={handleVariable} loading={loading}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -81,7 +78,7 @@ export function AppVariables() {
 						</CreateVariable>
 
 						{/* Import Makefile */}
-						<ImportEnv handleVariableAction={handleVariableAction}>
+						<ImportEnv handleVariable={handleVariable}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -101,7 +98,9 @@ export function AppVariables() {
 						</ImportEnv>
 
 						{/* Export .env */}
-						{project.variables.length > 0 && <ExportEnv loading={loading} />}
+						{project.variables.length > 0 && (
+							<ExportEnv handleVariable={handleVariable} loading={loading} />
+						)}
 					</SmoothAnimate>
 				</div>
 			</>
@@ -111,7 +110,7 @@ export function AppVariables() {
 				<div className="bg-background rounded-md">
 					<VariablesList
 						search={search}
-						handleVariableAction={handleVariableAction}
+						handleVariable={handleVariable}
 						loading={loading}
 					/>
 				</div>
@@ -120,37 +119,20 @@ export function AppVariables() {
 	);
 }
 
-function ExportEnv({ loading = false }: { loading?: boolean }) {
-	// Custom Hooks
-	const { project } = useProject();
-
-	function handleExport() {
-		// Créer le contenu du fichier .env
-		const envContent = project.variables
-			.map((variable) => `${variable.key}=${variable.value}`)
-			.join("\n");
-
-		// Créer un blob avec le contenu
-		const blob = new Blob([envContent], { type: "text/plain" });
-		const url = URL.createObjectURL(blob);
-
-		// Créer un lien de téléchargement
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = ".env";
-		document.body.appendChild(link);
-		link.click();
-
-		// Nettoyer
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
-
+function ExportEnv({
+	handleVariable,
+	loading = false,
+}: {
+	handleVariable: (action: VariableAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	return (
 		<Button
 			type={"button"}
 			variant={"outline"}
-			onClick={handleExport}
+			onClick={async () => {
+				await handleVariable({ type: "variable-export" });
+			}}
 			disabled={loading}
 			className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 		>

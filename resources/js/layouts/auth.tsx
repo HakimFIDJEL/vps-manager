@@ -10,13 +10,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { type ReactNode } from "react";
 
 // Custom components
-import { ResponsiveBlocker } from "./responsive-blocker";
+import { ResponsiveBlocker } from "@/components/layouts/responsive-blocker";
 import AppearanceToggleDropdown from "@/components/layouts/header/theme";
-import { CustomToaster } from "./custom-toaster";
+import { CustomToaster } from "@/components/layouts/custom-toaster";
 
 // Shadcn UI components
 import { CookieConsent } from "@/components/ui/cookie-consent";
-import { Logo } from "./logo";
+import { Logo } from "@/components/layouts/logo";
 
 interface AuthLayoutProps {
 	children: ReactNode;

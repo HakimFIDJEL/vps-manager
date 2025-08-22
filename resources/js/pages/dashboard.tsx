@@ -1,4 +1,4 @@
-import { AppLayout } from '@/components/layouts/app-layout'
+import { AppLayout } from '@/layouts/app'
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { useAppearance } from '@/hooks/use-appearance';
 import { type BreadcrumbItem } from '@/types';

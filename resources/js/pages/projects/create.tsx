@@ -1,3 +1,5 @@
+// pages/projects/create.tsx
+
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link, useForm } from "@inertiajs/react";
@@ -9,7 +11,7 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 
 // Components
-import { AppLayout } from "@/components/layouts/app-layout";
+import { AppLayout } from "@/layouts/app";
 
 import { AppProject } from "@/components/page/projects/create/app-project";
 import { AppVariables } from "@/components/page/projects/create/app-variables";
@@ -64,12 +66,18 @@ import { CommandProvider } from "@/contexts/command-context";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
+		title: "VPS Manager",
+		link: false,
+	},
+	{
 		title: "Projects",
 		href: route("projects.index"),
+		link: true,
 	},
 	{
 		title: "Create",
 		href: route("projects.create"),
+		link: true,
 	},
 ];
 
@@ -192,9 +200,10 @@ function Content() {
 		} catch (error) {
 			toast.dismiss("create-project");
 			if (error instanceof z.ZodError) {
-				toast.error(
-					error.errors[0].message || "Please fill in all the required fields",
-				);
+				toast.error("An error occured", {
+					description:
+						error.errors[0].message || "Please fill in all the required fields",
+				});
 			}
 		}
 	}

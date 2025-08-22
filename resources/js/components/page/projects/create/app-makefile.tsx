@@ -64,10 +64,14 @@ import {
 } from "lucide-react";
 
 // Types
-import { type Command, CommandSchema } from "@/lib/commands/type";
+import {
+	type Command,
+	CommandSchema,
+	type CommandAction,
+} from "@/lib/commands/type";
 import { parseCommandsFromMakefile } from "@/lib/commands/parser";
 import { MakefileSchema, MakefileTextSchema } from "@/lib/commands/type";
-import { CommandAction, useCommand } from "@/contexts/command-context";
+import { useCommand } from "@/contexts/command-context";
 import { ProjectSchema } from "@/lib/projects/type";
 
 // Contexts
@@ -87,14 +91,16 @@ export function AppMakefile({
 
 	// Custom Hooks
 	const { project } = useProject();
-	const { handleCommandAction, loading } = useCommand();
+	const { handleCommand, loading } = useCommand();
 
 	const validator = async () => {
 		// Check if the schema is valid
 		const result = ProjectSchema.shape.commands.safeParse(project.commands);
 
 		if (!result.success) {
-			toast.error(result.error.errors[0].message);
+			toast.error("An error occured", {
+				description: result.error.errors[0].message,
+			});
 			return false;
 		}
 
@@ -111,10 +117,7 @@ export function AppMakefile({
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import Makefile */}
-					<ImportMakefile
-						handleCommandAction={handleCommandAction}
-						loading={loading}
-					>
+					<ImportMakefile handleCommand={handleCommand} loading={loading}>
 						<Button variant={"outline"} type={"button"} disabled={loading}>
 							<FileUp />
 							Import makefile
@@ -122,7 +125,7 @@ export function AppMakefile({
 					</ImportMakefile>
 
 					{/* Add command */}
-					<CreateCommand handleCommandAction={handleCommandAction} loading={loading}>
+					<CreateCommand handleCommand={handleCommand} loading={loading}>
 						<Button variant={"default"} type={"button"} disabled={loading}>
 							<Plus />
 							Add command
@@ -178,8 +181,7 @@ export function AppMakefile({
 												<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 												<AlertDialogAction
 													onAction={async () => {
-														await handleCommandAction({ type: "delete-all" });
-														return true;
+														return handleCommand({ type: "command-delete-all" });
 													}}
 													disabled={loading}
 													variant={"destructive"}
@@ -199,7 +201,7 @@ export function AppMakefile({
 
 			<CommandList
 				search={search}
-				handleCommandAction={handleCommandAction}
+				handleCommand={handleCommand}
 				loading={loading}
 			/>
 		</div>
@@ -207,11 +209,11 @@ export function AppMakefile({
 }
 
 export function ImportMakefile({
-	handleCommandAction,
+	handleCommand,
 	children,
 	loading = false,
 }: {
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 	children: React.ReactNode;
 	loading?: boolean;
 }) {
@@ -276,8 +278,8 @@ export function ImportMakefile({
 			});
 			return false;
 		} else {
-			await handleCommandAction({
-				type: "create-multiple",
+			await handleCommand({
+				type: "command-create-multiple",
 				commands: parsedCommands,
 			});
 
@@ -526,11 +528,11 @@ export function ImportMakefile({
 }
 
 export function CreateCommand({
-	handleCommandAction,
+	handleCommand,
 	children,
 	loading = false,
 }: {
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 	children: React.ReactNode;
 	loading?: boolean;
 }) {
@@ -562,7 +564,7 @@ export function CreateCommand({
 			return false;
 		}
 
-		await handleCommandAction({ type: "create", command: data });
+		await handleCommand({ type: "command-create", command: data });
 
 		CommandForm.reset();
 		return true; // Retourne true pour fermer le Dialog
@@ -677,11 +679,11 @@ export function CreateCommand({
 
 export function EditCommand({
 	command,
-	handleCommandAction,
+	handleCommand,
 	loading = false,
 }: {
 	command: Command;
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	// Variables
@@ -710,7 +712,7 @@ export function EditCommand({
 
 		const data = CommandForm.getValues();
 
-		await handleCommandAction({ type: "update", command: data });
+		await handleCommand({ type: "command-update", command: data });
 
 		CommandForm.reset();
 		return true;
@@ -824,11 +826,11 @@ export function EditCommand({
 
 function CommandList({
 	search,
-	handleCommandAction,
+	handleCommand,
 	loading = false,
 }: {
 	search: string;
-	handleCommandAction: (action: CommandAction) => void;
+	handleCommand: (action: CommandAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
 	// Custom hooks
@@ -839,8 +841,7 @@ function CommandList({
 		const command = project.commands.find((c) => c.target === target);
 		if (!command) return false;
 
-		await handleCommandAction({ type: "delete", command: command });
-		return true;
+		return handleCommand({ type: "command-delete", command: command });
 	}
 
 	// Variables
@@ -876,7 +877,7 @@ function CommandList({
 									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 										<EditCommand
 											command={command}
-											handleCommandAction={handleCommandAction}
+											handleCommand={handleCommand}
 											loading={loading}
 										/>
 										<AlertDialog>

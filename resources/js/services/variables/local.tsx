@@ -1,56 +1,88 @@
-import { useProject } from "@/contexts/project-context";
+// services/variables/local.tsx
+
+// Necessary imports
 import { toast } from "sonner";
-import { type VariableAction } from "@/contexts/variable-context";
+// Contexts
+import { useProject } from "@/contexts/project-context";
 
-export function useVariableActionsLocal() {
-  const { project, updateProject } = useProject();
+// Types
+import type { ActionOf } from "@/lib/variables/type";
+import type { VariableService, Registry } from "@/lib/variables/type";
 
-  return async (action: VariableAction): Promise<void> => {
-    switch (action.type) {
-      case "create":
-        updateProject("variables", [...project.variables, action.variable]);
-        toast.success(`Variable ${action.variable.key} created successfully!`);
-        break;
-      case "create-multiple":
-        updateProject("variables", [...action.variables, ...project.variables]);
-        toast.success(`${action.variables.length} variables imported successfully!`);
-        break;
-      case "update":
-        updateProject(
-          "variables",
-          project.variables.map((v) =>
-            v.key === action.variable.key ? action.variable : v
-          )
-        );
-        toast.success(`Variable ${action.variable.key} updated successfully!`);
-        break;
-      case "delete":
-        updateProject(
-          "variables",
-          project.variables.filter((v) => v.key !== action.variable.key)
-        );
-        toast.success(`Variable ${action.variable.key} deleted successfully!`);
-        break;
-      case "delete-all":
-        updateProject("variables", []);
-        toast.success("All variables deleted successfully!");
-        break;
-      case "toggle-visibility":
-        updateProject(
-          "variables",
-          project.variables.map((v) =>
-            v.key === action.variable.key ? { ...v, visible: !v.visible } : v
-          )
-        );
-        break;
-      case "toggle-visibility-all":
-        const allVisible = project.variables.every((v) => v.visible);
-        updateProject(
-          "variables",
-          project.variables.map((v) => ({ ...v, visible: !allVisible }))
-        );
-        break;
-    }
+export function useLocalVariableService(): VariableService {
+	const { project, updateProject } = useProject();
+
+	const registry: Registry = {
+		"variable-create": variable_create,
+		"variable-create-multiple": variable_create_multiple,
+		"variable-update": variable_update,
+		"variable-delete": variable_delete,
+		"variable-delete-all": variable_delete_all,
+    "variable-toggle-visibility": variable_toggle_visibility,
+    "variable-toggle-visibility-all": variable_toggle_visibility_all,
+	};
+
+	return {
+		async handleVariable(action) {
+			const fn = registry[action.type] as any;
+			return fn ? fn(action as any) : true;
+		},
+	};
+
+	async function variable_create(a: ActionOf<"variable-create">) {
+		updateProject("variables", [...project.variables, a.variable]);
+		toast.success(`Variable ${a.variable.key} created successfully!`);
+		return true;
+	}
+
+	async function variable_create_multiple(
+		a: ActionOf<"variable-create-multiple">,
+	) {
+		updateProject("variables", [...project.variables, ...a.variables]);
+		toast.success(`${a.variables.length} variables imported successfully!`);
+		return true;
+	}
+
+	async function variable_update(a: ActionOf<"variable-update">) {
+		updateProject(
+			"variables",
+			project.variables.map((v) => (v.key === a.variable.key ? a.variable : v)),
+		);
+		toast.success(`Variable ${a.variable.key} updated successfully!`);
+		return true;
+	}
+
+	async function variable_delete(a: ActionOf<"variable-delete">) {
+		updateProject(
+			"variables",
+			project.variables.filter((v) => v.key !== a.variable.key),
+		);
+		toast.success(`Variable ${a.variable.key} deleted successfully!`);
+		return true;
+	}
+
+	async function variable_delete_all() {
+		updateProject("variables", []);
+		toast.success("All variables deleted successfully!");
+		return true;
+	}
+
+  async function variable_toggle_visibility(a: ActionOf<"variable-toggle-visibility">) {
+    updateProject(
+      "variables",
+      project.variables.map((v) =>
+        v.key === a.variable.key ? { ...v, visible: !v.visible } : v
+      )
+    );
+    return true;
   }
 
-} 
+  async function variable_toggle_visibility_all() {
+    const allVisible = project.variables.every((v) => v.visible);
+    updateProject(
+      "variables",
+      project.variables.map((v) => ({ ...v, visible: !allVisible }))
+    );
+    return true;
+  }
+}

@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 
-class Path extends FormRequest
+class Rename extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -38,7 +38,8 @@ class Path extends FormRequest
     public function rules(): array
     {
         return [
-            'path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/'],
+            'old_path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/'],
+            'new_path' => ['required', 'string', 'min:6', 'regex:/^[a-zA-Z0-9_-]+$/', 'different:old_path']
         ];
     }
 
@@ -50,10 +51,16 @@ class Path extends FormRequest
     public function messages(): array
     {
         return [
-            'path.required' => 'The folder path is required.',
-            'path.string'   => 'The folder path must be a string.',
-            'path.min'      => 'The folder path must be at least 6 characters long.',
-            'path.regex'    => 'The folder path may only contain letters, numbers, underscores, and dashes.',
+            'old_path.required' => 'The folder path is required.',
+            'old_path.string'   => 'The folder path must be a string.',
+            'old_path.min'      => 'The folder path must be at least 6 characters long.',
+            'old_path.regex'    => 'The folder path may only contain letters, numbers, underscores, and dashes.',
+
+            'new_path.required' => 'The new folder path is required.',
+            'new_path.string'   => 'The new folder path must be a string.',
+            'new_path.min'      => 'The new folder path must be at least 6 characters long.',
+            'new_path.regex'    => 'The new folder path may only contain letters, numbers, underscores, and dashes.',
+            'new_path.different'=> 'The new folder path must be different from the old folder path.',
         ];
     }
 

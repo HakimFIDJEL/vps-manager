@@ -8,7 +8,7 @@ export function Logo({ variant = "mini", className }: { variant?: "mini" | "defa
 	) : (
 		<div className={`text-white flex items-center justify-center rounded-lg mr-2 ${className} gap-2`}>
 			<Boxes className="h-5 w-5" />
-            <span className="text-base">vps manager</span>
+            <span className="text-base ">vps manager</span>
 		</div>
 	);
 }

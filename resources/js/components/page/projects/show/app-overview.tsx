@@ -22,20 +22,23 @@ import {
 } from "lucide-react";
 
 // Types
-import { type tempContainer } from "@/lib/docker/type";
+import { type DockerContainer } from "@/lib/docker/type";
 
 // Contexts
 import { useDocker } from "@/contexts/docker-context";
 import { useCommand } from "@/contexts/command-context";
 
 export function AppOverview() {
+
+	const { containers } = useDocker();
+
 	return (
 		<TabsContent value="overview" className="space-y-12">
 			{/* Overview */}
 			<QuickActions />
 
 			{/* Table of the containers in app-docker */}
-			<ContainerOverview />
+			<ContainerOverview containers={containers} />
 
 			{/* Stats of the directory (Not now, todo later : chart)*/}
 
@@ -80,9 +83,9 @@ function QuickActions() {
 						</div>
 						<div>
 							<h4 className="font-medium text-base">Project information</h4>
-							<div className="flex items-center gap-2">
+							{/* <div className="flex items-center gap-2">
 								<Badge variant={"outline"}>{project.path}</Badge>
-							</div>
+							</div> */}
 						</div>
 					</div>
 					<ArrowRight className="h-4 w-4 text-primary opacity-0 absolute top-4 right-6 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
@@ -186,68 +189,26 @@ function QuickActions() {
 	);
 }
 
-function ContainerOverview() {
-	const { handleDockerAction, loading } = useDocker();
+function ContainerOverview({ containers }: { containers : DockerContainer[] }) {
+	const { handleDocker, loading } = useDocker();
 
 	// Variables
-	const initialContainers: tempContainer[] = [
-		{
-			container_id: "a1b2c3d4e5f6",
-			image: "containrrr/watchtower:latest",
-			command: "/watchtower --cleanup",
-			created_at: "2025-06-24T06:15:00Z",
-			status: "Up 2 hours",
-			state: "running",
-			ports: "",
-			name: "webproject_watchtower",
-		},
-		{
-			container_id: "b2c3d4e5f6g7",
-			image: "node:18-alpine",
-			command: "npm start",
-			created_at: "2025-06-24T06:00:00Z",
-			status: "Up 2 hours",
-			state: "running",
-			ports: "3000/tcp -> 0.0.0.0:3000",
-			name: "webproject_app",
-		},
-		{
-			container_id: "c3d4e5f6g7h8",
-			image: "mysql:8.0",
-			command: "docker-entrypoint.sh mysqld",
-			created_at: "2025-06-24T05:45:00Z",
-			status: "Up 3 hours",
-			state: "running",
-			ports: "3306/tcp -> 0.0.0.0:3306",
-			name: "webproject_mysql",
-		},
-		{
-			container_id: "d4e5f6g7h8i9",
-			image: "phpmyadmin/phpmyadmin:latest",
-			command: "/docker-entrypoint.sh apache2-foreground",
-			created_at: "2025-06-24T05:50:00Z",
-			status: "Exited (0) 1 hour ago",
-			state: "exited",
-			ports: "8080/tcp -> 0.0.0.0:8080",
-			name: "webproject_phpmyadmin",
-		},
-	];
 	return (
 		<ContainersList
-			initialContainers={initialContainers}
-			handleDockerAction={handleDockerAction}
+			containers={containers}
+			handleDocker={handleDocker}
 			loading={loading}
 		/>
 	);
 }
 
 function CommandOverview() {
-	const { handleCommandAction, loading } = useCommand();
+	const { handleCommand, loading } = useCommand();
 	return (
 		<CommandList
 			carrousel
 			loading={loading}
-			handleCommandAction={handleCommandAction}
+			handleCommand={handleCommand}
 		/>
 	);
 }

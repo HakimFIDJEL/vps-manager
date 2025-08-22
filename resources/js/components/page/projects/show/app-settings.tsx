@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 // Schemas
-import { FolderSchema } from "@/lib/projects/type";
+import { FolderSchema, ProjectSchema } from "@/lib/projects/type";
 
 // Icons
 import {
@@ -71,6 +71,9 @@ import {
 	formatSize,
 	formatActions,
 } from "@/lib/projects/formatter";
+
+// Services
+import { verifyPathAvailability } from "@/services/projects/remote";
 
 export function AppSettings() {
 	return (
@@ -104,8 +107,6 @@ function FolderPathCard() {
 	}, [watchedPath]);
 
 	async function checkPathAvailability(path: string): Promise<boolean> {
-		if (loading) return false;
-
 		// No need to check if the path is the same as the current project folder path
 		if (!path || path === project.path) {
 			setAvailabilityState("");
@@ -117,19 +118,19 @@ function FolderPathCard() {
 			return true;
 		}
 
-		if (FolderSchema.safeParse({ path }).success === false) {
+		// Check if it matches the regex
+		if (!ProjectSchema.shape.path.safeParse(path).success) {
 			setAvailabilityState("");
 			return false;
 		}
 
 		setAvailabilityState("loading");
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			const isAvailable = true;
+			const isAvailable = await verifyPathAvailability(path);
 
 			setAvailabilityState(isAvailable ? "success" : "error");
 			return isAvailable;
-		} catch (error) {
+		} catch {
 			setAvailabilityState("error");
 			return false;
 		}
@@ -151,21 +152,33 @@ function FolderPathCard() {
 		toast.loading("Changing folder path...", {
 			id: "change-folder-path",
 		});
-		try {
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-
-			toast.success("Folder path changed successfully!");
-			updateProject("path", data.path);
-
-			router.reload();
-		} catch (error) {
-			console.error("Error changing folder path:", error);
-			toast.error("Failed to change folder path");
-		} finally {
-			toast.dismiss("change-folder-path");
-			setLoading(false);
-			setAvailabilityState("");
-		}
+		router.post(
+			route("projects.rename", { inode: project.inode }),
+			{
+				old_path: project.path,
+				new_path: data.path,
+			},
+			{
+				onStart: () => {
+					setLoading(true);
+					toast.loading("Changing folder path...", { id: "change-folder-path" });
+				},
+				onSuccess: () => {
+					updateProject("path", data.path);
+					toast.success("Project renamed successfully!");
+				},
+				onError: (errors: Record<string, any>) => {
+					const messages = Object.values(errors).flat();
+					toast.error("An error occured", {
+						description: messages.join("\n") || "Unknown error",
+					});
+				},
+				onFinish: () => {
+					setLoading(false);
+					toast.dismiss("change-folder-path");
+				},
+			},
+		);
 	}
 
 	return (
@@ -268,7 +281,6 @@ function FolderPathCard() {
 }
 
 function ProjectInfoCard() {
-
 	const { project } = useProject();
 
 	return (
@@ -358,9 +370,8 @@ function DeleteProjectCard() {
 		});
 
 		try {
-			router.delete(route("projects.destroy", { inode: 1234 }));
+			router.delete(route("projects.destroy", { inode: project.inode }));
 		} catch (error) {
-			console.error("Error deleting project:", error);
 			toast.error("Failed deleting project");
 			toast.dismiss("delete-project");
 			setLoading(false);
@@ -435,7 +446,7 @@ function DeleteProjectCard() {
 													<Input
 														id={"path"}
 														readOnly={loading}
-														placeholder={"folder-path"}
+														placeholder={project.path}
 														autoFocus={true}
 														addonText={"/projects/"}
 														{...field}

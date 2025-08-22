@@ -87,6 +87,35 @@ class System
     }
 
     /**
+     * Get the folder path from its inode.
+     *
+     * @param int $inode The folder inode
+     * @return null|string The folder path or null if not found
+     */
+    public function getFolderPathFromInode(int $inode): null | string
+    {
+        $result = $this->execute("find /projects -type d -inum {$inode}");
+
+        if ($result->successful()) {
+            return trim($result->output());
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the inode of a folder from its path.
+     *
+     * @param string $path      The folder path
+     * @return int | null       The folder inode or null if not found
+     */
+    public function getInodeFromPath(string $path): int | null
+    {
+        $info = $this->getFolderInfo($path);
+        return $info['inode'] ?? null;
+    }
+
+    /**
      * Retrieve a list of folders in the /projects directory.
      * 
      * @return array<string> List of folder paths
@@ -143,5 +172,17 @@ class System
         }
 
         return $this->execute("sudo rm -rf " . escapeshellarg($path));
+    }
+
+    /**
+     * Check if a path exists.
+     *
+     * @param  string  $path   The path to check
+     * @return bool            True if the path exists, false otherwise
+     */
+    public function pathExists(string $path): bool
+    {
+        $result = $this->execute("test -e " . escapeshellarg($path));
+        return $result->successful();
     }
 }

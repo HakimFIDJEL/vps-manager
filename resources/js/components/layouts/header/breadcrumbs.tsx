@@ -28,9 +28,15 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                                             </AnimatePresence>
                                         ) : (
                                             
-                                            <BreadcrumbLink asChild>
-                                                <Link href={item.href}>{item.title}</Link>
-                                            </BreadcrumbLink>
+                                            item.link ? (
+                                                <BreadcrumbLink asChild>
+                                                    <Link href={item.href ?? "#"}>{item.title}</Link>
+                                                </BreadcrumbLink>
+                                            ) : (
+                                                <BreadcrumbPage className="text-muted-foreground">
+                                                    {item.title}
+                                                </BreadcrumbPage>
+                                            )
                                         )}
                                     </BreadcrumbItem>
                                     {!isLast && <BreadcrumbSeparator />}

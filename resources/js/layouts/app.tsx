@@ -1,3 +1,5 @@
+// layoutes/app.tsx
+
 // Necessary imports
 import { usePage } from "@inertiajs/react";
 import { useEffect } from "react";
@@ -17,9 +19,9 @@ import { type BreadcrumbItem } from "@/types";
 import { type ReactNode } from "react";
 
 // Custom components
-import { Breadcrumbs } from "./header/breadcrumbs";
-import { CustomToaster } from "./custom-toaster";
-import { ResponsiveBlocker } from "./responsive-blocker";
+import { Breadcrumbs } from "@/components/layouts/header/breadcrumbs";
+import { CustomToaster } from "@/components/layouts/custom-toaster";
+import { ResponsiveBlocker } from "@/components/layouts/responsive-blocker";
 
 // Shadcn UI components
 import { CookieConsent } from "@/components/ui/cookie-consent";

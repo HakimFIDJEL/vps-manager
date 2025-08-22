@@ -4,7 +4,7 @@ import { Head } from "@inertiajs/react";
 import { useState, useRef, useEffect } from "react";
 
 // Admin Layout
-import { AppLayout } from "@/components/layouts/app-layout";
+import { AppLayout } from "@/layouts/app";
 
 // Shadcn UI components
 import {

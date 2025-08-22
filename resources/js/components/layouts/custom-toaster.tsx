@@ -73,6 +73,7 @@ export function CustomToaster(props: FlashProps) {
 					toast: "!bg-card",
 				},
 			}}
+			duration={4000}
 			theme={appearance}
 			closeButton
 		/>

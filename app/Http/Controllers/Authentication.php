@@ -68,10 +68,12 @@ class Authentication extends Controller
         $data = $request->validated();
         $res = $auth->authenticate($data['username'], $data['password']);
 
-        if (!($result['auth'] ?? false)) {
+        // dd($res);
+
+        if (!($res['auth'] ?? false)) {
             return redirect()->route('auth.login')->with(['error' => [
                 'title' => 'Authentication failed',
-                'description' => trim($res['error']) ?: 'Invalid username or password'
+                'description' => trim($res['error'] ?? '') ?: 'Invalid username or password'
             ]]);
         }
 
