@@ -25,7 +25,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/layouts/logo";
 
 export default function Page({ className, ...props }: { className?: string }) {
-
 	const inputRef = React.useRef<HTMLInputElement>(null);
 
 	const { data, setData, processing, errors, post } = useForm({
@@ -120,7 +119,9 @@ export default function Page({ className, ...props }: { className?: string }) {
 									</div>
 									<div className="flex items-center gap-2">
 										<Checkbox id="remember" />
-										<Label htmlFor="remember" className="font-normal hover:underline">Remember me</Label>
+										<Label htmlFor="remember" className="font-normal hover:underline">
+											Remember me
+										</Label>
 									</div>
 									<Button
 										type={"submit"}
