@@ -39,6 +39,10 @@ class Docker
      */
     public function docker_prune(int $inode, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+        
         $path = $system->getFolderPathFromInode($inode);
         if (!$path) {
             throw new \RuntimeException("Failed to retrieve folder path for inode {$inode}");
@@ -68,6 +72,10 @@ class Docker
      */
     public function containers_list(int $inode, ServicesSystem $system): array
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
         if (!$path) throw new \RuntimeException("Failed to retrieve folder path for inode {$inode}");
         $compose = rtrim($path, '/') . '/docker-compose.yaml';
@@ -120,6 +128,10 @@ class Docker
      */
     public function containers_run(int $inode, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
         if (!$path) {
             throw new \RuntimeException("Failed to retrieve folder path for inode {$inode}");
@@ -149,6 +161,10 @@ class Docker
      */
     public function containers_stop(int $inode, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
         if (!$path) {
             throw new \RuntimeException("Failed to retrieve folder path for inode {$inode}");
@@ -178,6 +194,10 @@ class Docker
      */
     public function containers_remove(int $inode, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
         if (!$path) {
             throw new \RuntimeException("Failed to retrieve folder path for inode {$inode}");
@@ -208,6 +228,10 @@ class Docker
      */
     public function container_run(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
@@ -232,6 +256,10 @@ class Docker
      */
     public function container_stop(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
@@ -256,6 +284,10 @@ class Docker
      */
     public function container_restart(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
@@ -280,6 +312,10 @@ class Docker
      */
     public function container_remove(int $inode, string $id, ServicesSystem $system): ProcessResult
     {
+        if (!$this->isDockerInstalled($system)) {
+            throw new RuntimeException("Docker is not installed, follow the README for installation instructions.");
+        }
+
         $path = $system->getFolderPathFromInode($inode);
 
         if ($path) {
@@ -289,5 +325,17 @@ class Docker
         } else {
             throw new RuntimeException("Failed to retrieve folder path for inode {$inode}");
         }
+    }
+
+    /**
+     * Check if Docker is installed.
+     *
+     * @param ServicesSystem $system
+     * @return bool
+     */
+    public function isDockerInstalled(ServicesSystem $system): bool
+    {
+        $res = $system->execute("which docker");
+        return $res->successful() && trim($res->output()) !== '';
     }
 }

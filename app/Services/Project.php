@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 // Services
 use App\Services\System as ServicesSystem;
+use Illuminate\Support\Facades\Process;
 
 /**
  * Class Project
@@ -334,7 +335,6 @@ class Project
             }
         }
 
-
         return $commands;
     }
 
@@ -358,5 +358,48 @@ class Project
         }
 
         return $result->output();
+    }
+
+    /**
+     * Runs a command in the context of a Makefile.
+     *
+     * @param string $path              The folder path
+     * @param string $command           The command to run
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @throws RuntimeException
+     *
+     * @return ProcessResult
+     */
+    public function command_run(string $path, string $command, ServicesSystem $system): ProcessResult
+    {
+        if (!$this->isMakeInstalled($system)) {
+            throw new RuntimeException("Make is not installed, follow the README for installation instructions.");
+        }
+
+        if (!$system->pathExists($path . "/Makefile")) {
+            throw new RuntimeException('Makefile does not exist.');
+        }
+
+        try {
+            return $system->execute(
+                '/usr/bin/make -C ' . escapeshellarg($path) . ' ' . escapeshellarg($command)
+            );
+        } catch (RuntimeException $e) {
+            throw new RuntimeException(trim($e->getMessage()));
+        }
+    }
+
+    /**
+     * Checks if Make is installed on the system.
+     *
+     * @param ServicesSystem $system
+     * 
+     * @return bool
+     */
+    public function isMakeInstalled(ServicesSystem $system): bool
+    {
+        $res = Process::run('command -v make');
+        return $res->successful();
     }
 }

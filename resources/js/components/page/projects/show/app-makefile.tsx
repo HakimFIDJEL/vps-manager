@@ -92,7 +92,7 @@ export function AppMakefile() {
 						)}
 					</SmoothAnimate>
 					<SmoothAnimate
-						className={`grid gap-2 ${project.commands.length > 0 ? "grid-cols-4" : "grid-cols-3"}`}
+						className={`grid gap-2 ${project.commands.length > 0 ? "grid-cols-4" : "grid-cols-2"}`}
 					>
 						{/* Add command */}
 						<CreateCommand handleCommand={handleCommand} loading={loading}>
@@ -134,55 +134,57 @@ export function AppMakefile() {
 							</Button>
 						</ImportMakefile>
 
-						<ExportMakeFile loading={loading} />
-
 						{project.commands.length > 0 && (
-							<AlertDialog>
-								<AlertDialogTrigger asChild>
-									<Button
-										type={"button"}
-										variant={"outline"}
-										disabled={loading}
-										className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-destructive/50  transition-all duration-200 cursor-pointer relative overflow-hidden"
-									>
-										<div className="p-2 bg-destructive/10 rounded-md">
-											<Trash className="h-5 w-5 text-destructive" />
-										</div>
-										<div className="flex-1 text-left">
-											<div className="font-medium text-foreground">Delete commands</div>
-											<div className="text-xs text-muted-foreground">
-												Remove all commands
+							<>
+								<ExportMakeFile handleCommand={handleCommand} loading={loading} />
+
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<Button
+											type={"button"}
+											variant={"outline"}
+											disabled={loading}
+											className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-destructive/50  transition-all duration-200 cursor-pointer relative overflow-hidden"
+										>
+											<div className="p-2 bg-destructive/10 rounded-md">
+												<Trash className="h-5 w-5 text-destructive" />
 											</div>
-										</div>
-									</Button>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle className="flex items-center gap-2">
-											<OctagonAlert className="w-4 h-4 text-destructive" />
-											Delete all commands
-										</AlertDialogTitle>
-										<AlertDialogDescription>
-											Are you sure you want to delete all commands?
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<AlertDialogBody>
-										<AlertDialogFooter>
-											<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-											<AlertDialogAction
-												disabled={loading}
-												onAction={async () => {
-													return await handleCommand({ type: "command-delete-all" });
-												}}
-												variant={"destructive"}
-											>
-												{loading ? <Loader2 className="animate-spin" /> : <Trash />}
-												Delete
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogBody>
-								</AlertDialogContent>
-							</AlertDialog>
+											<div className="flex-1 text-left">
+												<div className="font-medium text-foreground">Delete commands</div>
+												<div className="text-xs text-muted-foreground">
+													Remove all commands
+												</div>
+											</div>
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle className="flex items-center gap-2">
+												<OctagonAlert className="w-4 h-4 text-destructive" />
+												Delete all commands
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Are you sure you want to delete all commands?
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogBody>
+											<AlertDialogFooter>
+												<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+												<AlertDialogAction
+													disabled={loading}
+													onAction={async () => {
+														return await handleCommand({ type: "command-delete-all" });
+													}}
+													variant={"destructive"}
+												>
+													{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+													Delete
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogBody>
+									</AlertDialogContent>
+								</AlertDialog>
+							</>
 						)}
 					</SmoothAnimate>
 				</div>
@@ -406,48 +408,20 @@ function CommandCard({
 	);
 }
 
-function ExportMakeFile({ loading = false }: { loading?: boolean }) {
-	// Custom Hooks
-	const { project } = useProject();
-
-	function handleExport() {
-		// Créer le contenu du Makefile
-		const makefileContent = project.commands
-			.map((command) => {
-				// Ajouter la description en commentaire
-				const description = command.description ? `# ${command.description}\n` : "";
-
-				// Formater la commande
-				const formattedCommand = command.command
-					.split("\n")
-					.map((line) => `\t${line}`)
-					.join("\n");
-
-				return `${description}${command.target}:\n${formattedCommand}`;
-			})
-			.join("\n\n");
-
-		// Créer un blob avec le contenu
-		const blob = new Blob([makefileContent], { type: "text/plain" });
-		const url = URL.createObjectURL(blob);
-
-		// Créer un lien de téléchargement
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = "Makefile";
-		document.body.appendChild(link);
-		link.click();
-
-		// Nettoyer
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
-
+function ExportMakeFile({
+	handleCommand,
+	loading = false,
+}: {
+	handleCommand: (action: CommandAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	return (
 		<Button
 			type={"button"}
 			variant={"outline"}
-			onClick={handleExport}
+			onClick={async () => {
+				await handleCommand({ type: "command-export" });
+			}}
 			disabled={loading}
 			className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 		>

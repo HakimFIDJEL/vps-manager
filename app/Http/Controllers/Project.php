@@ -472,7 +472,7 @@ class Project extends Controller
             }
         } catch (RuntimeException $e) {
             throw ValidationException::withMessages([
-                'project.path' => trim($e->getMessage() ?? '') ?: 'Project path is not valid.',
+                'project_path' => trim($e->getMessage() ?? '') ?: 'Project path is not valid.',
             ]);
         }
 
@@ -480,10 +480,127 @@ class Project extends Controller
             $content = $project->getEnvFile($path, $system);
         } catch (RuntimeException $e) {
             throw ValidationException::withMessages([
-                'project.docker' => trim($e->getMessage() ?? '') ?: 'Failed to read .env file.',
+                'project_variables' => trim($e->getMessage() ?? '') ?: 'Failed to read .env file.',
             ]);
         }
 
         return response()->json(['content' => $content]);
+    }
+
+    /**
+     * Handle the commands for a project.
+     *
+     * @param RequestsCommand $request   The command request instance
+     * @param ServicesProject $project   The project service instance
+     * @param ServicesSystem $system     The system service instance
+     *
+     * @throws ValidationException
+     *
+     * @return RedirectResponse
+     */
+    public function commands(RequestsCommand $request, ServicesProject $project, ServicesSystem $system): RedirectResponse
+    {
+        $data       = $request->validated();
+        $commands  = $data['project']['commands'];
+        $path       = $data['project']['path'];
+        $path       = "/projects/{$path}";
+
+        $inode = $system->getInodeFromPath($path) ?? $data['inode'];
+
+        if (!$inode) {
+            throw ValidationException::withMessages([
+                'project.path' => 'Project path is not valid.',
+            ]);
+        }
+
+        try {
+            $res = $project->createMakefile($path, $commands, $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'commands' => trim($res->errorOutput() ?? '') ?: 'Failed to create Makefile.',
+                ]);
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'commands' => trim($e->getMessage() ?? '') ?: 'Failed to create Makefile.',
+            ]);
+        }
+
+        return redirect()->route('projects.show', ['inode' => $inode]);
+    }
+
+    /**
+     * Export the commands for a project.
+     *
+     * @param int $inode                The inode of the project
+     * @param ServicesProject $project  The project service instance
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @return JsonResponse
+     */
+    public function commands_export(int $inode, ServicesProject $project, ServicesSystem $system): JsonResponse
+    {
+        try {
+            $path = $system->getFolderPathFromInode($inode);
+
+            if (!$path) {
+                throw new RuntimeException('Failed to get project path.');
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'project_path' => trim($e->getMessage() ?? '') ?: 'Project path is not valid.',
+            ]);
+        }
+
+        try {
+            $content = $project->getMakefile($path, $system);
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'project_commands' => trim($e->getMessage() ?? '') ?: 'Failed to read Makefile.',
+            ]);
+        }
+
+        return response()->json(['content' => $content]);
+    }
+
+    /**
+     * Run a command for a project.
+     *
+     * @param int $inode                The inode of the project
+     * @param string $command           The command to run
+     * @param ServicesProject $project  The project service instance
+     * @param ServicesSystem $system    The system service instance
+     *
+     * @throws ValidationException
+     *
+     * @return RedirectResponse
+     */
+    public function command_run(int $inode, string $command, ServicesProject $project, ServicesSystem $system): RedirectResponse
+    {
+        // Verify the folder
+        try {
+            $path = $system->getFolderPathFromInode($inode);
+
+            if (!$path) {
+                throw new RuntimeException('Failed to get project path.');
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'project_path' => trim($e->getMessage() ?? '') ?: 'Project path is not valid.',
+            ]);
+        }
+
+        // Run the command
+        try {
+            $res = $project->command_run($path, $command, $system);
+            if (!$res->successful()) {
+                throw ValidationException::withMessages(['command_run' => trim($res->errorOutput()) ?: 'Failed to run command.']);
+            }
+        } catch (\RuntimeException $e) {
+            throw ValidationException::withMessages(['command_run' => trim($e->getMessage()) ?: 'Failed to run command.']);
+        }
+
+        return redirect()->route('projects.show', ['inode' => $inode]);
     }
 }

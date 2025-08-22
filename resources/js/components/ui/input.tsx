@@ -150,7 +150,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				)}
 
 				{/* Commentaire sous l'input */}
-				{comment && <p className="mt-1 text-xs text-muted-foreground">{comment}</p>}
+				{comment && <p className="mt-1 text-xs font-light leading-4 text-muted-foreground">{comment}</p>}
 			</div>
 		);
 	},

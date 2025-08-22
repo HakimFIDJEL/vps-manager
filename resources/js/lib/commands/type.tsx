@@ -88,7 +88,8 @@ export type CommandAction =
 	| { type: "command-delete"; command: Command }
 	| { type: "command-delete-all" }
 	// Server only
-	| { type: "command-run"; command: Command };
+	| { type: "command-run"; command: Command }
+	| { type: "command-export"; };
 
 export type ActionOf<T extends CommandAction["type"]> = Extract<
 	CommandAction,

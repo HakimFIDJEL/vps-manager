@@ -130,8 +130,8 @@ function ExportEnv({
 		<Button
 			type={"button"}
 			variant={"outline"}
-			onClick={() => {
-				handleVariable({ type: "variable-export" });
+			onClick={async () => {
+				await handleVariable({ type: "variable-export" });
 			}}
 			disabled={loading}
 			className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"

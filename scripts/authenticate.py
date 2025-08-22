@@ -41,7 +41,7 @@ if len(sys.argv) != 2:
 if not PAM_AVAILABLE:
     print(json.dumps({
         'auth': False,
-        'error': "The authentication python package pam is missing, don't forget to follow the README instructions to use the application"
+        'error': "The authentication python package pam is not installed, follow the README for installation instructions."
     }))
     sys.exit(1)
 

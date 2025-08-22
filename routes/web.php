@@ -44,6 +44,8 @@ Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthenticati
     // COMMANDS
     // - Get Makefile
     Route::get('/commands/{inode}', 'commands_export')->name('commands_export');
+    // - Run command
+    Route::post('/commands/run/{inode}/{command}', 'command_run')->name('command_run');
     // - Update Makefile
     Route::post('/commands', 'commands')->name('commands');
 });

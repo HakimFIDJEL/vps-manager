@@ -2,6 +2,7 @@
 
 // Necessary imports
 import { toast } from "sonner";
+import { router } from "@inertiajs/react";
 
 // Services
 import { useLocalVariableService } from "./local";
@@ -12,7 +13,6 @@ import { useProject } from "@/contexts/project-context";
 // Types
 import type { ActionOf } from "@/lib/variables/type";
 import type { VariableService, Registry } from "@/lib/variables/type";
-import { router } from "@inertiajs/react";
 
 export function useRemoteVariableService(): VariableService {
 	const { project, updateProject, setProject } = useProject();
@@ -195,7 +195,7 @@ export function useRemoteVariableService(): VariableService {
 	}
 
 	/**
-	 * Export all variables
+	 * Export the .env file
 	 * 
 	 * @returns A promise that resolves to a boolean indicating success
 	 */
@@ -212,8 +212,9 @@ export function useRemoteVariableService(): VariableService {
 			const body = await res.json().catch(() => null);
 
 			if (!res.ok) {
+				const errors = Object.values(body?.errors || {}).flat();
 				toast.error("An error occurred", {
-					description: body?.errors?.containers_run ?? "Unknown error",
+					description: errors.join("\n") || "Unknown error",
 				});
 				return false;
 			}
