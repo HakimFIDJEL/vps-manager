@@ -58,10 +58,7 @@ export function AppVariables() {
 						className={`grid gap-2 ${project.variables.length > 0 ? "grid-cols-3" : "grid-cols-2  mt-[-10px]"}`}
 					>
 						{/* Add command */}
-						<CreateVariable
-							handleVariable={handleVariable}
-							loading={loading}
-						>
+						<CreateVariable handleVariable={handleVariable} loading={loading}>
 							<Button
 								type={"button"}
 								variant={"outline"}
@@ -101,7 +98,9 @@ export function AppVariables() {
 						</ImportEnv>
 
 						{/* Export .env */}
-						{project.variables.length > 0 && <ExportEnv loading={loading} />}
+						{project.variables.length > 0 && (
+							<ExportEnv handleVariable={handleVariable} loading={loading} />
+						)}
 					</SmoothAnimate>
 				</div>
 			</>
@@ -120,37 +119,20 @@ export function AppVariables() {
 	);
 }
 
-function ExportEnv({ loading = false }: { loading?: boolean }) {
-	// Custom Hooks
-	const { project } = useProject();
-
-	function handleExport() {
-		// Créer le contenu du fichier .env
-		const envContent = project.variables
-			.map((variable) => `${variable.key}=${variable.value}`)
-			.join("\n");
-
-		// Créer un blob avec le contenu
-		const blob = new Blob([envContent], { type: "text/plain" });
-		const url = URL.createObjectURL(blob);
-
-		// Créer un lien de téléchargement
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = ".env";
-		document.body.appendChild(link);
-		link.click();
-
-		// Nettoyer
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
-
+function ExportEnv({
+	handleVariable,
+	loading = false,
+}: {
+	handleVariable: (action: VariableAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	return (
 		<Button
 			type={"button"}
 			variant={"outline"}
-			onClick={handleExport}
+			onClick={() => {
+				handleVariable({ type: "variable-export" });
+			}}
 			disabled={loading}
 			className="h-auto w-full flex items-start gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 		>

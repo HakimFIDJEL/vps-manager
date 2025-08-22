@@ -18,7 +18,7 @@ class Docker extends FormRequest
         }
         return redirect()->route('auth.login')->with(['error' => [
             'title' => 'Unauthorized',
-            'description' => 'You must be logged in to create a project.'
+            'description' => 'You must be logged in to access this resource.'
         ]]);
     }
 

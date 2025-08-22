@@ -626,7 +626,7 @@ export function EditVariable({
 												{...field}
 											/>
 										</FormControl>
-										<FormDescription>Must not contain spaces.</FormDescription>
+										<FormDescription>This is the value of the variable.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}

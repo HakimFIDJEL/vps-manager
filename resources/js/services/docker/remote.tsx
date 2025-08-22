@@ -24,8 +24,8 @@ export function useRemoteDockerService({
 
 	const registry: Registry = {
 		"docker-create": local.handleDocker,
-		"docker-update": docker_update,
-		"docker-delete": docker_delete,
+		"docker-update": local.handleDocker,
+		"docker-delete": local.handleDocker,
 		"docker-save": docker_save,
 		"docker-un-save": local.handleDocker,
 		"docker-clear": local.handleDocker,
@@ -51,33 +51,8 @@ export function useRemoteDockerService({
 	};
 
 	/**
-	 * Update an existing Docker configuration
-	 * @param a 	The action payload
-	 * @returns 	Whether the operation was successful
-	 */
-	async function docker_update(a: ActionOf<"docker-update">) {
-		updateProject("docker", a.docker);
-		toast.success("Docker configuration updated successfully!");
-		return true;
-	}
-
-	/**
-	 * Delete the current Docker configuration
-	 * @returns 	Whether the operation was successful
-	 */
-	async function docker_delete() {
-		updateProject("docker", {
-			content: "",
-			isSaved: false,
-			isStrict: false,
-			parsed: { services: [], volumes: [], networks: [] },
-		});
-		toast.success("Docker configuration deleted successfully!");
-		return true;
-	}
-
-	/**
 	 * Save the current Docker configuration
+	 * 
 	 * @returns 	Whether the operation was successful
 	 */
 	async function docker_save() {
@@ -101,7 +76,7 @@ export function useRemoteDockerService({
 
 		return await new Promise<boolean>((resolve) => {
 			router.post(
-				route("projects.docker.store", { inode: project.inode }),
+				route("projects.docker", { inode: project.inode }),
 				{ project: payload },
 				{
 					onStart: () =>
@@ -114,7 +89,7 @@ export function useRemoteDockerService({
 					},
 					onError: (errors: Record<string, any>) => {
 						const messages = Object.values(errors).flat();
-						toast.error("Failed to save Docker configuration", {
+						toast.error("An error occured", {
 							description: messages.join("\n") || "Unknown error",
 						});
 						resolve(false);
@@ -129,6 +104,7 @@ export function useRemoteDockerService({
 	 * Run all Docker containers
 	 *
 	 * @param a The action containing the setContainers function
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_containers_run(
@@ -170,6 +146,7 @@ export function useRemoteDockerService({
 	 * Stop all Docker containers
 	 *
 	 * @param a The action containing the setContainers function
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_containers_stop(
@@ -211,6 +188,7 @@ export function useRemoteDockerService({
 	 * Remove all Docker containers
 	 *
 	 * @param a The action containing the setContainers function
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_containers_remove(
@@ -252,6 +230,7 @@ export function useRemoteDockerService({
 	 * Prune unused Docker objects
 	 *
 	 * @param a The action containing the setContainers function
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_prune(a: ActionOf<"docker-prune">): Promise<boolean> {
@@ -290,6 +269,7 @@ export function useRemoteDockerService({
 	 * Run a Docker container
 	 *
 	 * @param a The action containing the container ID
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_container_run(
@@ -334,6 +314,7 @@ export function useRemoteDockerService({
 	 * Stop a Docker container
 	 *
 	 * @param a The action containing the container ID
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_container_stop(
@@ -378,6 +359,7 @@ export function useRemoteDockerService({
 	 * Restart a Docker container
 	 *
 	 * @param a The action containing the container ID
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_container_restart(
@@ -422,6 +404,7 @@ export function useRemoteDockerService({
 	 * Remove a Docker container
 	 *
 	 * @param a The action containing the container ID
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_container_remove(
@@ -466,6 +449,7 @@ export function useRemoteDockerService({
 	 * Fetch a list of Docker containers
 	 *
 	 * @param a The action containing the setContainers function
+	 * 
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_containers_list(a: ActionOf<"docker-containers-list">) {

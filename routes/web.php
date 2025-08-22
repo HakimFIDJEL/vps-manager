@@ -13,14 +13,13 @@ use App\Http\Middleware\Authentication as MiddlewareAuthentication;
 
 
 // // Welcome Route
-Route::get('/', function() {
+Route::get('/', function () {
     return redirect()->route('auth.login');
 })->name('dashboard');
 
 
 // PROJECT ROUTES
-Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthentication::class)->controller(ControllerProjects::class)->group(function()
-{
+Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthentication::class)->controller(ControllerProjects::class)->group(function () {
     // PROJECT ROUTES
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
@@ -32,19 +31,29 @@ Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthenticati
 
     Route::delete('/{inode}', 'destroy')->name('destroy');
 
-    // DOCKER ROUTES
-    Route::prefix('/docker')->name('docker.')->group(function() {
-        Route::post('/store', 'docker_store')->name('store');
-    });
+    // DOCKER
+    // - Update docker configuration
+    Route::post('/docker', 'docker')->name('docker');
+
+    // VARIABLES
+    // - Get .env file
+    Route::get('/variables/{inode}', 'variables_export')->name('variables_export');
+    // - Update .env file
+    Route::post('/variables', 'variables')->name('variables');
+
+    // COMMANDS
+    // - Get Makefile
+    Route::get('/commands/{inode}', 'commands_export')->name('commands_export');
+    // - Update Makefile
+    Route::post('/commands', 'commands')->name('commands');
 });
 
 // DOCKER ROUTES
-Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::class)->controller(ControllerDockers::class)->group(function()
-{
+Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::class)->controller(ControllerDockers::class)->group(function () {
     Route::get('/prune/{inode}', 'docker_prune')->name('prune');
 
     // CONTAINERS ROUTES
-    Route::prefix('/containers')->name('containers.')->group(function() {
+    Route::prefix('/containers')->name('containers.')->group(function () {
 
         Route::get('/list/{inode}', 'containers_list')->name('list');
 
@@ -60,23 +69,21 @@ Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::
 });
 
 // AUTH ROUTES
-Route::prefix('/auth')->name('auth.')->controller(ControlleAuthentication::class)->group(function()
-{
+Route::prefix('/auth')->name('auth.')->controller(ControlleAuthentication::class)->group(function () {
     // Authentification
     Route::get('/login', 'login')->name('login');
     Route::get('/logout', 'logout')->name('logout');
 
     Route::post('/login', 'loginPost')->name('login');
-
 });
 
 
-Route::get('/not-implemented', function() {
+Route::get('/not-implemented', function () {
     abort(501);
 })->name('not-implemented');
 
 // ERRORS ROUTES
 // abort() is also supported by Inertia and will redirect to the error page
-Route::get('{any}', function() {
+Route::get('{any}', function () {
     abort(404);
 })->name('errors');

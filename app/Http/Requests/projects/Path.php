@@ -4,6 +4,7 @@ namespace App\Http\Requests\projects;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class Path extends FormRequest
 {
@@ -17,8 +18,16 @@ class Path extends FormRequest
         }
         return redirect()->route('auth.login')->with(['error' => [
             'title' => 'Unauthorized',
-            'description' => 'You must be logged in to create a project.'
+            'description' => 'You must be logged in to access this resource.'
         ]]);
+    }
+
+    /**
+     * Handle a failed authorization attempt.
+     */
+    protected function failedAuthorization(): void
+    {
+        throw new AuthorizationException('You must be logged in to access this resource.');
     }
 
     /**

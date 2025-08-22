@@ -22,11 +22,15 @@ use App\Http\Controllers\Docker as ControllersDocker;
 use App\Http\Requests\projects\Path as RequestsPath;
 use App\Http\Requests\projects\Store as RequestsStore;
 use App\Http\Requests\projects\Docker as RequestsDocker;
+use App\Http\Requests\projects\Variables as RequestsVariable;
+use App\Http\Requests\projects\Commands as RequestsCommand;
 
 // Services
 use App\Services\System as ServicesSystem;
 use App\Services\Project as ServicesProject;
 use App\Services\Docker as ServicesDocker;
+use PHPUnit\Event\Runtime\Runtime;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Class Project 
@@ -150,7 +154,7 @@ class Project extends Controller
             ]]);
         }
 
-        
+
         // Step 4 - Get the commands from the Makefile
         try {
             $project_commands = $project->getCommandsFromMakefile($path, $system);
@@ -356,15 +360,14 @@ class Project extends Controller
      *
      * @return RedirectResponse
      */
-    public function docker_store(RequestsDocker $request, ServicesProject $project, ServicesSystem $system, ServicesDocker $docker): RedirectResponse
+    public function docker(RequestsDocker $request, ServicesProject $project, ServicesSystem $system, ServicesDocker $docker): RedirectResponse
     {
         $data = $request->validated();
 
         $path   = $data['project']['path'];
         $path   = "/projects/{$path}";
-        $inode  = $data['inode'];
 
-        $inode = $system->getInodeFromPath($path);
+        $inode = $system->getInodeFromPath($path) ?? $data['inode'];
 
         if (!$inode) {
             throw ValidationException::withMessages([
@@ -402,6 +405,85 @@ class Project extends Controller
             ]);
         }
 
-        return redirect()->route('projects.show', ['inode' => $inode])->with(['success' => 'Docker configuration updated successfully!']);
+        return redirect()->route('projects.show', ['inode' => $inode]);
+    }
+
+    /**
+     * Update the environment variables for a project.
+     *
+     * @param RequestsVariable $request   The variable request instance
+     * @param ServicesProject $project    The project service instance
+     * @param ServicesSystem $system      The system service instance
+     *
+     * @throws ValidationException
+     *
+     * @return RedirectResponse
+     */
+    public function variables(RequestsVariable $request, ServicesProject $project, ServicesSystem $system): RedirectResponse
+    {
+        $data       = $request->validated();
+        $variables  = $data['project']['variables'];
+        $path       = $data['project']['path'];
+        $path       = "/projects/{$path}";
+
+        $inode = $system->getInodeFromPath($path) ?? $data['inode'];
+
+        if (!$inode) {
+            throw ValidationException::withMessages([
+                'project.path' => 'Project path is not valid.',
+            ]);
+        }
+
+        try {
+            $res = $project->createEnvFile($path, $variables, $system);
+
+            if (!$res->successful()) {
+                throw ValidationException::withMessages([
+                    'variables' => trim($res->errorOutput() ?? '') ?: 'Failed to create .env file.',
+                ]);
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'variables' => trim($e->getMessage() ?? '') ?: 'Failed to create .env file.',
+            ]);
+        }
+
+        return redirect()->route('projects.show', ['inode' => $inode]);
+    }
+
+    /**
+     * Export the environment variables for a project.
+     *
+     * @param RequestsPath $request   The path request instance
+     * @param ServicesProject $project The project service instance
+     * @param ServicesSystem $system   The system service instance
+     *
+     * @throws ValidationException
+     *
+     * @return JsonResponse
+     */
+    public function variables_export(int $inode, ServicesProject $project, ServicesSystem $system): JsonResponse
+    {
+        try {
+            $path = $system->getFolderPathFromInode($inode);
+
+            if (!$path) {
+                throw new RuntimeException('Failed to get project path.');
+            }
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'project.path' => trim($e->getMessage() ?? '') ?: 'Project path is not valid.',
+            ]);
+        }
+
+        try {
+            $content = $project->getEnvFile($path, $system);
+        } catch (RuntimeException $e) {
+            throw ValidationException::withMessages([
+                'project.docker' => trim($e->getMessage() ?? '') ?: 'Failed to read .env file.',
+            ]);
+        }
+
+        return response()->json(['content' => $content]);
     }
 }

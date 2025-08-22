@@ -94,6 +94,28 @@ class Project
     }
 
     /**
+     * Retrieves the contents of the .env file in a folder.
+     *
+     * @param string $path              The folder path
+     * @param  ServicesSystem $system   The system service instance
+     * @return string|null               The contents of the .env file or null if it doesn't exist
+     */
+    public function getEnvFile(string $path, ServicesSystem $system): ?string
+    {
+        if (!$system->pathExists($path . "/.env")) {
+            return null;
+        }
+
+        $result = $system->execute("cat " . escapeshellarg($path . '/.env'));
+
+        if (!$result->successful()) {
+            throw new RuntimeException('Failed to read the .env file: ' . $result->errorOutput());
+        }
+
+        return $result->output();
+    }
+
+    /**
      * Create a docker-compose.yaml file in a folder.
      *
      * @param string $path              The folder path
@@ -314,5 +336,27 @@ class Project
 
 
         return $commands;
+    }
+
+    /**
+     * Retrieves the contents of the Makefile in a folder.
+     *
+     * @param string $path              The folder path
+     * @param  ServicesSystem $system   The system service instance
+     * @return string|null               The contents of the Makefile or null if it doesn't exist
+     */
+    public function getMakefile(string $path, ServicesSystem $system): ?string
+    {
+        if (!$system->pathExists($path . "/Makefile")) {
+            return null;
+        }
+
+        $result = $system->execute("cat " . escapeshellarg($path . '/Makefile'));
+
+        if (!$result->successful()) {
+            throw new RuntimeException('Failed to read the Makefile: ' . $result->errorOutput());
+        }
+
+        return $result->output();
     }
 }

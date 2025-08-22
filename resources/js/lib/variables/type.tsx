@@ -78,7 +78,8 @@ export type VariableAction =
 	| { type: "variable-delete"; variable: Variable }
 	| { type: "variable-delete-all" }
 	| { type: "variable-toggle-visibility"; variable: Variable }
-	| { type: "variable-toggle-visibility-all" };
+	| { type: "variable-toggle-visibility-all" }
+	| { type: "variable-export" };
 
 export type ActionOf<T extends VariableAction["type"]> = Extract<
 	VariableAction,
