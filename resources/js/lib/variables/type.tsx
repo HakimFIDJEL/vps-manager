@@ -8,20 +8,14 @@ export type Variable = {
 
 // Schemas
 export const VariableSchema = z.object({
-	key: z
-		.string({
-			message: "The field is required",
-		})
-		.regex(/^[A-Z][A-Z0-9_]*$/, {
-			message: "Key must be uppercase and separated by an underscore",
-		}),
-
-	value: z
-		.string({
-			message: "The field is required",
-		})
-		.regex(/^\S+$/, { message: "Value must not contain spaces" }),
+  key: z.string({ message: "The field is required" })
+        .regex(/^[A-Z][A-Z0-9_]*$/, { message: "Key must be uppercase and separated by an underscore" }),
+  value: z.string({ message: "The field is required" })
+        .trim()
+        .min(1, { message: "Value is required" })
+        // .regex(/^\S+$/, { message: "Value must not contain spaces" }),
 });
+
 
 export const VariableTextSchema = z.object({
 	textarea: z
@@ -76,3 +70,26 @@ export const VariableEnvSchema = z.object({
 		),
 });
 
+
+export type VariableAction =
+	| { type: "variable-create"; variable: Variable }
+	| { type: "variable-create-multiple"; variables: Variable[] }
+	| { type: "variable-update"; variable: Variable }
+	| { type: "variable-delete"; variable: Variable }
+	| { type: "variable-delete-all" }
+	| { type: "variable-toggle-visibility"; variable: Variable }
+	| { type: "variable-toggle-visibility-all" }
+	| { type: "variable-export" };
+
+export type ActionOf<T extends VariableAction["type"]> = Extract<
+	VariableAction,
+	{ type: T }
+>;
+export type TypedHandler<T extends VariableAction["type"]> = (
+	a: ActionOf<T>,
+) => Promise<boolean>;
+export type Registry = { [K in VariableAction["type"]]?: TypedHandler<K> };
+
+export interface VariableService {
+	handleVariable(action: VariableAction): Promise<boolean>;
+}

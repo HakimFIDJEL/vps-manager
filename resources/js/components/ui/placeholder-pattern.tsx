@@ -1,6 +1,7 @@
 import type React from "react"
 import { useId } from "react"
 import { 
+  ArrowLeft,
   ArrowRight,
   Bug,
   Home,
@@ -60,8 +61,9 @@ export function PlaceholderPattern({ className, statusCode, displayButton = fals
                 {displayButton && (
                   <Link href={route('dashboard') ?? "/"}>
                       <Button variant={'outline'}>
-                          Go to Home 
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowLeft className="h-4 w-4" />
+                          Go back 
+                          {/* <ArrowRight className="h-4 w-4" /> */}
                       </Button>
                   </Link>
                 )}

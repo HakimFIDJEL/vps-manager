@@ -143,7 +143,8 @@ const AlertDialogAction = React.forwardRef<
 		if (onAction) {
 			const shouldClose = await onAction();
 			if (shouldClose && closeRef.current) {
-				closeRef.current.click();
+				console.log("clicked");
+				closeRef.current?.click();
 			}
 		}
 	};
@@ -164,7 +165,8 @@ const AlertDialogAction = React.forwardRef<
 				ref={closeRef}
 				className="hidden"
 				aria-hidden="true"
-				{...props}
+				// {...props}
+				disabled={false}
 			/>
 		</>
 	);

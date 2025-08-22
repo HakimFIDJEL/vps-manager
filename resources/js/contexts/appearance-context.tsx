@@ -1,4 +1,6 @@
-// appearance-context.tsx
+// contexts/appearance-context.tsx
+
+import { isCookieConsent } from '@/lib/utils';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 export type Appearance = 'light'|'dark'|'system';
@@ -34,7 +36,9 @@ export const AppearanceProvider = ({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     applyTheme(appearance);
     localStorage.setItem('appearance', appearance);
-    setCookie('appearance', appearance);
+    if(isCookieConsent()) {
+      setCookie('appearance', appearance);
+    }
   }, [appearance]);
 
   // Écoute système (mode "system")

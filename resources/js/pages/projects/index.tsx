@@ -1,12 +1,16 @@
+// pages/projects/index.tsx
+
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
-import { Link } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
+import React from "react";
+import { getCookie, isCookieConsent, setCookie } from "@/lib/utils";
 
 // Components
-import { AdminLayout } from "@/components/layouts/admin-layout";
+import { AppLayout } from "@/layouts/app";
 import { AppTable } from "@/components/page/projects/index/app-table";
 import { AppGrid } from "@/components/page/projects/index/app-grid";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import {
@@ -16,10 +20,8 @@ import {
 	CardDescription,
 	CardHeader,
 	CardContent,
-	CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
 import { Separator } from "@/components/ui/separator";
 import {
 	Tabs,
@@ -27,172 +29,135 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
+	useTabsContext,
 } from "@/components/ui/tabs";
-import { SmoothItem } from "@/components/ui/smooth-resized";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Icons
 import {
-	Folder,
+	Layers,
 	LayoutGrid,
 	Plus,
 	RefreshCcw,
 	TableProperties,
-	TriangleAlert,
-	X,
 } from "lucide-react";
 
-const projects = [
-	{
-		inode: 1048577,
-		name: "Portfolio",
-		folder: "/projects/portfolio",
-		traefik_enabled: true,
-		updated_at: "2025-01-01 00:00:00",
-		created_at: "2025-01-01 00:00:00",
-		containers: [
-			{
-				name: "portfolio-app",
-				image: "portfolio-app:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "portfolio-db",
-				image: "mysql:8.0",
-				status: "exited",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "portfolio-phpmyadmin",
-				image: "phpmyadmin:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-		],
-	},
-	{
-		inode: 1048578,
-		name: "Jcoaching",
-		folder: "/projects/jcoaching",
-		traefik_enabled: false,
-		updated_at: "2025-01-01 00:00:00",
-		created_at: "2025-01-01 00:00:00",
-		containers: [
-			{
-				name: "jcoaching-app",
-				image: "jcoaching-app:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-db",
-				image: "mysql:8.0",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-phpmyadmin",
-				image: "phpmyadmin:latest",
-				status: "running",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-			{
-				name: "jcoaching-websocket",
-				image: "jcoaching-app:latest",
-				status: "exited",
-				updated_at: "2025-01-01 00:00:00",
-				created_at: "2025-01-01 00:00:00",
-			},
-		],
-	},
-];
+// Projects
+import { Project } from "@/lib/projects/type";
+// import { ProjectListExample } from "@/lib/projects/type";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
-		title: "Dashboard",
-		href: route("dashboard"),
+		title: "VPS Manager",
+		link: false,
 	},
 	{
 		title: "Projects",
 		href: route("projects.index"),
+		link: true,
 	},
 ];
 
-export default function Page() {
+export default function Page({ projects }: { projects: Project[] }) {
+	const defaultTab = isCookieConsent() ? getCookie("project_index_tab") : "list";
 	return (
-		<AdminLayout breadcrumbs={breadcrumbs}>
+		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Projects" />
 
-			<Tabs defaultValue="list" className="w-full">
-				<SmoothItem
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					delay={0.1}
-				>
-					<TabsList className="grid w-max grid-cols-2">
-						<TabsTrigger value="list">
-							<TableProperties />
-						</TabsTrigger>
-						<TabsTrigger value="grid">
-							<LayoutGrid />
-						</TabsTrigger>
-					</TabsList>
-				</SmoothItem>
-
-				<SmoothItem delay={0.3}>
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Folder className="w-5 h-5 text-muted-foreground" />
-								Projects
-							</CardTitle>
-							<CardDescription>List of all projects</CardDescription>
-							<CardAction className="flex items-center gap-2">
-								<Link href={route("projects.index")}>
-									<Button variant={"secondary"}>
-										<RefreshCcw />
-									</Button>
-								</Link>
-								<Link href={route("projects.create")}>
-									<Button variant={"default"}>
-										<Plus />
-										Create a new project
-									</Button>
-								</Link>
-							</CardAction>
-						</CardHeader>
-						<Separator />
-
-						<CardContent>
-							<TabsBody>
-								<TabsContent value="grid">
-									{/* Cards */}
-									<AppGrid projects={projects} />
-								</TabsContent>
-								<TabsContent value="list">
-									{/* Table */}
-									<AppTable projects={projects} />
-								</TabsContent>
-							</TabsBody>
-						</CardContent>
-
-						<Separator />
-						<CardFooter className="text-sm text-muted-foreground flex items-center gap-2">
-							<TriangleAlert />
-							All projects are fetched from the server itself without a database, if a
-							project is not found, try reloading the page, check the server logs or
-							access the sever via SSH.
-						</CardFooter>
-					</Card>
-				</SmoothItem>
+			<Tabs className="w-full" defaultValue={defaultTab || "list"}>
+				<Content projects={projects} />
 			</Tabs>
-		</AdminLayout>
+		</AppLayout>
+	);
+}
+
+function Content({ projects }: { projects: Project[] }) {
+	const { currentValue } = useTabsContext();
+
+	React.useEffect(() => {
+		if (isCookieConsent()) {
+			setCookie("project_index_tab", currentValue);
+		}
+	}, [currentValue]);
+	return (
+		<>
+			<SmoothItem delay={0.1}>
+				<Card className="mb-4">
+					<CardHeader className="gap-0 gap-x-1.5">
+						<div className="flex items-center gap-3">
+							<div className="bg-card border rounded-md p-2">
+								<Layers className="w-5 h-5 text-muted-foreground" />
+							</div>
+							<div>
+								<CardTitle className="flex items-center gap-2 text-xl">
+									Projects
+								</CardTitle>
+								<CardDescription>
+									Manage your projects and their containers. You can create, edit, and
+									delete projects as needed.
+								</CardDescription>
+							</div>
+						</div>
+						<CardAction className="flex items-center gap-2 self-center">
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Link href={route("projects.index")}>
+										<Button variant={"outline"} className="group">
+											<RefreshCcw className="h-4 w-4 group-hover:-rotate-180 transition-transform duration-300" />
+										</Button>
+									</Link>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>Refresh the project list</p>
+								</TooltipContent>
+							</Tooltip>
+							<Link href={route("projects.create")}>
+								<Button variant={"default"} className="group">
+									<Plus />
+									Create a new project
+								</Button>
+							</Link>
+						</CardAction>
+					</CardHeader>
+				</Card>
+			</SmoothItem>
+
+			<SmoothItem
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				exit={{ opacity: 0 }}
+				delay={0.3}
+			>
+				<TabsList className="grid w-max grid-cols-2">
+					<TabsTrigger value="list">
+						<TableProperties />
+					</TabsTrigger>
+					<TabsTrigger value="grid">
+						<LayoutGrid />
+					</TabsTrigger>
+				</TabsList>
+			</SmoothItem>
+
+			<SmoothItem delay={0.5}>
+				<TabsBody>
+					<TabsContent value="grid">
+						{/* Cards */}
+						<AppGrid projects={projects} />
+					</TabsContent>
+					<TabsContent value="list">
+						{/* Table */}
+						<Card className="border-0 overflow-visible">
+							<CardContent className="p-0">
+								<AppTable projects={projects} />
+							</CardContent>
+						</Card>
+					</TabsContent>
+				</TabsBody>
+			</SmoothItem>
+		</>
 	);
 }

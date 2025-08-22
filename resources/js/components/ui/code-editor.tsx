@@ -23,6 +23,7 @@ import { useAppearance } from "@/hooks/use-appearance";
 import { autocompletion } from "@codemirror/autocomplete";
 import { StreamLanguage } from "@codemirror/language";
 import { Button } from "@/components/ui/button";
+import { EditorView } from "@codemirror/view";
 import { motion, AnimatePresence } from "framer-motion";
 
 type CodeBlockProps = {
@@ -224,6 +225,7 @@ type CodeEditorProps = {
 		type?: string;
 		detail?: string;
 	}>;
+	disabled?: boolean;
 };
 
 export const CodeEditor = ({
@@ -236,12 +238,16 @@ export const CodeEditor = ({
 	className = "",
 	customVariables = [],
 	keywords = [],
+	disabled = false,
 }: CodeEditorProps) => {
+	// State
 	const [theme, setTheme] =
 		React.useState<ReactCodeMirrorProps["theme"]>(dracula);
+
+	// Hook
 	const { appearance } = useAppearance();
 
-	// Création de l'extension d'autocomplétion personnalisée
+	// autocompletion
 	const customCompletion = React.useMemo(() => {
 		return autocompletion({
 			override: [
@@ -266,14 +272,27 @@ export const CodeEditor = ({
 		});
 	}, [customVariables, keywords]);
 
+	// Theme
 	React.useEffect(() => {
-		if (appearance === "dark") {
-			setTheme(dracula);
-		} else {
-			setTheme(githubLight);
+		const sysPrefersDark = window.matchMedia(
+			"(prefers-color-scheme: dark)",
+		).matches;
+
+		switch (appearance) {
+			case "dark":
+				setTheme(dracula);
+				break;
+			case "light":
+				setTheme(githubLight);
+				break;
+			case "system":
+			default:
+				setTheme(sysPrefersDark ? dracula : githubLight);
+				break;
 		}
 	}, [appearance]);
 
+	// Keydown handler for saving
 	const handleKeyDown = React.useCallback(
 		(event: KeyboardEvent) => {
 			if ((event.ctrlKey || event.metaKey) && event.key === "s") {
@@ -286,6 +305,7 @@ export const CodeEditor = ({
 		[isSaved, onSave],
 	);
 
+	// Effect to add keydown listener
 	React.useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
@@ -296,12 +316,21 @@ export const CodeEditor = ({
 	return (
 		<>
 			<div
-				className={`relative w-full rounded-lg overflow-auto border ${className}`}
+				className={`
+					relative w-full rounded-lg overflow-auto border
+					border-input          
+					transition-[color,box-shadow]
+					focus-within:border-ring     
+					focus-within:ring-ring/50    
+					focus-within:ring-3          
+					focus-within:ring-offset-0   
+					${className}
+				`}
 			>
 				<CodeMirror
 					value={value}
 					height="auto"
-					className="bg-background rounded-lg overflow-hidden"
+					className="bg-background"
 					theme={theme}
 					extensions={[
 						getLanguageExtension(language),
@@ -321,31 +350,45 @@ export const CodeEditor = ({
 						foldGutter: true,
 						indentOnInput: true,
 						syntaxHighlighting: true,
+						drawSelection: true,
+						highlightActiveLineGutter: true,
 					}}
+					style={
+						{
+							opacity: disabled ? 0.6 : 1,
+							pointerEvents: disabled ? "none" : "auto", // empêche même le curseur
+							"--cm-selection-background": "rgba(255, 255, 255, 0.2)",
+							"--cm-selectionMatch-background": "rgba(255, 255, 255, 0.2)",
+						} as React.CSSProperties
+					}
 				/>
 
-				<AnimatePresence>
-					{getLanguageExtension(language) == null && showError && value.length == 0 && (
-						<motion.div
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-							transition={{ duration: 0.2 }}
-							className="absolute flex items-center justify-center text-sm bg-card border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
-						>
-								<p className="whitespace-nowrap">The format is currently not supported</p>
-							<Button
-								variant={"outline"}
-								size={"icon"}
-								type="button"
-								onClick={() => setShowError(false)}
-								className="absolute top-1/2 right-[-0.5rem] translate-x-[100%] translate-y-[-50%] rounded-full !bg-card"
+				{/* <AnimatePresence>
+					{getLanguageExtension(language) == null &&
+						showError &&
+						 (
+							<motion.div
+								initial={{ opacity: 0, y: -10 }}
+								animate={{ opacity: 1, y: 0 }}
+								exit={{ opacity: 0, y: -10 }}
+								transition={{ duration: 0.2 }}
+								className="absolute flex items-center justify-center text-sm bg-card border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
 							>
-								<X size={14} />
-							</Button>
-						</motion.div>
-					)}
-				</AnimatePresence>
+								<p className="whitespace-nowrap">
+									The format is currently not supported
+								</p>
+								<Button
+									variant={"outline"}
+									size={"icon"}
+									type={"button"}
+									onClick={() => setShowError(false)}
+									className="absolute top-1/2 right-[-0.5rem] translate-x-[100%] translate-y-[-50%] rounded-full !bg-card"
+								>
+									<X size={14} />
+								</Button>
+							</motion.div>
+						)}
+				</AnimatePresence> */}
 			</div>
 			{comment && <p className="mt-1 text-xs text-muted-foreground">{comment}</p>}
 		</>

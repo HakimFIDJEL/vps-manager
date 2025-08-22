@@ -3,15 +3,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Dispatch, SetStateAction } from "react";
+import { toast } from "sonner";
 
 // Custom components
 import { parseVariablesFromEnv } from "@/lib/variables/parser";
-import {
-	SmoothAnimate,	
-} from "@/components/ui/smooth-resized";
+import { SmoothAnimate } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import { Label } from "@/components/ui/label";
@@ -34,6 +33,7 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
+	FormDescription,
 } from "@/components/ui/form";
 import {
 	Tabs,
@@ -58,7 +58,8 @@ import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 // Icons
 import {
@@ -90,29 +91,42 @@ import {
 // Contexts
 import { useProject } from "@/contexts/project-context";
 import { CodeEditor } from "@/components/ui/code-editor";
+import { useVariable } from "@/contexts/variable-context";
 
-export function AppVariables() {
-	const { project, updateProject } = useProject();
-	
-	const [variables, setVariables] = useState<Variable[]>(project.variables);
+// Types
+import { type VariableAction } from "@/lib/variables/type";
+import { ProjectSchema } from "@/lib/projects/type";
+
+export function AppVariables({
+	setValidate,
+}: {
+	setValidate: Dispatch<SetStateAction<() => Promise<boolean>>>;
+}) {
+	// States
 	const [search, setSearch] = useState<string>("");
 
+	// Custom Hooks
+	const { project } = useProject();
+	const { handleVariable, loading } = useVariable();
+
+	// Refs
 	const inputRef = useRef<HTMLInputElement>(null);
-	const buttonRef = useRef<HTMLButtonElement>(null);
 
-	// Synchroniser l'état local avec le contexte projet si le contexte change
-	useEffect(() => {
-		if (JSON.stringify(project.variables) !== JSON.stringify(variables)) {
-			setVariables(project.variables);
-		}
-	}, [project.variables]);
+	const validator = async () => {
+		// Check if the schema is valid
+		const result = ProjectSchema.shape.variables.safeParse(project.variables);
 
-	// Synchroniser le contexte projet avec l'état local si le local change
-	useEffect(() => {
-		if (JSON.stringify(variables) !== JSON.stringify(project.variables)) {
-			updateProject("variables", variables);
+		if (!result.success) {
+			toast.error("An error occured", { description: result.error.errors[0].message });
+			return false;
 		}
-	}, [variables]);
+
+		return true;
+	};
+
+	useEffect(() => {
+		setValidate(() => validator);
+	}, [setValidate, project.variables]);
 
 	return (
 		// Wrapper
@@ -120,10 +134,23 @@ export function AppVariables() {
 			<div className="flex items-center justify-between w-full">
 				<div className="flex items-center gap-2">
 					{/* Import .env */}
-					<ImportEnv variables={variables} setVariables={setVariables} />
+					<ImportEnv handleVariable={handleVariable} loading={loading}>
+						<Button variant={"outline"} type={"button"} disabled={loading}>
+							<FileUp />
+							Import variables
+						</Button>
+					</ImportEnv>
 
 					{/* Add variable */}
-					<CreateVariable variables={variables} setVariables={setVariables} />
+					<CreateVariable
+						handleVariable={handleVariable}
+						loading={loading}
+					>
+						<Button variant={"default"} type={"button"} disabled={loading}>
+							<Plus />
+							Add variable
+						</Button>
+					</CreateVariable>
 				</div>
 
 				<div className="flex items-center gap-2 relative">
@@ -131,252 +158,280 @@ export function AppVariables() {
 						ref={inputRef}
 						name="search"
 						placeholder="Filter variables..."
-						className="z-100 relative"
+						className="z-1 relative"
 						addonText={<Search className="h-4 w-4" />}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						readOnly={variables.length === 0}
+						readOnly={project.variables.length === 0 || loading}
 					/>
 				</div>
 			</div>
 
-			{/* <Separator className="my-8" /> */}
-
-			<VariablesList
-				variables={variables}
-				setVariables={setVariables}
-				search={search}
-			/>
+			<>
+				<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
+				<VariablesList
+					search={search}
+					handleVariable={handleVariable}
+				/>
+			</>
 		</div>
 	);
 }
 
-function VariablesList({
-	variables,
-	setVariables,
+export function VariablesList({
 	search,
+	handleVariable,
+	loading = false,
 }: {
-	variables: Variable[];
-	setVariables: (variables: Variable[]) => void;
 	search: string;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
+	loading?: boolean;
 }) {
-
+	// States
 	const [sortKey, setSortKey] = useState<string>("none");
-	const [showAll, setShowAll] = useState<boolean>(false);
 
-	function handleDelete(key: string) {
-		setVariables(variables.filter((variable) => variable.key !== key));
-		toast.success(`Variable ${key} deleted successfully!`);
-	}
+	// Custom hooks
+	const { project } = useProject();
 
-	function toggleVisibility(variable: Variable) {
-		if (variable.visible) {
-			setVariables(
-				variables.map((v) =>
-					v.key === variable.key ? { ...v, visible: false } : v,
-				),
-			);
-		} else {
-			setVariables(
-				variables.map((v) =>
-					v.key === variable.key ? { ...v, visible: true } : v,
-				),
-			);
-		}
-	}
-
-	function handleDeleteAll() {
-		setVariables([]);
-		toast.success(`All variables deleted successfully!`);
-		return true;
-	}
-
-	function toggleVisibilityAll() {
-		setShowAll(!showAll);
-		setVariables(variables.map((v) => ({ ...v, visible: !showAll })));
-	}
+	// Variables
+	const filteredVariables = project.variables
+		.filter((variable) =>
+			variable.key.toLowerCase().includes(search.toLowerCase()),
+		)
+		.sort((a, b) => {
+			if (sortKey === "desc") return b.key.localeCompare(a.key);
+			if (sortKey === "asc") return a.key.localeCompare(b.key);
+			return 0;
+		});
 
 	return (
-		<>
-			<h3 className="text-sm font-medium mb-2 mt-8">Variables</h3>
-			<div className="rounded-md border">
-				<Table >
-					<TableHeader>
-						<TableRow>
-							<TableHead>
-								<Button
-									type={"button"}
-									variant={"ghost"}
-									size={"sm"}
-									onClick={() => setSortKey(sortKey === "desc" ? "asc" : sortKey === "asc" ? "none" : "desc")}
-								>
-									{sortKey === "desc" && (
-										<ArrowDownNarrowWide className="w-4 h-4 text-muted-foreground" />
-									)}
-									{sortKey === "asc" && (
-										<ArrowUpNarrowWide className="w-4 h-4 text-muted-foreground" />
-									)}
-									{sortKey === "none" && (
-										<ArrowUpDown className="w-4 h-4 text-muted-foreground" />
-									)}
-									Key
-								</Button>
-							</TableHead>
-							<TableHead>Value</TableHead>
-							<TableHead className="flex items-center gap-4 justify-end">
-								<span className="mr-2">
-									Actions
-								</span>
-								<div className="h-[70%]">
-									<Separator orientation="vertical" />
-								</div>
-								<div className="flex items-center gap-2">
-									<Tooltip>
+		<Table>
+			<TableHeader className="bg-card">
+				<TableRow>
+					<TableHead>
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={() =>
+								setSortKey(
+									sortKey === "desc" ? "asc" : sortKey === "asc" ? "none" : "desc",
+								)
+							}
+						>
+							{sortKey === "desc" && (
+								<ArrowDownNarrowWide className="w-4 h-4 text-muted-foreground" />
+							)}
+							{sortKey === "asc" && (
+								<ArrowUpNarrowWide className="w-4 h-4 text-muted-foreground" />
+							)}
+							{sortKey === "none" && (
+								<ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+							)}
+							Key
+						</Button>
+					</TableHead>
+					<TableHead>Value</TableHead>
+					<TableHead className="flex items-center gap-4 justify-end">
+						<span className="mr-2">Actions</span>
+						<div className="h-[70%]">
+							<Separator orientation="vertical" />
+						</div>
+						<div className="flex items-center gap-2">
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										type={"button"}
+										variant={"ghost"}
+										size={"icon"}
+										disabled={project.variables.length === 0}
+										onClick={() =>
+											handleVariable({
+												type: "variable-toggle-visibility-all",
+											})
+										}
+									>
+										{project.variables.every((v) => v.visible) ? <EyeOff /> : <Eye />}
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>
+									{project.variables.every((v) => v.visible)
+										? "Hide all variables"
+										: "Show all variables"}
+								</TooltipContent>
+							</Tooltip>
+							<AlertDialog>
+								<Tooltip>
+									<AlertDialogTrigger asChild>
 										<TooltipTrigger asChild>
-											<Button type={"button"} variant={"ghost"} size={"icon"} disabled={variables.length === 0} onClick={toggleVisibilityAll}>
-												{variables.every((v) => v.visible) ? (
-													<EyeOff />
-												) : (
-													<Eye />
-												)}
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>
-											{variables.every((v) => v.visible) ? (
-												"Hide all variables"
-											) : (
-												"Show all variables"
-											)}
-										</TooltipContent>
-									</Tooltip>
-									<AlertDialog>
-										<Tooltip>
-											<AlertDialogTrigger asChild>
-												<TooltipTrigger asChild>
-													<Button type={"button"} variant={"ghost"} size={"icon"} disabled={variables.length === 0}>
-														<div className="flex items-center justify-center">
-															<Trash />
-														</div>
-													</Button>
-												</TooltipTrigger>
-											</AlertDialogTrigger>
-											<TooltipContent>
-												Delete all variables
-											</TooltipContent>
-										</Tooltip>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle className="flex items-center gap-2">
-													<OctagonAlert className="w-4 h-4 text-destructive" />
-													Delete all variables
-												</AlertDialogTitle>
-												<AlertDialogDescription>Are you sure you want to delete all variables?</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogBody>
-												<AlertDialogFooter>
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
-													<AlertDialogAction onAction={() => handleDeleteAll()} variant={"destructive"}>
-														<Trash />
-														Delete
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogBody>
-										</AlertDialogContent>
-
-									</AlertDialog>
-								</div>
-
-							</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{variables
-							.filter((variable) =>
-								variable.key.toLowerCase().includes(search.toLowerCase()),
-							)
-							.sort((a, b) => {
-								if (sortKey === "desc") return b.key.localeCompare(a.key);
-								if (sortKey === "asc") return a.key.localeCompare(b.key);
-								return 0;
-							})
-							.map((variable) => (
-								<TableRow key={variable.key}>
-									<TableCell>
-										<div className="flex items-center gap-2">
-											<Lock className="h-4 w-4" />
-											{variable.key}
-										</div>
-									</TableCell>
-									<TableCell>
-										<span className="font-mono text-muted-foreground relative overflow-hidden rounded-md">
-											<div className={`absolute inset-0 bg-muted transition-opacity duration-200 z-1 rounded-xs ${!variable.visible ? 'opacity-100' : 'opacity-0'}`} />
-											<span className="relative">{variable.value}</span>
-										</span>
-									</TableCell>
-									<TableCell className="text-right">
-										<div className="flex items-center justify-end gap-2">
 											<Button
 												type={"button"}
 												variant={"ghost"}
-												size="icon"
-												onClick={() => toggleVisibility(variable)}
+												size={"icon"}
+												disabled={project.variables.length === 0 || loading}
 											>
-												{variable.visible ? (
-													<EyeOff className="h-4 w-4" />
-												) : (
-													<Eye className="h-4 w-4" />
-												)}
+												<div className="flex items-center justify-center">
+													<Trash />
+												</div>
 											</Button>
-
-											<EditVariable
-												variable={variable}
-												variables={variables}
-												setVariables={setVariables}
-											/>
-
-											<Button
-												type={"button"}
-												variant={"outline"}
-												size="icon"
-												onClick={() => handleDelete(variable.key)}
+										</TooltipTrigger>
+									</AlertDialogTrigger>
+									<TooltipContent>Delete all variables</TooltipContent>
+								</Tooltip>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle className="flex items-center gap-2">
+											<OctagonAlert className="w-4 h-4 text-destructive" />
+											Delete all variables
+										</AlertDialogTitle>
+										<AlertDialogDescription>
+											Are you sure you want to delete all variables?
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogBody>
+										<AlertDialogFooter>
+											<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+											<AlertDialogAction
+												onAction={async () => {
+													return await handleVariable({ type: "variable-delete-all" });
+												}}
+												disabled={loading}
+												variant={"destructive"}
 											>
-												<Trash className="h-4 w-4" />
-											</Button>
-										</div>
-									</TableCell>
-								</TableRow>
-							))}
-						{variables.filter((variable) =>
-							variable.key.toLowerCase().includes(search.toLowerCase()),
-						).length === 0 && (
-								<TableRow>
-									<TableCell colSpan={3} className="text-center py-4 bg-muted/50 text-muted-foreground">
-										No variables added yet. Click on "Add Variable" to create one.
-									</TableCell>
-								</TableRow>
-							)}
-					</TableBody>
-				</Table>
-			</div>
-		</>
+												{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+												Delete
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogBody>
+								</AlertDialogContent>
+							</AlertDialog>
+						</div>
+					</TableHead>
+				</TableRow>
+			</TableHeader>
+			<TableBody className="bg-transparent">
+				{filteredVariables.map((variable) => (
+					<TableRow key={variable.key} className="group">
+						<TableCell>
+							<div className="flex items-center gap-2">
+								<Lock className="h-3 w-3 text-muted-foreground" />
+								{variable.key}
+							</div>
+						</TableCell>
+						<TableCell>
+							<span className="font-mono text-muted-foreground relative overflow-hidden rounded-md">
+								<div
+									className={`absolute inset-0 bg-muted transition-opacity duration-200 z-1 rounded-xs ${
+										!variable.visible ? "opacity-100" : "opacity-0"
+									}`}
+								/>
+								<span className="relative">{variable.value}</span>
+							</span>
+						</TableCell>
+						<TableCell className="text-right opacity-0 group-hover:opacity-100 transition-opacity">
+							<div className="flex items-center justify-end gap-2">
+								<Button
+									type={"button"}
+									variant={"ghost"}
+									size="icon"
+									onClick={() =>
+										handleVariable({
+											type: "variable-toggle-visibility",
+											variable,
+										})
+									}
+								>
+									{variable.visible ? (
+										<EyeOff className="h-4 w-4" />
+									) : (
+										<Eye className="h-4 w-4" />
+									)}
+								</Button>
+
+								<EditVariable
+									variable={variable}
+									handleVariable={handleVariable}
+									loading={loading}
+								/>
+
+								<AlertDialog>
+									<AlertDialogTrigger asChild>
+										<Button
+											type={"button"}
+											variant={"ghost"}
+											size={"icon"}
+											disabled={loading}
+										>
+											<Trash className="h-4 w-4" />
+										</Button>
+									</AlertDialogTrigger>
+									<AlertDialogContent>
+										<AlertDialogHeader>
+											<AlertDialogTitle className="flex items-center gap-2">
+												<OctagonAlert className="w-4 h-4 text-destructive" />
+												Delete variable
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												Are you sure you want to delete
+												<Badge variant={"outline"} className="font-mono mx-2">
+													{variable.key}
+												</Badge>
+												?
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogBody>
+											<AlertDialogFooter>
+												<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+												<AlertDialogAction
+													onAction={async () => {
+														return await handleVariable({ type: "variable-delete", variable });
+
+													}}
+													variant={"destructive"}
+													type={"button"}
+													disabled={loading}
+												>
+													{loading ? <Loader2 className="animate-spin" /> : <Trash />}
+													Delete
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogBody>
+									</AlertDialogContent>
+								</AlertDialog>
+							</div>
+						</TableCell>
+					</TableRow>
+				))}
+				{filteredVariables.length === 0 && (
+					<TableRow>
+						<TableCell
+							colSpan={3}
+							className="text-center py-4 bg-muted/50 text-muted-foreground"
+						>
+							No variables added yet. Click on "Add Variable" to create one.
+						</TableCell>
+					</TableRow>
+				)}
+			</TableBody>
+		</Table>
 	);
 }
 
-function CreateVariable({
-	variables,
-	setVariables,
+export function CreateVariable({
+	children,
+	handleVariable,
+	loading = false,
 }: {
-	variables: Variable[];
-	setVariables: (variables: Variable[]) => void;
+	children: React.ReactNode;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
+	loading?: boolean;
 }) {
-	const [variable, setVariable] = useState<Variable>({ key: "", value: "" });
-	const [loading, setLoading] = useState<boolean>(false);
-
+	// Variables
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
 		resolver: zodResolver(VariableSchema),
 		defaultValues: {
-			key: variable.key,
-			value: variable.value,
+			key: "",
+			value: "",
 		},
 	});
 
@@ -384,35 +439,26 @@ function CreateVariable({
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
+		await handleVariable({
+			type: "variable-create",
+			variable: VariableForm.getValues(),
+		});
 
-		const data = VariableForm.getValues();
-		const keyExists = variables.some((variable) => variable.key === data.key);
-		if (keyExists) {
-			VariableForm.setError("key", { message: "Key already exists" });
-			setLoading(false);
-			return false;
-		}
-
-		setVariables([...variables, data]);
-		setVariable({ key: "", value: "" });
-		toast.success(`Variable ${data.key} created successfully!`);
 		VariableForm.reset();
-		setLoading(false);
-		return true; // Retourne true pour fermer le Dialog
+		return true;
 	}
 
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button variant={"default"} type={"button"}>
-					<Plus />
-					Add variable
-				</Button>
-			</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<Form {...VariableForm}>
-					<form onSubmit={(e) => e.preventDefault()}>
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+					>
 						<AlertDialogHeader>
 							<AlertDialogTitle>Add variable</AlertDialogTitle>
 							<AlertDialogDescription>
@@ -430,12 +476,16 @@ function CreateVariable({
 										<FormControl>
 											<Input
 												id="key"
+												readOnly={loading}
 												placeholder="eg: MY_KEY"
 												autoFocus={true}
 												{...field}
-												comment="Must be in uppercase and not contain spaces."
 											/>
 										</FormControl>
+										<FormDescription>
+											You can use letters, numbers and underscores. Must not contain
+											spaces.
+										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -449,22 +499,23 @@ function CreateVariable({
 										<FormControl>
 											<Input
 												id="value"
-												placeholder="eg: MY_VALUE"
+												readOnly={loading}
+												placeholder="eg: My value"
 												{...field}
-												comment="Must not contain spaces."
 											/>
 										</FormControl>
+										<FormDescription>This is the value of the variable.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
 						</AlertDialogBody>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!VariableForm.formState.isValid || loading}
-								type="submit"
+								type={"submit"}
 							>
 								{loading ? <Loader2 className="animate-spin" /> : <Plus />}
 								Add variable
@@ -477,17 +528,16 @@ function CreateVariable({
 	);
 }
 
-function EditVariable({
+export function EditVariable({
 	variable,
-	variables,
-	setVariables,
+	handleVariable,
+	loading = false,
 }: {
 	variable: Variable;
-	variables: Variable[];
-	setVariables: (variables: Variable[]) => void;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
+	loading?: boolean;
 }) {
-	const [loading, setLoading] = useState<boolean>(false);
-
+	// Variables
 	const VariableForm = useForm<z.infer<typeof VariableSchema>>({
 		resolver: zodResolver(VariableSchema),
 		defaultValues: {
@@ -496,6 +546,7 @@ function EditVariable({
 		},
 	});
 
+	// Hooks
 	useEffect(() => {
 		VariableForm.reset({
 			key: variable.key,
@@ -507,17 +558,12 @@ function EditVariable({
 		const isValid = await VariableForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
+		await handleVariable({
+			type: "variable-update",
+			variable: { ...variable, value: VariableForm.getValues().value },
+		});
 
-		const data = VariableForm.getValues();
-		setVariables(
-			variables.map((v) =>
-				v.key === variable.key ? { ...v, value: data.value } : v,
-			),
-		);
-		toast.success(`Variable ${data.key} updated successfully!`);
 		VariableForm.reset();
-		setLoading(false);
 		return true;
 	}
 
@@ -530,7 +576,12 @@ function EditVariable({
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<Form {...VariableForm}>
-					<form onSubmit={(e) => e.preventDefault()}>
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+					>
 						<AlertDialogHeader>
 							<AlertDialogTitle>Edit variable</AlertDialogTitle>
 							<AlertDialogDescription>
@@ -550,10 +601,10 @@ function EditVariable({
 												id="key"
 												placeholder="eg: MY_KEY"
 												readOnly={true}
-												comment="You can't change the key."
 												{...field}
 											/>
 										</FormControl>
+										<FormDescription>You can't change the key.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -569,23 +620,24 @@ function EditVariable({
 												id="value"
 												type="password"
 												autoFocus={true}
-												placeholder="eg: MY_VALUE"
+												placeholder="eg: My_value"
 												showPasswordToggle={true}
-												comment="Must not contain spaces."
+												readOnly={loading}
 												{...field}
 											/>
 										</FormControl>
+										<FormDescription>This is the value of the variable.</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
 						</AlertDialogBody>
 						<AlertDialogFooter>
-							<AlertDialogCancel>Close</AlertDialogCancel>
+							<AlertDialogCancel disabled={loading}>Close</AlertDialogCancel>
 							<AlertDialogAction
 								onAction={onSubmit}
 								disabled={!VariableForm.formState.isValid || loading}
-								type="submit"
+								type={"submit"}
 							>
 								{loading ? <Loader2 className="animate-spin" /> : <Pen />}
 								Edit variable
@@ -598,19 +650,27 @@ function EditVariable({
 	);
 }
 
-function ImportEnv({
-	variables,
-	setVariables,
+export function ImportEnv({
+	children,
+	handleVariable,
+	loading = false,
 }: {
-	variables: Variable[];
-	setVariables: (variables: Variable[]) => void;
+	children: React.ReactNode;
+	handleVariable: (action: VariableAction) => Promise<boolean>;
+	loading?: boolean;
 }) {
+	// States
 	const [envPreview, setEnvPreview] = useState<string>("");
-	const [loading, setLoading] = useState<boolean>(false);
 	const [isDragActive, setIsDragActive] = useState(false);
+
+	// Refs
 	const inputFileRef = useRef<HTMLInputElement>(null);
 	const closeRef = useRef<HTMLButtonElement>(null);
 
+	// Custom hooks
+	const { project } = useProject();
+
+	// Variables
 	const VariableEnvForm = useForm<z.infer<typeof VariableEnvSchema>>({
 		resolver: zodResolver(VariableEnvSchema),
 	});
@@ -619,11 +679,10 @@ function ImportEnv({
 		resolver: zodResolver(VariableTextSchema),
 	});
 
+	// Custom methods
 	async function onSubmitText() {
 		const isValid = await VariableTextForm.trigger();
 		if (!isValid) return false;
-
-		setLoading(true);
 
 		const data = VariableTextForm.getValues();
 
@@ -634,8 +693,6 @@ function ImportEnv({
 		const isValid = await VariableEnvForm.trigger();
 		if (!isValid) return false;
 
-		setLoading(true);
-
 		const data = VariableEnvForm.getValues();
 
 		// On récupère le contenu du fichier
@@ -644,7 +701,6 @@ function ImportEnv({
 			VariableEnvForm.setError("file", {
 				message: "An error occured importing the file.",
 			});
-			setLoading(false);
 			return false;
 		}
 		const text = await file.text();
@@ -652,42 +708,34 @@ function ImportEnv({
 		return handleUpdate(text);
 	}
 
-	function handleUpdate(text: string) {
+	async function handleUpdate(text: string) {
 		// On parse le contenu du fichier
 		const parsedVariables = parseVariablesFromEnv({
 			content: text,
-			variables: variables,
+			variables: project.variables,
 		});
 
 		if (parsedVariables.length === 0) {
 			VariableEnvForm.setError("file", {
 				message: "No valid variables found in the file.",
 			});
-			setLoading(false);
 			return false;
 		} else {
+			await handleVariable({
+				type: "variable-create-multiple",
+				variables: parsedVariables,
+			});
+
 			setEnvPreview("");
 			VariableEnvForm.reset();
 		}
 
-		toast.success(`${parsedVariables.length} variables imported successfully!`);
-
-		setVariables([...parsedVariables, ...variables]);
-
-		setLoading(false);
-
-		closeRef.current?.click();
 		return true;
 	}
 
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button variant={"outline"} type={"button"}>
-					<FileUp />
-					Import variables
-				</Button>
-			</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Import variables</AlertDialogTitle>
@@ -707,10 +755,15 @@ function ImportEnv({
 							Paste content
 						</TabsTrigger>
 					</TabsList>
-					<TabsBody>
+					<TabsBody className="pt-4">
 						<TabsContent value="file">
 							<Form {...VariableEnvForm}>
-								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+								<form
+									onSubmit={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+									}}
+								>
 									<AlertDialogBody>
 										<FormField
 											control={VariableEnvForm.control}
@@ -813,6 +866,11 @@ function ImportEnv({
 																}}
 															/>
 														</FormControl>
+														<FormDescription className="mt-2">
+															Drop a .env file here or click to select it. The file must be in
+															the following format: <code>KEY=VALUE</code>. Lines starting with
+															{"#"} are ignored.
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												);
@@ -845,7 +903,7 @@ function ImportEnv({
 										<AlertDialogAction
 											onAction={onSubmitEnv}
 											disabled={!envPreview || loading}
-											type="submit"
+											type={"submit"}
 										>
 											{loading ? <Loader2 className="animate-spin" /> : <FileUp />}
 											Import file
@@ -857,7 +915,12 @@ function ImportEnv({
 
 						<TabsContent value="text">
 							<Form {...VariableTextForm}>
-								<form onSubmit={(e) => e.preventDefault()} className="mt-4">
+								<form
+									onSubmit={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+									}}
+								>
 									<AlertDialogBody>
 										<FormField
 											control={VariableTextForm.control}
@@ -867,21 +930,21 @@ function ImportEnv({
 													<FormItem>
 														<FormLabel>Content</FormLabel>
 														<FormControl>
-															{/* <Textarea
-																id="textarea"
-																placeholder="KEY=VALUE"
-																autoFocus={true}
-																className="min-h-32 max-h-64"
-																comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
-																{...field}
-															/> */}
 															<CodeEditor
 																language="env"
-																value={(field.value == "" || field.value == null) ? "\n\n\n\n\n\n" : field.value}
+																value={
+																	field.value == "" || field.value == null
+																		? "\n\n\n\n\n\n"
+																		: field.value
+																}
 																onChange={field.onChange}
-																comment="Each line must be in the form KEY=VALUE. Lines starting with # are ignored."
 															/>
 														</FormControl>
+														<FormDescription>
+															You can paste the content of a .env file here. Each line must be
+															in the form <code>KEY=VALUE</code>. Lines starting with{" "}
+															<code>#</code> are ignored.
+														</FormDescription>
 														<FormMessage />
 													</FormItem>
 												);
@@ -894,7 +957,7 @@ function ImportEnv({
 										<AlertDialogAction
 											onAction={onSubmitText}
 											disabled={!VariableTextForm.formState.isValid || loading}
-											type="submit"
+											type={"submit"}
 										>
 											{loading ? <Loader2 className="animate-spin" /> : <Copy />}
 											Import content

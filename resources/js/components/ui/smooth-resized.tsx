@@ -1,7 +1,15 @@
 import * as React from "react";
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from "react";
 import autoAnimate from "@formkit/auto-animate";
-import { motion, AnimatePresence, TargetAndTransition, VariantLabels, LayoutGroup, MotionProps } from "framer-motion";
+import type { AnimationController } from "@formkit/auto-animate";
+import {
+	motion,
+	AnimatePresence,
+	TargetAndTransition,
+	VariantLabels,
+	LayoutGroup,
+	MotionProps,
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 function SmoothResize({
@@ -21,15 +29,29 @@ function SmoothResize({
 	);
 }
 
-type SmoothItemProps = React.ComponentProps<"div"> & MotionProps & {
-	initial?: boolean | TargetAndTransition | VariantLabels | undefined;
-	animate?: boolean | TargetAndTransition | VariantLabels | undefined;
-	exit?: TargetAndTransition | VariantLabels | undefined;
-	delay?: number;
-	layout?: boolean | "size" | "position" | "preserve-aspect" | "preserve-aspect-size";
-}
+type SmoothItemProps = React.ComponentProps<"div"> &
+	MotionProps & {
+		initial?: boolean | TargetAndTransition | VariantLabels | undefined;
+		animate?: boolean | TargetAndTransition | VariantLabels | undefined;
+		exit?: TargetAndTransition | VariantLabels | undefined;
+		delay?: number;
+		layout?:
+			| boolean
+			| "size"
+			| "position"
+			| "preserve-aspect"
+			| "preserve-aspect-size";
+	};
 
-function SmoothItem({ className, layout=true, initial, delay, animate, exit, ...props }: SmoothItemProps) {
+function SmoothItem({
+	className,
+	layout = true,
+	initial,
+	delay,
+	animate,
+	exit,
+	...props
+}: SmoothItemProps) {
 	return (
 		<motion.div
 			layout={layout ? layout : false}
@@ -39,7 +61,7 @@ function SmoothItem({ className, layout=true, initial, delay, animate, exit, ...
 				ease: "easeInOut",
 				delay: delay ? delay : 0,
 			}}
-			initial={initial || { opacity: 0, scale: 0.99, }}
+			initial={initial || { opacity: 0, scale: 0.99 }}
 			animate={animate || { opacity: 1, scale: 1 }}
 			exit={exit || { opacity: 0, scale: 0.99 }}
 			{...props}
@@ -50,12 +72,20 @@ function SmoothItem({ className, layout=true, initial, delay, animate, exit, ...
 function SmoothAnimate({ className, ...props }: React.ComponentProps<"div">) {
 	const parent = useRef<HTMLDivElement>(null);
 
+	// useEffect(() => {
+	// 	parent.current && autoAnimate(parent.current, { duration: 200, easing: "ease-in-out" });
+	// }, [parent])
+
 	useEffect(() => {
-		parent.current && autoAnimate(parent.current, { duration: 200, easing: "ease-in-out" });
-	}, [parent])
+		if (!parent.current) return;
+		const controller: AnimationController = autoAnimate(parent.current, {
+			duration: 400,
+			easing: "ease-in-out",
+		});
+		return () => controller.destroy?.();
+	}, []);
 
 	return <div ref={parent} className={className} {...props} />;
 }
-
 
 export { SmoothResize, SmoothItem, SmoothAnimate };

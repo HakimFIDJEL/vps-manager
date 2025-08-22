@@ -1,5 +1,7 @@
+// Necessary imports
 import { z } from "zod";
 import yaml from "js-yaml";
+
 
 // Docker Compose Schema
 const DockerServiceSchema = z.object({
@@ -122,3 +124,47 @@ export type DockerCompose = {
     networks: Array<{ name: string; driver: string; customName?: string; }>;
   };
 };
+
+// TEMP
+
+export type DockerContainer = {
+  container_id : string;
+  image : string;
+  command : string;
+  created_at : string;
+  status: string;
+  state : "running" | "exited" | "created" | "restarting" | "paused" | "dead";
+  ports : string;
+  name : string;
+}
+
+export type DockerAction =
+  | { type: "docker-create"; docker: DockerCompose }
+  | { type: "docker-update"; docker: DockerCompose }
+  | { type: "docker-delete" }
+  | { type: "docker-save" }
+  | { type: "docker-clear" }
+  | { type: "docker-reset" }
+  | { type: "docker-copy" }
+  | { type: "docker-strict-toggle" }
+  | { type: "docker-un-save"; content: string }
+  | { type: "docker-remove-type"; name: string; elementType: "services" | "volumes" | "networks" }
+  // Server only
+  | { type: "docker-prune" }
+  | { type: "docker-containers-run" }
+  | { type: "docker-containers-stop" }
+  | { type: "docker-containers-remove" }
+  | { type: "docker-container-run"; container_id: string }
+  | { type: "docker-container-stop"; container_id: string }
+  | { type: "docker-container-restart"; container_id: string }
+  | { type: "docker-container-remove"; container_id: string }
+  | { type: "docker-containers-list"; };
+
+
+export type ActionOf<T extends DockerAction["type"]> = Extract<DockerAction, { type: T }>;
+export type TypedHandler<T extends DockerAction["type"]> = (a: ActionOf<T>) => Promise<boolean>;
+export type Registry = { [K in DockerAction["type"]]?: TypedHandler<K> };
+
+export interface DockerService {
+  handleDocker(action: DockerAction): Promise<boolean>;
+}

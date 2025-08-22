@@ -1,95 +1,202 @@
+// pages/projects/show.tsx
+
 // Necessary imports
-import { type BreadcrumbItem } from "@/types";
-import { Head, Link, useForm } from "@inertiajs/react";
-import { useProject } from "@/contexts/project-context";
-import { ProjectProvider } from "@/contexts/project-context";
-import { ProjectSchema } from "@/lib/projects/type";
-import { toast } from "sonner";
-import { z } from "zod";
-import { useEffect, useState } from "react";
+import { Head } from "@inertiajs/react";
+import * as React from "react";
+import { Link } from "@inertiajs/react";
 
 // Components
-import { AdminLayout } from "@/components/layouts/admin-layout";
-
-import { AppProject } from "@/components/page/projects/create/app-project";
-import { AppVariables } from "@/components/page/projects/create/app-variables";
-import { AppDocker } from "@/components/page/projects/create/app-docker";
-import { AppMakefile } from "@/components/page/projects/create/app-makefile";
-import { AppDone } from "@/components/page/projects/create/app-done";
+import { AppLayout } from "@/layouts/app";
+import { AppSidebar } from "@/components/page/projects/show/app-sidebar";
+import { AppOverview } from "@/components/page/projects/show/app-overview";
+import { AppMakefile } from "@/components/page/projects/show/app-makefile";
+import { AppVariables } from "@/components/page/projects/show/app-variables";
+import { AppDocker } from "@/components/page/projects/show/app-docker";
+import { AppSettings } from "@/components/page/projects/show/app-settings";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
-import {
-	Stepper,
-	StepperIndicator,
-	StepperItem,
-	StepperSeparator,
-	StepperTitle,
-	StepperTrigger,
-	StepperContent,
-	StepperList,
-	StepperNavigation,
-	StepperBody,
-} from "@/components/ui/stepper";
+import { Separator } from "@/components/ui/separator";
 import {
 	Card,
-	CardAction,
 	CardTitle,
 	CardDescription,
 	CardHeader,
-	CardContent,
+	CardAction,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { SmoothItem } from "@/components/ui/smooth-resized";
+import {
+	Tabs,
+	TabsBody,
+	TabsList,
+	TabsNavigation,
+	TabsTrigger,
+} from "@/components/ui/tabs";
 
 // Icons
 import {
 	ArrowLeft,
-	Check,
 	Container,
-	File,
 	FileLock,
 	Folder,
-	LoaderCircleIcon,
-	Plus,
+	Layers,
+	LayoutGrid,
+	Settings2,
 	SquareTerminal,
 } from "lucide-react";
 
-const breadcrumbs: BreadcrumbItem[] = [
-	{
-		title: "Dashboard",
-		href: route("dashboard"),
-	},
-	{
-		title: "Projects",
-		href: route("projects.index"),
-	},
-	{
-		title: "The name of the project",
-		href: route("projects.show"),
-	},
-];
+// Contexts
+import { useProject, ProjectProvider } from "@/contexts/project-context";
+import { useDocker } from "@/contexts/docker-context";
 
+// Libs
+import { type BreadcrumbItem } from "@/types";
+import { Project, ProjectExample } from "@/lib/projects/type";
+import { DockerContainer } from "@/lib/docker/type";
 
-export default function Page() {
+// Functions
+import { parseDockerCompose } from "@/lib/docker/parser";
+
+export default function Page({
+	project,
+	containers,
+}: {
+	project: Project;
+	containers: DockerContainer[];
+}) {
+	const breadcrumbs: BreadcrumbItem[] = [
+		{
+			title: "VPS Manager",
+			link: false,
+		},
+		{
+			title: "Projects",
+			href: route("projects.index"),
+			link: true,
+		},
+		{
+			title: project.path,
+			href: route("projects.show", { inode: project.inode }),
+			link: true,
+		},
+	];
+
 	return (
-		<AdminLayout breadcrumbs={breadcrumbs}>
-			<Head title="The name of the project" />
+		<AppLayout breadcrumbs={breadcrumbs}>
+			<Head title={project.path} />
 			<ProjectProvider>
-				<SmoothItem delay={0.1}>
+				{/* Content */}
+
+				<Content project={project} containersFetched={containers} />
+			</ProjectProvider>
+		</AppLayout>
+	);
+}
+
+function Content({
+	project,
+	containersFetched,
+}: {
+	project: Project;
+	containersFetched: DockerContainer[];
+}) {
+	const { setProject, updateProject } = useProject();
+	const { handleDocker, setContainers } = useDocker();
+	const timerRef = React.useRef<number | null>(null);
+	const [timerPercentage, setTimerPercentage] = React.useState(100);
+
+	const tabs = [
+		{ value: "overview", label: "Overview", icon: <LayoutGrid /> },
+		{ value: "commands", label: "Commands", icon: <SquareTerminal /> },
+		{ value: "containers", label: "Containers", icon: <Container /> },
+		{ value: "variables", label: "Variables", icon: <FileLock /> },
+		{ value: "settings", label: "Settings", icon: <Settings2 /> },
+	];
+
+	React.useEffect(() => {
+		// Updating project
+		setProject(project);
+
+		// Dynamic calculation of containers, volumes, and networks
+		if (project.docker.isSaved) {
+			if (project.docker.isStrict) {
+				const save_parsed = parseDockerCompose(
+					project.docker.content,
+					project.docker.isStrict,
+					project.variables.length,
+				);
+
+				if (save_parsed.isValid && save_parsed.updatedContent) {
+					updateProject("docker", {
+						content: save_parsed.updatedContent,
+						isSaved: true,
+						isStrict: project.docker.isStrict,
+						parsed: {
+							services: save_parsed.services,
+							volumes: save_parsed.volumes,
+							networks: save_parsed.networks,
+						},
+					});
+				}
+			}
+		}
+
+		// Updating containers
+		setContainers(containersFetched);
+	}, []);
+
+	React.useEffect(() => {
+		let remaining = 60;
+		let timer = 60;
+		setTimerPercentage(100);
+
+		timerRef.current = window.setInterval(() => {
+			handleDocker({ type: "docker-containers-list" });
+			remaining = timer;
+			setTimerPercentage(100);
+		}, timer * 1000);
+
+		const progressInterval = window.setInterval(() => {
+			remaining--;
+			setTimerPercentage((remaining / 60) * 100);
+		}, 1000);
+
+		return () => {
+			if (timerRef.current) window.clearInterval(timerRef.current);
+			window.clearInterval(progressInterval);
+		};
+	}, [handleDocker]);
+
+
+	return (
+		<Tabs
+			className="flex flex-row items-start justify-between gap-4"
+			defaultValue={"overview"}
+		>
+			{/* Header + TabsContent */}
+			<div className="flex flex-col w-full gap-4">
+				<SmoothItem delay={0.1} layout={false}>
 					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Folder className="w-5 h-5 text-muted-foreground" />
-								The name of the project
-							</CardTitle>
-							<CardDescription>
-								{/* Description */}
-							</CardDescription>
-							<CardAction>
+						<CardHeader className="gap-0 gap-x-1.5">
+							<div className="flex items-center gap-3">
+								<div className="bg-card border rounded-md p-2">
+									<Layers className="w-5 h-5 text-muted-foreground" />
+								</div>
+								<div>
+									<CardTitle className="flex items-center gap-2 text-xl">
+										{project.path}
+									</CardTitle>
+									<CardDescription>
+										Here you can view details, manage settings, and perform actions
+										related to this project.
+									</CardDescription>
+								</div>
+							</div>
+
+							<CardAction className="self-center">
 								<Link href={route("projects.index")}>
-									<Button variant={"outline"}>
-										<ArrowLeft />
+									<Button variant={"outline"} className="group">
+										<ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.75 transition-transform duration-300" />
 										Go back to projects
 									</Button>
 								</Link>
@@ -98,20 +205,29 @@ export default function Page() {
 					</Card>
 				</SmoothItem>
 
-				<Content />
-			</ProjectProvider>
-		</AdminLayout>
-	);
-}
+				<SmoothItem delay={0.3} layout={false} className="!flex-grow-0 w-full">
+					<TabsNavigation tabs={tabs} />
+				</SmoothItem>
 
-function Content() {
-	const { project, updateProject } = useProject();
+				<SmoothItem delay={0.5} layout={false} className="!flex-grow-0 w-full">
+					<TabsBody className="mt-4">
+						<AppOverview />
+						<AppMakefile />
+						<AppVariables />
+						<AppDocker timerPercentage={timerPercentage} />
+						<AppSettings />
+					</TabsBody>
+				</SmoothItem>
+			</div>
 
-
-
-
-	return (
-		<>
-		</>
+			{/* Sidebar */}
+			{/* <SmoothItem
+				delay={0.1}
+				layout={false}
+				className="self-start sticky top-[4.5rem] right-[0.5rem]"
+			>
+				<AppSidebar className="h-[calc(100vh-5rem)]" />
+			</SmoothItem> */}
+		</Tabs>
 	);
 }

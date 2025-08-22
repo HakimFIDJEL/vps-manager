@@ -11,7 +11,7 @@
 
 @theme {
     --font-sans:
-        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Geist", "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 
@@ -241,20 +241,25 @@
   }
 }
 
+.cm-foldPlaceholder {
+  background-color: var(--card) !important;
+  border: 1px solid var(--color-border) !important;
+  padding: 0 0.2rem !important;
 
+  transition: 0.2s ease-out;
+}
+
+.cm-foldPlaceholder:hover {
+  border-color: var(--color-foreground) !important;
+}
 
 .cm-editor {
   font-family: var(--font-mono) !important;
   background-color: var(--card) !important;
 }
 
-.cm-line {
-  font-family: var(--font-mono) !important;
-  background-color: var(--card) !important;
-}
-
 .cm-scroller {
-  font-family: var(--font-sans) !important; 
+  font-family: var(--font-mono) !important; 
   font-size: 14px !important;
 }
 

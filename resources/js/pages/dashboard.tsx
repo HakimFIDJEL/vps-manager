@@ -1,4 +1,4 @@
-import { AdminLayout } from '@/components/layouts/admin-layout'
+import { AppLayout } from '@/layouts/app'
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { useAppearance } from '@/hooks/use-appearance';
 import { type BreadcrumbItem } from '@/types';
@@ -20,9 +20,9 @@ export default function Page() {
   }, [appearance]);
 
   return (
-    <AdminLayout breadcrumbs={breadcrumbs}>
+    <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
       <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" statusCode={501} displayButton={false} />
-    </AdminLayout>
+    </AppLayout>
   )
 }

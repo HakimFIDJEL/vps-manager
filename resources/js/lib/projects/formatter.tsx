@@ -2,55 +2,64 @@
 import { Link } from "@inertiajs/react";
 
 // Shadcn ui components
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 
 // Icons
-import { Check, X, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
-// Types
-import { type Container } from "@/lib/projects/type";
-
-export function formatDate(date: string): string {
-  const opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
-  return new Date(date).toLocaleString("en-US", opts);
+export function formatDate({ date }: { date: string | undefined }): string {
+	const opts: Intl.DateTimeFormatOptions = {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+	};
+	if (!date) {
+		return "N/A";
+	}
+	return new Date(date).toLocaleString("en-US", opts);
 }
 
-export function formatTraefik(traefik_enabled: boolean) {
-  return traefik_enabled
-    ? <Badge variant="outline" className="flex items-center gap-2"><Check/>Enabled</Badge>
-    : <Badge variant="secondary"><X/>Disabled</Badge>;
+export function formatSize(size: number | undefined) {
+	if (size === undefined) {
+		return "N/A";
+	}
+	const sizeInMB = (size / 1024).toFixed(2);
+	return `${sizeInMB} KB`;
 }
 
-export function formatContainers(containers: Container[]) {
-  const running = containers.filter(c => c.status === "running").length;
-  const total = containers.length;
-  const pct = total ? (running/total)*100 : 0;
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild><Progress value={pct} className="w-[100px]" /></TooltipTrigger>
-      <TooltipContent>
-        <p>{ running === total ? "All containers running" : `${running} sur ${total}` }</p>
-      </TooltipContent>
-    </Tooltip>
-  );
+export function formatActions(
+	inode: number | undefined,
+	width: "full" | "auto" = "full",
+	size: "default" | "icon" | "lg" | "sm" = "default",
+): React.ReactNode {
+	return (
+		<Link
+			href={route("projects.show", { inode: inode })}
+			className={`w-${width}`}
+		>
+			<Button variant={"outline"} className={`w-${width} group`} size={size}>
+				<ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform duration-300" />
+				Show project
+			</Button>
+		</Link>
+	);
 }
 
-export function formatActions(inode: number) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Link href={route("projects.show", { inode })}>
-          <Button variant="outline" size="sm"><ArrowUpRight className="h-4 w-4"/></Button>
-        </Link>
-      </TooltipTrigger>
-      <TooltipContent>Show project</TooltipContent>
-    </Tooltip>
-  );
-}
+export function formatSlug(input: string): string {
+	const keepDashAtEnd = input.endsWith(" ") || input.endsWith("-");
 
-export function formatSlug(string: string) {
-  return string.replace(/[^A-Za-z0-9-]/g, "-").toLowerCase().replace(/--+/g, "-").replace(/^-|-$/g, "");
+	let slug = input
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9_\/-]+/g, "-")
+		.replace(/-{2,}/g, "-")
+		.replace(/^-+/g, "");
+
+	if (keepDashAtEnd && !slug.endsWith("-")) {
+		slug += "-";
+	}
+
+	return slug;
 }

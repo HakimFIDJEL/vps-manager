@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[] }) {
     return (
-        <>
+        <nav>
             {breadcrumbs.length > 0 && (
                 <Breadcrumb>
                     <BreadcrumbList>
@@ -28,9 +28,15 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                                             </AnimatePresence>
                                         ) : (
                                             
-                                            <BreadcrumbLink asChild>
-                                                <Link href={item.href}>{item.title}</Link>
-                                            </BreadcrumbLink>
+                                            item.link ? (
+                                                <BreadcrumbLink asChild>
+                                                    <Link href={item.href ?? "#"}>{item.title}</Link>
+                                                </BreadcrumbLink>
+                                            ) : (
+                                                <BreadcrumbPage className="text-muted-foreground">
+                                                    {item.title}
+                                                </BreadcrumbPage>
+                                            )
                                         )}
                                     </BreadcrumbItem>
                                     {!isLast && <BreadcrumbSeparator />}
@@ -40,6 +46,6 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                     </BreadcrumbList>
                 </Breadcrumb>
             )}
-        </>
+        </nav>
     );
 }

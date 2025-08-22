@@ -1,3 +1,5 @@
+// pages/projects/create.tsx
+
 // Necessary imports
 import { type BreadcrumbItem } from "@/types";
 import { Head, Link, useForm } from "@inertiajs/react";
@@ -9,13 +11,14 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 
 // Components
-import { AdminLayout } from "@/components/layouts/admin-layout";
+import { AppLayout } from "@/layouts/app";
 
 import { AppProject } from "@/components/page/projects/create/app-project";
 import { AppVariables } from "@/components/page/projects/create/app-variables";
 import { AppDocker } from "@/components/page/projects/create/app-docker";
 import { AppMakefile } from "@/components/page/projects/create/app-makefile";
 import { AppDone } from "@/components/page/projects/create/app-done";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import {
@@ -40,7 +43,9 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { SmoothItem } from "@/components/ui/smooth-resized";
+
+// Schemas
+import { FolderSchema } from "@/lib/projects/type";
 
 // Icons
 import {
@@ -50,23 +55,29 @@ import {
 	File,
 	FileLock,
 	Folder,
+	Layers,
 	LoaderCircleIcon,
 	Plus,
 	SquareTerminal,
 } from "lucide-react";
 
+// Contexts
+import { CommandProvider } from "@/contexts/command-context";
+
 const breadcrumbs: BreadcrumbItem[] = [
 	{
-		title: "Dashboard",
-		href: route("dashboard"),
+		title: "VPS Manager",
+		link: false,
 	},
 	{
 		title: "Projects",
 		href: route("projects.index"),
+		link: true,
 	},
 	{
 		title: "Create",
 		href: route("projects.create"),
+		link: true,
 	},
 ];
 
@@ -100,23 +111,31 @@ const steps = [
 
 export default function Page() {
 	return (
-		<AdminLayout breadcrumbs={breadcrumbs}>
+		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Create a project" />
+			{/* Project provider has every providers needed (commands, variables, docker etc..) */}
 			<ProjectProvider>
 				<SmoothItem delay={0.1}>
 					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Folder className="w-5 h-5 text-muted-foreground" />
-								Create a project
-							</CardTitle>
-							<CardDescription>
-								Finally a new project! It took you a while.. Let's get started.
-							</CardDescription>
-							<CardAction>
+						<CardHeader className="gap-0 gap-x-1.5">
+							<div className="flex items-center gap-3">
+								<div className="bg-card border rounded-md p-2">
+									<Layers className="w-5 h-5 text-muted-foreground" />
+								</div>
+								<div>
+									<CardTitle className="flex items-center gap-2 text-xl">
+										Create a project
+									</CardTitle>
+									<CardDescription>
+										Finally a new project! It took you a while.. Let's get started.
+									</CardDescription>
+								</div>
+							</div>
+
+							<CardAction className="self-center">
 								<Link href={route("projects.index")}>
-									<Button variant={"outline"}>
-										<ArrowLeft />
+									<Button variant={"outline"} className="group">
+										<ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.75 transition-transform duration-300" />
 										Go back to projects
 									</Button>
 								</Link>
@@ -127,104 +146,78 @@ export default function Page() {
 
 				<Content />
 			</ProjectProvider>
-		</AdminLayout>
+		</AppLayout>
 	);
 }
 
 function Content() {
 	const { project, updateProject } = useProject();
-	const [isLoading, setIsLoading] = useState(false);
 
-	const { data, setData, post, processing, errors } = useForm({
-		project: project,	
-	})
+	const { data, setData, post, processing, errors, wasSuccessful } = useForm({
+		project: project,
+	});
 
 	useEffect(() => {
-		setData('project', project);
+		setData("project", project);
 	}, [project, setData]);
 
-	function handleValidateStep1() {
-		try {
-			// Validate only step 1 fields
-			ProjectSchema.pick({ name: true, folderPath: true }).parse(project);
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error("Please fill in all required fields");
-			}
-			return false;
-		}
-	}
-
-	function handleValidateStep2() {
-		try {
-			// Validate only variables
-			ProjectSchema.pick({ variables: true }).parse(project);
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error("Please configure at least one variable");
-			}
-			return false;
-		}
-	}
-
-	function handleValidateStep3() {
-		try {
-			ProjectSchema.pick({ docker: true }).parse(project);
-
-			// Check if the content is saved
-			if (!project.docker.isSaved) {
-				toast.error("Please save your Docker Compose");
-				return false;
-			}
-
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error("Please configure your Docker Compose");
-			}
-			return false;
-		}
-	}
-
-	function handleValidateStep4() {
-		try {
-			// Validate only commands
-			ProjectSchema.pick({ commands: true }).parse(project);
-			return true;
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				toast.error("Please add at least one command");
-			}
-			return false;
-		}
-	}
+	const [validateStep1, setValidateStep1] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
+	const [validateStep2, setValidateStep2] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
+	const [validateStep3, setValidateStep3] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
+	const [validateStep4, setValidateStep4] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		setIsLoading(true);
 
 		try {
-			// Validation de ton projet
+			// console.log("Submitting project:", project);
+
 			ProjectSchema.parse(project);
 
-			toast.info("Creation of the project...");
+			toast.loading("Creating the project...", {
+				id: "create-project",
+			});
 
-			post(route("projects.store"));
+			post(route("projects.store"), {
+				onError: (errors) => {
+					toast.dismiss("create-project");
+					const messages = Object.values(errors).flat();
+					if (messages.length) {
+						toast.error("An error occured", { description: messages.join("\n") });
+					} else {
+						toast.error("An unknown error occurred");
+					}
+				},
+			});
 		} catch (error) {
+			toast.dismiss("create-project");
 			if (error instanceof z.ZodError) {
-				toast.error("Please check all project fields");
+				toast.error("An error occured", {
+					description:
+						error.errors[0].message || "Please fill in all the required fields",
+				});
 			}
+		}
+	}
 
-			setIsLoading(false);
+	function handleKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+		if (e.key === "Enter") {
+			e.preventDefault();
 		}
 	}
 
 	return (
 		<Stepper defaultValue={1} totalSteps={steps.length}>
 			<SmoothItem delay={0.3}>
-				<Card className="bg-muted/50 dark:bg-background  border-0 shadow-none mb-4">
+				<Card className="bg-background  border-0 shadow-none mb-4">
 					<CardContent className="px-4 py-2">
 						<div className="space-y-8 text-center">
 							<StepperList>
@@ -241,7 +234,7 @@ function Content() {
 											</div>
 										</StepperTrigger>
 										{step < steps.length && (
-											<StepperSeparator className="max-md:mt-3.5 md:mx-4" />
+											<StepperSeparator className="max-md:mt-3.5 md:mx-4 bg-border" />
 										)}
 									</StepperItem>
 								))}
@@ -252,100 +245,134 @@ function Content() {
 			</SmoothItem>
 
 			<SmoothItem delay={0.5} layout={false}>
-				<form onSubmit={handleSubmit}>
-					
+				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
 					<StepperBody>
 						<StepperContent value={1}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<File className="w-5 h-5 text-muted-foreground" />
-										Project details
-									</CardTitle>
-									<CardDescription>
-										Fill in the details below to create a new project.
-									</CardDescription>
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<File className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Project details
+											</CardTitle>
+											<CardDescription>
+												Fill in the details below to create a new project.
+											</CardDescription>
+										</div>
+									</div>
+
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep1} />
+										<StepperNavigation onNext={validateStep1} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppProject />
+									<AppProject setValidate={setValidateStep1} />
 								</CardContent>
 							</Card>
 						</StepperContent>
 						<StepperContent value={2}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<FileLock className="w-5 h-5 text-muted-foreground" />
-										Variables
-									</CardTitle>
-									<CardDescription>
-										Either fill in the environnement variables or import your .env file.
-									</CardDescription>
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<FileLock className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Variables
+											</CardTitle>
+											<CardDescription>
+												Either fill in the environnement variables or import your .env file.
+											</CardDescription>
+										</div>
+									</div>
+
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep2} />
+										<StepperNavigation onNext={validateStep2} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppVariables />
+									<AppVariables setValidate={setValidateStep2} />
 								</CardContent>
 							</Card>
 						</StepperContent>
 						<StepperContent value={3}>
-							<Card>
+							<Card className="overflow-visible">
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Container className="w-5 h-5 text-muted-foreground" />
-										Docker
-									</CardTitle>
-									<CardDescription>
-										Fill in your docker configuration, importing a docker-compose or
-										create it from scratch.
-									</CardDescription>
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<Container className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Docker
+											</CardTitle>
+											<CardDescription>
+												Fill in your docker configuration, importing a docker-compose or
+												create it from scratch.
+											</CardDescription>
+										</div>
+									</div>
+
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep3} />
+										<StepperNavigation onNext={validateStep3} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppDocker />
+									<AppDocker setValidate={setValidateStep3} />
 								</CardContent>
 							</Card>
 						</StepperContent>
 						<StepperContent value={4}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<SquareTerminal className="w-5 h-5 text-muted-foreground" />
-										Makefile
-									</CardTitle>
-									<CardDescription>
-										Create your Makefile to easily execute your commands.
-									</CardDescription>
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<SquareTerminal className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Makefile
+											</CardTitle>
+											<CardDescription>
+												Create your Makefile to easily execute your commands.
+											</CardDescription>
+										</div>
+									</div>
+
 									<CardAction>
-										<StepperNavigation onNext={handleValidateStep4} />
+										<StepperNavigation onNext={validateStep4} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppMakefile />
+									<AppMakefile setValidate={setValidateStep4} />
 								</CardContent>
 							</Card>
 						</StepperContent>
 						<StepperContent value={5}>
 							<Card>
 								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Check className="w-5 h-5 text-muted-foreground" />
-										Done
-									</CardTitle>
-									<CardDescription>
-										Your project is ready! You can now create it.
-									</CardDescription>
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
+											<Check className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Done
+											</CardTitle>
+											<CardDescription>
+												Your project is ready! You can now create it.
+											</CardDescription>
+										</div>
+									</div>
+
 									<CardAction>
 										<StepperNavigation
 											nextButton={
@@ -353,9 +380,9 @@ function Content() {
 													variant="default"
 													size="sm"
 													type="submit"
-													disabled={isLoading}
+													disabled={processing}
 												>
-													{isLoading ? (
+													{processing ? (
 														<LoaderCircleIcon className="animate-spin" />
 													) : (
 														<Plus />
