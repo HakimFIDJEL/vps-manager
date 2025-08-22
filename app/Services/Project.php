@@ -44,6 +44,20 @@ class Project
     }
 
     /**
+     * Renames a project folder.
+     *
+     * @param string $oldPath          The current folder path
+     * @param string $newPath          The new folder path
+     * @param ServicesSystem $system   The system service instance
+     * 
+     * @return ProcessResult           The result of the rename process
+     */
+    public function renameProject(string $oldPath, string $newPath, ServicesSystem $system): ProcessResult
+    {
+        return $system->execute("sudo mv " . escapeshellarg($oldPath) . " " . escapeshellarg($newPath));
+    }
+
+    /**
      * Creates a .env file in a folder.
      *
      * @param string $path              The folder path

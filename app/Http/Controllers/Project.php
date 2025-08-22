@@ -20,6 +20,7 @@ use App\Http\Controllers\Docker as ControllersDocker;
 
 // Requests
 use App\Http\Requests\projects\Path as RequestsPath;
+use App\Http\Requests\projects\Rename as RequestsRename;
 use App\Http\Requests\projects\Store as RequestsStore;
 use App\Http\Requests\projects\Docker as RequestsDocker;
 use App\Http\Requests\projects\Variables as RequestsVariable;
@@ -303,6 +304,65 @@ class Project extends Controller
         }
 
         return redirect()->route('projects.index')->with(['success' => 'Project created successfully!']);
+    }
+
+    /**
+     * Handle the renaming of a project.
+     *
+     * @param RequestsRename $request   The request instance
+     * @param ServicesProject $project  The project service instance
+     * @param ServicesSystem $system    The system service instance
+     * @param ServicesDocker $docker    The docker service instance
+     *
+     * @return RedirectResponse
+     */
+    public function rename(RequestsRename $request, int $inode, ServicesProject $project, ServicesSystem $system, ServicesDocker $docker): RedirectResponse
+    {
+        $data = $request->validated();
+        $old_path = $data['old_path'];
+        $new_path = $data['new_path'];
+
+        $old_path = "/projects/{$old_path}";
+        $new_path = "/projects/{$new_path}";
+
+        // Check path availability
+        $availability = $project->checkPathAvailability($new_path, $system);
+
+        if (!$availability) {
+            return redirect()->back()->with(['error' => [
+                'title' => 'Project path is not available.',
+                'description' => 'The new project path is not available.',
+            ]]);
+        }
+
+        // Remove all containers
+        $res = $docker->containers_remove($inode, $system);
+
+        if (!$res->successful()) {
+            return redirect()->back()->with(['error' => [
+                'title' => 'Failed to remove Docker containers.',
+                'description' => trim($res->errorOutput() ?? '') ?: 'Failed to remove Docker containers.',
+            ]]);
+        }
+
+        // Rename
+        try {
+            $res = $project->renameProject($old_path, $new_path, $system);
+
+            if (!$res->successful()) {
+                return redirect()->back()->with(['error' => [
+                    'title' => 'Failed to rename project folder.',
+                    'description' => trim($res->errorOutput() ?? '') ?: 'Failed to rename project folder.',
+                ]]);
+            }
+        } catch (RuntimeException $e) {
+            return redirect()->back()->with(['error' => [
+                'title' => 'Failed to rename project folder.',
+                'description' => trim($e->getMessage() ?? '') ?: 'Failed to rename project folder.',
+            ]]);
+        }
+
+        return redirect()->route('projects.show', ['inode' => $inode]);
     }
 
     /**

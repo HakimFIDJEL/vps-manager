@@ -20,14 +20,14 @@ Route::get('/', function () {
 
 // PROJECT ROUTES
 Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthentication::class)->controller(ControllerProjects::class)->group(function () {
-    // PROJECT ROUTES
+    // PROJECT 
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
     Route::get('/show/{inode}', 'show')->name('show');
-
     Route::get('/verify-path-availability', 'verify_path_availability')->name('verify-path-availability');
 
     Route::post('/store', 'store')->name('store');
+    Route::post('/rename/{inode}', 'rename')->name('rename');
 
     Route::delete('/{inode}', 'destroy')->name('destroy');
 
