@@ -12,7 +12,6 @@ use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Illuminate\Http\RedirectResponse;
 use RuntimeException;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 // Controllers
@@ -30,8 +29,6 @@ use App\Http\Requests\projects\Commands as RequestsCommand;
 use App\Services\System as ServicesSystem;
 use App\Services\Project as ServicesProject;
 use App\Services\Docker as ServicesDocker;
-use PHPUnit\Event\Runtime\Runtime;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Class Project 
@@ -513,6 +510,8 @@ class Project extends Controller
         return redirect()->route('projects.show', ['inode' => $inode]);
     }
 
+    // ---------------------------- VARIABLES ---------------------------- //
+
     /**
      * Update the environment variables for a project.
      *
@@ -591,6 +590,8 @@ class Project extends Controller
 
         return response()->json(['content' => $content]);
     }
+
+    // ---------------------------- COMMANDS ---------------------------- //
 
     /**
      * Handle the commands for a project.
