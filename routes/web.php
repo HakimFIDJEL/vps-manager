@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // Controllers
 use App\Http\Controllers\Authentication as ControlleAuthentication;
@@ -14,8 +15,8 @@ use App\Http\Middleware\Authentication as MiddlewareAuthentication;
 
 // // Welcome Route
 Route::get('/', function () {
-    return redirect()->route('auth.login');
-})->name('dashboard');
+    return Inertia::render('home');
+})->name('home');
 
 
 // PROJECT ROUTES

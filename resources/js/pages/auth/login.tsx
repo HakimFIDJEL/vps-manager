@@ -1,7 +1,7 @@
 // pages/auth/login.tsx
 
 // Necessary imports
-import { Head, useForm } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import * as React from "react";
@@ -15,14 +15,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Custom components
 import { SmoothItem } from "@/components/ui/smooth-resized";
+import { Logo } from "@/components/layouts/logo";
 
 // Icons
-import { Lock, LogIn, User, Loader2 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Logo } from "@/components/layouts/logo";
+import { Lock, LogIn, User, Loader2, ArrowLeft } from "lucide-react";
 
 export default function Page({ className, ...props }: { className?: string }) {
 	const inputRef = React.useRef<HTMLInputElement>(null);
@@ -123,16 +123,30 @@ export default function Page({ className, ...props }: { className?: string }) {
 											Remember me
 										</Label>
 									</div>
-									<Button
-										type={"submit"}
-										variant={"default"}
-										size={"default"}
-										className="w-full mt-2"
-										disabled={processing}
-									>
-										{processing ? <Loader2 className="animate-spin" /> : <LogIn />}
-										Login
-									</Button>
+									<div>
+										<Button
+											type={"submit"}
+											variant={"default"}
+											size={"default"}
+											className="w-full mt-2"
+											disabled={processing}
+										>
+											{processing ? <Loader2 className="animate-spin" /> : <LogIn />}
+											Login
+										</Button>
+										<Link href={route('home')}>
+											<Button
+												type={"button"}
+												variant={"outline"}
+												size={"default"}
+												className="w-full mt-2"
+												disabled={processing}
+											>
+												<ArrowLeft />
+												Back to home
+											</Button>
+										</Link>
+									</div>
 									<Separator />
 									<span className="text-muted-foreground text-center text-sm font-light">
 										Log in as any non-root user on your VPS.
@@ -140,13 +154,13 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</div>
 							</form>
 							<div className="relative hidden md:block dark:border-primary border-border border-l bg-gradient-to-r  dark:from-primary/15 from-muted to-primary/70 ">
-								<Logo variant="default" className="absolute bottom-4 right-5" />
+								<Logo variant="default" color_scheme={"white"} className="absolute bottom-4 right-5 " />
 							</div>
 						</CardContent>
 					</Card>
 				</SmoothItem>
 				<SmoothItem delay={0.3}>
-					<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4 font-light">
+					<div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4 font-thin">
 						By clicking "Login", you acknowledge that the application may require some
 						root privileges to function correctly. Please ensure your VPS user has the
 						necessary permissions as described in the README.

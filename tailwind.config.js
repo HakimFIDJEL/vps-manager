@@ -1,4 +1,7 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
+
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -12,9 +15,13 @@ export default {
     ],
     theme: {
     	extend: {
-    		fontFamily: {
-    			sans: ['Figtree', ...defaultTheme.fontFamily.sans]
-    		},
+    		// fontFamily: {
+    		// 	sans: ['Figtree', ...defaultTheme.fontFamily.sans]
+    		// },
+			fontFamily: {
+				sans: ['Geist', ...defaultTheme.fontFamily.sans],
+				mono: ['GeistMono', ...defaultTheme.fontFamily.mono],
+			},
     		borderRadius: {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
