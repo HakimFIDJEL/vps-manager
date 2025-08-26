@@ -9,6 +9,7 @@ import { FeaturesSection } from "@/components/page/home/features";
 import { FaqsSection } from "@/components/page/home/faqs";
 import { RoadmapSection } from "@/components/page/home/roadmap";
 import { HeroHeader } from "@/components/page/home/header";
+import { AboutSection } from "@/components/page/home/about";
 
 // Custom components
 
@@ -20,8 +21,9 @@ export default function Home() {
 			<HeroHeader />
 
 			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 px-4 lg:px-0">
-				<div className="flex flex-1 flex-col gap-4 relative py-6 flex-shrink-0 h-full">
+				<div className="flex flex-1 flex-col gap-4 relative flex-shrink-0 h-full">
 					<HeroSection />
+					<AboutSection />
 					{/* <FeaturesSection />
 					<RoadmapSection />
 					<FaqsSection /> */}
