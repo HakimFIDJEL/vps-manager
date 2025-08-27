@@ -4,33 +4,113 @@
 import { Head } from "@inertiajs/react";
 
 // Shadcn UI Components
-import { HeroSection } from "@/components/page/home/hero";
-import { FeaturesSection } from "@/components/page/home/features";
-import { FaqsSection } from "@/components/page/home/faqs";
-import { RoadmapSection } from "@/components/page/home/roadmap";
-import { HeroHeader } from "@/components/page/home/header";
-import { AboutSection } from "@/components/page/home/about";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Custom components
+import { Header } from "@/components/page/home/header";
+import { Footer } from "@/components/page/home/footer";
+
+// Variables
+const links = [
+	{
+		group: "Product",
+		items: [
+			{
+				title: "Features",
+				href: "#",
+			},
+			{
+				title: "Solution",
+				href: "#",
+			},
+			{
+				title: "Customers",
+				href: "#",
+			},
+			{
+				title: "Help",
+				href: "#",
+			},
+			{
+				title: "About",
+				href: "#",
+			},
+		],
+	},
+	{
+		group: "Resources",
+		items: [
+			{
+				title: "Requirements",
+				href: "#",
+			},
+			{
+				title: "Installation",
+				href: "#",
+			},
+			{
+				title: "Documentation",
+				href: "#",
+			},
+			{
+				title: "Github",
+				href: "#",
+			},
+		],
+	},
+	{
+		group: "Legal",
+		items: [
+			{
+				title: "Licence",
+				href: "#",
+			},
+			{
+				title: "Usage",
+				href: "#",
+			},
+			{
+				title: "Privacy",
+				href: "#",
+			},
+			{
+				title: "Cookies",
+				href: "#",
+			},
+			{
+				title: "Security",
+				href: "#",
+			},
+		],
+	},
+];
+
+export type Link = {
+	group: string;
+	items: {
+		title: string;
+		href: string;
+	}[];
+};
 
 export default function Home() {
 	return (
 		<>
 			<Head title="Home" />
 
-			<HeroHeader />
+			<SmoothItem delay={0.1}>
+				<Header links={links} />
+			</SmoothItem>
 
-			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 px-4 lg:px-0">
+			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 lg:px-2 max-w-5xl px-6 min-h-[100vh]">
 				<div className="flex flex-1 flex-col gap-4 relative flex-shrink-0 h-full">
-					<HeroSection />
-					<AboutSection />
-					{/* <FeaturesSection />
-					<RoadmapSection />
-					<FaqsSection /> */}
+					
 				</div>
 			</main>
 
-			{/* <Footer /> */}
+			<SmoothItem delay={0.3}>
+				<Footer links={links} />
+			</SmoothItem>
 		</>
 	);
 }

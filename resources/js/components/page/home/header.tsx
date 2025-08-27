@@ -11,19 +11,15 @@ import { Separator } from "@/components/ui/separator";
 
 // Custom components
 import { Logo } from "@/components/layouts/logo";
-
-// Icons
-import { LogIn, Menu, X } from "lucide-react";
 import AppearanceToggleDropdown from "@/components/layouts/header/theme";
 
-const menuItems = [
-	{ name: "About", href: "#link" },
-	{ name: "Features", href: "#link" },
-	{ name: "Roadmap", href: "#link" },
-	{ name: "FAQs", href: "#link" },
-];
+// Icons
+import { LogIn } from "lucide-react";
 
-export function HeroHeader() {
+// Types
+import { type Link as LinkType } from "@/pages/home";
+
+export function Header({ links }: { links: LinkType[] }) {
 	const [menuState, setMenuState] = React.useState(false);
 	const [isScrolled, setIsScrolled] = React.useState(false);
 
@@ -54,15 +50,17 @@ export function HeroHeader() {
 						<div className="hidden justify-center lg:flex">
 							<div className="m-auto hidden size-fit lg:block">
 								<ul className="flex gap-1">
-									{menuItems.map((item, index) => (
-										<li key={index}>
-											<Button asChild variant="ghost" size="sm">
-												<Link href={item.href} className="text-sm text-muted-foreground">
-													<span>{item.name}</span>
-												</Link>
-											</Button>
-										</li>
-									))}
+									{links
+										.find((group) => group.group === "Product")
+										?.items.map((item, index) => (
+											<li key={index}>
+												<Button asChild variant="ghost" size="sm">
+													<Link href={item.href} className="text-sm text-muted-foreground">
+														<span>{item.title}</span>
+													</Link>
+												</Button>
+											</li>
+										))}
 								</ul>
 							</div>
 						</div>

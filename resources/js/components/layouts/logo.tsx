@@ -15,7 +15,7 @@ export function Logo({
 		// </div>
 		<div
 			className={`
-				${color_scheme === 'white' ? 'bg-card border text-foreground' : 'bg-primary text-white'} 
+				${color_scheme === "white" ? "bg-card border text-foreground" : "bg-primary text-white"} 
 				flex aspect-square size-9 items-center justify-center rounded-lg ${className}
 				`}
 		>
@@ -24,13 +24,13 @@ export function Logo({
 	) : (
 		<div
 			className={`
-				${color_scheme === 'white' ? 'text-white' : ' text-foreground'} 
+				text-foreground 
 				flex items-center justify-center rounded-lg mr-2 ${className} gap-2
 				`}
 		>
-			<Boxes 
-				className={`h-6 w-6 ${color_scheme === 'white' ? '' : 'text-primary '}`} 
-				strokeWidth={1.75} 
+			<Boxes
+				className={`h-6 w-6 ${color_scheme === "white" ? "" : "text-primary "}`}
+				strokeWidth={1.75}
 			/>
 			<span className="pb-0.5 ">vps manager</span>
 		</div>

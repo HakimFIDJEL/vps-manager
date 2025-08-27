@@ -11,12 +11,10 @@ import { Github, Play } from "lucide-react";
 
 export function HeroSection() {
 	return (
-		<div className="relative py-12 mt-12">
+		<div className="relative py-24">
 			<div className="mx-auto max-w-5xl px-6">
 				<div>
-					<h1 className="mt-8 max-w-2xl text-4xl lg:text-6xl">
-						VPS Manager
-					</h1>
+					<h1 className="mt-8 max-w-2xl text-4xl lg:text-6xl">VPS Manager</h1>
 					<p className="text-muted-foreground my-6 max-w-2xl text-balance text-xl font-light">
 						Effortlessly orchestrate, monitor, and control all your VPS projects from
 						one platform.

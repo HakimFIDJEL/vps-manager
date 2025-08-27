@@ -11,12 +11,13 @@ import {
 	MotionProps,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { forwardRef, PropsWithChildren } from "react";
 
 function SmoothResize({
 	className,
 	children,
 	...props
-}: React.ComponentProps<"div">) {
+}: MotionProps & { className?: string; children?: React.ReactNode }) {
 	return (
 		<motion.div
 			layout
@@ -29,52 +30,30 @@ function SmoothResize({
 	);
 }
 
-type SmoothItemProps = React.ComponentProps<"div"> &
-	MotionProps & {
-		initial?: boolean | TargetAndTransition | VariantLabels | undefined;
-		animate?: boolean | TargetAndTransition | VariantLabels | undefined;
-		exit?: TargetAndTransition | VariantLabels | undefined;
-		delay?: number;
-		layout?:
-			| boolean
-			| "size"
-			| "position"
-			| "preserve-aspect"
-			| "preserve-aspect-size";
-	};
+type SmoothItemProps = PropsWithChildren<
+	MotionProps & { className?: string; layout?: boolean; delay?: number }
+>;
 
-function SmoothItem({
-	className,
-	layout = true,
-	initial,
-	delay,
-	animate,
-	exit,
-	...props
-}: SmoothItemProps) {
-	return (
+const SmoothItem = forwardRef<HTMLDivElement, SmoothItemProps>(
+	({ className, layout = true, delay = 0, children, ...rest }, ref) => (
 		<motion.div
-			layout={layout ? layout : false}
+			ref={ref}
+			layout={!!layout}
 			className={className}
-			transition={{
-				duration: 0.3,
-				ease: "easeInOut",
-				delay: delay ? delay : 0,
-			}}
-			initial={initial || { opacity: 0, scale: 0.99 }}
-			animate={animate || { opacity: 1, scale: 1 }}
-			exit={exit || { opacity: 0, scale: 0.99 }}
-			{...props}
-		/>
-	);
-}
+			initial={{ opacity: 0, scale: 0.99 }}
+			whileInView={{ opacity: 1, scale: 1 }}
+			viewport={{ once: true, amount: 0.2 }}
+			transition={{ duration: 0.3, ease: "easeInOut", delay }}
+			exit={{ opacity: 0, scale: 0.99 }}
+			{...rest}
+		>
+			{children}
+		</motion.div>
+	),
+);
 
-function SmoothAnimate({ className, ...props }: React.ComponentProps<"div">) {
+function SmoothAnimate({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
 	const parent = useRef<HTMLDivElement>(null);
-
-	// useEffect(() => {
-	// 	parent.current && autoAnimate(parent.current, { duration: 200, easing: "ease-in-out" });
-	// }, [parent])
 
 	useEffect(() => {
 		if (!parent.current) return;

@@ -1,26 +1,9 @@
 // components/page/home/about.tsx
 
-// Necessary imports
-import { cn } from "@/lib/utils";
-
-// Shadcn UI Components
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Button } from "@/components/ui/button";
-
-// Icons
-import {
-	Bold,
-	Calendar1,
-	Ellipsis,
-	Italic,
-	Strikethrough,
-	Underline,
-} from "lucide-react";
-
 export function AboutSection() {
 	return (
 		<section>
-			<div className="py-12">
+			<div className="py-24">
 				<div className="mx-auto w-full max-w-5xl px-6">
 					<div>
 						<span className="text-primary">Infrastructure Simplified</span>
@@ -28,8 +11,8 @@ export function AboutSection() {
 							Manage your VPS like a modern platform
 						</h2>
 						<p className="text-muted-foreground mb-12 mt-4 font-light">
-							VPS Manager brings enterprise-grade orchestration to your own server. 
-							Control Docker containers, environment variables, and project lifecycles 
+							VPS Manager brings enterprise-grade orchestration to your own server.
+							Control Docker containers, environment variables, and project lifecycles
 							through an elegant interface, without ever touching the terminal.
 						</p>
 					</div>
@@ -40,24 +23,20 @@ export function AboutSection() {
 								<img className="w-full h-full object-cover" />
 							</div>
 							<div className="mt-6 sm:col-span-3 sm:mt-0 sm:border-l sm:pl-12">
-								<h3 className="text-foreground text-xl">
-									Project Automation
-								</h3>
+								<h3 className="text-foreground text-xl">Project Automation</h3>
 								<p className="text-muted-foreground mt-4 font-light">
-									Every project is bootstrapped with a Makefile, a Docker Compose 
-									stack, and a ready-to-use .env file. Your environments stay consistent, 
+									Every project is bootstrapped with a Makefile, a Docker Compose stack,
+									and a ready-to-use .env file. Your environments stay consistent,
 									repeatable, and production-ready by design.
 								</p>
 							</div>
 						</div>
 						<div className="grid sm:grid-cols-5 sm:divide-x">
 							<div className="pt-12 sm:col-span-3 sm:border-r sm:pr-12">
-								<h3 className="text-foreground text-xl">
-									Secure System Integration
-								</h3>
+								<h3 className="text-foreground text-xl">Secure System Integration</h3>
 								<p className="text-muted-foreground mt-4 font-light">
-									User authentication is tied directly to Linux accounts. Commands are 
-									executed with the right privileges using PAM and sudo rules, ensuring 
+									User authentication is tied directly to Linux accounts. Commands are
+									executed with the right privileges using PAM and sudo rules, ensuring
 									security without sacrificing productivity.
 								</p>
 							</div>

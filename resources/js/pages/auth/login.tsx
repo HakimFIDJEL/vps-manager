@@ -154,7 +154,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 								</div>
 							</form>
 							<div className="relative hidden md:block dark:border-primary border-border border-l bg-gradient-to-r  dark:from-primary/15 from-muted to-primary/70 ">
-								<Logo variant="default" color_scheme={"white"} className="absolute bottom-4 right-5 " />
+								<Logo variant="default" color_scheme={"white"} className="absolute bottom-4 right-5 text-white " />
 							</div>
 						</CardContent>
 					</Card>
