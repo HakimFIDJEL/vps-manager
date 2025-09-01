@@ -8,6 +8,7 @@ import { SmoothItem } from "@/components/ui/smooth-resized";
 
 // Custom components
 import { Header } from "@/components/page/home/header";
+import { Hero } from "@/components/page/home/hero";
 import { Footer } from "@/components/page/home/footer";
 
 // Variables
@@ -102,13 +103,15 @@ export default function Home() {
 				<Header links={links} />
 			</SmoothItem>
 
-			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 lg:px-2 max-w-5xl px-6 min-h-[100vh]">
+			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 max-w-5xl px-6">
 				<div className="flex flex-1 flex-col gap-4 relative flex-shrink-0 h-full">
-					
+					<SmoothItem delay={0.3}>
+						<Hero />
+					</SmoothItem>
 				</div>
 			</main>
 
-			<SmoothItem delay={0.3}>
+			<SmoothItem delay={0.5}>
 				<Footer links={links} />
 			</SmoothItem>
 		</>
