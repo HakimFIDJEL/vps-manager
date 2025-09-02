@@ -12,6 +12,7 @@ import { Hero } from "@/components/page/home/hero";
 import { Footer } from "@/components/page/home/footer";
 import { Features } from "@/components/page/home/features";
 import { Solution } from "@/components/page/home/solution";
+import { Customers } from "@/components/page/home/customers";
 
 // Variables
 const links = [
@@ -117,6 +118,10 @@ export default function Home() {
 
 					<SmoothItem delay={0.2}>
 						<Solution />
+					</SmoothItem>
+
+					<SmoothItem delay={0.2}>
+						<Customers />
 					</SmoothItem>
 				</div>
 			</main>
