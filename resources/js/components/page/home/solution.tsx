@@ -1,7 +1,11 @@
-// components/page/home/SolutionSplit.tsx
+// components/page/home/solution.tsx
+
+// Shadcn UI Components
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+
+// Icons
 import { Terminal, Wrench, ClipboardList } from "lucide-react";
 
 export function Solution() {
@@ -15,7 +19,7 @@ export function Solution() {
 				confident operations
 			</h2>
 
-			<Card className="mt-10 overflow-hidden">
+			<Card className="mt-10 overflow-hidden bg-card/50">
 				<div className="relative grid lg:grid-cols-[1fr_1.1fr_1fr]">
 					{/* Connecteurs (desktop) */}
 
@@ -80,6 +84,9 @@ export function Solution() {
 							</span>
 							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">
 								One-click setup
+							</span>
+							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">
+								And much more!
 							</span>
 						</div>
 					</div>
