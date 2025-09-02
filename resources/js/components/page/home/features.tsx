@@ -1,96 +1,196 @@
-// components/pages/features.tsx
+// components/page/home/features.tsx
+
+// Necessary imports
+import { useAppearance } from "@/hooks/use-appearance";
 
 // Shadcn UI Components
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 // Icons
-import { Server, Boxes, Terminal, ShieldCheck } from "lucide-react";
+import {
+	ArrowUp,
+	Globe,
+	Plus,
+	Sparkles,
+	Check,
+	CircleDashed,
+	CalendarCheck,
+} from "lucide-react";
 
-export function FeaturesSection() {
+export function Features() {
+	const { appearance } = useAppearance();
+
 	return (
-		<section>
-			<div className="py-24">
-				<div className="mx-auto w-full max-w-5xl px-6">
-					<div>
-						<span className="text-primary">Core Capabilities</span>
-						<h2 className="text-foreground mt-4 text-4xl">
-							Everything you need to manage your VPS
-						</h2>
-						<p className="text-muted-foreground mb-12 mt-4 font-light">
-							VPS Manager streamlines infrastructure management with powerful 
-							orchestration features. From project setup to container lifecycle, 
-							it makes complex operations effortless and secure.
-						</p>
+		<section className="py-12">
+			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
+				Features
+			</h5>
+			<h2 className="text-foreground text-balance text-3xl md:text-3xl">
+				<span className="text-muted-foreground">Streamline your workflow with</span>{" "}
+				powerful VPS features
+			</h2>
+
+			<div className="@container mt-12 space-y-12">
+				<Card className="relative overflow-hidden p-0 sm:col-span-2">
+					<div className="absolute inset-0 size-full object-cover bg-gradient-to-l from-primary/50 to-muted" />
+					<div className="m-auto w-full p-4 sm:p-12 relative z-1">
+						{appearance === "dark" && (
+							<img
+								src="assets/images/create-dark.png"
+								alt="Page - creation of a project"
+								className="object-top-left size-full object-cover rounded-md"
+							/>
+						)}
+
+						{appearance === "light" && (
+							<img
+								src="assets/images/create-light.png"
+								alt="Page - creation of a project"
+								className="object-top-left size-full object-cover rounded-md"
+							/>
+						)}
+
+						{appearance === "system" && (
+							<img
+								src={
+									window.matchMedia("(prefers-color-scheme: dark)").matches
+										? "assets/images/create-dark.png"
+										: "assets/images/create-light.png"
+								}
+								alt="Page - creation of a project"
+								className="object-top-left size-full object-cover rounded-md"
+							/>
+						)}
 					</div>
+				</Card>
+				<div className="grid-cols-1 lg:grid-cols-3 grid">
+					<Feature
+						title="System Authentication"
+						description="Login using the server's Unix user for secure, local auth."
+						status="done"
+						className="lg:pl-0 lg:border-r border-b"
+					/>
+					<Feature
+						title="Projects"
+						description="Create and manage projects with .env, Makefile, and Compose."
+						status="done"
+						className="border-b"
+					/>
+					<Feature
+						title="Docker Compose"
+						description="Manage full Compose stacks including containers, volumes, and networks."
+						status="done"
+						className="lg:pr-0 lg:border-l border-b"
+					/>
 
-					<div className="mt-16 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-						<Card className="overflow-hidden p-6 flex-col justify-between">
-							<div>
-								<Server className="text-primary size-5" />
-								<h3 className="text-foreground mt-5 text-lg font-semibold">
-									One-Click Project Setup
-								</h3>
-								<p className="text-muted-foreground mt-3 text-balance">
-									Automatically generate a Makefile, Docker Compose, and .env 
-									for every project, keeping environments consistent and reproducible.
-								</p>
-							</div>
-							<div className="h-40 w-full mt-8">
-								<img className="w-full h-full object-cover" />
-							</div>
-						</Card>
-
-						<Card className="overflow-hidden p-6 flex-col justify-between">
-							<div>
-								<Boxes className="text-primary size-5" />
-								<h3 className="text-foreground mt-5 text-lg font-semibold">
-									Container Lifecycle Control
-								</h3>
-								<p className="text-muted-foreground mt-3 text-balance">
-									Start, stop, remove, and monitor Docker containers directly 
-									from the dashboard, no CLI required.
-								</p>
-							</div>
-							<div className="h-40 w-full mt-8">
-								<img className="w-full h-full object-cover" />
-							</div>
-						</Card>
-
-						<Card className="overflow-hidden p-6 flex-col justify-between">
-							<div>
-								<Terminal className="text-primary size-5" />
-								<h3 className="text-foreground mt-5 text-lg font-semibold">
-									Secure Command Execution
-								</h3>
-								<p className="text-muted-foreground mt-3 text-balance">
-									Leverage Laravel’s Process API, PAM, and sudo rules to 
-									run system commands safely with the right user privileges.
-								</p>
-							</div>
-							<div className="h-40 w-full mt-8">
-								<img className="w-full h-full object-cover" />
-							</div>
-						</Card>
-
-						<Card className="overflow-hidden p-6 flex-col justify-between">
-							<div>
-								<ShieldCheck className="text-primary size-5" />
-								<h3 className="text-foreground mt-5 text-lg font-semibold">
-									Role-Based Access
-								</h3>
-								<p className="text-muted-foreground mt-3 text-balance">
-									Authentication is tied to Linux system users, ensuring 
-									granular control and compliance-grade security.
-								</p>
-							</div>
-							<div className="h-40 w-full mt-8">
-								<img className="w-full h-full object-cover" />
-							</div>
-						</Card>
-					</div>
+					<Feature
+						title="Landing Experience"
+						description="A clean, focused landing to explain value and entry points."
+						status="wip"
+						className="lg:pl-0 lg:border-r border-b"
+					/>
+					<Feature
+						title="Command Audit Log"
+						description="Track every executed command with timestamp, user, and output."
+						status="wip"
+						className="border-b"
+					/>
+					<Feature
+						title="Inline Docs"
+						description="Contextual documentation for every feature and screen."
+						status="planned"
+						className="lg:pr-0 lg:border-l border-b"
+					/>
+					<Feature
+						title="Guided Setup"
+						description="Step-by-step onboarding to configure projects with best practices."
+						status="planned"
+						className="lg:pl-0 lg:border-r border-b"
+					/>
+					<Feature
+						title="Quick Tasks"
+						description="One-click recipes for Traefik, Minecraft server, and more."
+						status="planned"
+						className="border-b"
+					/>
+					<Feature
+						title="One-file Backup"
+						description="Export and restore full project configuration from a single file."
+						status="planned"
+						className="lg:pr-0 lg:border-l border-b"
+					/>
+					<Feature
+						title="Advanced Containers"
+						description="Detailed views with logs, exec, and richer container insights."
+						status="planned"
+						className="lg:pl-0 lg:border-r border-b"
+					/>
+					<Feature
+						title="SSH Keys"
+						description="Manage authorized SSH keys allowed to access your VPS."
+						status="planned"
+						className="border-b"
+					/>
+					<Feature
+						title="Web Terminal"
+						description="Run commands on the VPS directly from the application."
+						status="planned"
+						className="lg:pr-0 lg:border-l border-b lg:border-b-0"
+					/>
+					<Feature
+						title="VPS Settings"
+						description="Configure SSH port, security hardening, and core system options."
+						status="planned"
+						className="lg:pl-0 lg:border-r border-b lg:border-b-0"
+					/>
+					<Feature
+						title="Responsive Design"
+						description="Ensure a seamless experience across desktop, tablet, and mobile."
+						status="planned"
+					/>
 				</div>
 			</div>
 		</section>
 	);
 }
 
+function Feature({
+	title,
+	description,
+	status,
+	className,
+}: {
+	title: string;
+	description: string;
+	status: "done" | "wip" | "planned";
+	className?: string;
+}) {
+	return (
+		<div className={`space-y-2 lg:p-6 p-4 ${className}`}>
+			<Badge
+				variant={
+					status === "done" ? "default" : status === "wip" ? "outline" : "secondary"
+				}
+			>
+				{status === "done" ? (
+					<Check />
+				) : status === "wip" ? (
+					<CircleDashed />
+				) : (
+					<CalendarCheck />
+				)}
+				{status === "done"
+					? "Completed"
+					: status === "wip"
+						? "In Progress"
+						: "To Come"}
+			</Badge>
+			<div className="flex items-center justify-between">
+				<h3 className="text-xl font-medium">{title}</h3>
+			</div>
+			<p className="text-muted-foreground">{description}</p>
+		</div>
+	);
+}

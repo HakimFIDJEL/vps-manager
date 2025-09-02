@@ -52,9 +52,9 @@ export function Footer({ links }: { links: LinkType[] }) {
 						<span className="text-muted-foreground text-sm justify-center lg:text-center text-start">
 							Made by
 							<Button variant={"link"} className="p-1 m-0 text-muted-foreground">
-								<Link href="https://hakimfidjel.fr" target="_blank">
+								<a href="https://hakimfidjel.fr" target="_blank">
 									Hakim Fidjel
-								</Link>
+								</a>
 							</Button>
 						</span>
 						<div className="flex lg:justify-end gap-2 text-sm justify-start">

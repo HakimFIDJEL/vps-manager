@@ -10,6 +10,7 @@ import { SmoothItem } from "@/components/ui/smooth-resized";
 import { Header } from "@/components/page/home/header";
 import { Hero } from "@/components/page/home/hero";
 import { Footer } from "@/components/page/home/footer";
+import { Features } from "@/components/page/home/features";
 
 // Variables
 const links = [
@@ -108,10 +109,14 @@ export default function Home() {
 					<SmoothItem delay={0.3}>
 						<Hero />
 					</SmoothItem>
+
+					<SmoothItem delay={0.2}>
+						<Features />
+					</SmoothItem>
 				</div>
 			</main>
 
-			<SmoothItem delay={0.5}>
+			<SmoothItem delay={0.7}>
 				<Footer links={links} />
 			</SmoothItem>
 		</>
