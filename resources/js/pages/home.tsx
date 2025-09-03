@@ -13,6 +13,7 @@ import { Footer } from "@/components/page/home/footer";
 import { Features } from "@/components/page/home/features";
 import { Solution } from "@/components/page/home/solution";
 import { Customers } from "@/components/page/home/customers";
+import { Help } from "@/components/page/home/help";
 
 // Variables
 const links = [
@@ -107,7 +108,7 @@ export default function Home() {
 			</SmoothItem>
 
 			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 max-w-5xl px-6">
-				<div className="flex flex-1 flex-col gap-4 relative flex-shrink-0 h-full">
+				<div className="flex flex-1 flex-col lg:gap-4 relative flex-shrink-0 h-full">
 					<SmoothItem delay={0.3}>
 						<Hero />
 					</SmoothItem>
@@ -122,6 +123,10 @@ export default function Home() {
 
 					<SmoothItem delay={0.2}>
 						<Customers />
+					</SmoothItem>
+
+					<SmoothItem delay={0.2}>
+						<Help />
 					</SmoothItem>
 				</div>
 			</main>

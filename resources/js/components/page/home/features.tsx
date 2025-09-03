@@ -4,26 +4,17 @@
 import { useAppearance } from "@/hooks/use-appearance";
 
 // Shadcn UI Components
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 // Icons
-import {
-	ArrowUp,
-	Globe,
-	Plus,
-	Sparkles,
-	Check,
-	CircleDashed,
-	CalendarCheck,
-} from "lucide-react";
+import { Check, CircleDashed, CalendarCheck } from "lucide-react";
 
 export function Features() {
 	const { appearance } = useAppearance();
 
 	return (
-		<section className="py-12">
+		<section className="py-8 lg:py-12">
 			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
 				Features
 			</h5>
@@ -137,7 +128,7 @@ export function Features() {
 						title="Web Terminal"
 						description="Run commands on the VPS directly from the application."
 						status="planned"
-						className="lg:pr-0 lg:border-l border-b lg:border-b-0"
+						className="lg:pr-0 lg:border-l border-b"
 					/>
 					<Feature
 						title="VPS Settings"
@@ -149,6 +140,13 @@ export function Features() {
 						title="Responsive Design"
 						description="Ensure a seamless experience across desktop, tablet, and mobile."
 						status="planned"
+						className="border-b lg:border-b-0"
+					/>
+					<Feature
+						title="Update Helper"
+						description="One-click intuitive update from GitHub repository."
+						status="planned"
+						className="lg:pr-0 lg:border-l lg:border-b-0"
 					/>
 				</div>
 			</div>

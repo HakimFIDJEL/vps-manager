@@ -1,24 +1,17 @@
-// components/page/home/Customers.tsx
+// components/page/home/customers.tsx
 
 // Shadcn UI Components
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 // Icons
-import {
-	User,
-	Users,
-	Building2,
-	Github,
-	List,
-	Check,
-} from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { User, Users, Building2, Github, List, Check } from "lucide-react";
 
 export function Customers() {
 	return (
-		<section className="py-16">
+		<section className="py-8 lg:py-16">
 			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
 				Customers
 			</h5>
@@ -115,10 +108,16 @@ export function Customers() {
 							>
 								Check out the README on Github
 							</Badge>
-							<Button size={"sm"} variant={"default"} className="rounded-full text-xs">
-								<Github />
-								Github
-							</Button>
+							<a href="https://github.com/HakimFIDJEL/vps-manager" target="_blank">
+								<Button
+									size={"sm"}
+									variant={"default"}
+									className="rounded-full text-xs lg:w-auto w-full"
+								>
+									<Github />
+									Github
+								</Button>
+							</a>
 						</div>
 					</Card>
 				</div>
