@@ -37,7 +37,7 @@ export function Hero() {
 	}, []);
 
 	return (
-		<section className="relative pb-36 pt-24 lg:pt-48">
+		<section className="relative pb-36 pt-24 lg:pt-48 mb-18 lg:mb-0">
 			<div className="relative z-10 mx-auto w-full">
 				<div className="lg:w-[45%]">
 					<div>
@@ -128,7 +128,7 @@ export function Hero() {
 			</div>
 
 			<div
-				className={`group absolute bottom-0 left-1/2 z-20 -translate-x-1/2 duration-500 p-0 bg-transparent transition-all border-none shadow-none hover:bg-transparent focus:ring-0 ${isVisible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}
+				className={`hidden lg:block group absolute bottom-0 left-1/2 z-20 -translate-x-1/2 duration-500 p-0 bg-transparent transition-all border-none shadow-none hover:bg-transparent focus:ring-0 ${isVisible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}
 			>
 				<Button
 					asChild

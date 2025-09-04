@@ -2,6 +2,8 @@
 
 // Necessary imports
 import { Head } from "@inertiajs/react";
+import Lenis from "lenis";
+import React from "react";
 
 // Shadcn UI Components
 import { SmoothItem } from "@/components/ui/smooth-resized";
@@ -16,7 +18,6 @@ import { Customers } from "@/components/page/home/customers";
 import { Help } from "@/components/page/home/help";
 import { About } from "@/components/page/home/about";
 import { ScrollTop } from "@/components/page/home/scroll-top";
-
 
 // Variables
 const links = [
@@ -102,6 +103,25 @@ export type Link = {
 };
 
 export default function Home() {
+	// const lenisRef = React.useRef<Lenis | null>(null);
+
+	// React.useEffect(() => {
+	// 	const lenis = new Lenis({ duration: 1.1 });
+	// 	lenisRef.current = lenis;
+
+	// 	let rafId: number;
+	// 	const raf = (time: number) => {
+	// 		lenis.raf(time);
+	// 		rafId = requestAnimationFrame(raf);
+	// 	};
+	// 	rafId = requestAnimationFrame(raf);
+
+	// 	return () => {
+	// 		cancelAnimationFrame(rafId);
+	// 		lenis.destroy();
+	// 	};
+	// }, []);
+
 	return (
 		<>
 			<Head title="Home" />
@@ -139,7 +159,6 @@ export default function Home() {
 
 				<ScrollTop />
 			</main>
-
 
 			<SmoothItem delay={0.2}>
 				<Footer links={links} />
