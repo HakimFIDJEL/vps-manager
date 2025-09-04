@@ -10,7 +10,7 @@ import { Rocket, Terminal, Server, Cpu } from "lucide-react";
 
 export function About() {
 	return (
-		<section className="py-8">
+		<section className="py-8 lg:py-12" id="about">
 			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
 				About
 			</h5>
@@ -18,14 +18,14 @@ export function About() {
 				<span className="text-muted-foreground">Built from daily needs into</span> a scalable VPS toolkit
 			</h2>
 
-			<div className="mt-10 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+			<div className="mt-10 grid lg:gap-4 gap-2 lg:grid-cols-[1.4fr_1fr]">
 				{/* Narrative – single wide card */}
 				<Card className="p-6 lg:p-8 bg-card/50 hover:border-primary/50 transition-colors">
 					<div className="mb-4 flex items-center gap-3">
 						<div className="size-7 rounded-full bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20">
 							<Rocket className="h-4 w-4" />
 						</div>
-						<Badge variant="secondary" className="rounded-full h-7 px-2.5">
+						<Badge variant="outline" className="rounded-full h-7 px-2.5">
 							Origin & Purpose
 						</Badge>
 					</div>
@@ -67,13 +67,13 @@ export function About() {
 				</Card>
 
 				{/* Right column – two compact cards */}
-				<div className="grid gap-4">
+				<div className="grid lg:gap-4 gap-2">
 					<Card className="p-6 bg-card/50 hover:border-primary/50 transition-colors">
 						<div className="mb-4 flex items-center gap-3">
 							<div className="size-7 rounded-full bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20">
 								<Cpu className="h-4 w-4" />
 							</div>
-							<Badge variant="secondary" className="rounded-full h-7 px-2.5">
+							<Badge variant="outline" className="rounded-full h-7 px-2.5">
 								Stack
 							</Badge>
 						</div>
@@ -91,7 +91,7 @@ export function About() {
 							<div className="size-7 rounded-full bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20">
 								<Server className="h-4 w-4" />
 							</div>
-							<Badge variant="secondary" className="rounded-full h-7 px-2.5">
+							<Badge variant="outline" className="rounded-full h-7 px-2.5">
 								Runtime
 							</Badge>
 						</div>

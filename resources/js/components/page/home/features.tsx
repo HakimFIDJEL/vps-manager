@@ -14,7 +14,7 @@ export function Features() {
 	const { appearance } = useAppearance();
 
 	return (
-		<section className="py-8 lg:py-12">
+		<section className="py-8 lg:py-12" id="features">
 			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
 				Features
 			</h5>

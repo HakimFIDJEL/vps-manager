@@ -30,21 +30,22 @@ export function Header({ links }: { links: LinkType[] }) {
 		window.addEventListener("scroll", handleScroll);
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
+	
 	return (
-		<header>
+		<header className="fixed inset-x-0 top-0 z-20 w-full">
 			<nav
 				data-state={menuState && "active"}
 				className={cn(
-					"fixed z-20 w-full transition-all duration-300 border-b border-transparent",
+					"transition-all duration-300 border-b border-transparent",
 					isScrolled && "bg-background/75 border-border backdrop-blur-lg",
 				)}
 			>
 				<div className="mx-auto max-w-5xl px-6">
 					<div className="relative grid lg:grid-cols-3 grid-cols-2 items-center py-4 lg:py-3">
 						<div className="flex justify-start">
-							<Link href="/" aria-label="home" className="flex items-center space-x-2">
+							<a href="#top" aria-label="home" className="flex items-center space-x-2">
 								<Logo variant={"default"} color_scheme={"default"} />
-							</Link>
+							</a>
 						</div>
 
 						<div className="hidden justify-center lg:flex">
@@ -55,9 +56,9 @@ export function Header({ links }: { links: LinkType[] }) {
 										?.items.map((item, index) => (
 											<li key={index}>
 												<Button asChild variant="ghost" size="sm">
-													<Link href={item.href} className="text-sm text-muted-foreground">
+													<a href={item.href} className="text-sm text-muted-foreground">
 														<span>{item.title}</span>
-													</Link>
+													</a>
 												</Button>
 											</li>
 										))}
@@ -68,12 +69,17 @@ export function Header({ links }: { links: LinkType[] }) {
 						<div className="flex justify-end items-center gap-4">
 							<AppearanceToggleDropdown />
 
-							<Link href={route("auth.login")} className="lg:block hidden">
-								<Button size={"sm"} variant={"default"} className="w-full lg:w-auto">
+							<Button
+								size={"sm"}
+								variant={"default"}
+								className="w-full lg:w-auto lg:flex hidden"
+								asChild
+							>
+								<Link href={route("auth.login")}>
 									<LogIn />
 									<span>Login</span>
-								</Button>
-							</Link>
+								</Link>
+							</Button>
 						</div>
 					</div>
 				</div>

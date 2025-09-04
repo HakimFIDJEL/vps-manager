@@ -2,6 +2,7 @@
 
 // Necessary imports
 import { useAppearance } from "@/hooks/use-appearance";
+import React from "react";
 
 // Custom components
 import { SmoothItem } from "@/components/ui/smooth-resized";
@@ -17,13 +18,26 @@ import {
 	KeyRound,
 	Logs,
 	Zap,
+	ChevronDown,
 } from "lucide-react";
 
 export function Hero() {
 	const { appearance } = useAppearance();
 
+	const [isVisible, setIsVisible] = React.useState(true);
+
+	React.useEffect(() => {
+		const handleScroll = () => {
+			setIsVisible(window.scrollY <= 200);
+		};
+		window.addEventListener("scroll", handleScroll);
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+		};
+	}, []);
+
 	return (
-		<section className="relative pb-24 pt-24 lg:pt-48 mb-18 lg:mb-0">
+		<section className="relative pb-36 pt-24 lg:pt-48">
 			<div className="relative z-10 mx-auto w-full">
 				<div className="lg:w-[45%]">
 					<div>
@@ -36,18 +50,18 @@ export function Hero() {
 						</p>
 
 						<div className="flex items-center gap-3">
-							<a href="#link">
-								<Button size="lg" className="pr-4.5">
+							<Button size="lg" className="pr-4.5" asChild>
+								<a href="#features">
 									<span className="text-nowrap">Learn More</span>
 									<ChevronRight className="opacity-50" />
-								</Button>
-							</a>
-							<a href="https://github.com/HakimFIDJEL/vps-manager" target="_blank">
-								<Button key={2} size="lg" variant="outline" className="pl-5">
+								</a>
+							</Button>
+							<Button key={2} size="lg" variant="outline" className="pl-5" asChild>
+								<a href="https://github.com/HakimFIDJEL/vps-manager" target="_blank">
 									<Github />
 									<span className="text-nowrap">Github</span>
-								</Button>
-							</a>
+								</a>
+							</Button>
 						</div>
 					</div>
 
@@ -111,6 +125,30 @@ export function Hero() {
 						</div>
 					</SmoothItem>
 				</div>
+			</div>
+
+			<div
+				className={`group absolute bottom-0 left-1/2 z-20 -translate-x-1/2 duration-500 p-0 bg-transparent transition-all border-none shadow-none hover:bg-transparent focus:ring-0 ${isVisible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"}`}
+			>
+				<Button
+					asChild
+					className="bg-background ring ring-primary text-primary rounded-full hover:text-foreground transition-all focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 relative z-1"
+				>
+					<a
+						href="#features"
+						aria-label="Scroll down"
+						className="group flex flex-col items-center relative"
+					>
+						Scroll down
+					</a>
+				</Button>
+
+				<span className="mt-1 flex flex-col items-center absolute left-1/2 -translate-x-1/2">
+					<ChevronDown
+						className="h-6 w-6 text-primary group-hover:translate-y-0 translate-y-[-100%] transition-transform duration-300"
+						strokeWidth={2}
+					/>
+				</span>
 			</div>
 		</section>
 	);

@@ -7,6 +7,7 @@ import {
 	AccordionContent,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 export function Help() {
 	const faqItems = [
@@ -79,7 +80,7 @@ export function Help() {
 	];
 
 	return (
-		<section className="py-8 lg:py-24">
+		<section className="py-8 lg:py-12" id="help">
 			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
 				Help
 			</h5>
@@ -97,22 +98,33 @@ export function Help() {
 						real-time feedback.
 					</p>
 					<p className="text-muted-foreground mt-6 hidden lg:block">
-						Still stuck? Read the{" "}
-						<a
-							href="https://github.com/HakimFIDJEL/vps-manager/blob/main/README.md"
-							target="_blank"
-							className="text-primary font-medium hover:underline"
+						Still stuck? Read the
+						<Button
+							variant={"link"}
+							className="px-1 text-base"
+							asChild
 						>
-							docs
-						</a>{" "}
-						or{" "}
-						<a
-							href="https://github.com/HakimFIDJEL/vps-manager/issues"
-							target="_blank"
-							className="text-primary font-medium hover:underline"
+							<a
+								href="https://github.com/HakimFIDJEL/vps-manager/blob/main/README.md"
+								target="_blank"
+							>
+								docs
+							</a>
+						</Button>
+						or
+						<Button
+							variant={"link"}
+							className="px-1 text-base"
+							asChild
 						>
-							open an issue
-						</a>
+							<a
+								href="https://github.com/HakimFIDJEL/vps-manager/issues"
+								target="_blank"
+								className="text-primary font-medium hover:underline"
+							>
+								open an issue
+							</a>
+						</Button>
 						.
 					</p>
 				</div>

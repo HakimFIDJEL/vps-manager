@@ -10,7 +10,7 @@ import { Terminal, Wrench, ClipboardList } from "lucide-react";
 
 export function Solution() {
 	return (
-		<section className="py-8 lg:py-16">
+		<section className="py-8 lg:py-12" id="solution">
 			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
 				Solution
 			</h5>

@@ -15,6 +15,8 @@ import { Solution } from "@/components/page/home/solution";
 import { Customers } from "@/components/page/home/customers";
 import { Help } from "@/components/page/home/help";
 import { About } from "@/components/page/home/about";
+import { ScrollTop } from "@/components/page/home/scroll-top";
+
 
 // Variables
 const links = [
@@ -23,23 +25,23 @@ const links = [
 		items: [
 			{
 				title: "Features",
-				href: "#",
+				href: "#features",
 			},
 			{
 				title: "Solution",
-				href: "#",
+				href: "#solution",
 			},
 			{
 				title: "Customers",
-				href: "#",
+				href: "#customers",
 			},
 			{
 				title: "Help",
-				href: "#",
+				href: "#help",
 			},
 			{
 				title: "About",
-				href: "#",
+				href: "#about",
 			},
 		],
 	},
@@ -108,7 +110,7 @@ export default function Home() {
 				<Header links={links} />
 			</SmoothItem>
 
-			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 max-w-5xl px-6">
+			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 max-w-5xl px-6 relative">
 				<div className="flex flex-1 flex-col lg:gap-4 relative flex-shrink-0 h-full">
 					<SmoothItem delay={0.3}>
 						<Hero />
@@ -134,7 +136,10 @@ export default function Home() {
 						<About />
 					</SmoothItem>
 				</div>
+
+				<ScrollTop />
 			</main>
+
 
 			<SmoothItem delay={0.2}>
 				<Footer links={links} />

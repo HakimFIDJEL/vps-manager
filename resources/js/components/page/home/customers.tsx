@@ -11,7 +11,7 @@ import { User, Users, Building2, Github, List, Check } from "lucide-react";
 
 export function Customers() {
 	return (
-		<section className="py-8 lg:py-16">
+		<section className="py-8 lg:py-12" id="customers">
 			<h5 className="text-primary font-medium mb-3 text-sm bg-muted rounded-xl px-3 py-1 inline-block">
 				Customers
 			</h5>
@@ -108,16 +108,17 @@ export function Customers() {
 							>
 								Check out the README on Github
 							</Badge>
-							<a href="https://github.com/HakimFIDJEL/vps-manager" target="_blank">
-								<Button
-									size={"sm"}
-									variant={"default"}
-									className="rounded-full text-xs lg:w-auto w-full"
-								>
+							<Button
+								size={"sm"}
+								variant={"default"}
+								className="rounded-full text-xs lg:w-auto w-full"
+								asChild
+							>
+								<a href="https://github.com/HakimFIDJEL/vps-manager" target="_blank">
 									<Github />
 									Github
-								</Button>
-							</a>
+								</a>
+							</Button>
 						</div>
 					</Card>
 				</div>

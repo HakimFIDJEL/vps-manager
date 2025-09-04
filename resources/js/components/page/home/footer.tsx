@@ -34,11 +34,17 @@ export function Footer({ links }: { links: LinkType[] }) {
 							<div key={index} className="space-y-4">
 								<span className="block font-medium">{link.group}</span>
 								{link.items.map((item, index) => (
-									<Button variant={"link"} key={index} className="p-0 m-0 block">
-										<Link href={item.href} className="text-muted-foreground">
-											<span>{item.title}</span>
-										</Link>
-									</Button>
+									<div className="block m-0" key={index}>
+										<Button
+											variant={"link"}
+											className="p-0 m-0 text-muted-foreground"
+											asChild
+										>
+											<a href={item.href} className="">
+												<span>{item.title}</span>
+											</a>
+										</Button>
+									</div>
 								))}
 							</div>
 						))}
@@ -51,7 +57,11 @@ export function Footer({ links }: { links: LinkType[] }) {
 						</span>
 						<span className="text-muted-foreground text-sm justify-center lg:text-center text-start">
 							Made by
-							<Button variant={"link"} className="p-1 m-0 text-muted-foreground">
+							<Button
+								variant={"link"}
+								className="p-1 m-0 text-muted-foreground"
+								asChild
+							>
 								<a href="https://hakimfidjel.fr" target="_blank">
 									Hakim Fidjel
 								</a>
@@ -60,31 +70,31 @@ export function Footer({ links }: { links: LinkType[] }) {
 						<div className="flex lg:justify-end gap-2 text-sm justify-start">
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button size={"icon"} variant={"ghost"}>
-										<Link
-											href="#"
+									<Button size={"icon"} variant={"ghost"} asChild>
+										<a
+											href="https://x.com/hakim_fidjel"
 											target="_blank"
 											rel="noopener noreferrer"
 											aria-label="X/Twitter"
 											className="text-muted-foreground"
 										>
 											<Twitter />
-										</Link>
+										</a>
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>My Twitter</TooltipContent>
 							</Tooltip>
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button size={"icon"} variant={"ghost"}>
-										<Link
-											href="#"
+									<Button size={"icon"} variant={"ghost"} asChild>
+										<a
+											href="https://www.linkedin.com/in/hakim-fidjel/"
 											target="_blank"
 											aria-label="LinkedIn"
 											className="text-muted-foreground"
 										>
 											<Linkedin />
-										</Link>
+										</a>
 									</Button>
 								</TooltipTrigger>
 								<TooltipContent>My LinkedIn</TooltipContent>
