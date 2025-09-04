@@ -42,7 +42,7 @@ const SmoothItem = forwardRef<HTMLDivElement, SmoothItemProps>(
 			className={className}
 			initial={{ opacity: 0, scale: 0.99 }}
 			whileInView={{ opacity: 1, scale: 1 }}
-			viewport={{ once: true, amount: 0.2 }}
+			viewport={{ once: true }}
 			transition={{ duration: 0.3, ease: "easeInOut", delay }}
 			exit={{ opacity: 0, scale: 0.99 }}
 			{...rest}

@@ -136,7 +136,7 @@ export default function Home() {
 						<Hero />
 					</SmoothItem>
 
-					<SmoothItem delay={0.2}>
+					<SmoothItem delay={0.5}>
 						<Features />
 					</SmoothItem>
 
