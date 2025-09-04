@@ -136,7 +136,7 @@ export default function Home() {
 				</div>
 			</main>
 
-			<SmoothItem delay={0.7}>
+			<SmoothItem delay={0.2}>
 				<Footer links={links} />
 			</SmoothItem>
 		</>
