@@ -27,10 +27,13 @@ export function ScrollTop() {
 
 	return (
 		<Tooltip>
-			<TooltipTrigger asChild>
+			<TooltipTrigger
+				asChild
+				className={`${isVisible ? "pointer-events-auto" : "pointer-events-none"}`}
+			>
 				<div className="fixed bottom-8 right-4 sm:right-12 z-50">
 					<Button
-						className={`transition-all duration-500 size-10 rounded-full transform ${isVisible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-2 pointer-events-none"}`}
+						className={`transition-all duration-500 size-10 rounded-full transform ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
 						asChild
 					>
 						<a href="#top" aria-label="Scroll to top">

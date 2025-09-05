@@ -19,7 +19,13 @@ import { LogIn } from "lucide-react";
 // Types
 import { type Link as LinkType } from "@/pages/home";
 
-export function Header({ links }: { links: LinkType[] }) {
+export function Header({
+	links,
+	activeSection,
+}: {
+	links: LinkType[];
+	activeSection: string | null;
+}) {
 	const [menuState, setMenuState] = React.useState(false);
 	const [isScrolled, setIsScrolled] = React.useState(false);
 
@@ -30,7 +36,7 @@ export function Header({ links }: { links: LinkType[] }) {
 		window.addEventListener("scroll", handleScroll);
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
-	
+
 	return (
 		<header className="fixed inset-x-0 top-0 z-20 w-full">
 			<nav
@@ -55,7 +61,12 @@ export function Header({ links }: { links: LinkType[] }) {
 										.find((group) => group.group === "Product")
 										?.items.map((item, index) => (
 											<li key={index}>
-												<Button asChild variant="ghost" size="sm">
+												<Button
+													asChild
+													variant="ghost"
+													size="sm"
+													className={`${activeSection === item.href.substring(1) ? "!text-foreground" : "text-muted-foreground"} `}
+												>
 													<a href={item.href} className="text-sm text-muted-foreground">
 														<span>{item.title}</span>
 													</a>

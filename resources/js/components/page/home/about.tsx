@@ -15,7 +15,8 @@ export function About() {
 				About
 			</h5>
 			<h2 className="text-foreground text-balance text-3xl md:text-3xl">
-				<span className="text-muted-foreground">Built from daily needs into</span> a scalable VPS toolkit
+				<span className="text-muted-foreground">Built from daily needs into</span> a
+				scalable VPS toolkit
 			</h2>
 
 			<div className="mt-10 grid lg:gap-4 gap-2 lg:grid-cols-[1.4fr_1fr]">
@@ -31,9 +32,9 @@ export function About() {
 					</div>
 
 					<p className="text-muted-foreground text-sm leading-relaxed">
-						VPS Manager began as a side project to tame real CLI friction on my own servers.
-						It aims to run continuously on a VPS and host personal or team projects with
-						clear guardrails and reproducible outcomes.
+						VPS Manager began as a side project to tame real CLI friction on my own
+						servers. It aims to run continuously on a VPS and host personal or team
+						projects with clear guardrails and reproducible outcomes.
 					</p>
 
 					<Separator className="my-6" />
@@ -73,16 +74,26 @@ export function About() {
 							<div className="size-7 rounded-full bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20">
 								<Cpu className="h-4 w-4" />
 							</div>
-							<Badge variant="outline" className="rounded-full h-7 px-2.5">
+							<Badge variant={"outline"} className="rounded-full h-7 px-2.5">
 								Stack
 							</Badge>
 						</div>
 						<div className="flex flex-wrap gap-2">
-							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">Laravel 12</Badge>
-							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">Inertia</Badge>
-							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">React + TS</Badge>
-							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">Python (exec)</Badge>
-							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">Docker & Compose</Badge>
+							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">
+								Laravel 12
+							</Badge>
+							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">
+								Inertia
+							</Badge>
+							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">
+								React + TS
+							</Badge>
+							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">
+								Python (exec)
+							</Badge>
+							<Badge variant="outline" className="rounded-full px-3 py-1 text-xs">
+								Docker & Compose
+							</Badge>
 						</div>
 					</Card>
 
@@ -103,9 +114,15 @@ export function About() {
 
 						<Separator className="my-6" />
 						<div className="flex flex-wrap gap-2 text-xs">
-							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">Side project</span>
-							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">Scalable first</span>
-							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">Iterative</span>
+							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">
+								Side project
+							</span>
+							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">
+								Scalable first
+							</span>
+							<span className="rounded-full bg-primary/10 text-primary px-3 py-1">
+								Iterative
+							</span>
 						</div>
 					</Card>
 				</div>
@@ -117,4 +134,3 @@ export function About() {
 		</section>
 	);
 }
-

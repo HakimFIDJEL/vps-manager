@@ -103,37 +103,47 @@ export type Link = {
 };
 
 export default function Home() {
+	// Smooth scroll
 	const lenisRef = React.useRef<Lenis | null>(null);
 
-	// React.useEffect(() => {
-	// 	const lenis = new Lenis({ duration: 1.1 });
-	// 	lenisRef.current = lenis;
+	React.useEffect(() => {
+		const lenis = new Lenis({ duration: 1.1, autoRaf: true });
+		lenisRef.current = lenis;
+		return () => {
+			lenis.destroy();
+			lenisRef.current = null;
+		};
+	}, []);
 
-	// 	let rafId: number;
-	// 	const raf = (time: number) => {
-	// 		lenis.raf(time);
-	// 		rafId = requestAnimationFrame(raf);
-	// 	};
-	// 	rafId = requestAnimationFrame(raf);
-
-	// 	return () => {
-	// 		cancelAnimationFrame(rafId);
-	// 		lenis.destroy();
-	// 	};
-	// }, []);
+	// Active section
+	const [activeSection, setActiveSection] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
-		const lenis = new Lenis({ duration: 1.1, autoRaf: true }); // <-- pas de raf manuel
-		return () => lenis.destroy();
-		}, []);
+		const sections = document.querySelectorAll("section[id]");
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const visible = entries.filter((e) => e.isIntersecting);
+				if (!visible.length) return;
+				const top = visible.reduce((a, b) =>
+					b.intersectionRatio > a.intersectionRatio ? b : a,
+				);
+				const id = (top.target as HTMLElement).id;
+				setActiveSection(id);
+				console.log(id);
+			},
+			{ root: null, rootMargin: "0px", threshold: 0.4 },
+		);
 
+		sections.forEach((sec) => observer.observe(sec));
+		return () => sections.forEach((sec) => observer.unobserve(sec));
+	}, []);
 
 	return (
 		<>
 			<Head title="Home" />
 
 			<SmoothItem delay={0.1}>
-				<Header links={links} />
+				<Header links={links} activeSection={activeSection} />
 			</SmoothItem>
 
 			<main className="@container/main w-full flex flex-1 flex-col container mx-auto py-6 gap-4 max-w-5xl px-6 relative">
@@ -146,19 +156,19 @@ export default function Home() {
 						<Features />
 					</SmoothItem>
 
-					<SmoothItem delay={0.2}>
+					<SmoothItem delay={0.5}>
 						<Solution />
 					</SmoothItem>
 
-					<SmoothItem delay={0.2}>
+					<SmoothItem delay={0.5}>
 						<Customers />
 					</SmoothItem>
 
-					<SmoothItem delay={0.2}>
+					<SmoothItem delay={0.5}>
 						<Help />
 					</SmoothItem>
 
-					<SmoothItem delay={0.2}>
+					<SmoothItem delay={0.5}>
 						<About />
 					</SmoothItem>
 				</div>
@@ -166,7 +176,7 @@ export default function Home() {
 				<ScrollTop />
 			</main>
 
-			<SmoothItem delay={0.2}>
+			<SmoothItem delay={0.3}>
 				<Footer links={links} />
 			</SmoothItem>
 		</>

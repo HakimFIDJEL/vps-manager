@@ -37,7 +37,10 @@ export function Hero() {
 	}, []);
 
 	return (
-		<section className="relative pb-32 lg:pb-16 pt-24 lg:pt-48 mb-18 lg:mb-0">
+		<section
+			className="relative pb-32 lg:pb-16 pt-24 lg:pt-48 mb-18 lg:mb-0"
+			id="hero"
+		>
 			<div className="relative z-10 mx-auto w-full">
 				<div className="lg:w-[45%]">
 					<div>

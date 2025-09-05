@@ -99,11 +99,7 @@ export function Help() {
 					</p>
 					<p className="text-muted-foreground mt-6 hidden lg:block">
 						Still stuck? Read the
-						<Button
-							variant={"link"}
-							className="px-1 text-base"
-							asChild
-						>
+						<Button variant={"link"} className="px-1 text-base" asChild>
 							<a
 								href="https://github.com/HakimFIDJEL/vps-manager/blob/main/README.md"
 								target="_blank"
@@ -112,11 +108,7 @@ export function Help() {
 							</a>
 						</Button>
 						or
-						<Button
-							variant={"link"}
-							className="px-1 text-base"
-							asChild
-						>
+						<Button variant={"link"} className="px-1 text-base" asChild>
 							<a
 								href="https://github.com/HakimFIDJEL/vps-manager/issues"
 								target="_blank"
