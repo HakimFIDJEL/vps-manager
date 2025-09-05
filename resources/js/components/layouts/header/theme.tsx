@@ -17,10 +17,16 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+interface AppearanceToggleDropdownProps extends HTMLAttributes<HTMLDivElement> {
+	className?: string;
+	variant?: "default" | "outline" | "ghost";
+}
+
 export default function AppearanceToggleDropdown({
 	className = "",
+	variant = "ghost",
 	...props
-}: HTMLAttributes<HTMLDivElement>) {
+}: AppearanceToggleDropdownProps) {
 	const { appearance, setAppearance } = useAppearance();
 
 	const getCurrentIcon = () => {
@@ -40,7 +46,7 @@ export default function AppearanceToggleDropdown({
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<TooltipTrigger asChild>
-							<Button variant="ghost" size="icon" className="h-9 w-9 rounded-md group">
+							<Button variant={variant} size="icon" className="h-9 w-9 rounded-md group">
 								{getCurrentIcon()}
 								<span className="sr-only">Toggle theme</span>
 							</Button>

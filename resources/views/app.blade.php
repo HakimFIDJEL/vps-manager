@@ -36,7 +36,10 @@
 
         {{-- Favicon --}}
         <link rel="icon" href="{{ asset('favicon.png') }}" type="image/x-icon" />
-        
+
+        {{-- Font --}}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
 
         @routes
         @viteReactRefresh

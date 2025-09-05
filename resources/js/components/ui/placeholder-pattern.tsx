@@ -59,7 +59,7 @@ export function PlaceholderPattern({ className, statusCode, displayButton = fals
                 <h3 className="text-xl font-bold mb-2">{content.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-3   ">{content.description}</p>
                 {displayButton && (
-                  <Link href={route('dashboard') ?? "/"}>
+                  <Link href={"/"}>
                       <Button variant={'outline'}>
                           <ArrowLeft className="h-4 w-4" />
                           Go back 

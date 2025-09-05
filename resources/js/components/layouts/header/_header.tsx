@@ -29,22 +29,21 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 					{/* <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md mr-2">
 						<span className="text-xl text-white italic font-bold -translate-x-[0.5px] -translate-y-[0.5px]">H</span>
 					</div> */}
-					<Logo />
+					<Link href={route("projects.index")}>
+						<Logo variant={"mini"}/>
+					</Link>
 
 					<Separator
 						orientation="vertical"
 						className="mx-2 data-[orientation=vertical]:h-4"
 					/>
 
-					<Link href={route("projects.index")}>
-						<Button
-							variant={"ghost"}
-							size={"sm"}
-							className={`${!route().current("projects.*") ? "text-muted-foreground" : ""} gap-3`}
-						>
-							<Layers className="h-4 w-4" />
-							<span className="hidden lg:inline">Projects</span>
-						</Button>
+					<Link
+						href={route("projects.index")}
+						className={`${!route().current("projects.*") ? "text-muted-foreground" : ""} text-sm`}
+					>
+						{/* <Layers className="h-4 w-4" /> */}
+						<span className="hidden lg:inline">Projects</span>
 					</Link>
 
 					{/* <SidebarTrigger className="-ml-1"  /> */}
