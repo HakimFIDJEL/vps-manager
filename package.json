@@ -107,6 +107,7 @@
         "react-magic-motion": "^1.1.2",
         "react-resizable-panels": "^2.1.9",
         "recharts": "^2.15.3",
+        "smooth-scrollbar": "^8.8.4",
         "sonner": "^2.0.3",
         "swapy": "^1.0.5",
         "tailwind-merge": "^3.0.1",

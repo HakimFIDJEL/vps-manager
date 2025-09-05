@@ -103,7 +103,7 @@ export type Link = {
 };
 
 export default function Home() {
-	// const lenisRef = React.useRef<Lenis | null>(null);
+	const lenisRef = React.useRef<Lenis | null>(null);
 
 	// React.useEffect(() => {
 	// 	const lenis = new Lenis({ duration: 1.1 });
@@ -121,6 +121,12 @@ export default function Home() {
 	// 		lenis.destroy();
 	// 	};
 	// }, []);
+
+	React.useEffect(() => {
+		const lenis = new Lenis({ duration: 1.1, autoRaf: true }); // <-- pas de raf manuel
+		return () => lenis.destroy();
+		}, []);
+
 
 	return (
 		<>
