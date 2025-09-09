@@ -21,6 +21,7 @@ yarn-error.log
 /.idea
 /.vscode
 /.zed
+.venv/
 
 composer.lock
 package-lock.json
