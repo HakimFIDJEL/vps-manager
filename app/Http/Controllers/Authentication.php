@@ -100,7 +100,7 @@ class Authentication extends Controller
                 $until = now()->addHours(2);
                 Cache::put($lockKey, $until, $until);     // store Carbon + TTL
                 Cache::forget($attemptsKey);
-                $mins = now()->diffInMinutes($until);
+                $mins = ceil(now()->diffInMinutes($until));
                 return redirect()->route('auth.login')->with(['error' => [
                     'title' => 'Too many attempts',
                     'description' => "Please try again in {$mins} minutes",
