@@ -49,10 +49,20 @@ username = sys.argv[1]
 # password = getpass.getpass()
 password = sys.stdin.readline().strip()
 
+# auth = pam.pam()
+# if not auth.authenticate(username, password):
+#     print(json.dumps({'auth': False}))
+#     sys.exit(0)
 auth = pam.pam()
-if not auth.authenticate(username, password):
-    print(json.dumps({'auth': False}))
+ok = auth.authenticate(username, password, service="login")
+if not ok:
+    print(json.dumps({
+        "auth": False,
+        "error": f"PAM failure: {getattr(auth, 'reason', 'unknown')}",
+        "code": getattr(auth, 'code', None)
+    }))
     sys.exit(0)
+
 
 for cmd in REQUIRED_COMMANDS:
     if not user_can_run_command(username, cmd):
