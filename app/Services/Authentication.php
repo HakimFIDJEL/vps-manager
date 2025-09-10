@@ -30,7 +30,7 @@ class Authentication
     public function authenticate(string $username, string $password): array
     {
         $script = escapeshellarg("{$this->scriptsPath}/authenticate.py");
-        $cmd = 'sudo ' . escapeshellarg($this->pythonPath) . ' ' . $script . ' ' . escapeshellarg($username);
+        $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . $script . ' ' . escapeshellarg($username);
 
         $pipes = [];
         $process = proc_open($cmd, [
