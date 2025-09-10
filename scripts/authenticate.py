@@ -1,4 +1,5 @@
 import sys
+import os
 import json
 import getpass
 import pwd
@@ -50,9 +51,19 @@ username = sys.argv[1]
 password = sys.stdin.readline().strip()
 
 auth = pam.pam()
-if not auth.authenticate(username, password):
-    print(json.dumps({'auth': False}))
+# if not auth.authenticate(username, password):
+#     print(json.dumps({'auth': False}))
+#     sys.exit(0)
+ok = auth.authenticate(username, password, service="login")
+if not ok:
+    print(json.dumps({
+        'auth': False,
+        'error': 'User: ' + os.getenv('USER', 'unknown') + ',' +
+        'Complete command: ' + os.getenv('SUDO_COMMAND', 'unknown') + ',' +
+        'Error: ' + auth.reason
+    }))
     sys.exit(0)
+    
 
 for cmd in REQUIRED_COMMANDS:
     if not user_can_run_command(username, cmd):
