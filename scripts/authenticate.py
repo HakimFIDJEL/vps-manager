@@ -5,6 +5,21 @@ import getpass
 import pwd
 import subprocess
 
+# Infos sur l'utilisateur système qui exécute le script
+import getpass
+
+executor = getpass.getuser()  # utilisateur courant qui exécute le script
+with open("/proc/self/cmdline", "rb") as f:
+    executor_cmd = f.read().replace(b"\x00", b" ").decode().strip()
+
+print(json.dumps({
+    'auth': False,
+    'error': "Executor: " + executor + ',' +
+             "Executor command: " + executor_cmd
+}))
+sys.exit(0)
+
+
 # Try import pam with a clear fallback message
 try:
     import pam  # type: ignore
