@@ -54,7 +54,7 @@ password = sys.stdin.readline().strip()
 #     print(json.dumps({'auth': False}))
 #     sys.exit(0)
 auth = pam.pam()
-ok = auth.authenticate(username, password, service="login")
+ok = auth.authenticate(username, password, service="common-auth")
 if not ok:
     print(json.dumps({
         "auth": False,
