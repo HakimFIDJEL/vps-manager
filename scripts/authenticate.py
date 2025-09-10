@@ -1,8 +1,17 @@
+import os
 import sys
 import json
 import getpass
 import pwd
 import subprocess
+
+print(json.dumps({
+    "exec_user": os.getlogin(),
+    "uid": os.getuid(),
+    "euid": os.geteuid(),
+    "user_env": os.environ.get("USER")
+}))
+sys.exit(0)
 
 # Try import pam with a clear fallback message
 try:
