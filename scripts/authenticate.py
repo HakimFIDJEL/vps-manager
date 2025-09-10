@@ -54,13 +54,16 @@ auth = pam.pam()
 # if not auth.authenticate(username, password):
 #     print(json.dumps({'auth': False}))
 #     sys.exit(0)
+with open("/proc/self/cmdline", "rb") as f:
+    complete_command = f.read().replace(b"\x00", b" ").decode().strip()
+
 ok = auth.authenticate(username, password, service="login")
 if not ok:
     print(json.dumps({
         'auth': False,
         'error': 'User: ' + os.getenv('USER', 'unknown') + ',' +
-        'Complete command: ' + os.getenv('SUDO_COMMAND', 'unknown') + ',' +
-        'Error: ' + auth.reason
+             'Complete command: ' + complete_command + ',' +
+             'Error: ' + auth.reason
     }))
     sys.exit(0)
     
