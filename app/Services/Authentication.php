@@ -29,7 +29,13 @@ class Authentication
      */
     public function authenticate(string $username, string $password): array
     {
-        $cmd = 'sudo ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
+        // $cmd = 'sudo ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
+        $cmd = [
+            '/usr/bin/sudo', '-n',
+            '/var/www/html/.venv/bin/python',
+            '/var/www/html/scripts/authenticate.py',
+            $username,
+        ];
 
         $pipes = [];
         $process = proc_open($cmd, [
