@@ -16,10 +16,8 @@ class Authentication
 
     public function __construct()
     {
-        // $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        // $this->scriptsPath = base_path('scripts');
-        $this->pythonPath = "/var/www/html/.venv/bin/python";
-        $this->scriptsPath = "/var/www/html/scripts/authenticate.py";
+        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
+        $this->scriptsPath = base_path('scripts') . '/authenticate.py';
     }
 
     /**
@@ -31,7 +29,7 @@ class Authentication
      */
     public function authenticate(string $username, string $password): array
     {
-        $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
+        $cmd = escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
 
         $pipes = [];
         $process = proc_open($cmd, [
