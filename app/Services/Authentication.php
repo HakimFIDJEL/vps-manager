@@ -16,8 +16,10 @@ class Authentication
 
     public function __construct()
     {
-        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        $this->scriptsPath = base_path('scripts');
+        // $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
+        // $this->scriptsPath = base_path('scripts');
+        $this->pythonPath = "/var/www/html/.venv/bin/python";
+        $this->scriptsPath = "/var/www/html/scripts/authenticate.py";
     }
 
     /**
