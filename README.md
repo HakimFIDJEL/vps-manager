@@ -210,7 +210,9 @@ rm -f index.html
 
 git clone git@github.com:HakimFIDJEL/vps-manager.git .
 
-sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chown -R <your_user>:<your_user> /var/www/html
+sudo chgrp -R www-data /var/www/html/storage /var/www/html/bootstrap/cache
+sudo chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 ```
 
 - **Dependencies**
