@@ -31,7 +31,13 @@ class Authentication
      */
     public function authenticate(string $username, string $password): array
     {
-        $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
+        // $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
+
+        $cmd = '/usr/bin/sudo -n ' .
+            escapeshellarg($this->pythonPath) . ' ' .
+            escapeshellarg($this->scriptsPath) . ' ' .
+            escapeshellarg($username);
+
 
         Log::info('cmd: ' . $cmd);
 
