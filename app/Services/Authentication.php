@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class Authentication
  * 
@@ -16,8 +18,8 @@ class Authentication
 
     public function __construct()
     {
-        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        $this->scriptsPath = base_path('scripts');
+        $this->pythonPath = config('vps.python_path');
+        $this->scriptsPath = config('vps.scripts_path');
     }
 
     /**
@@ -29,8 +31,7 @@ class Authentication
      */
     public function authenticate(string $username, string $password): array
     {
-        $script = escapeshellarg("{$this->scriptsPath}/authenticate.py");
-        $cmd = escapeshellarg($this->pythonPath) . ' ' . $script . ' ' . escapeshellarg($username);
+        $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
 
         $pipes = [];
         $process = proc_open($cmd, [
