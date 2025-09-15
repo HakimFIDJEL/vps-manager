@@ -31,22 +31,14 @@ class Authentication
      */
     public function authenticate(string $username, string $password): array
     {
-        // $cmd = escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
-        $cmd = ['sudo','-n','/usr/local/bin/authenticate-vps',$username];
+        $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
 
-
-        // $pipes = [];
-        // $process = proc_open($cmd, [
-        //     0 => ['pipe', 'r'], // stdin
-        //     1 => ['pipe', 'w'], // stdout
-        //     2 => ['pipe', 'w'], // stderr
-        // ], $pipes);
-        $descriptors = [
-        0 => ['pipe','r'],
-        1 => ['pipe','w'],
-        2 => ['pipe','w'],
-        ];
-        $process = proc_open($cmd, $descriptors, $pipes, base_path());
+        $pipes = [];
+        $process = proc_open($cmd, [
+            0 => ['pipe', 'r'], // stdin
+            1 => ['pipe', 'w'], // stdout
+            2 => ['pipe', 'w'], // stderr
+        ], $pipes);
 
         if (!is_resource($process)) {
             return ['auth' => false, 'error' => 'unable to start process'];
