@@ -20,38 +20,24 @@ REQUIRED_COMMANDS = [
     '/bin/rm',
 ]
 
-# def user_can_run_command(user, cmd):
-#     try:
-#         result = subprocess.run(
-#             ['sudo', '-l', '-U', user],
-#             capture_output=True,
-#             text=True
-#         )
-#         for line in result.stdout.splitlines():
-#             if 'NOPASSWD' in line and cmd in line:
-#                 return True
-#         return False
-#     except Exception:
-#         return False
-
-# def user_can_run_command(user, cmd):
-#     try:
-#         result = subprocess.run(
-#             ['/usr/bin/sudo', '-n', '-l', '-U', user],
-#             capture_output=True, text=True
-#         )
-#         if result.returncode != 0:
-#             return False
-#         return any('NOPASSWD' in line and cmd in line for line in result.stdout.splitlines())
-#     except Exception:
-#         return False
-
+def user_can_run_command(user, cmd):
+    try:
+        result = subprocess.run(
+            ['sudo', '-l', '-U', user],
+            capture_output=True,
+            text=True
+        )
+        for line in result.stdout.splitlines():
+            if 'NOPASSWD' in line and cmd in line:
+                return True
+        return False
+    except Exception:
+        return False
 
 if len(sys.argv) != 2:
     print(json.dumps({'auth': False, 'error': 'The username is required'}))
     sys.exit(1)
 
-# If pam is missing, exit early with a clear, actionable message
 if not PAM_AVAILABLE:
     print(json.dumps({
         'auth': False,

@@ -33,13 +33,14 @@ class Authentication
     {
         // $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
 
-        $cmd = '/usr/bin/sudo -n ' .
+        $cmd = '/usr/bin/sudo -n -- ' .
             escapeshellarg($this->pythonPath) . ' ' .
             escapeshellarg($this->scriptsPath) . ' ' .
             escapeshellarg($username);
 
+        // Log::info('cmd: ' . $cmd);
+        Log::info(shell_exec('id -u; id -un; /usr/bin/sudo -n -l 2>&1'));
 
-        Log::info('cmd: ' . $cmd);
 
         $pipes = [];
         $process = proc_open($cmd, [
