@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
+
 /**
  * Class Authentication
  * 
@@ -30,6 +32,8 @@ class Authentication
     public function authenticate(string $username, string $password): array
     {
         $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
+
+        Log::info($cmd);
 
         $pipes = [];
         $process = proc_open($cmd, [

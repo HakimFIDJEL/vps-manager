@@ -34,17 +34,17 @@ REQUIRED_COMMANDS = [
 #     except Exception:
 #         return False
 
-def user_can_run_command(user, cmd):
-    try:
-        result = subprocess.run(
-            ['/usr/bin/sudo', '-n', '-l', '-U', user],
-            capture_output=True, text=True
-        )
-        if result.returncode != 0:
-            return False
-        return any('NOPASSWD' in line and cmd in line for line in result.stdout.splitlines())
-    except Exception:
-        return False
+# def user_can_run_command(user, cmd):
+#     try:
+#         result = subprocess.run(
+#             ['/usr/bin/sudo', '-n', '-l', '-U', user],
+#             capture_output=True, text=True
+#         )
+#         if result.returncode != 0:
+#             return False
+#         return any('NOPASSWD' in line and cmd in line for line in result.stdout.splitlines())
+#     except Exception:
+#         return False
 
 
 if len(sys.argv) != 2:
@@ -60,7 +60,6 @@ if not PAM_AVAILABLE:
     sys.exit(1)
 
 username = sys.argv[1]
-# password = getpass.getpass()
 password = sys.stdin.readline().strip()
 
 auth = pam.pam()
@@ -81,13 +80,13 @@ if not ok:
     sys.exit(0)
     
 
-for cmd in REQUIRED_COMMANDS:
-    if not user_can_run_command(username, cmd):
-        print(json.dumps({
-            'auth': False,
-            'error': f'The user {username} cannot run {cmd}'
-        }))
-        sys.exit(0)
+# for cmd in REQUIRED_COMMANDS:
+#     if not user_can_run_command(username, cmd):
+#         print(json.dumps({
+#             'auth': False,
+#             'error': f'The user {username} cannot run {cmd}'
+#         }))
+#         sys.exit(0)
 
 try:
     user_info = pwd.getpwnam(username)
