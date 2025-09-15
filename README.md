@@ -248,3 +248,24 @@ PYTHON_PATH=/path/to/vps-manager/.venv/bin/python
 ## Contributing
 
 ## License
+
+
+
+
+
+
+
+
+**WRAPPER BASH**
+```bash
+sudo tee /usr/local/bin/authenticate-vps <<'SH'
+#!/bin/sh
+exec /var/www/html/.venv/bin/python /var/www/html/scripts/authenticate.py "$@"
+SH
+sudo chmod 755 /usr/local/bin/authenticate-vps
+```
+
+**SUDOERS.D**
+```bash
+www-data ALL=(root) NOPASSWD: /usr/local/bin/authenticate-vps *
+```
