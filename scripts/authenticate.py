@@ -49,30 +49,17 @@ username = sys.argv[1]
 password = sys.stdin.readline().strip()
 
 auth = pam.pam()
-# if not auth.authenticate(username, password):
-#     print(json.dumps({'auth': False}))
-#     sys.exit(0)
-with open("/proc/self/cmdline", "rb") as f:
-    complete_command = f.read().replace(b"\x00", b" ").decode().strip()
+if not auth.authenticate(username, password):
+    print(json.dumps({'auth': False}))
+    sys.exit(0)    
 
-ok = auth.authenticate(username, password, service="login")
-if not ok:
-    print(json.dumps({
-        'auth': False,
-        'error': 'User: ' + os.getenv('USER', 'unknown') + ',' +
-             'Complete command: ' + complete_command + ',' +
-             'Error: ' + auth.reason
-    }))
-    sys.exit(0)
-    
-
-# for cmd in REQUIRED_COMMANDS:
-#     if not user_can_run_command(username, cmd):
-#         print(json.dumps({
-#             'auth': False,
-#             'error': f'The user {username} cannot run {cmd}'
-#         }))
-#         sys.exit(0)
+for cmd in REQUIRED_COMMANDS:
+    if not user_can_run_command(username, cmd):
+        print(json.dumps({
+            'auth': False,
+            'error': f'The user {username} cannot run {cmd}'
+        }))
+        sys.exit(0)
 
 try:
     user_info = pwd.getpwnam(username)

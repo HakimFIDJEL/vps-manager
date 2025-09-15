@@ -31,16 +31,7 @@ class Authentication
      */
     public function authenticate(string $username, string $password): array
     {
-        // $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
-
-        $cmd = '/usr/bin/sudo -n -- ' .
-            escapeshellarg($this->pythonPath) . ' ' .
-            escapeshellarg($this->scriptsPath) . ' ' .
-            escapeshellarg($username);
-
-        // Log::info('cmd: ' . $cmd);
-        Log::info(shell_exec('id -u; id -un; /usr/bin/sudo -n -l 2>&1'));
-
+        $cmd = 'sudo -n ' . escapeshellarg($this->pythonPath) . ' ' . escapeshellarg($this->scriptsPath) . ' ' . escapeshellarg($username);
 
         $pipes = [];
         $process = proc_open($cmd, [
