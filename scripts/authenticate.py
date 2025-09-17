@@ -54,11 +54,11 @@ if not auth.authenticate(username, password):
     sys.exit(0)    
 
 # -- DEBUG -- #
-print(json.dumps({
-    'auth': False,
-    'error': f'This is a test'
-}))
-sys.exit(0)
+# print(json.dumps({
+#     'auth': False,
+#     'error': f'This is a test'
+# }))
+# sys.exit(0)
 # -- DEBUG -- #
 
 # for cmd in REQUIRED_COMMANDS:
