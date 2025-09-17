@@ -61,13 +61,13 @@ if not auth.authenticate(username, password):
 # sys.exit(0)
 # -- DEBUG -- #
 
-# for cmd in REQUIRED_COMMANDS:
-#     if not user_can_run_command(username, cmd):
-#         print(json.dumps({
-#             'auth': False,
-#             'error': f'The user {username} cannot run {cmd}'
-#         }))
-#         sys.exit(0)
+for cmd in REQUIRED_COMMANDS:
+    if not user_can_run_command(username, cmd):
+        print(json.dumps({
+            'auth': False,
+            'error': f'The user {username} cannot run {cmd}'
+        }))
+        sys.exit(0)
 
 try:
     user_info = pwd.getpwnam(username)
