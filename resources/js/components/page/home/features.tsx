@@ -79,7 +79,7 @@ export function Features() {
 					<Feature
 						title="Landing Experience"
 						description="A clean, focused landing to explain value and entry points."
-						status="wip"
+						status="done"
 						className="lg:pl-0 lg:border-r border-b"
 					/>
 					<Feature
