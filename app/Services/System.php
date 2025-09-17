@@ -39,11 +39,13 @@ class System
             throw new \RuntimeException('No user session found.');
         }
 
-        $script = escapeshellarg($this->scriptsPath);
-        $userArg = escapeshellarg($user);
-        $commandArg = escapeshellarg($command);
+        $cmd = 'sudo -n' . 
+        escapeshellarg($this->pythonPath) . ' ' . 
+        escapeshellarg($this->scriptsPath) . ' ' .
+        escapeshellarg($user) . ' ' . 
+        escapeshellarg($command);
 
-        $process = Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
+        $process = Process::run($cmd);
         dd($process->successful(), $process->errorOutput(), $process->command()); 
         // return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
     }

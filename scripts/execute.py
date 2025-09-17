@@ -5,8 +5,8 @@ import subprocess
 if len(sys.argv) < 3:
     sys.exit(1)
 
-user = sys.argv[1]
-command = sys.argv[2:] 
+user = sys.argv[2]
+command = sys.argv[3:] 
 
 cmd_str = f"sudo -u {user} " + ' '.join(command)
 
