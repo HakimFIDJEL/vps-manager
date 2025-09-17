@@ -5,7 +5,7 @@ import getpass
 import pwd
 import subprocess
 
-# # Try import pam with a clear fallback message
+# Try import pam with a clear fallback message
 try:
     import pam  # type: ignore
     PAM_AVAILABLE = True
@@ -53,7 +53,13 @@ if not auth.authenticate(username, password):
     print(json.dumps({'auth': False}))
     sys.exit(0)    
 
-
+# -- DEBUG -- #
+print(json.dumps({
+    'auth': False,
+    'error': f'This is a test'
+}))
+sys.exit(0)
+# -- DEBUG -- #
 
 # for cmd in REQUIRED_COMMANDS:
 #     if not user_can_run_command(username, cmd):
@@ -76,10 +82,3 @@ try:
 except Exception:
     print(json.dumps({'auth': True, 'username': username}))
 
-# -- DEBUG -- #
-print(json.dumps({
-    'auth': False,
-    'error': f'This is a test'
-}))
-sys.exit(0)
-# -- DEBUG -- #
