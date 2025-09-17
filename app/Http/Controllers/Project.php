@@ -68,10 +68,10 @@ class Project extends Controller
                 ]]);
             }
         }
+        dd('test');
 
         $folders = $system->getFolders();
 
-        dd('test');
 
         foreach ($folders as $key => $path) {
 
