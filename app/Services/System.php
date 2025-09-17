@@ -39,7 +39,7 @@ class System
             throw new \RuntimeException('No user session found.');
         }
 
-        $cmd = 'sudo -n' . 
+        $cmd = 'sudo -n ' . 
         escapeshellarg($this->pythonPath) . ' ' . 
         escapeshellarg($this->scriptsPath) . ' ' .
         escapeshellarg($user) . ' ' . 
