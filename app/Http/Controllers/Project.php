@@ -51,13 +51,14 @@ class Project extends Controller
     {
         $res = Process::run('ls -l /projects');
 
-        dd('test');
-
+        
         // Checks if the /projects directory exists
         if (!$res->successful()) {
-
+            
             // If the directory does not exist, we create it
             $res = $system->execute('sudo mkdir -p /projects');
+            
+            dd('test');
 
             if (!$res->successful()) {
                 Session::forget('vps_user');
