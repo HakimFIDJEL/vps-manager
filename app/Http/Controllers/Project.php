@@ -56,6 +56,7 @@ class Project extends Controller
         if (!$res->successful()) {
             
             // If the directory does not exist, we create it
+            dd('test');
             $res = $system->execute('sudo mkdir -p /projects');
 
             if (!$res->successful()) {
@@ -68,7 +69,6 @@ class Project extends Controller
                 ]]);
             }
         }
-        dd('test');
 
         $folders = $system->getFolders();
 
