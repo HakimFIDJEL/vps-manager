@@ -57,8 +57,6 @@ class Project extends Controller
             
             // If the directory does not exist, we create it
             $res = $system->execute('sudo mkdir -p /projects');
-            
-            dd('test');
 
             if (!$res->successful()) {
                 Session::forget('vps_user');
@@ -72,6 +70,8 @@ class Project extends Controller
         }
 
         $folders = $system->getFolders();
+
+        dd('test');
 
         foreach ($folders as $key => $path) {
 
