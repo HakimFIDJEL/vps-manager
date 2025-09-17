@@ -48,6 +48,11 @@ if not PAM_AVAILABLE:
 username = sys.argv[1]
 password = sys.stdin.readline().strip()
 
+auth = pam.pam()
+if not auth.authenticate(username, password):
+    print(json.dumps({'auth': False}))
+    sys.exit(0)    
+
 # -- DEBUG -- #
 print(json.dumps({
     'auth': False,
@@ -55,11 +60,6 @@ print(json.dumps({
 }))
 sys.exit(0)
 # -- DEBUG -- #
-
-# auth = pam.pam()
-# if not auth.authenticate(username, password):
-#     print(json.dumps({'auth': False}))
-#     sys.exit(0)    
 
 # for cmd in REQUIRED_COMMANDS:
 #     if not user_can_run_command(username, cmd):
