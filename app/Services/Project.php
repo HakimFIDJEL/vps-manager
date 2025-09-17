@@ -26,8 +26,8 @@ class Project
 
     public function __construct()
     {
-        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        $this->scriptsPath = base_path('scripts');
+        $this->pythonPath = config('vps.python_path');
+        $this->scriptsPath = config('vps.scripts_path');
     }
 
     /**

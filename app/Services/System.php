@@ -19,8 +19,8 @@ class System
 
     public function __construct()
     {
-        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        $this->scriptsPath = base_path('scripts');
+        $this->pythonPath = config('vps.python_path');
+        $this->scriptsPath = config('vps.scripts_path');
     }
 
     /**
@@ -43,7 +43,8 @@ class System
         $userArg = escapeshellarg($user);
         $commandArg = escapeshellarg($command);
 
-        return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
+        dd(Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}")); 
+        // return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
     }
 
     /**
