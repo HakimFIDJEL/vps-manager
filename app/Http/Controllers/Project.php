@@ -56,12 +56,15 @@ class Project extends Controller
         if (!$res->successful()) {
             
             // If the directory does not exist, we create it
+            Log::info('AAAA');
             $res = $system->execute('sudo mkdir -p /projects');
-            dd('test');
+            Log::info('BBBB');
 
             if (!$res->successful()) {
                 Session::forget('vps_user');
                 Cookie::queue(Cookie::forget('vps_user_remember'));
+
+                Log::info('CCCC');
 
                 return redirect()->route('auth.login')->with(['error' => [
                     'title' => 'An error occurred',
@@ -70,7 +73,9 @@ class Project extends Controller
             }
         }
 
+        Log::info('DDDD');
         $folders = $system->getFolders();
+        Log::info('EEEE');
 
 
         foreach ($folders as $key => $path) {
