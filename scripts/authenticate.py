@@ -79,6 +79,9 @@ try:
         'home': user_info.pw_dir,
         'shell': user_info.pw_shell
     }))
-except Exception:
-    print(json.dumps({'auth': True, 'username': username}))
+except Exception as e:
+    print(json.dumps({
+        'auth': False,
+        'error': f'pwd.getpwnam failed: {str(e)}'
+    }))
 
