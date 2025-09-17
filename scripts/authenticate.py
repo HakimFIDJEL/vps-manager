@@ -1,52 +1,60 @@
 import sys
-# import os
+import os
 import json
-# import getpass
-# import pwd
-# import subprocess
+import getpass
+import pwd
+import subprocess
 
 # # Try import pam with a clear fallback message
-# try:
-#     import pam  # type: ignore
-#     PAM_AVAILABLE = True
-# except Exception:
-#     PAM_AVAILABLE = False
+try:
+    import pam  # type: ignore
+    PAM_AVAILABLE = True
+except Exception:
+    PAM_AVAILABLE = False
 
-# REQUIRED_COMMANDS = [
-#     '/usr/bin/docker',
-#     '/usr/bin/mkdir',
-#     '/bin/ls',
-#     '/usr/bin/mv',
-#     '/bin/rm',
-# ]
+REQUIRED_COMMANDS = [
+    '/usr/bin/docker',
+    '/usr/bin/mkdir',
+    '/bin/ls',
+    '/usr/bin/mv',
+    '/bin/rm',
+]
 
-# def user_can_run_command(user, cmd):
-#     try:
-#         result = subprocess.run(
-#             ['sudo', '-l', '-U', user],
-#             capture_output=True,
-#             text=True
-#         )
-#         for line in result.stdout.splitlines():
-#             if 'NOPASSWD' in line and cmd in line:
-#                 return True
-#         return False
-#     except Exception:
-#         return False
+def user_can_run_command(user, cmd):
+    try:
+        result = subprocess.run(
+            ['sudo', '-l', '-U', user],
+            capture_output=True,
+            text=True
+        )
+        for line in result.stdout.splitlines():
+            if 'NOPASSWD' in line and cmd in line:
+                return True
+        return False
+    except Exception:
+        return False
 
-# if len(sys.argv) != 2:
-#     print(json.dumps({'auth': False, 'error': 'The username is required'}))
-#     sys.exit(1)
+if len(sys.argv) != 2:
+    print(json.dumps({'auth': False, 'error': 'The username is required'}))
+    sys.exit(1)
 
-# if not PAM_AVAILABLE:
-#     print(json.dumps({
-#         'auth': False,
-#         'error': "The authentication python package pam is not installed, follow the README for installation instructions."
-#     }))
-#     sys.exit(1)
+if not PAM_AVAILABLE:
+    print(json.dumps({
+        'auth': False,
+        'error': "The authentication python package pam is not installed, follow the README for installation instructions."
+    }))
+    sys.exit(1)
 
-# username = sys.argv[1]
-# password = sys.stdin.readline().strip()
+username = sys.argv[1]
+password = sys.stdin.readline().strip()
+
+# -- DEBUG -- #
+print(json.dumps({
+    'auth': False,
+    'error': f'This is a test'
+}))
+sys.exit(0)
+# -- DEBUG -- #
 
 # auth = pam.pam()
 # if not auth.authenticate(username, password):
@@ -74,8 +82,3 @@ import json
 # except Exception:
 #     print(json.dumps({'auth': True, 'username': username}))
 
-print(json.dumps({
-    'auth': False,
-    'error': f'This is a test'
-}))
-sys.exit(0)
