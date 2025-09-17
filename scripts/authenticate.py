@@ -70,14 +70,14 @@ if not auth.authenticate(username, password):
 #         sys.exit(0)
 
 try:
-    # user_info = pwd.getpwnam(username)
+    user_info = pwd.getpwnam(username)
     print(json.dumps({
         'auth': True,
         'username': username,
-        # 'uid': user_info.pw_uid,
-        # 'gid': user_info.pw_gid,
-        # 'home': user_info.pw_dir,
-        # 'shell': user_info.pw_shell
+        'uid': user_info.pw_uid,
+        'gid': user_info.pw_gid,
+        'home': user_info.pw_dir,
+        'shell': user_info.pw_shell
     }))
 except Exception:
     print(json.dumps({'auth': True, 'username': username}))
