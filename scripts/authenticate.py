@@ -53,13 +53,13 @@ if not auth.authenticate(username, password):
     print(json.dumps({'auth': False}))
     sys.exit(0)    
 
-# # -- DEBUG -- #
-# print(json.dumps({
-#     'auth': False,
-#     'error': f'This is a test'
-# }))
-# sys.exit(0)
-# # -- DEBUG -- #
+# -- DEBUG -- #
+print(json.dumps({
+    'auth': False,
+    'error': f'This is a test'
+}))
+sys.exit(0)
+# -- DEBUG -- #
 
 # for cmd in REQUIRED_COMMANDS:
 #     if not user_can_run_command(username, cmd):
@@ -79,9 +79,11 @@ try:
         'home': user_info.pw_dir,
         'shell': user_info.pw_shell
     }))
-except Exception as e:
-    print(json.dumps({
-        'auth': False,
-        'error': f'pwd.getpwnam failed: {str(e)}'
-    }))
+except Exception:
+    print(json.dumps({'auth': True, 'username': username}))
+# except Exception as e:
+#     print(json.dumps({
+#         'auth': False,
+#         'error': f'pwd.getpwnam failed: {str(e)}'
+#     }))
 
