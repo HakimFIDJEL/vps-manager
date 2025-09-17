@@ -43,8 +43,8 @@ class System
         $userArg = escapeshellarg($user);
         $commandArg = escapeshellarg($command);
 
-        // dd(Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}")); 
-        return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
+        dd(Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}")); 
+        // return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
     }
 
     /**
