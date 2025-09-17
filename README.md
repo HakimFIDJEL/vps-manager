@@ -38,6 +38,17 @@ Update `sudoers` (replace `<my_user>`):
 
 ```bash
 sudo visudo -f /etc/sudoers.d/vps-manager
+```
+
+And copy this in the file
+
+```bash
+Defaults:www-data !requiretty
+
+www-data ALL=(ALL) NOPASSWD: /var/www/html/.venv/bin/python /var/www/html/scripts/authenticate.py *
+www-data ALL=(ALL) NOPASSWD: /var/www/html/.venv/bin/python /var/www/html/scripts/execute.py *
+
+www-data ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm, /bin/echo
 <my_user> ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm, /bin/echo
 ```
 

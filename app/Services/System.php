@@ -46,8 +46,6 @@ class System
         escapeshellarg($command);
 
         return Process::run($cmd);
-        // dd($process->successful(), $process->errorOutput(), $process->command()); 
-        // return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
     }
 
     /**
