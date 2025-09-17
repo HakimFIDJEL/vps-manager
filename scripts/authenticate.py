@@ -75,7 +75,7 @@
 #     print(json.dumps({'auth': True, 'username': username}))
 
 print(json.dumps({
-        'auth': False,
-        'error': f'This is a test'
-    }))
-    sys.exit(0)
+    'auth': False,
+    'error': f'This is a test'
+}))
+sys.exit(0)
