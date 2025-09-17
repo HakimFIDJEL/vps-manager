@@ -351,7 +351,7 @@ function DeleteProjectCard() {
 		} else {
 			setMatching(false);
 		}
-		console.log('watchedPath: ', watchedPath, ' - projectPath: ', project.path, matching);
+		console.log('watchedPath: ~', watchedPath, '~ - projectPath: ~', project.path, '~ ', matching);
 	}, [watchedPath]);
 
 	function handleDelete() {
