@@ -2,5 +2,6 @@
 
 return [
     'python_path' => env('PYTHON_PATH', '/usr/bin/python3'),
-    'scripts_path' => base_path('scripts') . '/authenticate.py',
+    'auth_scripts_path' => base_path('scripts') . '/authenticate.py',
+    'exec_scripts_path' => base_path('scripts') . '/execute.py',
 ];

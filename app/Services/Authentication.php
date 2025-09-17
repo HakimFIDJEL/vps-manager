@@ -19,7 +19,7 @@ class Authentication
     public function __construct()
     {
         $this->pythonPath = config('vps.python_path');
-        $this->scriptsPath = config('vps.scripts_path');
+        $this->scriptsPath = config('vps.auth_scripts_path');
     }
 
     /**

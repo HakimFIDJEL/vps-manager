@@ -20,7 +20,7 @@ class System
     public function __construct()
     {
         $this->pythonPath = config('vps.python_path');
-        $this->scriptsPath = config('vps.scripts_path');
+        $this->scriptsPath = config('vps.exec_scripts_path');
     }
 
     /**
