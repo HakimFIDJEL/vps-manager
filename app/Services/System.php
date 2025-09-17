@@ -39,7 +39,7 @@ class System
             throw new \RuntimeException('No user session found.');
         }
 
-        $script = escapeshellarg($this->scriptsPath . '/execute.py');
+        $script = escapeshellarg($this->scriptsPath);
         $userArg = escapeshellarg($user);
         $commandArg = escapeshellarg($command);
 
