@@ -53,13 +53,7 @@ if not auth.authenticate(username, password):
     print(json.dumps({'auth': False}))
     sys.exit(0)    
 
-# -- DEBUG -- #
-print(json.dumps({
-    'auth': False,
-    'error': f'This is a test'
-}))
-sys.exit(0)
-# -- DEBUG -- #
+
 
 # for cmd in REQUIRED_COMMANDS:
 #     if not user_can_run_command(username, cmd):
@@ -69,16 +63,23 @@ sys.exit(0)
 #         }))
 #         sys.exit(0)
 
-# try:
-#     user_info = pwd.getpwnam(username)
-#     print(json.dumps({
-#         'auth': True,
-#         'username': username,
-#         'uid': user_info.pw_uid,
-#         'gid': user_info.pw_gid,
-#         'home': user_info.pw_dir,
-#         'shell': user_info.pw_shell
-#     }))
-# except Exception:
-#     print(json.dumps({'auth': True, 'username': username}))
+try:
+    user_info = pwd.getpwnam(username)
+    print(json.dumps({
+        'auth': True,
+        'username': username,
+        'uid': user_info.pw_uid,
+        'gid': user_info.pw_gid,
+        'home': user_info.pw_dir,
+        'shell': user_info.pw_shell
+    }))
+except Exception:
+    print(json.dumps({'auth': True, 'username': username}))
 
+# -- DEBUG -- #
+print(json.dumps({
+    'auth': False,
+    'error': f'This is a test'
+}))
+sys.exit(0)
+# -- DEBUG -- #
