@@ -51,6 +51,8 @@ class Project extends Controller
     {
         $res = Process::run('ls -l /projects');
 
+        dd('test');
+
         // Checks if the /projects directory exists
         if (!$res->successful()) {
 

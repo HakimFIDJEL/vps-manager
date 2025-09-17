@@ -2,44 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use Inertia\Response as InertiaResponse;
+use App\Http\Requests\auth\Login as RequestsLogin;
+use App\Services\Authentication as ServicesAuthentication;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
-
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 // Requests
-use App\Http\Requests\auth\Login as RequestsLogin;
-
+use Inertia\Inertia;
 // Services
-use App\Services\Authentication as ServicesAuthentication;
+use Inertia\Response as InertiaResponse;
 
 /**
- * Class Authentication 
+ * Class Authentication
  *
  * Controller that manages authentication
- *
- * @package App\Http\Controllers
  */
 class Authentication extends Controller
 {
     /**
      * Show the login form.
      *
-     * @return Response | RedirectResponse  The response
+     * @return Response | RedirectResponse The response
      */
-    public function login(): InertiaResponse | RedirectResponse
+    public function login(): InertiaResponse|RedirectResponse
     {
         if (session()->has('vps_user')) {
             return redirect()->route('projects.index');
         }
+
         return Inertia::render('auth/login');
     }
-
 
     /**
      * Logout the user.
@@ -53,18 +49,16 @@ class Authentication extends Controller
 
         return redirect()->route('auth.login')->with(['success' => [
             'title' => 'Logout successful',
-            'description' => 'You have been logged out successfully.'
+            'description' => 'You have been logged out successfully.',
         ]]);
     }
-
 
     /**
      * Handle the login form submission.
      *
-     * @param RequestsLogin $request        The login request
-     * @param ServicesAuthentication $auth  The authentication service
-     * 
-     * @return RedirectResponse             The response
+     * @param  RequestsLogin  $request  The login request
+     * @param  ServicesAuthentication  $auth  The authentication service
+     * @return RedirectResponse The response
      */
     public function loginPost(RequestsLogin $request, ServicesAuthentication $auth): RedirectResponse
     {
@@ -72,53 +66,40 @@ class Authentication extends Controller
 
         // Brute force guard
         $user = Str::lower($data['username'] ?? '');
-        $ip   = $request->ip();
-        $attemptsKey = "login:attempts:{$user}|{$ip}";
-        $lockKey     = "login:lock:{$user}|{$ip}";
+        $ip = $request->ip();
         $maxAttempts = 5;
-        $lockUntil   = Cache::get($lockKey); // Carbon instance
 
-        // if ($lockUntil instanceof Carbon && now()->lt($lockUntil)) {
-        //     $mins = ceil(now()->diffInMinutes($lockUntil, false));
-        //     return redirect()->route('auth.login')->with(['error' => [
-        //         'title' => 'Too many attempts',
-        //         'description' => "Please try again in {$mins} minutes",
-        //     ]]);
-        // }
-        // // lock expired cleanup
-        // if ($lockUntil instanceof Carbon && now()->gte($lockUntil)) {
-        //     Cache::forget($lockKey);
-        //     Cache::forget($attemptsKey);
-        // }
+        // Check lock
+        $mins = $this->isLocked($user, $ip);
+        if (is_int($mins)) {
+            return redirect()->route('auth.login')->with(['error' => [
+                'title' => 'Too many attempts',
+                'description' => "Please try again in {$mins} minutes",
+            ]]);
+        }
 
         $res = $auth->authenticate($user, $data['password']);
 
-        if (!($res['auth'] ?? false)) {
-            $attempts = (int) Cache::get($attemptsKey, 0) + 1;
+        if (! ($res['auth'] ?? false)) {
+            $fail = $this->recordFailedAttempt($user, $ip, $maxAttempts);
 
-            // if ($attempts >= $maxAttempts) {
-            //     $until = now()->addHours(2);
-            //     Cache::put($lockKey, $until, $until);     // store Carbon + TTL
-            //     Cache::forget($attemptsKey);
-            //     $mins = ceil(now()->diffInMinutes($until, false));
-            //     return redirect()->route('auth.login')->with(['error' => [
-            //         'title' => 'Too many attempts',
-            //         'description' => "Please try again in {$mins} minutes",
-            //     ]]);
-            // }
+            if (($fail['locked'] ?? false) === true) {
+                return redirect()->route('auth.login')->with(['error' => [
+                    'title' => 'Too many attempts',
+                    'description' => "Please try again in {$fail['minutes']} minutes",
+                ]]);
+            }
 
-            // // keep attempts for up to 2h (rolling)
-            // Cache::put($attemptsKey, $attempts, now()->addHours(2));
+            $attempts = $fail['attempts'] ?? 1;
 
             return redirect()->route('auth.login')->with(['error' => [
                 'title' => 'Authentication failed',
-                'description' => trim($res['error'] ?? '') ?: 'Invalid username or password' . ($attempts > 1 ? " ({$attempts}/{$maxAttempts} attempts)" : ''),
+                'description' => trim($res['error'] ?? '') ?: 'Invalid username or password'.($attempts > 1 ? " ({$attempts}/{$maxAttempts} attempts)" : ''),
             ]]);
         }
 
         // success: clear counters
-        Cache::forget($attemptsKey);
-        Cache::forget($lockKey);
+        $this->clearBruteForce($user, $ip);
 
         $remember = $data['remember'] ?? false;
         session(['vps_user' => $res['username']]);
@@ -139,11 +120,62 @@ class Authentication extends Controller
             );
         }
 
-        dd($res);
-        
         return redirect()->route('projects.index')->with(['success' => [
             'title' => 'Authentication successful',
-            'description' => "Logged in as {$res['username']}"
+            'description' => "Logged in as {$res['username']}",
         ]]);
+    }
+
+    // ============================================================================ //
+    //                                 BRUTE FORCE                                  //
+    // ============================================================================ //
+
+    private function clearBruteForce(string $user, string $ip): void
+    {
+        [$attemptsKey, $lockKey] = $this->bruteKeys($user, $ip);
+        Cache::forget($attemptsKey);
+        Cache::forget($lockKey);
+    }
+
+    private function recordFailedAttempt(string $user, string $ip, int $maxAttempts = 5): array
+    {
+        [$attemptsKey, $lockKey] = $this->bruteKeys($user, $ip);
+        $attempts = (int) Cache::get($attemptsKey, 0) + 1;
+
+        if ($attempts >= $maxAttempts) {
+            $until = now()->addHours(2);
+            Cache::put($lockKey, $until, $until);
+            Cache::forget($attemptsKey);
+
+            return ['locked' => true, 'minutes' => (int) ceil(now()->diffInMinutes($until, false))];
+        }
+
+        Cache::put($attemptsKey, $attempts, now()->addHours(2));
+
+        return ['locked' => false, 'attempts' => $attempts];
+    }
+
+    private function isLocked(string $user, string $ip): ?int
+    {
+        [$attemptsKey, $lockKey] = $this->bruteKeys($user, $ip);
+        $lock = Cache::get($lockKey);
+        if ($lock instanceof Carbon && now()->lt($lock)) {
+            return (int) ceil(now()->diffInMinutes($lock, false));
+        }
+        // expired -> cleanup
+        if ($lock instanceof Carbon && now()->gte($lock)) {
+            Cache::forget($lockKey);
+            Cache::forget($attemptsKey);
+        }
+
+        return null;
+    }
+
+    private function bruteKeys(string $user, string $ip): array
+    {
+        $k = "login:attempts:{$user}|{$ip}";
+        $l = "login:lock:{$user}|{$ip}";
+
+        return [$k, $l];
     }
 }
