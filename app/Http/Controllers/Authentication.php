@@ -93,8 +93,6 @@ class Authentication extends Controller
 
         $res = $auth->authenticate($user, $data['password']);
 
-        dd($res);
-
         if (!($res['auth'] ?? false)) {
             $attempts = (int) Cache::get($attemptsKey, 0) + 1;
 
@@ -141,6 +139,8 @@ class Authentication extends Controller
             );
         }
 
+        dd($res);
+        
         return redirect()->route('projects.index')->with(['success' => [
             'title' => 'Authentication successful',
             'description' => "Logged in as {$res['username']}"
