@@ -10,8 +10,8 @@ raw = ' '.join(sys.argv[2:])   # couvre les deux cas
 parts = shlex.split(raw)
 
 # if caller accidentally prefixed 'sudo', remove it
-if parts and parts[0] == 'sudo':
-    parts = parts[1:]
+# if parts and parts[0] == 'sudo':
+#     parts = parts[1:]
 
 cmd = ["sudo", "-u", user] + parts
 
