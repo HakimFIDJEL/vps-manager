@@ -56,8 +56,8 @@ class Project extends Controller
         if (!$res->successful()) {
             
             // If the directory does not exist, we create it
-            dd('test');
             $res = $system->execute('sudo mkdir -p /projects');
+            dd('test');
 
             if (!$res->successful()) {
                 Session::forget('vps_user');
