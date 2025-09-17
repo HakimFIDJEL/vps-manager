@@ -346,12 +346,7 @@ function DeleteProjectCard() {
 	const { project } = useProject();
 
 	useEffect(() => {
-		if (watchedPath === project.path) {
-			setMatching(true);
-		} else {
-			setMatching(false);
-		}
-		console.log('watchedPath: ~', watchedPath, '~ - projectPath: ~', project.path, '~ ', matching);
+		setMatching(watchedPath.trim() === project.path.trim());
 	}, [watchedPath]);
 
 	function handleDelete() {
