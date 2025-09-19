@@ -72,7 +72,13 @@ class Project
             $envContent .= "{$variable['key']}={$variable['value']}\n";
         }
 
-        return $system->execute("echo " . escapeshellarg($envContent) . " | sudo tee " . escapeshellarg($path) . '/.env' . " > /dev/null");
+        $cmd = "bash -lc " . escapeshellarg(
+            "printf %s " . escapeshellarg($envContent) .
+            " | sudo tee " . escapeshellarg($path . '/.env') . " >/dev/null"
+        );
+        $process = $system->execute($cmd);
+        
+        return $process;
     }
 
     /**
@@ -243,37 +249,30 @@ class Project
      */
     public function createMakefile(string $path, array $commands, ServicesSystem $system): ProcessResult
     {
-        $makefileContent = '';
-
+        $make = '';
         foreach ($commands as $c) {
             $target      = $c['target'];
             $description = $c['description'] ?? 'Unknown description';
             $cmds        = $c['command'];
 
-            $makefileContent .= "# {$description}\n";
-            $makefileContent .= "{$target}:\n";
+            $make .= "# {$description}\n{$target}:\n";
 
-            $lines = is_string($cmds)
-                ? preg_split('/\r\n|\n|\r/', $cmds)
-                : (array) $cmds;
-
+            $lines = is_string($cmds) ? preg_split('/\r\n|\n|\r/', $cmds) : (array) $cmds;
             foreach ($lines as $line) {
                 $line = rtrim($line, "\r\n");
-                if ($line === '') {
-                    continue;
-                }
-                $makefileContent .= "\t{$line}\n";
+                if ($line === '') continue;
+                $make .= "\t{$line}\n"; // tab requis par make
             }
-
-            $makefileContent .= "\n";
+            $make .= "\n";
         }
 
-        $cmd = "printf %s " . escapeshellarg($makefileContent)
-            . " | sudo tee " . escapeshellarg($path . '/Makefile') . " > /dev/null";
+        $cmd = "bash -lc " . escapeshellarg(
+            "printf %s " . escapeshellarg($make) .
+            " | sudo tee " . escapeshellarg($path . '/Makefile') . " >/dev/null"
+        );
 
         return $system->execute($cmd);
     }
-
 
     /**
      * Retrieves the commands from a Makefile in a folder.

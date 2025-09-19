@@ -45,9 +45,7 @@ class System
         escapeshellarg($user) . ' ' . 
         escapeshellarg($command);
 
-        $process = Process::run($cmd);
-
-        // dd($process->successful(), $process->errorOutput(), $process->command());
+        $process = Process::timeout(300)->run($cmd);
 
         return $process;
     }
