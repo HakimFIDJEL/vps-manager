@@ -107,9 +107,9 @@ function Content({
 
 	const tabs = [
 		{ value: "overview", label: "Overview", icon: <LayoutGrid /> },
-		{ value: "commands", label: "Commands", icon: <SquareTerminal /> },
-		{ value: "containers", label: "Containers", icon: <Container /> },
 		{ value: "variables", label: "Variables", icon: <FileLock /> },
+		{ value: "containers", label: "Containers", icon: <Container /> },
+		{ value: "commands", label: "Commands", icon: <SquareTerminal /> },
 		{ value: "settings", label: "Settings", icon: <Settings2 /> },
 	];
 
