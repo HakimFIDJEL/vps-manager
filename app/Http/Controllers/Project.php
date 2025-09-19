@@ -51,9 +51,10 @@ class Project extends Controller
     {
         $res = Process::run('ls -l /projects');
 
+        
         // Checks if the /projects directory exists
         if (!$res->successful()) {
-
+            
             // If the directory does not exist, we create it
             $res = $system->execute('sudo mkdir -p /projects');
 
@@ -281,6 +282,7 @@ class Project extends Controller
 
             throw ValidationException::withMessages($errors);
         }
+
 
         // Step 4 - Create makefile
         $commands = $data['project']['commands'];

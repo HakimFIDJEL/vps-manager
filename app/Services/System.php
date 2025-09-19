@@ -19,8 +19,8 @@ class System
 
     public function __construct()
     {
-        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        $this->scriptsPath = base_path('scripts');
+        $this->pythonPath = config('vps.python_path');
+        $this->scriptsPath = config('vps.exec_scripts_path');
     }
 
     /**
@@ -39,11 +39,17 @@ class System
             throw new \RuntimeException('No user session found.');
         }
 
-        $script = escapeshellarg($this->scriptsPath . '/execute.py');
-        $userArg = escapeshellarg($user);
-        $commandArg = escapeshellarg($command);
+        $cmd = 'sudo -n ' . 
+        escapeshellarg($this->pythonPath) . ' ' . 
+        escapeshellarg($this->scriptsPath) . ' ' .
+        escapeshellarg($user) . ' ' . 
+        escapeshellarg($command);
 
-        return Process::run("{$this->pythonPath} {$script} {$userArg} {$commandArg}");
+        $process = Process::run($cmd);
+
+        // dd($process->successful(), $process->errorOutput(), $process->command());
+
+        return $process;
     }
 
     /**

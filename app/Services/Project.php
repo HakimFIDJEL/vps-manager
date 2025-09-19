@@ -26,8 +26,8 @@ class Project
 
     public function __construct()
     {
-        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        $this->scriptsPath = base_path('scripts');
+        $this->pythonPath = config('vps.python_path');
+        $this->scriptsPath = config('vps.exec_scripts_path');
     }
 
     /**
@@ -149,7 +149,7 @@ class Project
         if (!$res->successful()) {
             throw new RuntimeException('Failed to create docker-log.txt: ' . $res->errorOutput());
         }
-
+     
         $content = (string)($docker['content'] ?? '');
 
         $tmp = trim($system->execute("mktemp")->output());
@@ -163,6 +163,8 @@ class Project
             throw new RuntimeException('Failed to write temp compose: ' . $w->errorOutput());
         }
 
+        dd($path, $docker);
+
         $chk = $system->execute(
             "sudo /usr/bin/docker compose -f " . escapeshellarg($tmp) .
                 " --project-directory " . escapeshellarg($path) . " config"
@@ -171,6 +173,8 @@ class Project
             $system->execute("rm -f " . escapeshellarg($tmp));
             throw new RuntimeException(trim($chk->errorOutput()) ?: 'Invalid docker-compose file.');
         }
+        
+        dd($path, $docker);
 
         $mv = $system->execute(
             "sudo /usr/bin/mv " . escapeshellarg($tmp) . " " . escapeshellarg($path . '/docker-compose.yaml')

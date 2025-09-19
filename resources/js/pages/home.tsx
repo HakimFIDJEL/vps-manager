@@ -129,7 +129,6 @@ export default function Home() {
 				);
 				const id = (top.target as HTMLElement).id;
 				setActiveSection(id);
-				console.log(id);
 			},
 			{ root: null, rootMargin: "0px", threshold: 0.4 },
 		);
