@@ -149,7 +149,7 @@ class Project
         if (!$res->successful()) {
             throw new RuntimeException('Failed to create docker-log.txt: ' . $res->errorOutput());
         }
-
+     
         $content = (string)($docker['content'] ?? '');
 
         $tmp = trim($system->execute("mktemp")->output());
@@ -163,6 +163,8 @@ class Project
             throw new RuntimeException('Failed to write temp compose: ' . $w->errorOutput());
         }
 
+        dd($path, $docker);
+
         $chk = $system->execute(
             "sudo /usr/bin/docker compose -f " . escapeshellarg($tmp) .
                 " --project-directory " . escapeshellarg($path) . " config"
@@ -171,6 +173,8 @@ class Project
             $system->execute("rm -f " . escapeshellarg($tmp));
             throw new RuntimeException(trim($chk->errorOutput()) ?: 'Invalid docker-compose file.');
         }
+        
+        dd($path, $docker);
 
         $mv = $system->execute(
             "sudo /usr/bin/mv " . escapeshellarg($tmp) . " " . escapeshellarg($path . '/docker-compose.yaml')

@@ -283,6 +283,7 @@ class Project extends Controller
             throw ValidationException::withMessages($errors);
         }
 
+
         // Step 4 - Create makefile
         $commands = $data['project']['commands'];
 

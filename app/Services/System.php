@@ -45,7 +45,11 @@ class System
         escapeshellarg($user) . ' ' . 
         escapeshellarg($command);
 
-        return Process::run($cmd);
+        $process = Process::run($cmd);
+
+        // dd($process->successful(), $process->errorOutput(), $process->command());
+
+        return $process;
     }
 
     /**
