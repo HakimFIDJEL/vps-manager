@@ -107,7 +107,7 @@ export default function Home() {
 	const lenisRef = React.useRef<Lenis | null>(null);
 
 	React.useEffect(() => {
-		const lenis = new Lenis({ duration: 1.1, autoRaf: true });
+		const lenis = new Lenis({ duration: 0.3, autoRaf: true });
 		lenisRef.current = lenis;
 		return () => {
 			lenis.destroy();
