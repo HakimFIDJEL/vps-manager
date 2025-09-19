@@ -234,7 +234,7 @@ export function useRemoteDockerService({
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_prune(a: ActionOf<"docker-prune">): Promise<boolean> {
-		toast.loading("Removing all containers, networks and volumes...", {
+		toast.loading("Pruning Docker objects...", {
 			id: "prune",
 		});
 		try {
@@ -252,7 +252,7 @@ export function useRemoteDockerService({
 			}
 
 			setContainers(body?.containers ?? []);
-			toast.success("All containers, networks and volumes removed!");
+			toast.success("All Docker objects have been pruned!");
 
 			return true;
 		} catch (error: any) {

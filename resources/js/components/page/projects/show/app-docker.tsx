@@ -251,8 +251,8 @@ function QuickActions({
 								{/* <div className="text-xs text-muted-foreground">
 									Prune all volumes, networks...
 								</div> */}
-								<div className="text-xs text-muted-foreground font-mono">
-									docker compose down --volumes
+								<div className="text-xs text-muted-foreground font-mono whitespace-normal">
+									docker compose down -v --rmi all --remove-orphans
 								</div>
 							</div>
 						</Button>
@@ -264,10 +264,10 @@ function QuickActions({
 								Aggressive prune
 							</AlertDialogTitle>
 							<AlertDialogDescription>
-								Are you sure you want to remove all containers, volumes and networks by
+								Are you sure you want to remove all images, containers, volumes and networks by
 								running the{" "}
 								<Badge variant={"outline"} className="font-mono">
-									docker compose down --volumes
+									docker compose down -v --rmi all --remove-orphans
 								</Badge>{" "}
 								command?
 							</AlertDialogDescription>
