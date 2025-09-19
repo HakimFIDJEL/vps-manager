@@ -8,14 +8,17 @@ export type Variable = {
 
 // Schemas
 export const VariableSchema = z.object({
-  key: z.string({ message: "The field is required" })
-        .regex(/^[A-Z][A-Z0-9_]*$/, { message: "Key must be uppercase and separated by an underscore" }),
-  value: z.string({ message: "The field is required" })
-        .trim()
-        .min(1, { message: "Value is required" })
-        // .regex(/^\S+$/, { message: "Value must not contain spaces" }),
+	key: z
+		.string({ message: "The field is required" })
+		.regex(/^[A-Z][A-Z0-9_]*$/, {
+			message: "Key must be uppercase and separated by an underscore",
+		}),
+	value: z
+		.string({ message: "The field is required" })
+		.trim()
+		.min(1, { message: "Value is required" }),
+	// .regex(/^\S+$/, { message: "Value must not contain spaces" }),
 });
-
 
 export const VariableTextSchema = z.object({
 	textarea: z
@@ -49,9 +52,17 @@ export const VariableTextSchema = z.object({
 export const VariableEnvSchema = z.object({
 	file: z
 		.instanceof(File)
-		.refine((file) => file.name.endsWith(".env"), {
-			message: "Le fichier doit avoir l'extension .env",
-		})
+		.refine(
+			(file) =>
+				file.name === "env" ||
+				file.name === ".env" ||
+				file.name === ".env.example" ||
+				file.name.endsWith(".env") ||
+				file.name.endsWith(".env.example"),
+			{
+				message: "Le fichier doit être un .env, env ou .env.example",
+			},
+		)
 		.refine((file) => file.size <= 1024 * 1024, {
 			message: "Le fichier ne doit pas dépasser 1 Mo",
 		})
@@ -69,7 +80,6 @@ export const VariableEnvSchema = z.object({
 			},
 		),
 });
-
 
 export type VariableAction =
 	| { type: "variable-create"; variable: Variable }
