@@ -23,8 +23,8 @@ class Docker
 
     public function __construct()
     {
-        $this->pythonPath = env('PYTHON_PATH', '/usr/bin/python3');
-        $this->scriptsPath = base_path('scripts');
+        $this->pythonPath = config('vps.python_path');
+        $this->scriptsPath = config('vps.exec_scripts_path');
     }
 
     /**
@@ -56,7 +56,7 @@ class Docker
         return $system->execute(
             "sudo /usr/bin/docker compose -f " . escapeshellarg($path . "/docker-compose.yaml") .
                 " --project-directory " . escapeshellarg($path) .
-                " down --volumes --remove-orphans"
+                " down -v --rmi all --remove-orphans"
         );
     }
 

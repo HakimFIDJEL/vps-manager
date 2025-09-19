@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
-import sys
-import subprocess
+import sys, shlex, subprocess
+import os
 
 if len(sys.argv) < 3:
     sys.exit(1)
 
+# sys.argv[1] = user, sys.argv[2:] = command parts (or one arg with spaces)
 user = sys.argv[1]
-command = sys.argv[2:] 
+raw = ' '.join(sys.argv[2:])   # couvre les deux cas
+parts = shlex.split(raw)
 
-cmd_str = f"sudo -u {user} " + ' '.join(command)
+# if caller accidentally prefixed 'sudo', remove it
+# if parts and parts[0] == 'sudo':
+#     parts = parts[1:]
+
+cmd = ["sudo", "-u", user] + parts
+to = int(os.getenv("EXEC_TIMEOUT", "600"))  # default timeout 10 minutes
 
 try:
-    result = subprocess.run(
-        cmd_str,
-        shell=True,
-        capture_output=True,
-        text=True,
-        timeout=10
-    )
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=to)
     sys.stdout.write(result.stdout)
     sys.stderr.write(result.stderr)
     sys.exit(result.returncode)
-
 except Exception as e:
     sys.stderr.write(str(e))
     sys.exit(1)

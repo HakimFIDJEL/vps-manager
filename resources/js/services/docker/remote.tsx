@@ -6,7 +6,6 @@ import { useLocalDockerService } from "./local";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
-import { useDocker } from "@/contexts/docker-context";
 import { parseDockerCompose } from "@/lib/docker/parser";
 
 // Types
@@ -15,8 +14,10 @@ import type { DockerService, Registry } from "@/lib/docker/type";
 import { router } from "@inertiajs/react";
 
 export function useRemoteDockerService({
+	containers,
 	setContainers,
 }: {
+	containers: DockerContainer[];
 	setContainers: (containers: DockerContainer[]) => void;
 }): DockerService {
 	const { project, updateProject } = useProject();
@@ -56,6 +57,7 @@ export function useRemoteDockerService({
 	 * @returns 	Whether the operation was successful
 	 */
 	async function docker_save() {
+
 		const r = parseDockerCompose(
 			project.docker.content,
 			project.docker.isStrict,
@@ -110,6 +112,7 @@ export function useRemoteDockerService({
 	async function docker_containers_run(
 		a: ActionOf<"docker-containers-run">,
 	): Promise<boolean> {
+
 		toast.loading("Running all containers...", { id: "run-all" });
 		try {
 			const res = await fetch(
@@ -152,6 +155,7 @@ export function useRemoteDockerService({
 	async function docker_containers_stop(
 		a: ActionOf<"docker-containers-stop">,
 	): Promise<boolean> {
+		
 		toast.loading("Stopping all containers...", { id: "stop-all" });
 		try {
 			const res = await fetch(
@@ -194,6 +198,7 @@ export function useRemoteDockerService({
 	async function docker_containers_remove(
 		a: ActionOf<"docker-containers-remove">,
 	): Promise<boolean> {
+
 		toast.loading("Removing all containers...", { id: "rm-all" });
 		try {
 			const res = await fetch(
@@ -234,7 +239,8 @@ export function useRemoteDockerService({
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_prune(a: ActionOf<"docker-prune">): Promise<boolean> {
-		toast.loading("Removing all containers, networks and volumes...", {
+
+		toast.loading("Pruning Docker objects...", {
 			id: "prune",
 		});
 		try {
@@ -252,7 +258,7 @@ export function useRemoteDockerService({
 			}
 
 			setContainers(body?.containers ?? []);
-			toast.success("All containers, networks and volumes removed!");
+			toast.success("All Docker objects have been pruned!");
 
 			return true;
 		} catch (error: any) {
@@ -275,6 +281,7 @@ export function useRemoteDockerService({
 	async function docker_container_run(
 		a: ActionOf<"docker-container-run">,
 	): Promise<boolean> {
+
 		toast.loading("Running container...", { id: "run" });
 		try {
 			const res = await fetch(
@@ -320,6 +327,7 @@ export function useRemoteDockerService({
 	async function docker_container_stop(
 		a: ActionOf<"docker-container-stop">,
 	): Promise<boolean> {
+
 		toast.loading("Stopping container...", { id: "stop" });
 		try {
 			const res = await fetch(
@@ -365,6 +373,7 @@ export function useRemoteDockerService({
 	async function docker_container_restart(
 		a: ActionOf<"docker-container-restart">,
 	): Promise<boolean> {
+
 		toast.loading("Restarting container...", { id: "restart" });
 		try {
 			const res = await fetch(
@@ -410,6 +419,7 @@ export function useRemoteDockerService({
 	async function docker_container_remove(
 		a: ActionOf<"docker-container-remove">,
 	): Promise<boolean> {
+
 		toast.loading("Removing container...", { id: "rm" });
 		try {
 			const res = await fetch(
@@ -453,6 +463,7 @@ export function useRemoteDockerService({
 	 * @returns Whether the operation was successful
 	 */
 	async function docker_containers_list(a: ActionOf<"docker-containers-list">) {
+
 		toast.loading("Refreshing containers...", { id: "containers-list" });
 		try {
 			const res = await fetch(

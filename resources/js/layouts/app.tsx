@@ -2,16 +2,12 @@
 
 // Necessary imports
 import { usePage } from "@inertiajs/react";
-import { useEffect } from "react";
 import { getCookie, isCookieConsent } from "@/lib/utils";
-import { toast } from "sonner";
 
 // Providers
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Layouts
-import { AppSidebar } from "@/components/layouts/sidebar/_sidebar";
 import { AppHeader } from "@/components/layouts/header/_header";
 
 // Types

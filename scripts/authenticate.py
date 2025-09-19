@@ -1,4 +1,5 @@
 import sys
+import os
 import json
 import getpass
 import pwd
@@ -37,7 +38,6 @@ if len(sys.argv) != 2:
     print(json.dumps({'auth': False, 'error': 'The username is required'}))
     sys.exit(1)
 
-# If pam is missing, exit early with a clear, actionable message
 if not PAM_AVAILABLE:
     print(json.dumps({
         'auth': False,
@@ -46,13 +46,12 @@ if not PAM_AVAILABLE:
     sys.exit(1)
 
 username = sys.argv[1]
-# password = getpass.getpass()
 password = sys.stdin.readline().strip()
 
 auth = pam.pam()
 if not auth.authenticate(username, password):
     print(json.dumps({'auth': False}))
-    sys.exit(0)
+    sys.exit(0)    
 
 for cmd in REQUIRED_COMMANDS:
     if not user_can_run_command(username, cmd):
@@ -74,3 +73,4 @@ try:
     }))
 except Exception:
     print(json.dumps({'auth': True, 'username': username}))
+

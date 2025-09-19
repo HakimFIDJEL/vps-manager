@@ -4,6 +4,9 @@ namespace App\Http\Requests\auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @method string ip()
+ */
 class Login extends FormRequest
 {
     /**

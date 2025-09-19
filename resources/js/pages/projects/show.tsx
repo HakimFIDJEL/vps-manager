@@ -101,15 +101,15 @@ function Content({
 	containersFetched: DockerContainer[];
 }) {
 	const { setProject, updateProject } = useProject();
-	const { handleDocker, setContainers } = useDocker();
+	const { handleDocker, setContainers, loading } = useDocker();
 	const timerRef = React.useRef<number | null>(null);
 	const [timerPercentage, setTimerPercentage] = React.useState(100);
 
 	const tabs = [
 		{ value: "overview", label: "Overview", icon: <LayoutGrid /> },
-		{ value: "commands", label: "Commands", icon: <SquareTerminal /> },
-		{ value: "containers", label: "Containers", icon: <Container /> },
 		{ value: "variables", label: "Variables", icon: <FileLock /> },
+		{ value: "containers", label: "Containers", icon: <Container /> },
+		{ value: "commands", label: "Commands", icon: <SquareTerminal /> },
 		{ value: "settings", label: "Settings", icon: <Settings2 /> },
 	];
 
@@ -151,7 +151,9 @@ function Content({
 		setTimerPercentage(100);
 
 		timerRef.current = window.setInterval(() => {
-			handleDocker({ type: "docker-containers-list" });
+			if (!loading) {
+				handleDocker({ type: "docker-containers-list" });
+			}
 			remaining = timer;
 			setTimerPercentage(100);
 		}, timer * 1000);
