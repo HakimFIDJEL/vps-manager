@@ -275,7 +275,31 @@ From the web interface you can:
 
 ## Documentation
 
-> In progress...
+### Authentication
+Authentication is handled directly against the Linux system where VPS Manager runs.  
+To log in, use the **username** and **password** of a **non-root user** that exists on the server.  
+Permissions and available actions depend on the `sudoers` configuration of that user.  
+
+### Projects
+
+#### Project Overview
+On the **Projects** page, all projects are listed with two possible views:
+- **List view**: compact table for quick navigation.  
+- **Grid view**: card-based display for a more visual overview.
+
+#### Project Creation
+New projects are created through a guided **stepper** in the web interface:
+1. **Path**: define the target directory under `/projects/<name>`.  
+2. **Environment variables**: add entries for the `.env` file.  
+3. **Docker Compose**: provide the `docker-compose.yaml` configuration.  
+4. **Commands**: define shell commands that will be exposed in the generated `Makefile`.  
+5. **Finalize**: the project directory and configuration files are created.  
+
+#### Project Visualization & Management
+Each project has a dedicated page where you can:
+- Edit the environment variables, Docker Compose config, and commands (same as at creation).  
+- Manage Docker containers (start, stop, restart).  
+- Rename or delete the project directory.  
 
 ## Contributing
 
