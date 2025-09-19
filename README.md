@@ -34,26 +34,16 @@ The Linux user running the app must be allowed to execute required system comman
 
 > To see which user/group PHP-FPM uses, check `/etc/php/8.x/fpm/pool.d/www.conf` (default: `www-data`).
 
+Update `sudoers` (replace `<my_user>`):
 
 ```bash
 sudo visudo -f /etc/sudoers.d/vps-manager
-```
-
-And copy this in the file
-
-```bash
-Defaults:www-data !requiretty
-
-www-data ALL=(ALL) NOPASSWD: /var/www/html/.venv/bin/python /var/www/html/scripts/authenticate.py *
-www-data ALL=(ALL) NOPASSWD: /var/www/html/.venv/bin/python /var/www/html/scripts/execute.py *
-
-www-data ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm, /bin/echo
 <my_user> ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm, /bin/echo
 ```
 
-> Update `sudoers` (replace `<my_user>` with the user(s) that you wan to log in with and `www-data` with the user PHP-FPM uses):
+> When logging in, make sure your user has the right permissions as stated in **Permissions** and that `PasswordAuthentication` is set to `yes` in the files `/etc/ssh/sshd_config` and `/etc/ssh/sshd_config.d/*` if they exist.
 
-You’ll find install steps for both the requirements and the app in **Installation**.
+You’ll find installation steps for both the requirements and the app in **Installation**.
 
 ## Installation
 
@@ -253,12 +243,72 @@ PYTHON_PATH=/path/to/vps-manager/.venv/bin/python
 
 ## Usage
 
-> When logging in, make sure your user has the right permissions as stated in **Permissions** and that `PasswordAuthentication` is set to `yes` in the files `/etc/ssh/sshd_config` and `/etc/ssh/sshd_config.d/*` if they exist.
+Once installed and configured, you can access VPS Manager via your browser:
+
+- `https://<your_server_ip>:9443` (secure, self-signed cert, warning expected)
+- `http://<your_server_ip>:9000` (auto-redirects to HTTPS)
+
+### Authentication
+You must log in with a valid **Linux system user** configured on the VPS.  
+The credentials are verified through **PAM authentication**.  
+Permissions for each user depend on the configured `sudoers` rules.
+
+### Projects
+A **project** is defined by:
+- a `.env` file (environment variables),
+- a `docker-compose.yaml` file,
+- an optional `Makefile`.
+
+By default, all projects are stored under `/projects/<project_name>`.
+
+### Workflow
+From the web interface you can:
+- **Create a project** by uploading or writing its `docker-compose.yaml`.
+- **Start / Stop containers** with one click.
+- **Prune resources** (containers, volumes, networks, images) safely.
+- *Much more features to come (checkout the roadmap on the landing page)...*
+
+### System Notes
+- Ports `9000` and `9443` are reserved for VPS Manager itself — do not reuse them in your projects.
+- All system commands (docker, mkdir, mv, rm, etc.) are executed through controlled Python wrappers with `sudo` delegation.
+- Make sure your Linux user is correctly listed in `/etc/sudoers.d/vps-manager` as explained in the **Permissions** section.
 
 ## Documentation
 
+### Authentication
+Authentication is handled directly against the Linux system where VPS Manager runs.  
+To log in, use the **username** and **password** of a **non-root user** that exists on the server.  
+Permissions and available actions depend on the `sudoers` configuration of that user.  
+
+### Projects
+
+#### Project Overview
+On the **Projects** page, all projects are listed with two possible views:
+- **List view**: compact table for quick navigation.  
+- **Grid view**: card-based display for a more visual overview.
+
+#### Project Creation
+New projects are created through a guided **stepper** in the web interface:
+1. **Path**: define the target directory under `/projects/<name>`.  
+2. **Environment variables**: add entries for the `.env` file.  
+3. **Docker Compose**: provide the `docker-compose.yaml` configuration.  
+4. **Commands**: define shell commands that will be exposed in the generated `Makefile`.  
+5. **Finalize**: the project directory and configuration files are created.  
+
+#### Project Visualization & Management
+Each project has a dedicated page where you can:
+- Edit the environment variables, Docker Compose config, and commands (same as at creation).  
+- Manage Docker containers (start, stop, restart).  
+- Rename or delete the project directory.  
+
 ## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contribute to this project.
+
+## Security
+
+For details on reporting vulnerabilities and the project’s security policy, see [SECURITY.md](./SECURITY.md).
 
 ## License
 
-
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
