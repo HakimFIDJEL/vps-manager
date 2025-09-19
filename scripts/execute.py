@@ -15,7 +15,7 @@ parts = shlex.split(raw)
 #     parts = parts[1:]
 
 cmd = ["sudo", "-u", user] + parts
-to = int(os.getenv("EXEC_TIMEOUT", "300"))
+to = int(os.getenv("EXEC_TIMEOUT", "600"))  # default timeout 10 minutes
 
 try:
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=to)

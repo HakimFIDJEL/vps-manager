@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { z } from "zod";
-import yaml from "js-yaml";
+// import yaml from "js-yaml";
+import * as YAML from "yaml";
 
 // Docker Compose Schema
 const DockerServiceSchema = z
@@ -13,10 +14,7 @@ const DockerServiceSchema = z
 		env_file: z.union([z.string(), z.array(z.string())]).optional(),
 		networks: z.array(z.string()).optional(),
 		labels: z
-			.union([
-				z.record(z.string()),
-				z.array(z.string().regex(/^[^=]+=.*/)), 
-			])
+			.union([z.record(z.string()), z.array(z.string().regex(/^[^=]+=.*/))])
 			.optional(),
 
 		depends_on: z
@@ -89,145 +87,73 @@ export type ParsedDockerCompose = {
 };
 
 export function parseDockerCompose(
-	content: string,
-	isStrict: boolean,
-	variables_length: number,
+  content: string,
+  isStrict: boolean,
+  variables_length: number,
 ): ParsedDockerCompose {
-	try {
-		if (content.length === 0) {
-			toast.error("An error occured", {
-				description: "Invalid docker configuration format: Empty file",
-			});
-			return {
-				isValid: false,
-				isStrict: isStrict,
-				services: [],
-				volumes: [],
-				networks: [],
-			};
-		}
+  try {
+    if (content.length === 0) {
+      toast.error("An error occured", { description: "Invalid docker configuration format: Empty file" });
+      return { isValid: false, isStrict, services: [], volumes: [], networks: [] };
+    }
 
-		// Parse YAML content
-		const parsedYaml = yaml.load(content) as Record<string, any>;
+    if (isStrict) {
+      const parsedYaml = YAML.parse(content) as Record<string, any>;
+      const result = DockerComposeSchema.safeParse(parsedYaml);
+      if (!result.success) {
+        const errors = result.error.errors.map(err => `Field "${err.path.join(".")}": ${err.message}`);
+        toast.error("An error occured", { description: `Invalid docker configuration format: ${errors.join(", ")}` });
+        return { isValid: false, isStrict, services: [], volumes: [], networks: [] };
+      }
 
-		// Validate against schema
-		if (isStrict) {
-			const result = DockerComposeSchema.safeParse(parsedYaml);
+      if (parsedYaml.services && variables_length > 0) {
+        Object.keys(parsedYaml.services).forEach((serviceName) => {
+          const service = parsedYaml.services[serviceName] ?? {};
+          const envFile = service.env_file ?? [];
+          const envFileArray = Array.isArray(envFile) ? envFile : [envFile];
+          if (!envFileArray.includes(".env")) service.env_file = [...envFileArray, ".env"];
+          parsedYaml.services[serviceName] = service;
+        });
+      }
 
-			if (!result.success) {
-				console.error("Validation errors:", result.error.errors);
-				const errors = result.error.errors.map((err) => {
-					const path = err.path.join(".");
-					return `Field "${path}": ${err.message}`;
-				});
-				// console.error('Detailed validation errors:', errors);
-				toast.error("An error occured", {
-					description: `Invalid docker configuration format: ${errors.join(", ")}`,
-				});
-				return {
-					isValid: false,
-					isStrict: false,
-					services: [],
-					volumes: [],
-					networks: [],
-				};
-			}
+      const updatedContent = YAML.stringify(parsedYaml);
 
-			// Modifier le YAML pour ajouter .env à tous les services
-			if (parsedYaml.services && variables_length > 0) {
-				Object.keys(parsedYaml.services).forEach((serviceName) => {
-					const service = parsedYaml.services[serviceName];
-					const envFile = service.env_file || [];
-					const envFileArray = Array.isArray(envFile) ? envFile : [envFile];
+      const services = Object.entries(parsedYaml.services ?? {}).map(([name, config]: [string, any]) => ({
+        name,
+        image: config.image || "build context",
+        env_file: Array.isArray(config?.env_file) ? config.env_file : (config?.env_file ? [config.env_file] : undefined),
+      }));
+      const volumes = Object.entries(parsedYaml.volumes ?? {}).map(([name, config]: [string, any]) => ({
+        name,
+        driver: config?.driver || "local",
+      }));
+      const networks = Object.entries(parsedYaml.networks ?? {}).map(([name, config]: [string, any]) => ({
+        name,
+        driver: config?.driver || "bridge",
+        customName: config?.name,
+      }));
 
-					if (!envFileArray.includes(".env")) {
-						service.env_file = [...envFileArray, ".env"];
-					}
-				});
-			}
+      if (services.length === 0) {
+        toast.error("An error occured", { description: "Invalid docker configuration format: No services found" });
+        return { isValid: false, isStrict, services: [], volumes: [], networks: [] };
+      }
 
-			// Mettre à jour le contenu YAML
-			const updatedContent = yaml.dump(parsedYaml);
-
-			// Extract services, volumes, and networks
-			const services = Object.entries(parsedYaml.services).map(
-				([name, config]: [string, any]) => ({
-					name,
-					image: config.image || "build context",
-					env_file: config.env_file,
-				}),
-			);
-
-			const volumes = Object.entries(parsedYaml.volumes || {}).map(
-				([name, config]: [string, any]) => ({
-					name,
-					driver: config?.driver || "local",
-				}),
-			);
-
-			const networks = Object.entries(parsedYaml.networks || {}).map(
-				([name, config]: [string, any]) => ({
-					name,
-					driver: config?.driver || "bridge",
-					customName: config?.name,
-				}),
-			);
-
-			if (services.length === 0) {
-				toast.error("An error occured", {
-					description: "Invalid docker configuration format: No services found",
-				});
-				return {
-					isValid: false,
-					isStrict: isStrict,
-					services: [],
-					volumes: [],
-					networks: [],
-				};
-			}
-
-			return {
-				isValid: true,
-				isStrict: isStrict,
-				services,
-				volumes,
-				networks,
-				updatedContent,
-			};
-		} else {
-			const updatedContent = yaml.dump(parsedYaml);
-
-			return {
-				isValid: true,
-				isStrict: isStrict,
-				services: [],
-				volumes: [],
-				networks: [],
-				updatedContent,
-			};
-		}
-	} catch (error) {
-		console.error("Error parsing docker configuration:", error);
-		if (error instanceof z.ZodError) {
-			const errors = error.errors.map((err) => {
-				const path = err.path.join(".");
-				return `Field "${path}": ${err.message}`;
-			});
-			toast.error("An error occured", {
-				description: `Invalid docker configuration format: ${errors.join(", ")}`,
-			});
-		} else if (error instanceof Error) {
-			toast.error("An error occured", {
-				description: `Failed to parse docker configuration: ${error.message}`,
-			});
-		}
-
-		return {
-			isValid: false,
-			isStrict: isStrict,
-			services: [],
-			volumes: [],
-			networks: [],
-		};
-	}
+      return { isValid: true, isStrict, services, volumes, networks, updatedContent };
+    } else {
+      try {
+        YAML.parse(content);
+      } catch (e) {
+        toast.error("An error occured", { description: `Failed to parse docker configuration: ${(e as Error).message}` });
+        return { isValid: false, isStrict, services: [], volumes: [], networks: [] };
+      }
+      return { isValid: true, isStrict, services: [], volumes: [], networks: [], updatedContent: content };
+    }
+  } catch (error) {
+    console.error("Error parsing docker configuration:", error);
+    toast.error("An error occured", {
+      description: `Failed to parse docker configuration: ${error instanceof Error ? error.message : String(error)}`,
+    });
+    return { isValid: false, isStrict, services: [], volumes: [], networks: [] };
+  }
 }
+
