@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys, shlex, subprocess
+import os
 
 if len(sys.argv) < 3:
     sys.exit(1)
@@ -14,9 +15,10 @@ parts = shlex.split(raw)
 #     parts = parts[1:]
 
 cmd = ["sudo", "-u", user] + parts
+to = int(os.getenv("EXEC_TIMEOUT", "600"))  # default timeout 10 minutes
 
 try:
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=to)
     sys.stdout.write(result.stdout)
     sys.stderr.write(result.stderr)
     sys.exit(result.returncode)

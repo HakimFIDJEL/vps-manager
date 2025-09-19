@@ -16,7 +16,7 @@ const DockerContext = createContext<DockerContextType | undefined>(undefined);
 export function DockerProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [containers, setContainers] = useState<DockerContainer[]>([]);
-  const service: DockerService = useDockerServiceFactory({ setContainers });
+  const service: DockerService = useDockerServiceFactory({ containers, setContainers });
 
   const handleDocker = useCallback(async (action: DockerAction) => {
     setLoading(true);

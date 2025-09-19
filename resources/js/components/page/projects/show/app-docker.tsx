@@ -203,7 +203,7 @@ function QuickActions({
 					onClick={() => {
 						handleDocker({ type: "docker-containers-list" });
 					}}
-					disabled={loading || !project.docker.isSaved}
+					disabled={loading}
 					className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden group"
 				>
 					<div className="p-2 bg-primary/10 rounded-md">
@@ -240,7 +240,7 @@ function QuickActions({
 						<Button
 							type={"button"}
 							variant={"outline"}
-							disabled={loading|| !project.docker.isSaved}
+							disabled={loading}
 							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 						>
 							<div className="p-2 bg-primary/10 rounded-md">
@@ -251,8 +251,8 @@ function QuickActions({
 								{/* <div className="text-xs text-muted-foreground">
 									Prune all volumes, networks...
 								</div> */}
-								<div className="text-xs text-muted-foreground font-mono">
-									docker compose down --volumes
+								<div className="text-xs text-muted-foreground font-mono whitespace-normal">
+									docker compose down -v --rmi all --remove-orphans
 								</div>
 							</div>
 						</Button>
@@ -264,10 +264,10 @@ function QuickActions({
 								Aggressive prune
 							</AlertDialogTitle>
 							<AlertDialogDescription>
-								Are you sure you want to remove all containers, volumes and networks by
+								Are you sure you want to remove all images, containers, volumes and networks by
 								running the{" "}
 								<Badge variant={"outline"} className="font-mono">
-									docker compose down --volumes
+									docker compose down -v --rmi all --remove-orphans
 								</Badge>{" "}
 								command?
 							</AlertDialogDescription>
@@ -297,7 +297,7 @@ function QuickActions({
 						<Button
 							type={"button"}
 							variant={"outline"}
-							disabled={loading || !project.docker.isSaved}
+							disabled={loading}
 							className="h-auto w-full flex gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden items-center"
 						>
 							<div className="p-2 bg-primary/10 rounded-md">
@@ -353,7 +353,7 @@ function QuickActions({
 							type={"button"}
 							variant={"outline"}
 							disabled={
-								loading || containers_running.length == 0 || containers.length == 0 || !project.docker.isSaved
+								loading || containers_running.length == 0 || containers.length == 0
 							}
 							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 						>
@@ -409,7 +409,7 @@ function QuickActions({
 						<Button
 							type={"button"}
 							variant={"outline"}
-							disabled={loading || containers.length == 0 || !project.docker.isSaved}
+							disabled={loading || containers.length == 0}
 							className="h-auto w-full flex items-center gap-4 p-4 rounded-lg border hover:!border-primary/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
 						>
 							<div className="p-2 bg-primary/10 rounded-md">

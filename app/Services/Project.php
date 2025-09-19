@@ -72,7 +72,13 @@ class Project
             $envContent .= "{$variable['key']}={$variable['value']}\n";
         }
 
-        return $system->execute("echo " . escapeshellarg($envContent) . " | sudo tee " . escapeshellarg($path) . '/.env' . " > /dev/null");
+        $cmd = "bash -lc " . escapeshellarg(
+            "printf %s " . escapeshellarg($envContent) .
+            " | sudo tee " . escapeshellarg($path . '/.env') . " >/dev/null"
+        );
+        $process = $system->execute($cmd);
+        
+        return $process;
     }
 
     /**
@@ -143,49 +149,40 @@ class Project
      */
     public function createDockerConfiguration(string $path, array $docker, ServicesSystem $system): ProcessResult
     {
-        $strict = !empty($docker['isStrict']);
-        $log = "isStrict=" . ($strict ? 'true' : 'false') . "\n";
-        $res = $system->execute("echo " . escapeshellarg($log) . " | sudo tee " . escapeshellarg($path . '/docker-log.txt') . " > /dev/null");
-        if (!$res->successful()) {
-            throw new RuntimeException('Failed to create docker-log.txt: ' . $res->errorOutput());
-        }
-     
         $content = (string)($docker['content'] ?? '');
-
-        $tmp = trim($system->execute("mktemp")->output());
-        if (!$tmp) throw new RuntimeException('mktemp failed.');
-
-        $w = $system->execute(
-            "printf %s " . escapeshellarg($content) . " > " . escapeshellarg($tmp)
-        );
-        if (!$w->successful()) {
-            $system->execute("rm -f " . escapeshellarg($tmp));
-            throw new RuntimeException('Failed to write temp compose: ' . $w->errorOutput());
+        if ($content === '') {
+            throw new RuntimeException('compose content is empty');
         }
 
-        dd($path, $docker);
+        // Fichier temporaire écrit côté PHP (évite tout souci de quoting/tee)
+        $tmp = tempnam(sys_get_temp_dir(), 'compose_');
+        if ($tmp === false) throw new RuntimeException('tempnam failed');
+        if (file_put_contents($tmp, $content) === false || filesize($tmp) === 0) {
+            @unlink($tmp);
+            throw new RuntimeException('failed to write temp compose');
+        }
+        @chmod($tmp, 0644);
 
+        // S’assure que le dossier projet existe
+        $mk = $system->execute("sudo /usr/bin/mkdir -p " . escapeshellarg($path));
+        if (!$mk->successful()) { @unlink($tmp); throw new RuntimeException('mkdir failed: '.$mk->errorOutput()); }
+
+        // Validation docker compose
         $chk = $system->execute(
             "sudo /usr/bin/docker compose -f " . escapeshellarg($tmp) .
-                " --project-directory " . escapeshellarg($path) . " config"
+            " --project-directory " . escapeshellarg($path) . " config"
         );
-        if (!$chk->successful()) {
-            $system->execute("rm -f " . escapeshellarg($tmp));
-            throw new RuntimeException(trim($chk->errorOutput()) ?: 'Invalid docker-compose file.');
-        }
-        
-        dd($path, $docker);
 
+        if (!$chk->successful()) { @unlink($tmp); throw new RuntimeException(trim($chk->errorOutput()) ?: 'Invalid docker-compose file.'); }
+
+        // Déplacement atomique vers le projet
         $mv = $system->execute(
             "sudo /usr/bin/mv " . escapeshellarg($tmp) . " " . escapeshellarg($path . '/docker-compose.yaml')
         );
-        if (!$mv->successful()) {
-            $system->execute("rm -f " . escapeshellarg($tmp));
-            throw new RuntimeException('Failed to move compose file: ' . $mv->errorOutput());
-        }
+        if (!$mv->successful()) { @unlink($tmp); throw new RuntimeException('move failed: '.$mv->errorOutput()); }
+
         return $mv;
     }
-
 
     /**
      * Retrieves the Docker configuration from a folder.
@@ -252,37 +249,30 @@ class Project
      */
     public function createMakefile(string $path, array $commands, ServicesSystem $system): ProcessResult
     {
-        $makefileContent = '';
-
+        $make = '';
         foreach ($commands as $c) {
             $target      = $c['target'];
             $description = $c['description'] ?? 'Unknown description';
             $cmds        = $c['command'];
 
-            $makefileContent .= "# {$description}\n";
-            $makefileContent .= "{$target}:\n";
+            $make .= "# {$description}\n{$target}:\n";
 
-            $lines = is_string($cmds)
-                ? preg_split('/\r\n|\n|\r/', $cmds)
-                : (array) $cmds;
-
+            $lines = is_string($cmds) ? preg_split('/\r\n|\n|\r/', $cmds) : (array) $cmds;
             foreach ($lines as $line) {
                 $line = rtrim($line, "\r\n");
-                if ($line === '') {
-                    continue;
-                }
-                $makefileContent .= "\t{$line}\n";
+                if ($line === '') continue;
+                $make .= "\t{$line}\n"; // tab requis par make
             }
-
-            $makefileContent .= "\n";
+            $make .= "\n";
         }
 
-        $cmd = "printf %s " . escapeshellarg($makefileContent)
-            . " | sudo tee " . escapeshellarg($path . '/Makefile') . " > /dev/null";
+        $cmd = "bash -lc " . escapeshellarg(
+            "printf %s " . escapeshellarg($make) .
+            " | sudo tee " . escapeshellarg($path . '/Makefile') . " >/dev/null"
+        );
 
         return $system->execute($cmd);
     }
-
 
     /**
      * Retrieves the commands from a Makefile in a folder.

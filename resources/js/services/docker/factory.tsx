@@ -6,10 +6,11 @@ import { useProject } from "@/contexts/project-context";
 import type { DockerService, DockerContainer } from "@/lib/docker/type";
 
 export function useDockerServiceFactory({
+  containers,
   setContainers,
-}: { setContainers: (c: DockerContainer[]) => void }): DockerService {
+}: { containers: DockerContainer[]; setContainers: (c: DockerContainer[]) => void }): DockerService {
   const { project } = useProject();
   const local = useLocalDockerService();
-  const remote = useRemoteDockerService({ setContainers });
+  const remote = useRemoteDockerService({ containers, setContainers });
   return project.isCreated ? remote : local;
 }

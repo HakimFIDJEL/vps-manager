@@ -56,7 +56,7 @@ class Docker
         return $system->execute(
             "sudo /usr/bin/docker compose -f " . escapeshellarg($path . "/docker-compose.yaml") .
                 " --project-directory " . escapeshellarg($path) .
-                " down --volumes --remove-orphans"
+                " down -v --rmi all --remove-orphans"
         );
     }
 
