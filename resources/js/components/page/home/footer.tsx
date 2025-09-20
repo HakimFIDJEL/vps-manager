@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 
 // Custom components
-import { Logo } from "@/components/layouts/logo";
+import { Logo } from "@/components/layouts/app/logo";
 
 // Icons
 import { Linkedin, Twitter } from "lucide-react";

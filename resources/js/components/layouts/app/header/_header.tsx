@@ -2,9 +2,9 @@
 import { Link } from "@inertiajs/react";
 
 // Custom components
-import { Breadcrumbs } from "@/components/layouts/header/breadcrumbs";
-import AppearanceToggleDropdown from "@/components/layouts/header/theme";
-import { Logo } from "../logo";
+import { Breadcrumbs } from "@/components/layouts/app/header/breadcrumbs";
+import AppearanceToggleDropdown from "@/components/layouts/app/header/theme";
+import { Logo } from "../../logo";
 
 // Shadcn UI components
 import { Separator } from "@/components/ui/separator";

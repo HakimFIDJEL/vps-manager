@@ -7,7 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Authentication as ControllerAuthentication;
 use App\Http\Controllers\Project as ControllerProjects;
 use App\Http\Controllers\Docker as ControllerDockers;
-use App\Http\Controllers\Footer as ControllerFooter;
+use App\Http\Controllers\Policy as ControllerPolicies;
 
 
 // Middlewares
@@ -81,13 +81,12 @@ Route::prefix('/auth')->name('auth.')->controller(ControllerAuthentication::clas
     Route::post('/login', 'loginPost')->name('login');
 });
 
-// FOOTER ROUTES
-Route::prefix('/footer')->name('footer.')->controller(ControllerFooter::class)->group(function() {
+// POLICIES ROUTES
+Route::prefix('/policies')->name('policies.')->controller(ControllerPolicies::class)->group(function() {
     
     Route::get('/changelog', 'changelog')->name('changelog');
     Route::get('/terms', 'terms')->name('terms');
     Route::get('/privacy', 'privacy')->name('privacy');
-    Route::get('/cookies', 'cookies')->name('cookies');
 
 });
 

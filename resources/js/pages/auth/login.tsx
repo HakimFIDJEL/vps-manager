@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 // Custom components
 import { SmoothItem } from "@/components/ui/smooth-resized";
-import { Logo } from "@/components/layouts/logo";
+import { Logo } from "@/components/layouts/app/logo";
 
 // Icons
 import { Lock, LogIn, User, Loader2, ArrowLeft } from "lucide-react";

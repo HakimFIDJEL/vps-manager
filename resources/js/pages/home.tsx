@@ -64,7 +64,7 @@ const links = [
 
 			{
 				title: "Changelog",
-				href: route('footer.changelog'),
+				href: route('policies.changelog'),
 			},
 		],
 	},
@@ -73,15 +73,11 @@ const links = [
 		items: [
 			{
 				title: "Terms",
-				href: route('footer.terms'),
+				href: route('policies.terms'),
 			},
 			{
 				title: "Privacy",
-				href: route('footer.privacy'),
-			},
-			{
-				title: "Cookies",
-				href: route('footer.cookies'),
+				href: route('policies.privacy'),
 			},
 			{
 				title: "Security",
