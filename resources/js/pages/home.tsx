@@ -52,14 +52,17 @@ const links = [
 			{
 				title: "Source Code",
 				href: "https://github.com/HakimFIDJEL/vps-manager",
+				target: "_blank",
 			},
 			{
 				title: "Readme",
 				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/README.md",
+				target: "_blank",
 			},
 			{
 				title: "Contributing",
 				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/CONTRIBUTING.md",
+				target: "_blank",
 			},
 
 			{
@@ -82,10 +85,12 @@ const links = [
 			{
 				title: "Security",
 				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/SECURITY.md",
+				target: "_blank",
 			},
 			{
 				title: "Licence",
 				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/LICENCE.md",
+				target: "_blank",
 			},
 		],
 	},
@@ -96,6 +101,7 @@ export type Link = {
 	items: {
 		title: string;
 		href: string;
+		target?: string;
 	}[];
 };
 
@@ -148,23 +154,23 @@ export default function Home() {
 						<Hero />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Features />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Solution />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Customers />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Help />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<About />
 					</SmoothItem>
 				</div>
@@ -172,7 +178,7 @@ export default function Home() {
 				<ScrollTop />
 			</main>
 
-			<SmoothItem delay={0.3}>
+			<SmoothItem delay={0.2}>
 				<Footer links={links} />
 			</SmoothItem>
 		</>
