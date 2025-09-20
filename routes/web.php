@@ -8,6 +8,7 @@ use App\Http\Controllers\Authentication as ControllerAuthentication;
 use App\Http\Controllers\Project as ControllerProjects;
 use App\Http\Controllers\Docker as ControllerDockers;
 use App\Http\Controllers\Policy as ControllerPolicies;
+use App\Http\Controllers\Log as ControllerLogs;
 
 
 // Middlewares
@@ -70,6 +71,16 @@ Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::
         Route::get('/restart/{inode}/{id}', 'container_restart')->name('restart.id');
         Route::get('/remove/{inode}/{id}', 'container_remove')->name('remove.id');
     });
+});
+
+// LOG ROUTES
+Route::prefix('/logs')->name('logs.')->middleware(MiddlewareAuthentication::class)->controller(ControllerLogs::class)->group(function () {
+
+    Route::get('/', 'index')->name('index');
+    Route::get('/show/{id}', 'show')->name('show');
+    Route::delete('/{id}', 'destroy')->name('destroy');
+    Route::delete('/clear', 'clear')->name('clear');
+
 });
 
 // AUTH ROUTES

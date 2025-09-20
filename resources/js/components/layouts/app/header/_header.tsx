@@ -23,7 +23,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 	return (
-		<header className="sticky top-0 bg-muted/50 dark:bg-background backdrop-blur-2xl z-10 w-full group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+		<header className="sticky top-0 bg-muted/50 dark:bg-background backdrop-blur-2xl z-10 w-full group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex py-2 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
 			<div className="container mx-auto flex w-full items-center justify-between gap-2 px-4">
 				<div className="flex w-full items-center gap-1 lg:gap-2">
 					{/* <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md mr-2">
@@ -35,16 +35,26 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
 					<Separator
 						orientation="vertical"
-						className="mx-2 data-[orientation=vertical]:h-4"
+						className="ml-3 data-[orientation=vertical]:h-4"
 					/>
 
-					<Link
-						href={route("projects.index")}
-						className={`${!route().current("projects.*") ? "text-muted-foreground" : ""} text-sm`}
-					>
-						{/* <Layers className="h-4 w-4" /> */}
-						<span className="hidden lg:inline">Projects</span>
-					</Link>
+					<Button asChild size={"sm"} variant={"ghost"} >
+						<Link
+							href={route("projects.index")}
+							className={`${!route().current("projects.*") ? "text-muted-foreground" : ""} text-sm`}
+						>
+							<span className="hidden lg:inline">Projects</span>
+						</Link>
+					</Button>
+
+					<Button asChild size={"sm"} variant={"ghost"} >
+						<Link
+							href={route("logs.index")}
+							className={`${!route().current("logs.*") ? "text-muted-foreground" : ""} text-sm`}
+						>
+							<span className="hidden lg:inline">Logs</span>
+						</Link>
+					</Button>
 
 					{/* <SidebarTrigger className="-ml-1"  /> */}
 					{/*
