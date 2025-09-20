@@ -153,6 +153,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
 								</p>
 								<a
 									href={learnMoreHref}
+									target="_blank"
 									className="text-xs text-primary underline underline-offset-4 hover:no-underline"
 								>
 									Learn more
@@ -217,7 +218,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
 							<CardContent className="sm:flex grid gap-4 p-0 pl-3.5 pr-6">
 								<CardDescription className="text-xs sm:text-sm flex-1">
 									{description}
-									<Link href={learnMoreHref}>
+									<a href={learnMoreHref} target="_blank">
 										<Button
 											variant={"link"}
 											size={"sm"}
@@ -225,7 +226,7 @@ const CookieConsent = React.forwardRef<HTMLDivElement, CookieConsentProps>(
 										>
 											Learn more
 										</Button>
-									</Link>
+									</a>
 								</CardDescription>
 								<div className="flex items-center gap-2 justify-end">
 									<Button

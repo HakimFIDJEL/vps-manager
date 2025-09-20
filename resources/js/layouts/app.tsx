@@ -56,7 +56,7 @@ export function AppLayout({ children, breadcrumbs = [] }: AppLayoutProps) {
 			</main>
 			{/* </SidebarInset> */}
 			<ResponsiveBlocker />
-			<CookieConsent variant={"mini"} />
+			<CookieConsent variant={"mini"} learnMoreHref={route('policies.privacy')} />
 			{/* </SidebarProvider> */}
 		</TooltipProvider>
 	);
