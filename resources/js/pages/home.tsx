@@ -50,20 +50,21 @@ const links = [
 		group: "Resources",
 		items: [
 			{
-				title: "Requirements",
-				href: "#",
+				title: "Source Code",
+				href: "https://github.com/HakimFIDJEL/vps-manager",
 			},
 			{
-				title: "Installation",
-				href: "#",
+				title: "Readme",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/README.md",
 			},
 			{
-				title: "Documentation",
-				href: "#",
+				title: "Contributing",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/CONTRIBUTING.md",
 			},
+
 			{
-				title: "Github",
-				href: "#",
+				title: "Changelog",
+				href: route('footer.changelog'),
 			},
 		],
 	},
@@ -71,24 +72,24 @@ const links = [
 		group: "Legal",
 		items: [
 			{
-				title: "Licence",
-				href: "#",
-			},
-			{
-				title: "Usage",
-				href: "#",
+				title: "Terms",
+				href: route('footer.terms'),
 			},
 			{
 				title: "Privacy",
-				href: "#",
+				href: route('footer.privacy'),
 			},
 			{
 				title: "Cookies",
-				href: "#",
+				href: route('footer.cookies'),
 			},
 			{
 				title: "Security",
-				href: "#",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/SECURITY.md",
+			},
+			{
+				title: "Licence",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/LICENCE.md",
 			},
 		],
 	},

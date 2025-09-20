@@ -4,16 +4,17 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Controllers
-use App\Http\Controllers\Authentication as ControlleAuthentication;
+use App\Http\Controllers\Authentication as ControllerAuthentication;
 use App\Http\Controllers\Project as ControllerProjects;
 use App\Http\Controllers\Docker as ControllerDockers;
+use App\Http\Controllers\Footer as ControllerFooter;
 
 
 // Middlewares
 use App\Http\Middleware\Authentication as MiddlewareAuthentication;
 
 
-// // Welcome Route
+// Welcome Route
 Route::get('/', function () {
     return Inertia::render('home');
 })->name('home');
@@ -72,12 +73,22 @@ Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::
 });
 
 // AUTH ROUTES
-Route::prefix('/auth')->name('auth.')->controller(ControlleAuthentication::class)->group(function () {
+Route::prefix('/auth')->name('auth.')->controller(ControllerAuthentication::class)->group(function () {
     // Authentification
     Route::get('/login', 'login')->name('login');
     Route::get('/logout', 'logout')->name('logout');
 
     Route::post('/login', 'loginPost')->name('login');
+});
+
+// FOOTER ROUTES
+Route::prefix('/footer')->name('footer.')->controller(ControllerFooter::class)->group(function() {
+    
+    Route::get('/changelog', 'changelog')->name('changelog');
+    Route::get('/terms', 'terms')->name('terms');
+    Route::get('/privacy', 'privacy')->name('privacy');
+    Route::get('/cookies', 'cookies')->name('cookies');
+
 });
 
 
