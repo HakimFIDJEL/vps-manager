@@ -50,20 +50,24 @@ const links = [
 		group: "Resources",
 		items: [
 			{
-				title: "Requirements",
-				href: "#",
+				title: "Source Code",
+				href: "https://github.com/HakimFIDJEL/vps-manager",
+				target: "_blank",
 			},
 			{
-				title: "Installation",
-				href: "#",
+				title: "Readme",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/README.md",
+				target: "_blank",
 			},
 			{
-				title: "Documentation",
-				href: "#",
+				title: "Contributing",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/CONTRIBUTING.md",
+				target: "_blank",
 			},
+
 			{
-				title: "Github",
-				href: "#",
+				title: "Changelog",
+				href: route('policies.changelog'),
 			},
 		],
 	},
@@ -71,24 +75,22 @@ const links = [
 		group: "Legal",
 		items: [
 			{
-				title: "Licence",
-				href: "#",
-			},
-			{
-				title: "Usage",
-				href: "#",
+				title: "Terms",
+				href: route('policies.terms'),
 			},
 			{
 				title: "Privacy",
-				href: "#",
-			},
-			{
-				title: "Cookies",
-				href: "#",
+				href: route('policies.privacy'),
 			},
 			{
 				title: "Security",
-				href: "#",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/SECURITY.md",
+				target: "_blank",
+			},
+			{
+				title: "Licence",
+				href: "https://github.com/HakimFIDJEL/vps-manager/blob/main/LICENCE.md",
+				target: "_blank",
 			},
 		],
 	},
@@ -99,21 +101,22 @@ export type Link = {
 	items: {
 		title: string;
 		href: string;
+		target?: string;
 	}[];
 };
 
 export default function Home() {
 	// Smooth scroll
-	const lenisRef = React.useRef<Lenis | null>(null);
+	// const lenisRef = React.useRef<Lenis | null>(null);
 
-	React.useEffect(() => {
-		const lenis = new Lenis({ duration: 0.3, autoRaf: true });
-		lenisRef.current = lenis;
-		return () => {
-			lenis.destroy();
-			lenisRef.current = null;
-		};
-	}, []);
+	// React.useEffect(() => {
+	// 	const lenis = new Lenis({ duration: 0.3, autoRaf: true });
+	// 	lenisRef.current = lenis;
+	// 	return () => {
+	// 		lenis.destroy();
+	// 		lenisRef.current = null;
+	// 	};
+	// }, []);
 
 	// Active section
 	const [activeSection, setActiveSection] = React.useState<string | null>(null);
@@ -151,23 +154,23 @@ export default function Home() {
 						<Hero />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Features />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Solution />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Customers />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<Help />
 					</SmoothItem>
 
-					<SmoothItem delay={0.5}>
+					<SmoothItem delay={0.2}>
 						<About />
 					</SmoothItem>
 				</div>
@@ -175,7 +178,7 @@ export default function Home() {
 				<ScrollTop />
 			</main>
 
-			<SmoothItem delay={0.3}>
+			<SmoothItem delay={0.2}>
 				<Footer links={links} />
 			</SmoothItem>
 		</>

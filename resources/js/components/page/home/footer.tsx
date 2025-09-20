@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 
 // Custom components
-import { Logo } from "@/components/layouts/logo";
+import { Logo } from "@/components/layouts/app/logo";
 
 // Icons
 import { Linkedin, Twitter } from "lucide-react";
@@ -40,7 +40,7 @@ export function Footer({ links }: { links: LinkType[] }) {
 											className="p-0 m-0 text-muted-foreground"
 											asChild
 										>
-											<a href={item.href} className="">
+											<a href={item.href} className="" target={item.target}>
 												<span>{item.title}</span>
 											</a>
 										</Button>

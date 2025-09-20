@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import { Link } from "@inertiajs/react";
 
-import { NavLinks } from "@/components/layouts/sidebar/nav-links";
-import { NavUser } from "@/components/layouts/sidebar/nav-user";
+import { NavLinks } from "@/components/layouts/app/sidebar/nav-links";
+import { NavUser } from "@/components/layouts/app/sidebar/nav-user";
 
 import { Separator } from "@/components/ui/separator";
 

@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 // Custom components
-import { Logo } from "@/components/layouts/logo";
-import AppearanceToggleDropdown from "@/components/layouts/header/theme";
+import { Logo } from "@/components/layouts/app/logo";
+import AppearanceToggleDropdown from "@/components/layouts/app/header/theme";
 
 // Icons
 import { LogIn } from "lucide-react";

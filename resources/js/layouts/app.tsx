@@ -1,4 +1,4 @@
-// layoutes/app.tsx
+// layouts/app.tsx
 
 // Necessary imports
 import { usePage } from "@inertiajs/react";
@@ -8,16 +8,16 @@ import { getCookie, isCookieConsent } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Layouts
-import { AppHeader } from "@/components/layouts/header/_header";
+import { AppHeader } from "@/components/layouts/app/header/_header";
 
 // Types
 import { type BreadcrumbItem } from "@/types";
 import { type ReactNode } from "react";
 
 // Custom components
-import { Breadcrumbs } from "@/components/layouts/header/breadcrumbs";
-import { CustomToaster } from "@/components/layouts/custom-toaster";
-import { ResponsiveBlocker } from "@/components/layouts/responsive-blocker";
+import { Breadcrumbs } from "@/components/layouts/app/header/breadcrumbs";
+import { CustomToaster } from "@/components/layouts/app/custom-toaster";
+import { ResponsiveBlocker } from "@/components/layouts/app/responsive-blocker";
 
 // Shadcn UI components
 import { CookieConsent } from "@/components/ui/cookie-consent";
@@ -56,7 +56,7 @@ export function AppLayout({ children, breadcrumbs = [] }: AppLayoutProps) {
 			</main>
 			{/* </SidebarInset> */}
 			<ResponsiveBlocker />
-			<CookieConsent variant={"mini"} />
+			<CookieConsent variant={"mini"} learnMoreHref={route('policies.privacy')} />
 			{/* </SidebarProvider> */}
 		</TooltipProvider>
 	);

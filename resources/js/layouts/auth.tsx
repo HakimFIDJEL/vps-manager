@@ -1,3 +1,5 @@
+// layouts/auth.tsx
+
 // Necessary imports
 import { usePage } from "@inertiajs/react";
 
@@ -8,9 +10,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { type ReactNode } from "react";
 
 // Custom components
-import { ResponsiveBlocker } from "@/components/layouts/responsive-blocker";
-import AppearanceToggleDropdown from "@/components/layouts/header/theme";
-import { CustomToaster } from "@/components/layouts/custom-toaster";
+import { ResponsiveBlocker } from "@/components/layouts/app/responsive-blocker";
+import AppearanceToggleDropdown from "@/components/layouts/app/header/theme";
+import { CustomToaster } from "@/components/layouts/app/custom-toaster";
 
 interface AuthLayoutProps {
 	children: ReactNode;
