@@ -20,7 +20,7 @@ export default function Changelog() {
 
   const entries: Entry[] = [
     {
-      version: "Unreleased",
+      version: "v0.5.1",
       date: "2025-09-20",
       added: [
         "Legal pages: Terms of Service, Privacy Policy, Changelog",
