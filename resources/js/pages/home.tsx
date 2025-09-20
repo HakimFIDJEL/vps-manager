@@ -101,16 +101,16 @@ export type Link = {
 
 export default function Home() {
 	// Smooth scroll
-	const lenisRef = React.useRef<Lenis | null>(null);
+	// const lenisRef = React.useRef<Lenis | null>(null);
 
-	React.useEffect(() => {
-		const lenis = new Lenis({ duration: 0.3, autoRaf: true });
-		lenisRef.current = lenis;
-		return () => {
-			lenis.destroy();
-			lenisRef.current = null;
-		};
-	}, []);
+	// React.useEffect(() => {
+	// 	const lenis = new Lenis({ duration: 0.3, autoRaf: true });
+	// 	lenisRef.current = lenis;
+	// 	return () => {
+	// 		lenis.destroy();
+	// 		lenisRef.current = null;
+	// 	};
+	// }, []);
 
 	// Active section
 	const [activeSection, setActiveSection] = React.useState<string | null>(null);
