@@ -4,6 +4,9 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Process;
 use Illuminate\Process\ProcessResult;
+use App\Services\Log as ServicesLog;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 /**
  * Class System
@@ -27,11 +30,12 @@ class System
      * Execute a command as a specific user.
      *
      * @param  string  $command   The command to execute
+     * @param  bool    $log       Whether to log the command execution
      * @return ProcessResult
      * 
      * @throws \RuntimeException If the user session is not found or the command fails
      */
-    public function execute(string $command): ProcessResult
+    public function execute(string $command, bool $log = true): ProcessResult
     {
         $user = session('vps_user');
 
@@ -42,12 +46,23 @@ class System
         $cmd = 'sudo -n ' . 
         escapeshellarg($this->pythonPath) . ' ' . 
         escapeshellarg($this->scriptsPath) . ' ' .
-        escapeshellarg($user) . ' ' . 
+        escapeshellarg($user['username'] ?? null) . ' ' . 
         escapeshellarg($command);
 
-        $process = Process::timeout(600)->run($cmd);
+        $result = Process::timeout(600)->run($cmd);
 
-        return $process;
+        // Must log the Process
+        if($log) {
+            try {
+                ServicesLog::addLog($result, $command, $this, $user, $log);
+
+            } catch (\Exception $e) {
+                // Just log the error
+                Log::error("Failed to log process: " . $e->getMessage());
+            }
+        }
+
+        return $result;
     }
 
     /**

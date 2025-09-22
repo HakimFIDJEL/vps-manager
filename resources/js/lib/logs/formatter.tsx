@@ -4,7 +4,7 @@
 import { Badge } from "@/components/ui/badge";
 
 // Icons
-import { Check, X } from "lucide-react";
+import { Bug, Check, X } from "lucide-react";
 
 export function formatDate(date: string | undefined): string {
 	const opts: Intl.DateTimeFormatOptions = {
@@ -20,18 +20,26 @@ export function formatDate(date: string | undefined): string {
 	return new Date(date).toLocaleString("en-US", opts);
 }
 
-export function formatStatus(successfull : boolean): React.ReactNode {
-	return successfull ? (
-		<Badge variant={"default"}>
-            <Check />
-            Success
-        </Badge>
-	) : (
-		<Badge variant={"outline"}>
-            <X />
-            Failed
-        </Badge>
+export function formatSuccessful(successful: boolean): React.ReactNode {
+	return (
+		<div className="flex justify-center">
+			{successful ? (
+				<Badge variant="default">
+					<Check />
+					Success
+				</Badge>
+			) : (
+				<Badge variant="outline">
+					<X />
+					Failed
+				</Badge>
+			)}
+		</div>
 	);
+}
+
+export function formatExitCode(exit_code: number): React.ReactNode {
+	return <div className="text-center">{exit_code}</div>;
 }
 
 export function formatActions(
@@ -39,7 +47,5 @@ export function formatActions(
 	width: "full" | "auto" = "full",
 	size: "default" | "icon" | "lg" | "sm" = "default",
 ): React.ReactNode {
-	return (
-		<></>
-	);
+	return <></>;
 }

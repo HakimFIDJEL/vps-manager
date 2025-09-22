@@ -6,13 +6,22 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 
+// Services
+use App\Services\Log as ServicesLog;
+use App\Services\System as ServicesSystem;
+
 class Log extends Controller
 {
     /**
      * Display a listing of the logs (with pagination).
      */
-    public function index() : InertiaResponse {
-        return Inertia::render('logs/index');
+    public function index(ServicesSystem $system) : InertiaResponse {
+
+        $logs = ServicesLog::getLogs(20, $system);
+
+        return Inertia::render('logs/index', [
+            'logs' => $logs
+        ]);
     }
 
     /**

@@ -102,7 +102,7 @@ class Authentication extends Controller
         $this->clearBruteForce($user, $ip);
 
         $remember = $data['remember'] ?? false;
-        session(['vps_user' => $res['username']]);
+        session(['vps_user' => $res]);
 
         if ($remember) {
             cookie()->queue(
