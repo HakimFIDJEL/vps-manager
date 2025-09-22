@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 
 // Projects
-import { Project } from "@/lib/projects/type";
+import { type Project } from "@/lib/projects/type";
 // import { ProjectListExample } from "@/lib/projects/type";
 
 const breadcrumbs: BreadcrumbItem[] = [

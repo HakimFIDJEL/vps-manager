@@ -22,8 +22,8 @@ import { Link } from "@inertiajs/react";
 
 export function AppTable({ projects }: { projects: Project[] }) {
 	return (
-		<Table className="border-0">
-			<TableHeader className="bg-muted/50">
+		<Table className="border-0 ">
+			<TableHeader>
 				<TableRow>
 					{/* <TableHead>Inode</TableHead> */}
 					<TableHead className="p-4">Path</TableHead>
