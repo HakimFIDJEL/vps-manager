@@ -38,7 +38,7 @@ Update `sudoers` (replace `<my_user>`):
 
 ```bash
 sudo visudo -f /etc/sudoers.d/vps-manager
-<my_user> ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm, /bin/echo, /usr/bin/tee, /bin/cat, /usr/bin/touch
+<my_user> ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/mkdir, /bin/ls, /usr/bin/mv, /bin/rm, /bin/echo, /usr/bin/tee, /bin/cat, /usr/bin/touch, /usr/bin/truncate
 ```
 
 > When logging in, make sure your user has the right permissions as stated in **Permissions** and that `PasswordAuthentication` is set to `yes` in the files `/etc/ssh/sshd_config` and `/etc/ssh/sshd_config.d/*` if they exist.

@@ -1,7 +1,7 @@
 // pages/logs/index.tsx
 
 // Necessary imports
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 
 // Layout
 import { AppLayout } from "@/layouts/app";
@@ -26,6 +26,18 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogBody,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTrigger,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Functions
 import {
@@ -36,7 +48,7 @@ import {
 } from "@/lib/logs/formatter";
 
 // Icons
-import { Logs, Trash2 } from "lucide-react";
+import { Loader2, Logs, Trash2 } from "lucide-react";
 
 // Types
 import { type BreadcrumbItem } from "@/types";
@@ -66,7 +78,12 @@ export default function Index({ logs }: { logs: Log[] }) {
 }
 
 export function Content({ logs }: { logs: Log[] }) {
-	console.log(logs);
+	const { delete: destroy, processing } = useForm();
+
+	async function handleClear(): Promise<boolean> {
+		destroy(route("logs.clear"));
+		return true;
+	}
 
 	return (
 		<>
@@ -85,20 +102,47 @@ export function Content({ logs }: { logs: Log[] }) {
 								</CardDescription>
 							</div>
 						</div>
-						{/* <CardAction className="flex items-center gap-2 self-center">
-							<Link href={route("logs.clear")}>
-								<Button variant={"outline"}>
-									<Trash2 />
-									Clear logs
-								</Button>
-							</Link>
-						</CardAction> */}
+						<CardAction className="flex items-center gap-2 self-center">
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button variant={"outline"} type={"button"}>
+										<Trash2 />
+										Clear logs
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle className="flex items-center gap-2">
+											<Trash2 className="w-4 h-4 text-destructive" />
+											Clear logs
+										</AlertDialogTitle>
+										<AlertDialogDescription>
+											Are you sure you want to clear all logs? This action cannot be
+											undone.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogBody>
+										<AlertDialogFooter>
+											<AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
+											<AlertDialogAction
+												onAction={handleClear}
+												disabled={processing}
+												variant={"destructive"}
+											>
+												{processing ? <Loader2 className="animate-spin" /> : <Trash2 />}
+												Delete
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogBody>
+								</AlertDialogContent>
+							</AlertDialog>
+						</CardAction>
 					</CardHeader>
 				</Card>
 			</SmoothItem>
 
 			{/* Table */}
-			<SmoothItem delay={0.3}>
+			<SmoothItem delay={0.3} layout={false}>
 				<Card className="border-0 overflow-visible">
 					<CardContent className="p-0">
 						<Table className="border-0 ">
@@ -132,7 +176,7 @@ export function Content({ logs }: { logs: Log[] }) {
 								{logs.length === 0 && (
 									<TableRow>
 										<TableCell
-											colSpan={5}
+											colSpan={6}
 											className="text-center py-4 bg-muted/50 text-muted-foreground"
 										>
 											No logs available yet, they will be added here when commands are

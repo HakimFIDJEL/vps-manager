@@ -39,7 +39,7 @@ class Log
         if (! $log) {
             return null;
         }
-        
+
         $payload = [
             'id' => self::getHighestId($system) + 1,
             'username' => $user['username'] ?? null,
@@ -51,7 +51,7 @@ class Log
             'stderr' => $result->errorOutput(),
             'executed_at' => date('Y-m-d H:i:s'),
         ];
-        
+
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         $cmd = 'bash -lc '.escapeshellarg(
@@ -82,10 +82,8 @@ class Log
      *
      * @return ProcessResult The result of the clear log command
      */
-    public static function clearLogs() : ProcessResult
+    public static function clearLogs(ServicesSystem $system): ProcessResult
     {
-        $system = new ServicesSystem;
-
         $cmd = 'bash -lc '.escapeshellarg(
             'sudo truncate -s 0 /var/log/vps-manager.log'
         );
@@ -100,7 +98,7 @@ class Log
      * @param  int  $id  The ID of the log entry to delete
      * @return ProcessResult The result of the delete log command
      */
-    public static function deleteLog(ServicesSystem $system, int $id) : ProcessResult
+    public static function deleteLog(ServicesSystem $system, int $id): ProcessResult
     {
         // Récupérer tous les logs
         $logs = self::getLogs(null, $system);
@@ -115,13 +113,13 @@ class Log
             return json_encode($log, JSON_THROW_ON_ERROR);
         }, $logs);
 
-        $content = implode("\n", $jsonLines) . (count($jsonLines) > 0 ? "\n" : "");
+        $content = implode("\n", $jsonLines).(count($jsonLines) > 0 ? "\n" : '');
 
         $tmpFile = tempnam(sys_get_temp_dir(), 'vps-log-');
         file_put_contents($tmpFile, $content);
 
-        $cmd = 'bash -lc ' . escapeshellarg(
-            'sudo cp ' . escapeshellarg($tmpFile) . ' /var/log/vps-manager.log && sudo chown root:root /var/log/vps-manager.log && sudo chmod 640 /var/log/vps-manager.log'
+        $cmd = 'bash -lc '.escapeshellarg(
+            'sudo cp '.escapeshellarg($tmpFile).' /var/log/vps-manager.log && sudo chown root:root /var/log/vps-manager.log && sudo chmod 640 /var/log/vps-manager.log'
         );
 
         $result = $system->execute($cmd, false);
@@ -132,14 +130,13 @@ class Log
         return $result;
     }
 
-
     /**
      * Retrieve all log entries from the log file
      *
      * @param  int|null  $pagination  Number of entries per page for pagination (optional)
      * @return array An array of log entries
      */
-    public static function getLogs($pagination = null, ServicesSystem $system): array
+    public static function getLogs($pagination, ServicesSystem $system): array
     {
         $system->execute('sudo touch /var/log/vps-manager.log', false);
 
