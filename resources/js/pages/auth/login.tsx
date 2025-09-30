@@ -118,7 +118,7 @@ export default function Page({ className, ...props }: { className?: string }) {
 										/>
 									</div>
 									<div className="flex items-center gap-2">
-										<Checkbox id="remember" />
+										<Checkbox id="remember" disabled={processing}/>
 										<Label htmlFor="remember" className="font-normal hover:underline">
 											Remember me
 										</Label>
