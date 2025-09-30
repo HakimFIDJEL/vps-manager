@@ -22,7 +22,7 @@ Route::get('/', function () {
 
 
 // PROJECT ROUTES
-Route::prefix('/projects')->name('projects.')->middleware(MiddlewareAuthentication::class)->controller(ControllerProjects::class)->group(function () {
+Route::prefix('/projects')->name('projects.')->middleware(['web', MiddlewareAuthentication::class])->controller(ControllerProjects::class)->group(function () {
     // PROJECT 
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
@@ -74,12 +74,12 @@ Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::
 });
 
 // LOG ROUTES
-Route::prefix('/logs')->name('logs.')->middleware(MiddlewareAuthentication::class)->controller(ControllerLogs::class)->group(function () {
+Route::prefix('/logs')->name('logs.')->middleware(['web', MiddlewareAuthentication::class])->controller(ControllerLogs::class)->group(function () {
 
     Route::get('/', 'index')->name('index');
     Route::get('/show/{id}', 'show')->name('show');
     Route::delete('/{id}', 'destroy')->name('destroy');
-    Route::delete('/clear', 'clear')->name('clear');
+    Route::post('/clear', 'clear')->name('clear');
 
 });
 

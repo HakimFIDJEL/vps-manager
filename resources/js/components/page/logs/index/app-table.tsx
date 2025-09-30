@@ -26,15 +26,15 @@ export function AppTable({ logs }: { logs: Log[] }) {
 	return (
 		<Card className="border-0 overflow-visible">
 			<CardContent className="p-0">
-				<Table className="border-0 ">
+				<Table className="border-0 table-fixed">
 					<TableHeader>
 						<TableRow>
-							<TableHead className="p-4">User</TableHead>
+							<TableHead className="w-[12rem] p-4">User</TableHead>
 							<TableHead className="p-4">Command</TableHead>
-							<TableHead className="text-center p-4">Successful</TableHead>
-							<TableHead className="text-center p-4">Exit Code</TableHead>
-							<TableHead className="p-4">Executed At</TableHead>
-							<TableHead className="text-center p-4">Actions</TableHead>
+							<TableHead className="w-[8rem] text-center p-4">Status</TableHead>
+							<TableHead className="w-[8rem] text-center p-4">Exit Code</TableHead>
+							<TableHead className="w-[20%] p-4">Executed At</TableHead>
+							<TableHead className="w-[8rem] text-center p-4">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -43,7 +43,9 @@ export function AppTable({ logs }: { logs: Log[] }) {
 								<TableCell className="font-mono p-4">
 									#{log.userid} - {log.username}
 								</TableCell>
-								<TableCell className="font-mono p-4">{log.command}</TableCell>
+								<TableCell className="font-mono p-4 break-all truncate">
+									{log.command}
+								</TableCell>
 								<TableCell className="p-4">
 									{formatSuccessful(log.successful)}
 								</TableCell>

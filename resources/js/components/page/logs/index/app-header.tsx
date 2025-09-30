@@ -1,7 +1,9 @@
 // components/page/logs/index/app-header.tsx
 
 // Necessary imports
-import { useForm } from "@inertiajs/react";
+import { useForm, router, Link } from "@inertiajs/react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 // Shadcn UI components
 import {
@@ -32,11 +34,29 @@ import { Loader2, Logs, Trash2 } from "lucide-react";
 import { type Log } from "@/lib/logs/type";
 
 export function Appheader({ logs }: { logs: Log[] }) {
-	const { delete: destroy, processing } = useForm();
+	const { post, processing } = useForm();
 
-	async function handleClear(): Promise<boolean> {
-		destroy(route("logs.clear"));
+	// States
+	const [loading, setLoading] = useState(false);
+
+	function handleClear() {
+		post(route("logs.clear"), { replace: true })
 		return true;
+		// setLoading(true);
+
+		// toast.loading("Clearing logs...", {
+		// 	id: "clear-logs",
+		// });
+
+		// try {
+		// 	router.delete(route("logs.clear"));
+		// } catch (error) {
+		// 	toast.error("Failed clearing logs");
+		// 	toast.dismiss("clear-logs");
+		// 	setLoading(false);
+		// } finally {
+		// 	return false;
+		// }
 	}
 
 	return (
@@ -71,19 +91,26 @@ export function Appheader({ logs }: { logs: Log[] }) {
 									Are you sure you want to clear all logs? This action cannot be undone.
 								</AlertDialogDescription>
 							</AlertDialogHeader>
-							<AlertDialogBody>
+							<form
+								onSubmit={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+								}}
+							>
+								<AlertDialogBody></AlertDialogBody>
 								<AlertDialogFooter>
-									<AlertDialogCancel disabled={processing}>Cancel</AlertDialogCancel>
+									<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 									<AlertDialogAction
 										onAction={handleClear}
-										disabled={processing}
 										variant={"destructive"}
+										type={"submit"}
+										disabled={loading}
 									>
-										{processing ? <Loader2 className="animate-spin" /> : <Trash2 />}
+										{loading ? <Loader2 className="animate-spin" /> : <Trash2 />}
 										Delete
 									</AlertDialogAction>
 								</AlertDialogFooter>
-							</AlertDialogBody>
+							</form>
 						</AlertDialogContent>
 					</AlertDialog>
 				</CardAction>

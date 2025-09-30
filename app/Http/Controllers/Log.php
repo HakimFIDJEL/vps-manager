@@ -52,9 +52,7 @@ class Log extends Controller
      */
     public function clear(ServicesLog $log, ServicesSystem $system)
     {
-
-        dd('test');
-
+        
         try {
             $log->clearLogs($system);
         } catch (RuntimeException $e) {
@@ -64,6 +62,6 @@ class Log extends Controller
             ]);
         }
 
-        return redirect()->route('logs.index')->with(['success' => 'Logs cleared successfully!']);
+        return redirect()->route('logs.index')->with(['success' => 'Logs cleared successfully!']);   
     }
 }
