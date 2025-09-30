@@ -43,7 +43,8 @@ class System
             throw new \RuntimeException('No user session found.');
         }
 
-        $cmd = 'sudo -n ' . 
+        $env = 'LC_ALL=C.UTF-8 LANG=C.UTF-8 NO_COLOR=1';
+        $cmd = $env . ' sudo -n ' .
         escapeshellarg($this->pythonPath) . ' ' . 
         escapeshellarg($this->scriptsPath) . ' ' .
         escapeshellarg($user['username'] ?? null) . ' ' . 
@@ -82,9 +83,7 @@ class System
         $result = $this->execute($cmd);
 
         if (! $result->successful()) {
-            throw new \RuntimeException(
-                "Impossible d'exécuter stat sur « {$path} » : " . $result->errorOutput()
-            );
+            throw new \RuntimeException("Impossible d'exécuter stat sur « {$path} » : " . $result->errorOutput());
         }
 
         $output = trim($result->output());
