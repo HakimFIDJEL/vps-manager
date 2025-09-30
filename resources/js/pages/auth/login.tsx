@@ -27,7 +27,11 @@ export default function Login({ className, ...props }: { className?: string }) {
 						<CardContent className="grid p-0 md:grid-cols-2">
 							<AppForm />
 							<div className="relative hidden md:block dark:border-primary border-border border-l bg-gradient-to-r  dark:from-primary/15 from-muted to-primary/70 ">
-								<Logo variant="default" color_scheme={"white"} className="absolute bottom-4 right-5 text-white " />
+								<Logo
+									variant="default"
+									color_scheme={"white"}
+									className="absolute bottom-4 right-5 text-white "
+								/>
 							</div>
 						</CardContent>
 					</Card>

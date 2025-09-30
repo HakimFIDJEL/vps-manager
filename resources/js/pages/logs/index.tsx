@@ -16,7 +16,6 @@ import { type Log } from "@/lib/logs/type";
 import { SmoothItem } from "@/components/ui/smooth-resized";
 import { Appheader } from "@/components/page/logs/index/app-header";
 
-
 const breadcrumbs: BreadcrumbItem[] = [
 	{
 		title: "VPS Manager",
@@ -40,7 +39,6 @@ export default function Index({ logs }: { logs: Log[] }) {
 }
 
 export function Content({ logs }: { logs: Log[] }) {
-
 	return (
 		<>
 			{/* Title */}
