@@ -11,17 +11,30 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogBody,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTrigger,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 // Functions
 import {
-	formatActions,
 	formatDate,
 	formatExitCode,
 	formatSuccessful,
 } from "@/lib/logs/formatter";
 
 // Types
-import { LogProps } from "@/lib/logs/type";
+import { Log, LogProps } from "@/lib/logs/type";
+import { Info } from "lucide-react";
 
 export function AppTable(props: LogProps) {
 	const totalPages = Number(props.pages);
@@ -40,32 +53,30 @@ export function AppTable(props: LogProps) {
 							<TableHead className="w-[8rem] text-center p-4">Status</TableHead>
 							<TableHead className="w-[8rem] text-center p-4">Exit Code</TableHead>
 							<TableHead className="w-[20%] p-4">Executed At</TableHead>
-							<TableHead className="w-[8rem] text-center p-4">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{props.logs.map((log) => (
-							<TableRow key={log.id}>
-								<TableCell className="font-mono p-4">
-									#{log.userid} - {log.username}
-								</TableCell>
-								<TableCell className="font-mono p-4 break-all truncate">
-									{log.command}
-								</TableCell>
-								<TableCell className="p-4">
-									{formatSuccessful(log.successful)}
-								</TableCell>
-								<TableCell className="p-4">{formatExitCode(log.exitCode)}</TableCell>
-								<TableCell className="p-4">{formatDate(log.executed_at)}</TableCell>
-								<TableCell className="w-[12rem]">
-									{formatActions(log.id, "full", "sm")}
-								</TableCell>
-							</TableRow>
+							<DetailDialog key={log.id} log={log}>
+								<TableRow className="cursor-pointer">
+									<TableCell className="font-mono p-4">
+										#{log.userid} - {log.username}
+									</TableCell>
+									<TableCell className="font-mono p-4 break-all truncate">
+										{log.command}
+									</TableCell>
+									<TableCell className="p-4">
+										{formatSuccessful(log.successful)}
+									</TableCell>
+									<TableCell className="p-4">{formatExitCode(log.exitCode)}</TableCell>
+									<TableCell className="p-4">{formatDate(log.executed_at)}</TableCell>
+								</TableRow>
+							</DetailDialog>
 						))}
 						{props.logs.length === 0 && (
 							<TableRow>
 								<TableCell
-									colSpan={6}
+									colSpan={5}
 									className="text-center py-4 bg-muted/50 text-muted-foreground"
 								>
 									No logs available yet, they will be added here when commands are
@@ -77,9 +88,10 @@ export function AppTable(props: LogProps) {
 					{totalPages > 0 && (
 						<TableFooter>
 							<TableRow>
-								<TableCell colSpan={6} className="text-center px-4 py-2">
+								<TableCell colSpan={5} className="text-center px-4 py-2">
 									<span className="flex text-sm font-light text-muted-foreground">
-										Showing {(current- 1) * paginate + 1}-{(current - 1) * paginate + props.logs.length } of {totalLogs} entries
+										Showing {(current - 1) * paginate + 1}-
+										{(current - 1) * paginate + props.logs.length} of {totalLogs} entries
 									</span>
 								</TableCell>
 							</TableRow>
@@ -88,5 +100,30 @@ export function AppTable(props: LogProps) {
 				</Table>
 			</CardContent>
 		</Card>
+	);
+}
+
+function DetailDialog({ children, log }: { children: React.ReactNode, log: Log }) {
+	return (
+		<AlertDialog>
+			<AlertDialogTrigger asChild>
+				{/* <Button variant="outline" size={"icon"}>
+					<Info />
+				</Button> */}
+				{children}
+			</AlertDialogTrigger>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>Alert Dialog Title</AlertDialogTitle>
+					<AlertDialogDescription>
+						{log.command}
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogAction>Continue</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
 	);
 }

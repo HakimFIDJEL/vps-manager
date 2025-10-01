@@ -41,11 +41,3 @@ export function formatSuccessful(successful: boolean): React.ReactNode {
 export function formatExitCode(exit_code: number): React.ReactNode {
 	return <div className="text-center">{exit_code}</div>;
 }
-
-export function formatActions(
-	id: number | undefined,
-	width: "full" | "auto" = "full",
-	size: "default" | "icon" | "lg" | "sm" = "default",
-): React.ReactNode {
-	return <></>;
-}
