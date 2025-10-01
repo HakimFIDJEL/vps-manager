@@ -23,7 +23,6 @@ import {
 	AlertDialogTrigger,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 
 // Functions
 import {
@@ -34,7 +33,6 @@ import {
 
 // Types
 import { Log, LogProps } from "@/lib/logs/type";
-import { Info } from "lucide-react";
 
 export function AppTable(props: LogProps) {
 	const totalPages = Number(props.pages);
@@ -103,21 +101,20 @@ export function AppTable(props: LogProps) {
 	);
 }
 
-function DetailDialog({ children, log }: { children: React.ReactNode, log: Log }) {
+function DetailDialog({
+	children,
+	log,
+}: {
+	children: React.ReactNode;
+	log: Log;
+}) {
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				{/* <Button variant="outline" size={"icon"}>
-					<Info />
-				</Button> */}
-				{children}
-			</AlertDialogTrigger>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Alert Dialog Title</AlertDialogTitle>
-					<AlertDialogDescription>
-						{log.command}
-					</AlertDialogDescription>
+					<AlertDialogDescription>{log.command}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
