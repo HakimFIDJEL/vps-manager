@@ -5,6 +5,7 @@ import {
 	Table,
 	TableBody,
 	TableCell,
+	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -20,9 +21,14 @@ import {
 } from "@/lib/logs/formatter";
 
 // Types
-import { type Log } from "@/lib/logs/type";
+import { LogProps } from "@/lib/logs/type";
 
-export function AppTable({ logs }: { logs: Log[] }) {
+export function AppTable(props: LogProps) {
+	const totalPages = Number(props.pages);
+	const current = Number(props.page);
+	const paginate = Number(props.paginate);
+	const totalLogs = Number(props.total);
+
 	return (
 		<Card className="border-0 overflow-visible">
 			<CardContent className="p-0">
@@ -38,7 +44,7 @@ export function AppTable({ logs }: { logs: Log[] }) {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{logs.map((log) => (
+						{props.logs.map((log) => (
 							<TableRow key={log.id}>
 								<TableCell className="font-mono p-4">
 									#{log.userid} - {log.username}
@@ -56,7 +62,7 @@ export function AppTable({ logs }: { logs: Log[] }) {
 								</TableCell>
 							</TableRow>
 						))}
-						{logs.length === 0 && (
+						{props.logs.length === 0 && (
 							<TableRow>
 								<TableCell
 									colSpan={6}
@@ -68,6 +74,17 @@ export function AppTable({ logs }: { logs: Log[] }) {
 							</TableRow>
 						)}
 					</TableBody>
+					{totalPages > 0 && (
+						<TableFooter>
+							<TableRow>
+								<TableCell colSpan={6} className="text-center px-4 py-2">
+									<span className="flex text-sm font-light text-muted-foreground">
+										Showing {(current- 1) * paginate + 1}-{(current - 1) * paginate + props.logs.length } of {totalLogs} entries
+									</span>
+								</TableCell>
+							</TableRow>
+						</TableFooter>
+					)}
 				</Table>
 			</CardContent>
 		</Card>

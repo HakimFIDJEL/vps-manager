@@ -68,7 +68,7 @@ class Log
      */
     public static function getHighestId(ServicesSystem $system): int
     {
-        $logs = self::getLogs(null, $system);
+        $logs = self::getLogs(null, null, $system);
 
         if (empty($logs)) {
             return 0;
@@ -101,7 +101,7 @@ class Log
     public static function deleteLog(ServicesSystem $system, int $id): ProcessResult
     {
         // Récupérer tous les logs
-        $logs = self::getLogs(null, $system);
+        $logs = self::getLogs(null, null, $system);
 
         // Filtrer les logs pour supprimer celui avec l'id donné
         $logs = array_filter($logs, function ($log) use ($id) {
@@ -133,40 +133,56 @@ class Log
     /**
      * Retrieve all log entries from the log file
      *
+     * @param  int|null  $page  Page number for pagination (optional)
      * @param  int|null  $pagination  Number of entries per page for pagination (optional)
      * @return array An array of log entries
      */
-    public static function getLogs($pagination, ServicesSystem $system): array
+    public static function getLogs($page, $paginate, ServicesSystem $system): array
+    {
+        $system->execute('sudo touch /var/log/vps-manager.log', false);
+        $result = $system->execute('bash -lc '.escapeshellarg('sudo cat /var/log/vps-manager.log'), false);
+        if (! $result->successful()) {
+            throw new \RuntimeException("Impossible d'exécuter la commande de récupération des logs : ".$result->errorOutput());
+        }
+
+        $lines = array_filter(explode("\n", $result->output()));
+        $logs = array_map(fn ($line) => json_decode($line, true, 512, JSON_THROW_ON_ERROR), $lines);
+        usort($logs, fn ($a, $b) => $b['id'] <=> $a['id']);
+
+        $page = max(1, (int) ($page ?? 1));
+        $perPage = max(1, (int) ($paginate ?? 20)); // défaut 20
+        $total = count($logs);
+        $lastPage = (int) ceil($total / $perPage);
+        if ($page > $lastPage) {
+            return [];
+        } // aucune donnée pour cette page
+
+        $offset = ($page - 1) * $perPage;
+
+        return array_slice($logs, $offset, $perPage);
+    }
+
+    /**
+     * Count total number of log entries
+     * 
+     * @param  ServicesSystem  $system  The system service to execute commands
+     * @return int The total number of log entries
+     * 
+     * @throws RuntimeException If the command to count logs fails
+     */
+    public static function countLogs(ServicesSystem $system): int
     {
         $system->execute('sudo touch /var/log/vps-manager.log', false);
 
-        $cmd = 'bash -lc '.escapeshellarg(
-            'sudo cat /var/log/vps-manager.log'
-        );
-
-        $result = $system->execute($cmd, false);
+        $result = $system->execute('bash -lc '.escapeshellarg('sudo cat /var/log/vps-manager.log'), false);
 
         if (! $result->successful()) {
             throw new \RuntimeException(
-                "Impossible d'exécuter la commande de récupération des logs : ".$result->errorOutput()
+                "Impossible d'exécuter la commande de comptage des logs : ".$result->errorOutput()
             );
         }
 
         $lines = array_filter(explode("\n", $result->output()));
-
-        $logs = array_map(function ($line) {
-            return json_decode($line, true, 512, JSON_THROW_ON_ERROR);
-        }, $lines);
-
-        // Sort logs by id descending
-        usort($logs, function ($a, $b) {
-            return $b['id'] <=> $a['id'];
-        });
-
-        if ($pagination !== null && is_int($pagination) && $pagination > 0) {
-            return array_slice($logs, 0, $pagination);
-        }
-
-        return $logs;
+        return count($lines);
     }
 }

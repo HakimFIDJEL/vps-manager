@@ -79,7 +79,7 @@ Route::prefix('/logs')->name('logs.')->middleware(['web', MiddlewareAuthenticati
     Route::get('/', 'index')->name('index');
     Route::get('/show/{id}', 'show')->name('show');
     Route::delete('/{id}', 'destroy')->name('destroy');
-    Route::post('/clear', 'clear')->name('clear');
+    Route::delete('/', 'clear')->name('clear');
 
 });
 

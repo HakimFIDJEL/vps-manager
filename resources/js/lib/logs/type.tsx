@@ -11,3 +11,11 @@ export type Log = {
 	stderr: string;
 	executed_at: string;
 };
+
+export type LogProps = {
+	logs: Log[];
+	paginate: number;
+	pages: number;
+	page: number;
+	total: number;
+}
