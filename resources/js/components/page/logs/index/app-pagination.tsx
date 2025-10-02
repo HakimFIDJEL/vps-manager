@@ -1,9 +1,6 @@
 // components/page/logs/index/app-pagination.tsx
 
-// Necessary imports
-
 // Shadcn UI components
-import { Card, CardContent } from "@/components/ui/card";
 import {
 	Pagination,
 	PaginationContent,

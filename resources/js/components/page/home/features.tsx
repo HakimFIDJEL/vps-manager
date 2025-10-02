@@ -85,13 +85,13 @@ export function Features() {
 					<Feature
 						title="Command Audit Log"
 						description="Track every executed command with timestamp, user, and output."
-						status="wip"
+						status="done"
 						className="border-b"
 					/>
 					<Feature
-						title="Inline Docs"
-						description="Contextual documentation for every feature and screen."
-						status="planned"
+						title="Project Files"
+						description="Use local or repo files to run containers without external images."
+						status="wip"
 						className="lg:pr-0 lg:border-l border-b"
 					/>
 					<Feature

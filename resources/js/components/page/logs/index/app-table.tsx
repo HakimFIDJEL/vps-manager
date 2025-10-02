@@ -45,8 +45,6 @@ export function AppTable(props: LogProps) {
 	const paginate = Number(props.paginate);
 	const totalLogs = Number(props.total);
 
-	console.log(props.logs);
-
 	return (
 		<Card className="border-0 overflow-visible">
 			<CardContent className="p-0">
@@ -66,15 +64,9 @@ export function AppTable(props: LogProps) {
 						{props.logs.map((log) => (
 							<DetailDialog key={log.id} log={log}>
 								<TableRow className="cursor-pointer">
-									<TableCell className="font-mono p-4">
-										#{log.id}
-									</TableCell>
-									<TableCell className="font-mono p-4">
-										#{log.userid}
-									</TableCell>
-									<TableCell className="font-mono p-4">
-										{log.username}
-									</TableCell>
+									<TableCell className="font-mono p-4">#{log.id}</TableCell>
+									<TableCell className="font-mono p-4">#{log.userid}</TableCell>
+									<TableCell className="font-mono p-4">{log.username}</TableCell>
 									<TableCell className="font-mono p-4 break-all truncate">
 										{log.command}
 									</TableCell>
@@ -130,7 +122,7 @@ function DetailDialog({
 				<AlertDialogHeader>
 					<AlertDialogTitle className="flex items-center justify-between">
 						<div className="flex items-center justify-center gap-2">
-							<Info className="text-muted-foreground"/>
+							<Info className="text-muted-foreground" />
 							Details of log #{log.id}
 						</div>
 						{formatSuccessful(log.successful)}

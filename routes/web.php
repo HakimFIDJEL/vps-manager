@@ -75,12 +75,9 @@ Route::prefix('/docker')->name('docker.')->middleware(MiddlewareAuthentication::
 
 // LOG ROUTES
 Route::prefix('/logs')->name('logs.')->middleware(['web', MiddlewareAuthentication::class])->controller(ControllerLogs::class)->group(function () {
-
     Route::get('/', 'index')->name('index');
-    Route::get('/show/{id}', 'show')->name('show');
     Route::delete('/{id}', 'destroy')->name('destroy');
     Route::delete('/', 'clear')->name('clear');
-
 });
 
 // AUTH ROUTES

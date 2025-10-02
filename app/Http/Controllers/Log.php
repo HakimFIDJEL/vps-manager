@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\logs\Page as PageRequests;
 use App\Services\Log as ServicesLog;
 use App\Services\System as ServicesSystem;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 // Requests
-use App\Http\Requests\logs\Page as PageRequests;
+use Inertia\Inertia;
 // Services
 use Inertia\Response as InertiaResponse;
 use RuntimeException;
@@ -25,9 +24,9 @@ class Log extends Controller
      */
     public function index(PageRequests $request, ServicesSystem $system, ServicesLog $log): InertiaResponse|RedirectResponse
     {
-        $data       = $request->validated();
-        $page       = $data['page'] ?? 1;
-        $paginate   = 20;
+        $data = $request->validated();
+        $page = $data['page'] ?? 1;
+        $paginate = 20;
 
         // Fetch logs
         try {
@@ -50,20 +49,12 @@ class Log extends Controller
         }
 
         return Inertia::render('logs/index', [
-            'logs'      => $logs,
-            'paginate'  => $paginate,
-            'page'      => $page,
-            'pages'     => (int) ceil($total / $paginate),
-            'total'     => $total,
+            'logs' => $logs,
+            'paginate' => $paginate,
+            'page' => $page,
+            'pages' => (int) ceil($total / $paginate),
+            'total' => $total,
         ]);
-    }
-
-    /**
-     * Display the specified log.
-     */
-    public function show($id)
-    {
-        //
     }
 
     /**
