@@ -112,7 +112,7 @@ function Content({ projects }: { projects: Project[] }) {
 									</Link>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>Refresh the project list</p>
+									<p>Refresh the projects list</p>
 								</TooltipContent>
 							</Tooltip>
 							<Link href={route("projects.create")}>

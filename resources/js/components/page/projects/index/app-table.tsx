@@ -20,7 +20,6 @@ export function AppTable({ projects }: { projects: Project[] }) {
 		<Table className="border-0 ">
 			<TableHeader>
 				<TableRow>
-					{/* <TableHead>Inode</TableHead> */}
 					<TableHead className="p-4">Path</TableHead>
 					<TableHead className="p-4">Inode</TableHead>
 					<TableHead className="p-4">Size</TableHead>

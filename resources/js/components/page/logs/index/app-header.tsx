@@ -1,9 +1,7 @@
 // components/page/logs/index/app-header.tsx
 
 // Necessary imports
-import { useForm, router, Link } from "@inertiajs/react";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useForm, Link } from "@inertiajs/react";
 
 // Shadcn UI components
 import {
@@ -14,6 +12,11 @@ import {
 	CardHeader,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -28,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 // Icons
-import { Loader2, Logs, Trash2 } from "lucide-react";
+import { Loader2, Logs, Trash2, RefreshCcw } from "lucide-react";
 
 // Types
 import { LogProps } from "@/lib/logs/type";
@@ -59,47 +62,62 @@ export function Appheader(props: LogProps) {
 					</div>
 				</div>
 				<CardAction className="flex items-center gap-2 self-center">
-					<AlertDialog>
-						<AlertDialogTrigger asChild>
-							<Button variant={"outline"} type={"button"}>
-								<Trash2 />
-								Clear logs
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle className="flex items-center gap-2">
-									<Trash2 className="w-4 h-4 text-destructive" />
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Link href={route("logs.index")}>
+								<Button variant={"outline"} className="group">
+									<RefreshCcw className="h-4 w-4 group-hover:-rotate-180 transition-transform duration-300" />
+								</Button>
+							</Link>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>Refresh the logs list</p>
+						</TooltipContent>
+					</Tooltip>
+					{props.logs.length > 0 && (
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button variant={"destructive"} type={"button"}>
+									<Trash2 />
 									Clear logs
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Are you sure you want to delete {props.total} log{props.total > 1 ? 's' : ''}? This action cannot be undone.
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<form
-								onSubmit={(e) => {
-									e.preventDefault();
-									e.stopPropagation();
-								}}
-							>
-								<AlertDialogBody></AlertDialogBody>
-								<AlertDialogFooter>
-									<AlertDialogCancel disabled={form.processing}>
-										Cancel
-									</AlertDialogCancel>
-									<AlertDialogAction
-										onAction={handleClear}
-										variant={"destructive"}
-										type={"submit"}
-										disabled={form.processing}
-									>
-										{form.processing ? <Loader2 className="animate-spin" /> : <Trash2 />}
-										Delete
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</form>
-						</AlertDialogContent>
-					</AlertDialog>
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle className="flex items-center gap-2">
+										<Trash2 className="w-4 h-4 text-destructive" />
+										Clear logs
+									</AlertDialogTitle>
+									<AlertDialogDescription>
+										Are you sure you want to delete {props.total} log
+										{props.total > 1 ? "s" : ""}? This action cannot be undone.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+								<form
+									onSubmit={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+									}}
+								>
+									<AlertDialogBody></AlertDialogBody>
+									<AlertDialogFooter>
+										<AlertDialogCancel disabled={form.processing}>
+											Cancel
+										</AlertDialogCancel>
+										<AlertDialogAction
+											onAction={handleClear}
+											variant={"destructive"}
+											type={"submit"}
+											disabled={form.processing}
+										>
+											{form.processing ? <Loader2 className="animate-spin" /> : <Trash2 />}
+											Delete
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</form>
+							</AlertDialogContent>
+						</AlertDialog>
+					)}
 				</CardAction>
 			</CardHeader>
 		</Card>

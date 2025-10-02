@@ -69,9 +69,18 @@ class Log extends Controller
     /**
      * Delete the specified log.
      */
-    public function destroy($id)
+    public function destroy($id, ServicesLog $log, ServicesSystem $system)
     {
-        //
+        try {
+            $log->deleteLog($system, $id);
+        } catch (RuntimeException $e) {
+            return redirect()->back()->withErrors([
+                'title' => 'An error occured',
+                'description' => $e->getMessage() ?: 'Unable to delete log.',
+            ]);
+        }
+
+        return redirect()->back()->with(['success' => 'Log deleted successfully!']);
     }
 
     /**

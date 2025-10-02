@@ -100,35 +100,20 @@ class Log
      */
     public static function deleteLog(ServicesSystem $system, int $id): ProcessResult
     {
-        // Récupérer tous les logs
         $logs = self::getLogs(null, null, $system);
+        $filtered = array_values(array_filter($logs, fn($l) => isset($l['id']) && (int)$l['id'] !== $id));
 
-        // Filtrer les logs pour supprimer celui avec l'id donné
-        $logs = array_filter($logs, function ($log) use ($id) {
-            return isset($log['id']) && $log['id'] != $id;
-        });
-
-        // Réécrire le fichier de log avec les logs restants
-        $jsonLines = array_map(function ($log) {
-            return json_encode($log, JSON_THROW_ON_ERROR);
-        }, $logs);
-
-        $content = implode("\n", $jsonLines).(count($jsonLines) > 0 ? "\n" : '');
-
-        $tmpFile = tempnam(sys_get_temp_dir(), 'vps-log-');
-        file_put_contents($tmpFile, $content);
+        $jsonLines = array_map(fn($l) => json_encode($l, JSON_THROW_ON_ERROR), $filtered);
+        $content = implode("\n", $jsonLines);
+        if ($content !== '') $content .= "\n";
 
         $cmd = 'bash -lc '.escapeshellarg(
-            'sudo cp '.escapeshellarg($tmpFile).' /var/log/vps-manager.log && sudo chown root:root /var/log/vps-manager.log && sudo chmod 640 /var/log/vps-manager.log'
+            'printf %s ' . escapeshellarg($content) . ' | sudo /usr/bin/tee /var/log/vps-manager.log >/dev/null'
         );
 
-        $result = $system->execute($cmd, false);
-
-        // Nettoyer le fichier temporaire
-        @unlink($tmpFile);
-
-        return $result;
+        return $system->execute($cmd, false);
     }
+
 
     /**
      * Retrieve all log entries from the log file
@@ -137,7 +122,7 @@ class Log
      * @param  int|null  $pagination  Number of entries per page for pagination (optional)
      * @return array An array of log entries
      */
-    public static function getLogs($page, $paginate, ServicesSystem $system): array
+   public static function getLogs($page, $paginate, ServicesSystem $system): array
     {
         $system->execute('sudo touch /var/log/vps-manager.log', false);
         $result = $system->execute('bash -lc '.escapeshellarg('sudo cat /var/log/vps-manager.log'), false);
@@ -149,18 +134,20 @@ class Log
         $logs = array_map(fn ($line) => json_decode($line, true, 512, JSON_THROW_ON_ERROR), $lines);
         usort($logs, fn ($a, $b) => $b['id'] <=> $a['id']);
 
+        if ($paginate === null) {
+            return $logs; // pas de pagination
+        }
+
+        $perPage = max(1, (int) $paginate);
         $page = max(1, (int) ($page ?? 1));
-        $perPage = max(1, (int) ($paginate ?? 20)); // défaut 20
         $total = count($logs);
         $lastPage = (int) ceil($total / $perPage);
-        if ($page > $lastPage) {
-            return [];
-        } // aucune donnée pour cette page
-
+        if ($page > $lastPage) return [];
         $offset = ($page - 1) * $perPage;
 
         return array_slice($logs, $offset, $perPage);
     }
+
 
     /**
      * Count total number of log entries
