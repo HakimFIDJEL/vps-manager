@@ -132,14 +132,14 @@ function DetailDialog({
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					<div className="col-span-1 flex flex-col gap-2 h-full">
 						<h2 className="text-base font-normal">Command</h2>
-						<div className="rounded-md px-3 py-2 dark:bg-input/30 bg-transparent border font-mono text-sm font-light h-full">
+						<div className="rounded-md px-3 py-2 dark:bg-input/30 bg-transparent border font-mono text-sm font-light h-full max-h-48 overflow-scroll break-words">
 							{log.command}
 						</div>
 					</div>
 
 					<div className="col-span-1 flex flex-col gap-2 h-full">
 						<h2 className="text-base font-normal">Output</h2>
-						<div className="relative rounded-md px-3 py-2 dark:bg-input/30 bg-transparent border font-mono text-sm font-light h-full">
+						<div className="relative rounded-md px-3 py-2 dark:bg-input/30 bg-transparent border font-mono text-sm font-light h-full max-h-48 overflow-scroll break-words">
 							{(log.successful && log.stdout != "") ||
 							(!log.successful && log.stderr != "") ? (
 								log.successful ? (
