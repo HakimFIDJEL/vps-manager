@@ -1,21 +1,19 @@
 // pages/projects/create.tsx
 
 // Necessary imports
-import { type BreadcrumbItem } from "@/types";
 import { Head, Link, useForm } from "@inertiajs/react";
-import { useProject } from "@/contexts/project-context";
-import { ProjectProvider } from "@/contexts/project-context";
-import { ProjectSchema } from "@/lib/projects/type";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useEffect, useState } from "react";
 
-// Components
+// Layout
 import { AppLayout } from "@/layouts/app";
 
+// Custom components
 import { AppProject } from "@/components/page/projects/create/app-project";
 import { AppVariables } from "@/components/page/projects/create/app-variables";
 import { AppDocker } from "@/components/page/projects/create/app-docker";
+import { AppFiles } from "@/components/page/projects/create/app-files";
 import { AppMakefile } from "@/components/page/projects/create/app-makefile";
 import { AppDone } from "@/components/page/projects/create/app-done";
 import { SmoothItem } from "@/components/ui/smooth-resized";
@@ -45,7 +43,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 // Schemas
-import { FolderSchema } from "@/lib/projects/type";
+import { ProjectSchema } from "@/lib/projects/type";
+
+// Types
+import { type BreadcrumbItem } from "@/types";
+
+// Custom hooks & providers
+import { useProject, ProjectProvider } from "@/contexts/project-context";
 
 // Icons
 import {
@@ -53,16 +57,13 @@ import {
 	Check,
 	Container,
 	File,
+	FileArchive,
 	FileLock,
-	Folder,
 	Layers,
 	LoaderCircleIcon,
 	Plus,
 	SquareTerminal,
 } from "lucide-react";
-
-// Contexts
-import { CommandProvider } from "@/contexts/command-context";
 
 const breadcrumbs: BreadcrumbItem[] = [
 	{
@@ -89,23 +90,23 @@ const steps = [
 	},
 	{
 		step: 2,
-		title: "Variables",
-		icon: <FileLock />,
+		title: "Files",
 	},
 	{
 		step: 3,
-		title: "Docker",
-		icon: <Container />,
+		title: "Variables",
 	},
 	{
 		step: 4,
-		title: "Makefile",
-		icon: <SquareTerminal />,
+		title: "Docker",
 	},
 	{
 		step: 5,
+		title: "Commands",
+	},
+	{
+		step: 6,
 		title: "Done",
-		icon: <Check />,
 	},
 ];
 
@@ -113,7 +114,6 @@ export default function Page() {
 	return (
 		<AppLayout breadcrumbs={breadcrumbs}>
 			<Head title="Create a project" />
-			{/* Project provider has every providers needed (commands, variables, docker etc..) */}
 			<ProjectProvider>
 				<SmoothItem delay={0.1}>
 					<Card>
@@ -151,9 +151,9 @@ export default function Page() {
 }
 
 function Content() {
-	const { project, updateProject } = useProject();
+	const { project } = useProject();
 
-	const { data, setData, post, processing, errors, wasSuccessful } = useForm({
+	const { data, setData, post, processing } = useForm({
 		project: project,
 	});
 
@@ -173,13 +173,14 @@ function Content() {
 	const [validateStep4, setValidateStep4] = useState<() => Promise<boolean>>(
 		() => async () => true,
 	);
+	const [validateStep5, setValidateStep5] = useState<() => Promise<boolean>>(
+		() => async () => true,
+	);
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
 		try {
-			// console.log("Submitting project:", project);
-
 			ProjectSchema.parse(project);
 
 			toast.loading("Creating the project...", {
@@ -215,13 +216,13 @@ function Content() {
 	}
 
 	return (
-		<Stepper defaultValue={1} totalSteps={steps.length}>
+		<Stepper defaultValue={2} totalSteps={steps.length}>
 			<SmoothItem delay={0.3}>
 				<Card className="bg-background  border-0 shadow-none mb-4">
 					<CardContent className="px-4 py-2">
 						<div className="space-y-8 text-center">
 							<StepperList>
-								{steps.map(({ step, title, icon }) => (
+								{steps.map(({ step, title }) => (
 									<StepperItem
 										key={step}
 										step={step}
@@ -279,6 +280,34 @@ function Content() {
 								<CardHeader>
 									<div className="flex items-center gap-3">
 										<div className="bg-card border rounded-md p-2">
+											<FileArchive className="w-5 h-5 text-muted-foreground" />
+										</div>
+										<div>
+											<CardTitle className="flex items-center gap-2 text-xl">
+												Files
+											</CardTitle>
+											<CardDescription>
+												Fetch from GitHub, upload a zipped project, or simply skip this step
+												if your Docker environment requires only external images.{" "}
+											</CardDescription>
+										</div>
+									</div>
+
+									<CardAction>
+										<StepperNavigation onNext={validateStep2} />
+									</CardAction>
+								</CardHeader>
+								<Separator />
+								<CardContent>
+									<AppFiles setValidate={setValidateStep2} />
+								</CardContent>
+							</Card>
+						</StepperContent>
+						<StepperContent value={3}>
+							<Card>
+								<CardHeader>
+									<div className="flex items-center gap-3">
+										<div className="bg-card border rounded-md p-2">
 											<FileLock className="w-5 h-5 text-muted-foreground" />
 										</div>
 										<div>
@@ -292,16 +321,16 @@ function Content() {
 									</div>
 
 									<CardAction>
-										<StepperNavigation onNext={validateStep2} />
+										<StepperNavigation onNext={validateStep3} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppVariables setValidate={setValidateStep2} />
+									<AppVariables setValidate={setValidateStep3} />
 								</CardContent>
 							</Card>
 						</StepperContent>
-						<StepperContent value={3}>
+						<StepperContent value={4}>
 							<Card className="overflow-visible">
 								<CardHeader>
 									<div className="flex items-center gap-3">
@@ -320,16 +349,16 @@ function Content() {
 									</div>
 
 									<CardAction>
-										<StepperNavigation onNext={validateStep3} />
+										<StepperNavigation onNext={validateStep4} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppDocker setValidate={setValidateStep3} />
+									<AppDocker setValidate={setValidateStep4} />
 								</CardContent>
 							</Card>
 						</StepperContent>
-						<StepperContent value={4}>
+						<StepperContent value={5}>
 							<Card>
 								<CardHeader>
 									<div className="flex items-center gap-3">
@@ -338,7 +367,7 @@ function Content() {
 										</div>
 										<div>
 											<CardTitle className="flex items-center gap-2 text-xl">
-												Makefile
+												Commands
 											</CardTitle>
 											<CardDescription>
 												Create your Makefile to easily execute your commands.
@@ -347,16 +376,16 @@ function Content() {
 									</div>
 
 									<CardAction>
-										<StepperNavigation onNext={validateStep4} />
+										<StepperNavigation onNext={validateStep5} />
 									</CardAction>
 								</CardHeader>
 								<Separator />
 								<CardContent>
-									<AppMakefile setValidate={setValidateStep4} />
+									<AppMakefile setValidate={setValidateStep5} />
 								</CardContent>
 							</Card>
 						</StepperContent>
-						<StepperContent value={5}>
+						<StepperContent value={6}>
 							<Card>
 								<CardHeader>
 									<div className="flex items-center gap-3">
