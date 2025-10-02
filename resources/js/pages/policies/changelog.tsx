@@ -16,9 +16,22 @@ type Entry = {
 };
 
 export default function Changelog() {
-  const updatedAt = useMemo(() => "2025-09-20", []);
+  const updatedAt = useMemo(() => "2025-10-02", []);
 
   const entries: Entry[] = [
+    {
+      version: "v0.5.2",
+      date: "2025-10-02",
+      added: [
+        "System log management: View, track, and clear command logs to keep full control and security.",
+      ],
+      changed: [],
+      fixed: [
+        "Landing page roadmap updated",
+        "Project's table rows are directly clickable rather than using a button (same for logs table)",
+        "'Remember me' checkbox disabled when submitting the login form",
+      ],
+    },
     {
       version: "v0.5.1",
       date: "2025-09-20",

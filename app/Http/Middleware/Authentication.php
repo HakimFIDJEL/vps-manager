@@ -16,6 +16,7 @@ class Authentication
      */
     public function handle(Request $request, Closure $next): Response
     {
+
         if (!session()->has('vps_user')) {
             $remembered = $request->cookie('vps_user_remember');
             if ($remembered) {

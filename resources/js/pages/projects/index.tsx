@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 
 // Projects
-import { Project } from "@/lib/projects/type";
+import { type Project } from "@/lib/projects/type";
 // import { ProjectListExample } from "@/lib/projects/type";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -112,7 +112,7 @@ function Content({ projects }: { projects: Project[] }) {
 									</Link>
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>Refresh the project list</p>
+									<p>Refresh the projects list</p>
 								</TooltipContent>
 							</Tooltip>
 							<Link href={route("projects.create")}>

@@ -143,7 +143,6 @@ const AlertDialogAction = React.forwardRef<
 		if (onAction) {
 			const shouldClose = await onAction();
 			if (shouldClose && closeRef.current) {
-				console.log("clicked");
 				closeRef.current?.click();
 			}
 		}

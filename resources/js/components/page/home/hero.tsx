@@ -45,7 +45,9 @@ export function Hero() {
 				<div className="lg:w-[45%]">
 					<div>
 						<h1 className="max-w-sm text-balance text-4xl font-base md:text-5xl">
-							VPS Management Simplified
+							VPS <br />
+							Management <br />
+							Simplified
 						</h1>
 						<p className="text-muted-foreground my-8 max-w-2xl text-balance text-lg font-light">
 							Effortlessly orchestrate, monitor, and control all your VPS projects from
