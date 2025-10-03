@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 // Libs
 
@@ -68,7 +69,6 @@ import { FileSchema } from "@/lib/files/type";
 
 // Types
 import { type ComboboxOption } from "@/components/ui/combobox";
-import { toast } from "sonner";
 
 export function AppFiles({
 	setValidate,
