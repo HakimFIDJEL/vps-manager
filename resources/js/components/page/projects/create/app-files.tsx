@@ -59,6 +59,8 @@ import {
 	ArrowDownToLine,
 	FileUp,
 	ChevronDown,
+	Github,
+	Gitlab,
 } from "lucide-react";
 
 // Contexts
@@ -203,11 +205,19 @@ function ModalGit({ children }: { children: ReactNode }) {
 
 	// Variables
 	const [repositories, setRepositories] = useState<ComboboxOption[]>([]);
+	const [targets, setTargets] = useState<ComboboxOption[]>([]);
+
+	// Constants
 	const [types, setTypes] = useState<ComboboxOption[]>([
 		{ label: "Branch", value: "branch" },
 		{ label: "Tag", value: "tag" },
 	]);
-	const [targets, setTargets] = useState<ComboboxOption[]>([]);
+	const [providers, setProviders] = useState<ComboboxOption[]>([
+		{ label: "GitHub", value: "github", icon: <Github /> },
+		{ label: "GitLab", value: "gitlab", icon: <Gitlab /> },
+		// Bitbucket for a next release
+		// { label: "Bitbucket", value: "bitbucket"},
+	]);
 
 	// Temp variables
 	const [fetchingRepositories, setFetchingRepositories] = useState<boolean>(false);
@@ -241,7 +251,6 @@ function ModalGit({ children }: { children: ReactNode }) {
 	async function fetchTargets(type: string) {
 		setFetchingTargets(true);
 
-		setTargets([]);
 		// Fetch targets from API based on type (branch or tag)
 		await new Promise((resolve) => setTimeout(resolve, 4000));
 
@@ -279,16 +288,24 @@ function ModalGit({ children }: { children: ReactNode }) {
 		return true;
 	}
 
-	// Fetch repositories on mount
+	const gitProvider = GitForm.watch("git_provider");
+	const gitRepo = GitForm.watch("git_repository");
+	const gitType = GitForm.watch("git_type");
+
+	// Fetch repositories on provider change
 	useEffect(() => {
-		fetchRepositories();
-	}, []);
+		GitForm.resetField("git_repository");
+		GitForm.resetField("git_type");
+		GitForm.resetField("git_target");
+		setRepositories([]);
+		setTargets([]);
+		if (gitProvider) fetchRepositories();
+	}, [gitProvider]);
 
 	// Fetch targets on type change
-	const gitType = GitForm.watch("git_type");
-	const gitRepo = GitForm.watch("git_repository");
 	useEffect(() => {
-		GitForm.setValue("git_target", "");
+		GitForm.resetField("git_target");
+		setTargets([]);
 		if (gitType) fetchTargets(gitType);
 	}, [gitType]);
 
@@ -319,36 +336,69 @@ function ModalGit({ children }: { children: ReactNode }) {
 					>
 						<AlertDialogBody className="mb-4">
 							<div className="grid items-center gap-3">
-								{/* Repository */}
-								<div className="col-span-1">
-									<FormField
-										control={GitForm.control}
-										name="git_repository"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Repository</FormLabel>
-												<FormControl>
-													<Combobox
-														options={repositories}
-														className="w-full"
-														placeholder="Select a repository"
-														allowDeselect={false}
-														icon={
-															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-														}
-														onValueChange={field.onChange}
-														disabled={submitting}
-														loading={fetchingRepositories}
-														{...field}
-													/>
-												</FormControl>
-												<FormDescription>
-													Select the repository you want to link to this project.
-												</FormDescription>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+								{/* Provider & Repository */}
+								<div className="grid grid-cols-2 gap-4 col-span-1">
+									{/* Provider */}
+									<div className="col-span-1">
+										<FormField
+											control={GitForm.control}
+											name="git_provider"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Provider</FormLabel>
+													<FormControl>
+														<Combobox
+															options={providers}
+															className="w-full"
+															placeholder="Select a provider"
+															searchable={false}
+															icon={
+																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+															}
+															onValueChange={field.onChange}
+															disabled={submitting}
+															{...field}
+														/>
+													</FormControl>
+													<FormDescription>
+														Select a Git provider to import an existing project from a Git Repository.
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+
+									{/* Repository */}
+									<div className="col-span-1">
+										<FormField
+											control={GitForm.control}
+											name="git_repository"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Repository</FormLabel>
+													<FormControl>
+														<Combobox
+															options={repositories}
+															className="w-full"
+															placeholder="Select a repository"
+															icon={
+																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+															}
+															onValueChange={field.onChange}
+															disabled={submitting || !gitProvider}
+															loading={fetchingRepositories}
+															{...field}
+														/>
+													</FormControl>
+													<FormDescription>
+														Select the repository you want to link to this project.
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
 								</div>
 
 								{/* Type & Target */}

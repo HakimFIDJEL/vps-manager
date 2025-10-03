@@ -6,6 +6,8 @@ export const FileSchema = z.discriminatedUnion("type", [
 	// GIT
 	z.object({
 		type: z.literal("git"),
+		// Bitbucket for a next release
+		git_provider: z.enum(["github", "gitlab"], { message: "The git provider is required and must be either 'github', or 'gitlab'." }),
 		git_repository: z
 			.string({ message: "The git repository name must be a string" })
             .nonempty("The git repository is required")
