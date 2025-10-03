@@ -1,6 +1,15 @@
 // Necessary imports
-import { useEffect, Dispatch, SetStateAction, ReactNode } from "react";
+import {
+	useEffect,
+	Dispatch,
+	SetStateAction,
+	ReactNode,
+	useState,
+} from "react";
 import { cn } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // Libs
 
@@ -28,6 +37,16 @@ import {
 	AlertDialogTrigger,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Combobox } from "@/components/ui/combobox";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	FormDescription,
+} from "@/components/ui/form";
 
 // Icons
 import {
@@ -38,10 +57,18 @@ import {
 	Loader2,
 	ArrowDownToLine,
 	FileUp,
+	ChevronDown,
 } from "lucide-react";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
+
+// Schemas
+import { FileSchema } from "@/lib/files/type";
+
+// Types
+import { type ComboboxOption } from "@/components/ui/combobox";
+import { toast } from "sonner";
 
 export function AppFiles({
 	setValidate,
@@ -66,15 +93,15 @@ export function AppFiles({
 		<Tabs defaultValue="none">
 			<TabsList className="hidden">
 				<TabsTrigger value="none">None</TabsTrigger>
-				<TabsTrigger value="github">Github</TabsTrigger>
+				<TabsTrigger value="git">Git</TabsTrigger>
 				<TabsTrigger value="import">Import</TabsTrigger>
 			</TabsList>
 			<TabsBody>
 				<TabsContent value="none">
 					<AppNone />
 				</TabsContent>
-				<TabsContent value="github">
-					<AppGithub />
+				<TabsContent value="git">
+					<AppGit />
 				</TabsContent>
 				<TabsContent value="import">
 					<AppImport />
@@ -85,14 +112,12 @@ export function AppFiles({
 }
 
 export function AppNone() {
-	
 	return (
 		<div className="grid gap-2">
 			<div className="flex flex-col">
 				<h3 className="text-sm font-medium mb-2">Import files</h3>
 				<div className="grid grid-cols-3 gap-4">
-
-					<ModalGithub>
+					<ModalGit>
 						<button
 							className={cn(
 								"group w-full flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 transition-all duration-200 cursor-pointer",
@@ -105,12 +130,13 @@ export function AppNone() {
 							<div className="flex-1 text-left">
 								<div className="font-medium">Git</div>
 								<div className="text-xs text-muted-foreground">
-									Connect your project to a Git repository targeting a chosen branch or tag.
+									Connect your project to a Git repository targeting a chosen branch or
+									tag.
 								</div>
 							</div>
 							<ArrowRight className="h-5 w-5 text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
 						</button>
-					</ModalGithub>
+					</ModalGit>
 
 					<ModalImport>
 						<button
@@ -171,8 +197,105 @@ export function AppNone() {
 	);
 }
 
-function ModalGithub({ children } : { children: ReactNode }) {
+function ModalGit({ children }: { children: ReactNode }) {
+	// Contexts
 	const { setCurrentValue } = useTabsContext();
+
+	// Variables
+	const [repositories, setRepositories] = useState<ComboboxOption[]>([]);
+	const [types, setTypes] = useState<ComboboxOption[]>([
+		{ label: "Branch", value: "branch" },
+		{ label: "Tag", value: "tag" },
+	]);
+	const [targets, setTargets] = useState<ComboboxOption[]>([]);
+
+	// Temp variables
+	const [fetchingRepositories, setFetchingRepositories] = useState<boolean>(false);
+	const [fetchingTargets, setFetchingTargets] = useState<boolean>(false);
+	const [submitting, setSubmitting] = useState<boolean>(false);
+
+	// Form
+	const GitForm = useForm<z.infer<typeof FileSchema>>({
+		resolver: zodResolver(FileSchema),
+		defaultValues: {
+			type: "git",
+		},
+	});
+
+	// Custom methods
+	async function fetchRepositories() {
+		setFetchingRepositories(true);
+
+		// Fetch repositories from API
+		await new Promise((resolve) => setTimeout(resolve, 4000));
+
+		setFetchingRepositories(false);
+
+		setRepositories([
+			{ label: "my-repo", value: "my-repo" },
+			{ label: "another-repo", value: "another-repo" },
+			{ label: "test-repo", value: "test-repo" },
+		]);
+	}
+
+	async function fetchTargets(type: string) {
+		setFetchingTargets(true);
+
+		setTargets([]);
+		// Fetch targets from API based on type (branch or tag)
+		await new Promise((resolve) => setTimeout(resolve, 4000));
+
+		setFetchingTargets(false);
+
+		if (type === "branch") {
+			setTargets([
+				{ label: "main", value: "main" },
+				{ label: "development", value: "development" },
+				{ label: "feature-xyz", value: "feature-xyz" },
+			]);
+		} else {
+			setTargets([
+				{ label: "v1.0.0", value: "v1.0.0" },
+				{ label: "v1.1.0", value: "v1.1.0" },
+				{ label: "v2.0.0", value: "v2.0.0" },
+			]);
+		}
+	}
+
+	async function onSubmit() {
+		const isValid = await GitForm.trigger();
+		if (!isValid) return false;
+
+		setSubmitting(true);
+
+		const data = GitForm.getValues();
+
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		GitForm.reset();
+		setCurrentValue("git");
+		setSubmitting(false);
+		toast.success("Git repository linked successfully!");
+		return true;
+	}
+
+	// Fetch repositories on mount
+	useEffect(() => {
+		fetchRepositories();
+	}, []);
+
+	// Fetch targets on type change
+	const gitType = GitForm.watch("git_type");
+	const gitRepo = GitForm.watch("git_repository");
+	useEffect(() => {
+		GitForm.setValue("git_target", "");
+		if (gitType) fetchTargets(gitType);
+	}, [gitType]);
+
+	// Test : Console.log form values on change
+	// useEffect(() => {
+	// 	console.log("Form values:", GitForm.getValues());
+	// }, [GitForm.watch()]);
 
 	return (
 		<AlertDialog>
@@ -186,44 +309,135 @@ function ModalGithub({ children } : { children: ReactNode }) {
 						Connect your project to a Git repository targeting a chosen branch or tag.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
-				<form
-					onSubmit={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-					}}
-				>
 
-					<div className="grid grid-cols-2">
+				<Form {...GitForm}>
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+					>
+						<AlertDialogBody className="mb-4">
+							<div className="grid items-center gap-3">
+								{/* Repository */}
+								<div className="col-span-1">
+									<FormField
+										control={GitForm.control}
+										name="git_repository"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Repository</FormLabel>
+												<FormControl>
+													<Combobox
+														options={repositories}
+														className="w-full"
+														placeholder="Select a repository"
+														allowDeselect={false}
+														icon={
+															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+														}
+														onValueChange={field.onChange}
+														disabled={submitting}
+														loading={fetchingRepositories}
+														{...field}
+													/>
+												</FormControl>
+												<FormDescription>
+													Select the repository you want to link to this project.
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
 
-						{/* Select repo */}
-						<div>
+								{/* Type & Target */}
+								<div className="grid grid-cols-2 gap-4 col-span-1">
+									{/* Type */}
+									<div className="col-span-1">
+										<FormField
+											control={GitForm.control}
+											name="git_type"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Type</FormLabel>
+													<FormControl>
+														<Combobox
+															options={types}
+															searchable={false}
+															className="w-full"
+															placeholder="Select a type"
+															onValueChange={field.onChange}
+															disabled={submitting || !gitRepo}
+															icon={
+																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+															}
+															{...field}
+														/>
+													</FormControl>
+													<FormDescription>
+														Select whether you want to pull from a branch or a tag.
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
 
-						</div>
+									{/* Target */}
+									<div className="col-span-1">
+										<FormField
+											control={GitForm.control}
+											name="git_target"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Target</FormLabel>
+													<FormControl>
+														<Combobox
+															options={targets}
+															className="w-full"
+															placeholder="Select a target"
+															onValueChange={field.onChange}
+															disabled={submitting || !gitType}
+															loading={fetchingTargets}
+															icon={
+																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+															}
+															{...field}
+														/>
+													</FormControl>
+													<FormDescription>
+														Select the branch or tag you want to pull from the repository.
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
+								</div>
+							</div>
+						</AlertDialogBody>
 
-						{/* Select type & target */}
-						<div>
-
-						</div>
-
-					</div>
-
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							variant={"default"}
-							type={"submit"}
-						>
-							<ArrowDownToLine />
-							Pull repository
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</form>
+						<AlertDialogFooter>
+							<AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+							<AlertDialogAction
+								variant={"default"}
+								type={"submit"}
+								onAction={onSubmit}
+								disabled={submitting}
+							>
+								{submitting ? <Loader2 className="animate-spin" /> : <ArrowDownToLine />}
+								Pull repository
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</form>
+				</Form>
 			</AlertDialogContent>
 		</AlertDialog>
 	);
 }
 
-function ModalImport({ children } : { children: ReactNode }) {
+function ModalImport({ children }: { children: ReactNode }) {
 	const { setCurrentValue } = useTabsContext();
 
 	return (
@@ -244,22 +458,16 @@ function ModalImport({ children } : { children: ReactNode }) {
 						e.stopPropagation();
 					}}
 				>
-
-					<div className="grid grid-cols-2">
-
-						{/* Import file */}
-						<div>
-
+					<AlertDialogBody>
+						<div className="grid grid-cols-2">
+							{/* Import file */}
+							<div></div>
 						</div>
-
-					</div>
+					</AlertDialogBody>
 
 					<AlertDialogFooter>
 						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction
-							variant={"default"}
-							type={"submit"}
-						>
+						<AlertDialogAction variant={"default"} type={"submit"}>
 							<FileUp />
 							Import ZIP File
 						</AlertDialogAction>
@@ -270,7 +478,7 @@ function ModalImport({ children } : { children: ReactNode }) {
 	);
 }
 
-function AppGithub() {
+function AppGit() {
 	return <></>;
 }
 function AppImport() {

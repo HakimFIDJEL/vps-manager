@@ -66,12 +66,6 @@ export interface ComboboxProps {
   contentClassName?: string
 
   /**
-   * Width of the combobox (applies to both trigger and content)
-   * @default "auto" - adapts to content
-   */
-  width?: string | number
-
-  /**
    * Whether to allow deselecting the current value
    */
   allowDeselect?: boolean
@@ -144,6 +138,17 @@ export interface ComboboxProps {
    * When true, displays a loading spinner instead of options
    */
   loading?: boolean
+
+  /**
+   * Name attribute for form submission
+   * When provided, an hidden input will be created with this name
+   */
+  name?: string
+
+  /**
+   * Whether the field is required for form validation
+   */
+  required?: boolean
 }
 
 export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
@@ -159,7 +164,6 @@ export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
       disabled = false,
       className,
       contentClassName,
-      width,
       allowDeselect = true,
       icon,
       checkIcon,
@@ -173,7 +177,9 @@ export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
       open: controlledOpen,
       align = "start",
       side = "bottom",
-      loading = false, // Added loading parameter with default value
+      loading = false,
+      name,
+      required = false,
     },
     ref,
   ) => {
@@ -226,8 +232,6 @@ export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
       [value, allowDeselect, setValue, setOpen],
     )
 
-    const widthStyle = width ? (typeof width === "number" ? `${width}px` : width) : undefined
-
     const defaultTriggerContent = (
       <>
         {selectedOption ? selectedOption.label : placeholder}
@@ -262,52 +266,55 @@ export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
     }
 
     return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            ref={ref}
-            variant={variant}
-            size={size}
-            role="combobox"
-            aria-expanded={open}
-            disabled={disabled}
-            className={cn("justify-between", !width && "w-fit min-w-[200px]", className)}
-            style={widthStyle ? { width: widthStyle } : undefined}
+      <>
+        {name && <input type="hidden" name={name} value={value} required={required} />}
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              ref={ref}
+              variant={variant}
+              size={size}
+              role="combobox"
+              aria-expanded={open}
+              disabled={disabled}
+              className={cn("justify-between", className)}
+            >
+              {triggerContent}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            className={cn("w-[var(--radix-popover-trigger-width)] p-0", contentClassName)}
+            align={align}
+            side={side}
           >
-            {triggerContent}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className={cn("p-0", contentClassName)}
-          style={{ width: widthStyle || "200px" }}
-          align={align}
-          side={side}
-        >
-          <Command>
-            {searchable && <CommandInput placeholder={searchPlaceholder} className="h-9" />}
-            <CommandList>
-              {loading ? (
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <>
-                  <CommandEmpty>{emptyMessage}</CommandEmpty>
-                  {groups ? (
-                    groups.map((group) => (
-                      <CommandGroup key={group.label} heading={group.label}>
-                        {renderOptions(group.options)}
-                      </CommandGroup>
-                    ))
-                  ) : (
-                    <CommandGroup>{renderOptions(allOptions)}</CommandGroup>
-                  )}
-                </>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+            <Command>
+              {searchable && <CommandInput placeholder={searchPlaceholder} className="h-9" />}
+              <CommandList>
+                {loading ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <>
+                    <CommandEmpty>{emptyMessage}</CommandEmpty>
+                    {groups ? (
+                      groups.map((group) => (
+                        <CommandGroup key={group.label} heading={group.label}>
+                          {renderOptions(group.options)}
+                        </CommandGroup>
+                      ))
+                    ) : (
+                        options.length !== 0 && (
+                            <CommandGroup>{renderOptions(allOptions)}</CommandGroup>
+                        )
+                    )}
+                  </>
+                )}
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </>
     )
   },
 )
