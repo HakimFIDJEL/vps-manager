@@ -343,7 +343,7 @@ export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
 					>
 						<Command>
 							{searchable && (
-								<CommandInput placeholder={searchPlaceholder} className="h-9" />
+								<CommandInput placeholder={searchPlaceholder} disabled={disabled || loading} className="h-9" />
 							)}
 							<CommandList>
 								{loading ? (

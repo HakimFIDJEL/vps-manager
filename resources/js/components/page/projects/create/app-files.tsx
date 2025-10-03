@@ -61,6 +61,10 @@ import {
 	ChevronDown,
 	Github,
 	Gitlab,
+	X,
+	Check,
+	GitBranch,
+	Tag,
 } from "lucide-react";
 
 // Contexts
@@ -69,8 +73,20 @@ import { useProject } from "@/contexts/project-context";
 // Schemas
 import { FileSchema } from "@/lib/files/type";
 
+// Mocks
+import {
+	mock_repositories_github,
+	mock_repositories_gitlab,
+	mock_targets_branch,
+	mock_targets_tag,
+} from "@/lib/files/type";
+
+// Constants
+import { git_types, git_providers } from "@/lib/files/type";
+
 // Types
 import { type ComboboxOption } from "@/components/ui/combobox";
+import { SmoothItem } from "@/components/ui/smooth-resized";
 
 export function AppFiles({
 	setValidate,
@@ -207,22 +223,14 @@ function ModalGit({ children }: { children: ReactNode }) {
 	const [repositories, setRepositories] = useState<ComboboxOption[]>([]);
 	const [targets, setTargets] = useState<ComboboxOption[]>([]);
 
-	// Constants
-	const [types, setTypes] = useState<ComboboxOption[]>([
-		{ label: "Branch", value: "branch" },
-		{ label: "Tag", value: "tag" },
-	]);
-	const [providers, setProviders] = useState<ComboboxOption[]>([
-		{ label: "GitHub", value: "github", icon: <Github /> },
-		{ label: "GitLab", value: "gitlab", icon: <Gitlab /> },
-		// Bitbucket for a next release
-		// { label: "Bitbucket", value: "bitbucket"},
-	]);
-
 	// Temp variables
-	const [fetchingRepositories, setFetchingRepositories] = useState<boolean>(false);
+	const [fetchingRepositories, setFetchingRepositories] =
+		useState<boolean>(false);
 	const [fetchingTargets, setFetchingTargets] = useState<boolean>(false);
 	const [submitting, setSubmitting] = useState<boolean>(false);
+	const [providerStatus, setProviderStatus] = useState<
+		"none" | "error" | "success" | "loading"
+	>("none");
 
 	// Form
 	const GitForm = useForm<z.infer<typeof FileSchema>>({
@@ -232,42 +240,48 @@ function ModalGit({ children }: { children: ReactNode }) {
 		},
 	});
 
+	// Watchers
+	const gitProvider = GitForm.watch("git_provider");
+	const gitRepo = GitForm.watch("git_repository");
+	const gitType = GitForm.watch("git_type");
+
 	// Custom methods
 	async function fetchRepositories() {
+		// Fetching repositories
 		setFetchingRepositories(true);
-
-		// Fetch repositories from API
-		await new Promise((resolve) => setTimeout(resolve, 4000));
-
+		await new Promise((r) => setTimeout(r, 4000));
 		setFetchingRepositories(false);
 
-		setRepositories([
-			{ label: "my-repo", value: "my-repo" },
-			{ label: "another-repo", value: "another-repo" },
-			{ label: "test-repo", value: "test-repo" },
-		]);
+		// Assigning mock repositories
+		if (gitProvider === "github") {
+			setRepositories(mock_repositories_github);
+		} else if (gitProvider === "gitlab") {
+			setRepositories(mock_repositories_gitlab);
+		} else {
+			setRepositories([]);
+		}
 	}
 
-	async function fetchTargets(type: string) {
+	async function fetchTargets(gitType: string) {
+		// Fetch targets
 		setFetchingTargets(true);
-
-		// Fetch targets from API based on type (branch or tag)
-		await new Promise((resolve) => setTimeout(resolve, 4000));
-
+		await new Promise((r) => setTimeout(r, 4000));
 		setFetchingTargets(false);
 
-		if (type === "branch") {
-			setTargets([
-				{ label: "main", value: "main" },
-				{ label: "development", value: "development" },
-				{ label: "feature-xyz", value: "feature-xyz" },
-			]);
-		} else {
-			setTargets([
-				{ label: "v1.0.0", value: "v1.0.0" },
-				{ label: "v1.1.0", value: "v1.1.0" },
-				{ label: "v2.0.0", value: "v2.0.0" },
-			]);
+		// Assign mock targets
+		setTargets(gitType === "branch" ? mock_targets_branch : mock_targets_tag);
+	}
+
+	async function connectProvider() {
+		// Connect to provider
+		setProviderStatus("loading");
+		await new Promise((r) => setTimeout(r, 3000));
+		// const success = gitProvider === "github" ? true : false;
+		const success = true;
+		setProviderStatus(success ? "success" : "error");
+
+		if (success) {
+			fetchRepositories();
 		}
 	}
 
@@ -288,26 +302,56 @@ function ModalGit({ children }: { children: ReactNode }) {
 		return true;
 	}
 
-	const gitProvider = GitForm.watch("git_provider");
-	const gitRepo = GitForm.watch("git_repository");
-	const gitType = GitForm.watch("git_type");
-
-	// Fetch repositories on provider change
+	// Custom Hooks
+	// Reset form on mount
 	useEffect(() => {
-		GitForm.resetField("git_repository");
-		GitForm.resetField("git_type");
-		GitForm.resetField("git_target");
+		// Reset form fields
+		GitForm.setValue("git_provider", ""); // TSX error but optimal for UX experience
+		GitForm.setValue("git_repository", "");
+		GitForm.setValue("git_type", ""); // TSX error but optimal for UX experience
+		GitForm.setValue("git_target", "");
+
+		// Empty variables
 		setRepositories([]);
 		setTargets([]);
-		if (gitProvider) fetchRepositories();
+	}, []);
+
+	// Connect to provider on provider change
+	useEffect(() => {
+		// Reset form fields
+		GitForm.setValue("git_repository", "");
+		GitForm.setValue("git_type", ""); // TSX error but optimal for UX experience
+		GitForm.setValue("git_target", "");
+
+		// Empty variables
+		setRepositories([]);
+		setTargets([]);
+
+		// Basic verification
+		if (!gitProvider) {
+			console.error("Requirements not met to connect to provider");
+			return;
+		} else {
+			connectProvider();
+		}
 	}, [gitProvider]);
 
 	// Fetch targets on type change
 	useEffect(() => {
-		GitForm.resetField("git_target");
+		// Reset form fields
+		GitForm.setValue("git_target", "");
+
+		// Empty variables
 		setTargets([]);
-		if (gitType) fetchTargets(gitType);
-	}, [gitType]);
+
+		// Basic verification
+		if (!gitProvider || !gitRepo || !gitType || providerStatus !== "success") {
+			console.error("Requirements not met to fetch targets");
+			return;
+		} else {
+			fetchTargets(gitType);
+		}
+	}, [gitProvider, gitRepo, gitType, providerStatus]);
 
 	// Test : Console.log form values on change
 	// useEffect(() => {
@@ -317,7 +361,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-			<AlertDialogContent>
+			<AlertDialogContent className="!max-w-2xl">
 				<AlertDialogHeader>
 					<AlertDialogTitle className="flex items-center gap-2">
 						Import files via Git
@@ -336,6 +380,42 @@ function ModalGit({ children }: { children: ReactNode }) {
 					>
 						<AlertDialogBody className="mb-4">
 							<div className="grid items-center gap-3">
+								{/* Alert for provider status */}
+								<SmoothItem layout={false}>
+									{gitProvider && providerStatus !== "none" && (
+										<Alert
+											variant={providerStatus === "error" ? "destructive" : "default"}
+										>
+											{providerStatus === "loading" && (
+												<AlertTitle className="flex items-center gap-2">
+													<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+													Connecting to provider...
+												</AlertTitle>
+											)}
+
+											{providerStatus === "error" && (
+												<>
+													<AlertTitle className="flex items-center gap-2">
+														<X className="h-4 w-4" />
+														Error connecting to provider {gitProvider}
+													</AlertTitle>
+													<AlertDescription>
+														There was an error connecting to the selected Git provider. Please
+														ensure you have the necessary permissions and try again.
+													</AlertDescription>
+												</>
+											)}
+
+											{providerStatus === "success" && (
+												<AlertTitle className="flex items-center gap-2">
+													<Check className="h-4 w-4" />
+													Successfully connected to {gitProvider}!
+												</AlertTitle>
+											)}
+										</Alert>
+									)}
+								</SmoothItem>
+
 								{/* Provider & Repository */}
 								<div className="grid grid-cols-2 gap-4 col-span-1">
 									{/* Provider */}
@@ -348,9 +428,10 @@ function ModalGit({ children }: { children: ReactNode }) {
 													<FormLabel>Provider</FormLabel>
 													<FormControl>
 														<Combobox
-															options={providers}
+															options={git_providers}
 															className="w-full"
 															placeholder="Select a provider"
+															allowDeselect
 															searchable={false}
 															icon={
 																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -361,7 +442,8 @@ function ModalGit({ children }: { children: ReactNode }) {
 														/>
 													</FormControl>
 													<FormDescription>
-														Select a Git provider to import an existing project from a Git Repository.
+														Select a Git provider to import an existing project from a Git
+														Repository.
 													</FormDescription>
 													<FormMessage />
 												</FormItem>
@@ -386,7 +468,9 @@ function ModalGit({ children }: { children: ReactNode }) {
 																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 															}
 															onValueChange={field.onChange}
-															disabled={submitting || !gitProvider}
+															disabled={
+																submitting || !gitProvider || providerStatus !== "success"
+															}
 															loading={fetchingRepositories}
 															{...field}
 														/>
@@ -413,12 +497,17 @@ function ModalGit({ children }: { children: ReactNode }) {
 													<FormLabel>Type</FormLabel>
 													<FormControl>
 														<Combobox
-															options={types}
+															options={git_types}
 															searchable={false}
 															className="w-full"
 															placeholder="Select a type"
 															onValueChange={field.onChange}
-															disabled={submitting || !gitRepo}
+															disabled={
+																submitting ||
+																!gitProvider ||
+																!gitRepo ||
+																providerStatus !== "success"
+															}
 															icon={
 																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 															}
@@ -448,7 +537,13 @@ function ModalGit({ children }: { children: ReactNode }) {
 															className="w-full"
 															placeholder="Select a target"
 															onValueChange={field.onChange}
-															disabled={submitting || !gitType}
+															disabled={
+																submitting ||
+																!gitProvider ||
+																!gitRepo ||
+																providerStatus !== "success" ||
+																!gitType
+															}
 															loading={fetchingTargets}
 															icon={
 																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -474,9 +569,13 @@ function ModalGit({ children }: { children: ReactNode }) {
 								variant={"default"}
 								type={"submit"}
 								onAction={onSubmit}
-								disabled={submitting}
+								disabled={submitting || providerStatus !== "success"}
 							>
-								{submitting ? <Loader2 className="animate-spin" /> : <ArrowDownToLine />}
+								{submitting ? (
+									<Loader2 className="animate-spin" />
+								) : (
+									<ArrowDownToLine />
+								)}
 								Pull repository
 							</AlertDialogAction>
 						</AlertDialogFooter>
