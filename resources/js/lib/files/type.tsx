@@ -32,7 +32,7 @@ export const FileSchema = z.discriminatedUnion("type", [
 		// Bitbucket for a next release
 		git_provider: z.enum(["github", "gitlab"], {
 			message:
-				"The git provider is required and must be either 'github', or 'gitlab'.",
+				"The git provider is required must be either 'github', or 'gitlab'.",
 		}),
 		git_repository: z
 			.string({ message: "The git repository name must be a string" })
@@ -51,6 +51,10 @@ export const FileSchema = z.discriminatedUnion("type", [
 				message:
 					"The git target name must only include alphanumeric characters, dots, underscores, hyphens, and slashes.",
 			}),
+		git_username: z
+			.string({ message: "The git username must be a string" })
+			.nonempty("The git username is required"),
+		git_avatar: z.string().url().optional(),
 	}),
 
 	// IMPORT ZIP FILE
@@ -99,6 +103,10 @@ export const mock_targets_tag = [
 	{ label: "v1.1.0", value: "v1.1.0" },
 	{ label: "v2.0.0", value: "v2.0.0" },
 ];
+
+export const mock_username = "hakimfidjel";
+export const mock_name = "Hakim Fidjel";
+export const mock_avatar = "";
 
 // Select options
 export const git_types = [

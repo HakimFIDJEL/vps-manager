@@ -176,8 +176,8 @@ export interface ComboboxProps {
 }
 
 export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
-	(
-		{
+	(props, ref) => {
+		const {
 			options = [],
 			value: controlledValue,
 			defaultValue,
@@ -204,19 +204,24 @@ export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
 			loading = false,
 			name,
 			required = false,
-		},
-		ref,
-	) => {
+		} = props;
+
+		// State
 		const [internalOpen, setInternalOpen] = React.useState(false);
 		const [internalValue, setInternalValue] = React.useState(defaultValue || "");
 
 		// Determine if we're in controlled mode
-		const isControlledValue = controlledValue !== undefined;
-		const isControlledOpen = controlledOpen !== undefined;
+		const isControlledValue = Object.prototype.hasOwnProperty.call(
+			props,
+			"value",
+		);
+		const isControlledOpen = Object.prototype.hasOwnProperty.call(props, "open");
 
-		const open = isControlledOpen ? controlledOpen : internalOpen;
-		const value = isControlledValue ? controlledValue : internalValue;
+		// Resolve effective values
+		const open = isControlledOpen ? (controlledOpen ?? false) : internalOpen;
+		const value = isControlledValue ? (controlledValue ?? "") : internalValue;
 
+		// Updaters
 		const setOpen = React.useCallback(
 			(newOpen: boolean) => {
 				if (!isControlledOpen) {
@@ -343,7 +348,11 @@ export const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
 					>
 						<Command>
 							{searchable && (
-								<CommandInput placeholder={searchPlaceholder} disabled={disabled || loading} className="h-9" />
+								<CommandInput
+									placeholder={searchPlaceholder}
+									disabled={disabled || loading}
+									className="h-9"
+								/>
 							)}
 							<CommandList>
 								{loading ? (

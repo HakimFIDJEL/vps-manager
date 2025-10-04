@@ -6,15 +6,11 @@ import {
 	ReactNode,
 	useState,
 } from "react";
-import { cn } from "@/lib/utils";
+import { cn, ucfirst, initials } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-
-// Libs
-
-// Custom components
 
 // Shadcn UI components
 import {
@@ -48,6 +44,7 @@ import {
 	FormMessage,
 	FormDescription,
 } from "@/components/ui/form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Icons
 import {
@@ -59,12 +56,8 @@ import {
 	ArrowDownToLine,
 	FileUp,
 	ChevronDown,
-	Github,
-	Gitlab,
 	X,
 	Check,
-	GitBranch,
-	Tag,
 } from "lucide-react";
 
 // Contexts
@@ -79,6 +72,9 @@ import {
 	mock_repositories_gitlab,
 	mock_targets_branch,
 	mock_targets_tag,
+	mock_username,
+	mock_name,
+	mock_avatar,
 } from "@/lib/files/type";
 
 // Constants
@@ -86,7 +82,6 @@ import { git_types, git_providers } from "@/lib/files/type";
 
 // Types
 import { type ComboboxOption } from "@/components/ui/combobox";
-import { SmoothItem } from "@/components/ui/smooth-resized";
 
 export function AppFiles({
 	setValidate,
@@ -222,6 +217,9 @@ function ModalGit({ children }: { children: ReactNode }) {
 	// Variables
 	const [repositories, setRepositories] = useState<ComboboxOption[]>([]);
 	const [targets, setTargets] = useState<ComboboxOption[]>([]);
+	const [username, setUsername] = useState<string>("");
+	const [name, setName] = useState<string>("");
+	const [avatar, setAvatar] = useState<string>("");
 
 	// Temp variables
 	const [fetchingRepositories, setFetchingRepositories] =
@@ -237,6 +235,8 @@ function ModalGit({ children }: { children: ReactNode }) {
 		resolver: zodResolver(FileSchema),
 		defaultValues: {
 			type: "git",
+			git_provider: undefined,
+			git_type: undefined,
 		},
 	});
 
@@ -276,12 +276,17 @@ function ModalGit({ children }: { children: ReactNode }) {
 		// Connect to provider
 		setProviderStatus("loading");
 		await new Promise((r) => setTimeout(r, 3000));
-		// const success = gitProvider === "github" ? true : false;
-		const success = true;
+		const success = gitProvider === "github" ? true : false;
+		// const success = true;
 		setProviderStatus(success ? "success" : "error");
 
 		if (success) {
 			fetchRepositories();
+
+			// Set mock user information
+			setUsername(mock_username);
+			setName(mock_name);
+			setAvatar(mock_avatar);
 		}
 	}
 
@@ -306,9 +311,9 @@ function ModalGit({ children }: { children: ReactNode }) {
 	// Reset form on mount
 	useEffect(() => {
 		// Reset form fields
-		GitForm.setValue("git_provider", ""); // TSX error but optimal for UX experience
+		GitForm.resetField("git_provider");
 		GitForm.setValue("git_repository", "");
-		GitForm.setValue("git_type", ""); // TSX error but optimal for UX experience
+		GitForm.resetField("git_type");
 		GitForm.setValue("git_target", "");
 
 		// Empty variables
@@ -318,9 +323,15 @@ function ModalGit({ children }: { children: ReactNode }) {
 
 	// Connect to provider on provider change
 	useEffect(() => {
+		setProviderStatus("none");
+		// Reset user information
+		setUsername("");
+		setName("");
+		setAvatar("");
+
 		// Reset form fields
 		GitForm.setValue("git_repository", "");
-		GitForm.setValue("git_type", ""); // TSX error but optimal for UX experience
+		GitForm.resetField("git_type");
 		GitForm.setValue("git_target", "");
 
 		// Empty variables
@@ -329,7 +340,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 
 		// Basic verification
 		if (!gitProvider) {
-			console.error("Requirements not met to connect to provider");
+			console.info("Requirements not met to connect to provider");
 			return;
 		} else {
 			connectProvider();
@@ -346,7 +357,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 
 		// Basic verification
 		if (!gitProvider || !gitRepo || !gitType || providerStatus !== "success") {
-			console.error("Requirements not met to fetch targets");
+			console.info("Requirements not met to fetch targets");
 			return;
 		} else {
 			fetchTargets(gitType);
@@ -381,40 +392,51 @@ function ModalGit({ children }: { children: ReactNode }) {
 						<AlertDialogBody className="mb-4">
 							<div className="grid items-center gap-3">
 								{/* Alert for provider status */}
-								<SmoothItem layout={false}>
-									{gitProvider && providerStatus !== "none" && (
-										<Alert
-											variant={providerStatus === "error" ? "destructive" : "default"}
-										>
-											{providerStatus === "loading" && (
-												<AlertTitle className="flex items-center gap-2">
-													<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-													Connecting to provider...
-												</AlertTitle>
-											)}
+								{providerStatus === "loading" && gitProvider && (
+									<Alert variant={"default"}>
+										<AlertTitle className="flex items-center gap-2">
+											<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+											Connecting to provider...
+										</AlertTitle>
+									</Alert>
+								)}
 
-											{providerStatus === "error" && (
-												<>
-													<AlertTitle className="flex items-center gap-2">
-														<X className="h-4 w-4" />
-														Error connecting to provider {gitProvider}
-													</AlertTitle>
-													<AlertDescription>
-														There was an error connecting to the selected Git provider. Please
-														ensure you have the necessary permissions and try again.
-													</AlertDescription>
-												</>
-											)}
+								{providerStatus === "error" && gitProvider && (
+									<Alert variant={"destructive"}>
+										<AlertTitle className="flex items-center gap-2">
+											<X className="h-4 w-4" />
+											Error connecting to provider {ucfirst(gitProvider)}
+										</AlertTitle>
+										<AlertDescription>
+											There was an error connecting to the selected Git provider. Please
+											ensure you have the necessary permissions and try again. Follow the
+											README guide for more information.
+										</AlertDescription>
+									</Alert>
+								)}
 
-											{providerStatus === "success" && (
-												<AlertTitle className="flex items-center gap-2">
-													<Check className="h-4 w-4" />
-													Successfully connected to {gitProvider}!
-												</AlertTitle>
-											)}
-										</Alert>
-									)}
-								</SmoothItem>
+								{providerStatus === "success" && gitProvider && (
+									<Alert variant={"default"}>
+										<AlertTitle className="flex justify-between items-center gap-2">
+											<div className="flex items-center gap-2">
+												<Check className="h-4 w-4" />
+												Successfully connected to {ucfirst(gitProvider)} as{" "}
+												{name ? name : username}!
+												{name && (
+													<span className="text-sm text-muted-foreground">
+														(@{username})
+													</span>
+												)}
+											</div>
+											<Avatar className="size-6">
+												<AvatarImage src={avatar} />
+												<AvatarFallback>
+													{name ? initials(name) : initials(username)}
+												</AvatarFallback>
+											</Avatar>
+										</AlertTitle>
+									</Alert>
+								)}
 
 								{/* Provider & Repository */}
 								<div className="grid grid-cols-2 gap-4 col-span-1">

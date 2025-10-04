@@ -5,6 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const ucfirst = (s: string) => s[0].toUpperCase() + s.slice(1);
+
+export const initials = (s: string) =>
+  s.split(/\s+/).map(w => w[0]?.toUpperCase() ?? "").join("");
+
+
 export const setCookie = (name: string, value: string | boolean, days = 365) => {
   if (typeof document === 'undefined') {
     return;
