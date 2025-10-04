@@ -3,6 +3,7 @@
 // Necessary imports
 import { toast } from "sonner";
 import { useLocalDockerService } from "./local";
+import { router } from "@inertiajs/react";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
@@ -11,7 +12,6 @@ import { parseDockerCompose } from "@/lib/docker/parser";
 // Types
 import type { ActionOf, DockerContainer } from "@/lib/docker/type";
 import type { DockerService, Registry } from "@/lib/docker/type";
-import { router } from "@inertiajs/react";
 
 export function useRemoteDockerService({
 	containers,

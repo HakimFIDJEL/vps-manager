@@ -5,6 +5,7 @@ import {
 	DockerComposeStateSchema,
 } from "@/lib/docker/type";
 import { CommandSchema, type Command } from "@/lib/commands/type";
+import { FileSchema, type Files } from "@/lib/files/type";
 
 // Types
 export type Project = {
@@ -16,9 +17,10 @@ export type Project = {
 
 	// Required properties
 	path: string;
+	files: Files;
 	variables: Variable[];
-	commands: Command[];
 	docker: DockerCompose;
+	commands: Command[];
 	isCreated: boolean;
 };
 
@@ -30,8 +32,8 @@ export type ProjectContextType = {
 
 export const DEFAULT_PROJECT: Project = {
 	path: "",
+	files: { type: "none" },
 	variables: [],
-	commands: [],
 	docker: {
 		content: "",
 		isSaved: true,
@@ -42,6 +44,7 @@ export const DEFAULT_PROJECT: Project = {
 			networks: [],
 		},
 	},
+	commands: [],
 	isCreated: false,
 	created_at: { date: undefined },
 	updated_at: { date: undefined },
@@ -62,11 +65,13 @@ export const FolderSchema = z.object({
 // Schemas
 export const ProjectSchema = z.object({
 	path: FolderSchema.shape.path,
+	files: FileSchema,
 	variables: z.array(VariableSchema),
-	commands: z.array(CommandSchema),
 	docker: DockerComposeStateSchema,
+	commands: z.array(CommandSchema),
 });
 
+// Mocks
 export const ProjectExample: Project = {
 	inode: 1234197,
 	size: 2048,
@@ -74,6 +79,7 @@ export const ProjectExample: Project = {
 	created_at: { date: "2023-09-01T12:00:00Z" },
 
 	path: "example-project",
+	files: { type: "none" },
 	variables: [
 		{
 			key: "EXAMPLE_VAR",
@@ -100,7 +106,6 @@ export const ProjectExample: Project = {
 	isCreated: true,
 };
 
-// Create 3 example projects with possible datas, those are mockups for testing
 export const ProjectListExample: Project[] = [
 	{
 		inode: 1234567,
@@ -109,6 +114,7 @@ export const ProjectListExample: Project[] = [
 		created_at: { date: "2023-09-01T12:00:00Z" },
 
 		path: "/projects/portfolio",
+		files: { type: "none" },
 		variables: [
 			{ key: "API_URL", value: "https://api.portfolio.com" },
 			{ key: "DEBUG", value: "true" },
@@ -145,6 +151,7 @@ export const ProjectListExample: Project[] = [
 		created_at: { date: "2023-09-02T12:00:00Z" },
 
 		path: "/projects/ecommerce",
+		files: { type: "none" },
 		variables: [
 			{ key: "DB_HOST", value: "localhost" },
 			{ key: "DB_PORT", value: "3306" },
@@ -176,6 +183,7 @@ export const ProjectListExample: Project[] = [
 		created_at: { date: "2023-09-03T12:00:00Z" },
 
 		path: "/projects/blog",
+		files: { type: "none" },
 		variables: [
 			{ key: "BLOG_TITLE", value: "My Personal Blog" },
 			{ key: "BLOG_THEME", value: "dark" },

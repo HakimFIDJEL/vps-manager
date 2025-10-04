@@ -3,14 +3,12 @@ import {
 	useEffect,
 	Dispatch,
 	SetStateAction,
-	ReactNode,
 	useState,
 } from "react";
 import { cn, ucfirst, initials } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 
 // Shadcn UI components
 import {
@@ -53,35 +51,30 @@ import {
 	Info,
 	FolderGit2,
 	Loader2,
-	ArrowDownToLine,
 	FileUp,
 	ChevronDown,
 	X,
 	Check,
+	Link,
 } from "lucide-react";
 
 // Contexts
 import { useProject } from "@/contexts/project-context";
+import { useFile } from "@/contexts/files-context";
 
 // Schemas
-import { FileSchema } from "@/lib/files/type";
-
-// Mocks
-import {
-	mock_repositories_github,
-	mock_repositories_gitlab,
-	mock_targets_branch,
-	mock_targets_tag,
-	mock_username,
-	mock_name,
-	mock_avatar,
-} from "@/lib/files/type";
+import { type FileAction, FileSchema } from "@/lib/files/type";
 
 // Constants
 import { git_types, git_providers } from "@/lib/files/type";
 
 // Types
 import { type ComboboxOption } from "@/components/ui/combobox";
+import {
+	connectProvider,
+	fetchRepositories,
+	fetchTargets,
+} from "@/lib/files/utils";
 
 export function AppFiles({
 	setValidate,
@@ -90,6 +83,7 @@ export function AppFiles({
 }) {
 	// Custom hooks
 	const { project } = useProject();
+	const { handleFile, loading } = useFile();
 
 	const validator = async () => {
 		// Validation
@@ -111,26 +105,32 @@ export function AppFiles({
 			</TabsList>
 			<TabsBody>
 				<TabsContent value="none">
-					<AppNone />
+					<AppNone handleFile={handleFile} loading={loading} />
 				</TabsContent>
 				<TabsContent value="git">
-					<AppGit />
+					<AppGit handleFile={handleFile} loading={loading} />
 				</TabsContent>
 				<TabsContent value="import">
-					<AppImport />
+					<AppImport handleFile={handleFile} loading={loading} />
 				</TabsContent>
 			</TabsBody>
 		</Tabs>
 	);
 }
 
-export function AppNone() {
+export function AppNone({
+	handleFile,
+	loading = false,
+}: {
+	handleFile: (action: FileAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	return (
 		<div className="grid gap-2">
 			<div className="flex flex-col">
 				<h3 className="text-sm font-medium mb-2">Import files</h3>
 				<div className="grid grid-cols-3 gap-4">
-					<ModalGit>
+					<ModalGit handleFile={handleFile} loading={loading}>
 						<button
 							className={cn(
 								"group w-full flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 transition-all duration-200 cursor-pointer",
@@ -151,7 +151,7 @@ export function AppNone() {
 						</button>
 					</ModalGit>
 
-					<ModalImport>
+					<ModalImport handleFile={handleFile} loading={loading}>
 						<button
 							className={cn(
 								"group w-full flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 transition-all duration-200 cursor-pointer",
@@ -210,9 +210,18 @@ export function AppNone() {
 	);
 }
 
-function ModalGit({ children }: { children: ReactNode }) {
+function ModalGit({
+	children,
+	handleFile,
+	loading = false,
+}: {
+	children: React.ReactNode;
+	handleFile: (action: FileAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	// Contexts
 	const { setCurrentValue } = useTabsContext();
+	const { project } = useProject();
 
 	// Variables
 	const [repositories, setRepositories] = useState<ComboboxOption[]>([]);
@@ -225,7 +234,6 @@ function ModalGit({ children }: { children: ReactNode }) {
 	const [fetchingRepositories, setFetchingRepositories] =
 		useState<boolean>(false);
 	const [fetchingTargets, setFetchingTargets] = useState<boolean>(false);
-	const [submitting, setSubmitting] = useState<boolean>(false);
 	const [providerStatus, setProviderStatus] = useState<
 		"none" | "error" | "success" | "loading"
 	>("none");
@@ -235,58 +243,52 @@ function ModalGit({ children }: { children: ReactNode }) {
 		resolver: zodResolver(FileSchema),
 		defaultValues: {
 			type: "git",
-			git_provider: undefined,
-			git_type: undefined,
+			git: project.files.git
 		},
 	});
 
 	// Watchers
-	const gitProvider = GitForm.watch("git_provider");
-	const gitRepo = GitForm.watch("git_repository");
-	const gitType = GitForm.watch("git_type");
+	const gitProvider = GitForm.watch("git.provider");
+	const gitRepo = GitForm.watch("git.repository");
+	const gitType = GitForm.watch("git.type");
 
 	// Custom methods
-	async function fetchRepositories() {
-		// Fetching repositories
+	async function _fetchRepositories() {
 		setFetchingRepositories(true);
-		await new Promise((r) => setTimeout(r, 4000));
+		const repositories = await fetchRepositories({ provider: gitProvider });
+		setRepositories(repositories);
 		setFetchingRepositories(false);
-
-		// Assigning mock repositories
-		if (gitProvider === "github") {
-			setRepositories(mock_repositories_github);
-		} else if (gitProvider === "gitlab") {
-			setRepositories(mock_repositories_gitlab);
-		} else {
-			setRepositories([]);
-		}
 	}
 
-	async function fetchTargets(gitType: string) {
-		// Fetch targets
+	async function _fetchTargets() {
 		setFetchingTargets(true);
-		await new Promise((r) => setTimeout(r, 4000));
+		const targets = await fetchTargets({ type: gitType });
+		setTargets(targets);
 		setFetchingTargets(false);
-
-		// Assign mock targets
-		setTargets(gitType === "branch" ? mock_targets_branch : mock_targets_tag);
 	}
 
-	async function connectProvider() {
+	async function _connectProvider() {
 		// Connect to provider
 		setProviderStatus("loading");
-		await new Promise((r) => setTimeout(r, 3000));
-		const success = gitProvider === "github" ? true : false;
-		// const success = true;
-		setProviderStatus(success ? "success" : "error");
+		const data = await connectProvider({ provider: gitProvider });
+		setProviderStatus(data.providerStatus ? "success" : "error");
 
-		if (success) {
-			fetchRepositories();
+		if (data.providerStatus) {
+			_fetchRepositories();
 
-			// Set mock user information
-			setUsername(mock_username);
-			setName(mock_name);
-			setAvatar(mock_avatar);
+			const fetched_username = data.username;
+			const fetched_name = data.name;
+			const fetched_avatar = data.avatar;
+
+			// Update the variables
+			setUsername(fetched_username);
+			setName(fetched_name ?? "");
+			setAvatar(fetched_avatar ?? "");
+
+			// Update the form
+			GitForm.setValue("git.username", fetched_username);
+			GitForm.setValue("git.name", fetched_name);
+			GitForm.setValue("git.avatar", fetched_avatar);
 		}
 	}
 
@@ -294,16 +296,11 @@ function ModalGit({ children }: { children: ReactNode }) {
 		const isValid = await GitForm.trigger();
 		if (!isValid) return false;
 
-		setSubmitting(true);
-
 		const data = GitForm.getValues();
 
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await handleFile({ type: "file-git-link", files: data });
 
-		GitForm.reset();
 		setCurrentValue("git");
-		setSubmitting(false);
-		toast.success("Git repository linked successfully!");
 		return true;
 	}
 
@@ -311,10 +308,10 @@ function ModalGit({ children }: { children: ReactNode }) {
 	// Reset form on mount
 	useEffect(() => {
 		// Reset form fields
-		GitForm.resetField("git_provider");
-		GitForm.setValue("git_repository", "");
-		GitForm.resetField("git_type");
-		GitForm.setValue("git_target", "");
+		GitForm.resetField("git.provider");
+		GitForm.setValue("git.repository", "");
+		GitForm.resetField("git.type");
+		GitForm.setValue("git.target", "");
 
 		// Empty variables
 		setRepositories([]);
@@ -330,9 +327,9 @@ function ModalGit({ children }: { children: ReactNode }) {
 		setAvatar("");
 
 		// Reset form fields
-		GitForm.setValue("git_repository", "");
-		GitForm.resetField("git_type");
-		GitForm.setValue("git_target", "");
+		GitForm.setValue("git.repository", "");
+		GitForm.resetField("git.type");
+		GitForm.setValue("git.target", "");
 
 		// Empty variables
 		setRepositories([]);
@@ -343,14 +340,14 @@ function ModalGit({ children }: { children: ReactNode }) {
 			console.info("Requirements not met to connect to provider");
 			return;
 		} else {
-			connectProvider();
+			_connectProvider();
 		}
 	}, [gitProvider]);
 
 	// Fetch targets on type change
 	useEffect(() => {
 		// Reset form fields
-		GitForm.setValue("git_target", "");
+		GitForm.setValue("git.target", "");
 
 		// Empty variables
 		setTargets([]);
@@ -360,7 +357,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 			console.info("Requirements not met to fetch targets");
 			return;
 		} else {
-			fetchTargets(gitType);
+			_fetchTargets();
 		}
 	}, [gitProvider, gitRepo, gitType, providerStatus]);
 
@@ -444,7 +441,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 									<div className="col-span-1">
 										<FormField
 											control={GitForm.control}
-											name="git_provider"
+											name="git.provider"
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Provider</FormLabel>
@@ -459,7 +456,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 															}
 															onValueChange={field.onChange}
-															disabled={submitting}
+															disabled={loading}
 															{...field}
 														/>
 													</FormControl>
@@ -477,7 +474,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 									<div className="col-span-1">
 										<FormField
 											control={GitForm.control}
-											name="git_repository"
+											name="git.repository"
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Repository</FormLabel>
@@ -491,7 +488,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 															}
 															onValueChange={field.onChange}
 															disabled={
-																submitting || !gitProvider || providerStatus !== "success"
+																loading || !gitProvider || providerStatus !== "success"
 															}
 															loading={fetchingRepositories}
 															{...field}
@@ -513,7 +510,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 									<div className="col-span-1">
 										<FormField
 											control={GitForm.control}
-											name="git_type"
+											name="git.type"
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Type</FormLabel>
@@ -525,7 +522,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 															placeholder="Select a type"
 															onValueChange={field.onChange}
 															disabled={
-																submitting ||
+																loading ||
 																!gitProvider ||
 																!gitRepo ||
 																providerStatus !== "success"
@@ -549,7 +546,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 									<div className="col-span-1">
 										<FormField
 											control={GitForm.control}
-											name="git_target"
+											name="git.target"
 											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Target</FormLabel>
@@ -560,7 +557,7 @@ function ModalGit({ children }: { children: ReactNode }) {
 															placeholder="Select a target"
 															onValueChange={field.onChange}
 															disabled={
-																submitting ||
+																loading ||
 																!gitProvider ||
 																!gitRepo ||
 																providerStatus !== "success" ||
@@ -586,19 +583,15 @@ function ModalGit({ children }: { children: ReactNode }) {
 						</AlertDialogBody>
 
 						<AlertDialogFooter>
-							<AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+							<AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
 							<AlertDialogAction
 								variant={"default"}
 								type={"submit"}
 								onAction={onSubmit}
-								disabled={submitting || providerStatus !== "success"}
+								disabled={loading || providerStatus !== "success"}
 							>
-								{submitting ? (
-									<Loader2 className="animate-spin" />
-								) : (
-									<ArrowDownToLine />
-								)}
-								Pull repository
+								{loading ? <Loader2 className="animate-spin" /> : <Link />}
+								Link repository
 							</AlertDialogAction>
 						</AlertDialogFooter>
 					</form>
@@ -608,7 +601,15 @@ function ModalGit({ children }: { children: ReactNode }) {
 	);
 }
 
-function ModalImport({ children }: { children: ReactNode }) {
+function ModalImport({
+	children,
+	handleFile,
+	loading = false,
+}: {
+	children: React.ReactNode;
+	handleFile: (action: FileAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	const { setCurrentValue } = useTabsContext();
 
 	return (
@@ -649,9 +650,21 @@ function ModalImport({ children }: { children: ReactNode }) {
 	);
 }
 
-function AppGit() {
+function AppGit({
+	handleFile,
+	loading = false,
+}: {
+	handleFile: (action: FileAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	return <></>;
 }
-function AppImport() {
+function AppImport({
+	handleFile,
+	loading = false,
+}: {
+	handleFile: (action: FileAction) => Promise<boolean>;
+	loading?: boolean;
+}) {
 	return <></>;
 }
