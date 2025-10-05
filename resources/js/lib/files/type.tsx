@@ -128,7 +128,8 @@ export const mock_avatar = "https://github.com/hakimfidjel.png";
 
 // Actions & Services
 export type FileAction =
-	{ type: "file-git-link"; files: Files };
+	| { type: "file-reset-type" }
+	| { type: "file-git-link"; files: Files };
 
 export type ActionOf<T extends FileAction["type"]> = Extract<
 	FileAction,

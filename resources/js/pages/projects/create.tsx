@@ -287,7 +287,7 @@ function Content() {
 												Files
 											</CardTitle>
 											<CardDescription>
-												Fetch from GitHub, upload a zipped project, or simply skip this step
+												Fetch from Git, upload a zipped project, or simply skip this step
 												if your Docker environment requires only external images.{" "}
 											</CardDescription>
 										</div>

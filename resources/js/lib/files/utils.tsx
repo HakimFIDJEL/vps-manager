@@ -15,7 +15,7 @@ import {
  * Fetch repositories for a given provider
  */
 export async function fetchRepositories({ provider }: { provider: string }) {
-	await new Promise((r) => setTimeout(r, 4000));
+	await new Promise((r) => setTimeout(r, 2000));
 
 	if (provider === "github") {
 		return mock_repositories_github;
@@ -27,7 +27,7 @@ export async function fetchRepositories({ provider }: { provider: string }) {
 }
 
 export async function fetchTargets({ type }: { type: string }) {
-	await new Promise((r) => setTimeout(r, 4000));
+	await new Promise((r) => setTimeout(r, 2000));
 
 	if (type === "branch") {
 		return mock_targets_branch;
@@ -39,7 +39,7 @@ export async function fetchTargets({ type }: { type: string }) {
 }
 
 export async function connectProvider({ provider } : { provider: string }) {
-	await new Promise((r) => setTimeout(r, 4000));
+	await new Promise((r) => setTimeout(r, 2000));
 
 	const success = provider === "github" ? true : false;
 

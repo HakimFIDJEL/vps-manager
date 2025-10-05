@@ -128,7 +128,6 @@ function DetailDialog({
 						{formatSuccessful(log.successful)}
 					</AlertDialogTitle>
 				</AlertDialogHeader>
-				<Separator />
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					<div className="col-span-1 flex flex-col gap-2 h-full">
 						<h2 className="text-base font-normal">Command</h2>

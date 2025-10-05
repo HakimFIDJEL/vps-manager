@@ -1,10 +1,5 @@
 // Necessary imports
-import {
-	useEffect,
-	Dispatch,
-	SetStateAction,
-	useState,
-} from "react";
+import { useEffect, Dispatch, SetStateAction, useState } from "react";
 import { cn, ucfirst, initials } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -43,6 +38,14 @@ import {
 	FormDescription,
 } from "@/components/ui/form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+	Item,
+	ItemActions,
+	ItemContent,
+	ItemDescription,
+	ItemMedia,
+	ItemTitle,
+} from "@/components/ui/item";
 
 // Icons
 import {
@@ -56,6 +59,12 @@ import {
 	X,
 	Check,
 	Link,
+	Computer,
+	BookCopy,
+	GitBranch,
+	Tag,
+	GitFork,
+	RefreshCcw,
 } from "lucide-react";
 
 // Contexts
@@ -63,7 +72,7 @@ import { useProject } from "@/contexts/project-context";
 import { useFile } from "@/contexts/files-context";
 
 // Schemas
-import { type FileAction, FileSchema } from "@/lib/files/type";
+import { type FileAction, Files, FileSchema } from "@/lib/files/type";
 
 // Constants
 import { git_types, git_providers } from "@/lib/files/type";
@@ -75,6 +84,7 @@ import {
 	fetchRepositories,
 	fetchTargets,
 } from "@/lib/files/utils";
+import { Button } from "@/components/ui/button";
 
 export function AppFiles({
 	setValidate,
@@ -97,7 +107,7 @@ export function AppFiles({
 
 	return (
 		// <Tabs defaultValue={project.docker.content ? "docker" : "empty"}>
-		<Tabs defaultValue="none">
+		<Tabs defaultValue={project.files.type}>
 			<TabsList className="hidden">
 				<TabsTrigger value="none">None</TabsTrigger>
 				<TabsTrigger value="git">Git</TabsTrigger>
@@ -243,7 +253,7 @@ function ModalGit({
 		resolver: zodResolver(FileSchema),
 		defaultValues: {
 			type: "git",
-			git: project.files.git
+			git: project.files.git,
 		},
 	});
 
@@ -309,9 +319,9 @@ function ModalGit({
 	useEffect(() => {
 		// Reset form fields
 		GitForm.resetField("git.provider");
-		GitForm.setValue("git.repository", "");
+		GitForm.resetField("git.repository", { defaultValue: undefined });
 		GitForm.resetField("git.type");
-		GitForm.setValue("git.target", "");
+		GitForm.resetField("git.target", { defaultValue: undefined });
 
 		// Empty variables
 		setRepositories([]);
@@ -327,9 +337,9 @@ function ModalGit({
 		setAvatar("");
 
 		// Reset form fields
-		GitForm.setValue("git.repository", "");
+		GitForm.resetField("git.repository", { defaultValue: undefined });
 		GitForm.resetField("git.type");
-		GitForm.setValue("git.target", "");
+		GitForm.resetField("git.target", { defaultValue: undefined });
 
 		// Empty variables
 		setRepositories([]);
@@ -347,7 +357,7 @@ function ModalGit({
 	// Fetch targets on type change
 	useEffect(() => {
 		// Reset form fields
-		GitForm.setValue("git.target", "");
+		GitForm.resetField("git.target", { defaultValue: undefined });
 
 		// Empty variables
 		setTargets([]);
@@ -657,7 +667,117 @@ function AppGit({
 	handleFile: (action: FileAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
-	return <></>;
+	// Contexts
+	const { setCurrentValue } = useTabsContext();
+	const { project } = useProject();
+
+	// Custom methods
+	async function handleReset() {
+		await handleFile({ type: "file-reset-type" });
+		setCurrentValue("none");
+		return true;
+	}
+
+	return (
+		<div className="flex flex-col gap-2">
+			<h3 className="text-sm font-medium">Import method</h3>
+			<Item variant={"outline"} className="col-span-2">
+				<ItemMedia variant="icon">
+					<FolderGit2 />
+				</ItemMedia>
+				<ItemContent>
+					<ItemTitle>Git</ItemTitle>
+					<ItemDescription>
+						Import your project files from a Git repository.
+					</ItemDescription>
+				</ItemContent>
+				<ItemActions>
+					<Button
+						variant={"outline"}
+						type={"button"}
+						onClick={handleReset}
+						disabled={loading}
+						className="group"
+					>
+						{loading ? (
+							<Loader2 className="animate-spin" />
+						) : (
+							<RefreshCcw className="group-hover:-rotate-180 transition-transform duration-300" />
+						)}
+						Reset
+					</Button>
+				</ItemActions>
+			</Item>
+
+			<h3 className="text-sm font-medium mt-2">Details</h3>
+			<div className="grid grid-cols-2 gap-2">
+				<Item variant="outline" className="col-span-1">
+					<ItemMedia variant="icon">
+						<Computer />
+					</ItemMedia>
+					<ItemContent>
+						<ItemTitle className="flex items-center gap-2">
+							{ucfirst(project.files.git?.provider ?? "Unknown")}
+							<span className="text-sm text-muted-foreground font-light">
+								(Git provider)
+							</span>
+						</ItemTitle>
+						<ItemDescription>
+							Authenticated Git provider used to fetch repositories and metadata.
+						</ItemDescription>
+					</ItemContent>
+				</Item>
+				<Item variant="outline" className="col-span-1">
+					<ItemMedia variant="icon">
+						<BookCopy />
+					</ItemMedia>
+					<ItemContent>
+						<ItemTitle className="flex items-center gap-2">
+							{project.files.git?.repository}
+							<span className="text-sm text-muted-foreground font-light">
+								(Git repository)
+							</span>
+						</ItemTitle>
+						<ItemDescription>
+							Repository that serves as the file source for this project.
+						</ItemDescription>
+					</ItemContent>
+				</Item>
+				<Item variant="outline" className="col-span-1">
+					<ItemMedia variant="icon">
+						{project.files.git?.type === "branch" ? <GitBranch /> : <Tag />}
+					</ItemMedia>
+					<ItemContent>
+						<ItemTitle className="flex items-center gap-2">
+							{ucfirst(project.files.git?.type ?? "Unknown")}
+							<span className="text-sm text-muted-foreground font-light">
+								(Git type)
+							</span>
+						</ItemTitle>
+						<ItemDescription>
+							Tracking mode: branch for continuous updates, tag for a fixed snapshot.
+						</ItemDescription>
+					</ItemContent>
+				</Item>
+				<Item variant="outline" className="col-span-1">
+					<ItemMedia variant="icon">
+						<GitFork />
+					</ItemMedia>
+					<ItemContent>
+						<ItemTitle className="flex items-center gap-2">
+							{project.files.git?.target}
+							<span className="text-sm text-muted-foreground font-light">
+								(Git target)
+							</span>
+						</ItemTitle>
+						<ItemDescription>
+							Selected ref (branch or tag) pulled on import and deploy.
+						</ItemDescription>
+					</ItemContent>
+				</Item>
+			</div>
+		</div>
+	);
 }
 function AppImport({
 	handleFile,

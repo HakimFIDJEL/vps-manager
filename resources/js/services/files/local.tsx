@@ -6,13 +6,14 @@ import { toast } from "sonner";
 import { useProject } from "@/contexts/project-context";
 
 // Types
-import type { ActionOf } from "@/lib/files/type";
+import type { ActionOf, Files } from "@/lib/files/type";
 import type { FileService, Registry } from "@/lib/files/type";
 
 export function useLocalFileService(): FileService {
 	const { project, updateProject } = useProject();
 
 	const registry: Registry = {
+		"file-reset-type": file_reset_type,
 		"file-git-link": file_git_link,
 	};
 
@@ -37,6 +38,23 @@ export function useLocalFileService(): FileService {
 		toast.success(
 			`Git repository ${a.files.git?.repository} successfully linked to the project!`,
 		);
+		return true;
+	}
+
+	/**
+	 * Reset type for project files
+	 */
+	async function file_reset_type(a: ActionOf<"file-reset-type">) {
+		if (project.files.type === "none") {
+			toast.error("An error occured", {
+				description: `Invalid file type: ${project.files.type}. Expected 'git' or 'import'.`,
+			});
+			return false;
+		}
+
+		updateProject("files", { type: "none" });
+
+		toast.success(`Project files import type reset successfully!`);
 		return true;
 	}
 }
