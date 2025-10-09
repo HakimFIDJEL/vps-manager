@@ -18,6 +18,7 @@ export function useRemoteFileService(): FileService {
 	const registry: Registry = {
 		"file-reset-type": local.handleFile,
 		"file-git-link": local.handleFile,
+		"file-import-upload": local.handleFile,
 	};
 
 	return {

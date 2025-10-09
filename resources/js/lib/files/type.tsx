@@ -23,9 +23,26 @@ export type Files = {
 		avatar?: string;
 	};
 	import?: {
-		file: File;
+		file_structure?: FS_FileStructure;
+		file?: File;
 	};
 };
+
+export type FS_FileStructure = {
+	elements: FS_Element[];
+}
+
+export type FS_Element = {
+	id: string;
+	parent_id?: string;
+	name: string;
+	type: "file" | "directory";
+	status : "loading" | "success" | "error";
+	size?: number;
+	path: string;
+	extension?: string;
+	children?: FS_Element[];
+}
 
 // Constants
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
@@ -129,7 +146,8 @@ export const mock_avatar = "https://github.com/hakimfidjel.png";
 // Actions & Services
 export type FileAction =
 	| { type: "file-reset-type" }
-	| { type: "file-git-link"; files: Files };
+	| { type: "file-git-link"; files: Files }
+	| { type: "file-import-upload"; file: File };
 
 export type ActionOf<T extends FileAction["type"]> = Extract<
 	FileAction,

@@ -15,6 +15,7 @@ export function useLocalFileService(): FileService {
 	const registry: Registry = {
 		"file-reset-type": file_reset_type,
 		"file-git-link": file_git_link,
+		"file-import-upload": file_import_upload,
 	};
 
 	return {
@@ -55,6 +56,17 @@ export function useLocalFileService(): FileService {
 		updateProject("files", { type: "none" });
 
 		toast.success(`Project files import type reset successfully!`);
+		return true;
+	}
+
+	/**
+	 * Import a file from local computer
+	 */
+	async function file_import_upload(a: ActionOf<"file-import-upload">) {
+		updateProject("files", { type: "import", import: { file: a.file } });
+
+		toast.success(`File ${a.file.name} successfully uploaded!`);
+
 		return true;
 	}
 }

@@ -1,9 +1,12 @@
 // Necessary imports
-import { useEffect, Dispatch, SetStateAction, useState } from "react";
+import { useEffect, Dispatch, SetStateAction, useState, useRef } from "react";
 import { cn, ucfirst, initials } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+// Custom components
+import { SmoothAnimate } from "@/components/ui/smooth-resized";
 
 // Shadcn UI components
 import {
@@ -46,6 +49,15 @@ import {
 	ItemMedia,
 	ItemTitle,
 } from "@/components/ui/item";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+// Utils
+import {
+	connectProvider,
+	fetchRepositories,
+	fetchTargets,
+} from "@/lib/files/utils";
 
 // Icons
 import {
@@ -79,12 +91,6 @@ import { git_types, git_providers } from "@/lib/files/type";
 
 // Types
 import { type ComboboxOption } from "@/components/ui/combobox";
-import {
-	connectProvider,
-	fetchRepositories,
-	fetchTargets,
-} from "@/lib/files/utils";
-import { Button } from "@/components/ui/button";
 
 export function AppFiles({
 	setValidate,
@@ -106,7 +112,6 @@ export function AppFiles({
 	}, [setValidate, project.docker]);
 
 	return (
-		// <Tabs defaultValue={project.docker.content ? "docker" : "empty"}>
 		<Tabs defaultValue={project.files.type}>
 			<TabsList className="hidden">
 				<TabsTrigger value="none">None</TabsTrigger>
@@ -620,7 +625,35 @@ function ModalImport({
 	handleFile: (action: FileAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
+	// States
+	const [isDragActive, setIsDragActive] = useState(false);
+
+	// Contexts
 	const { setCurrentValue } = useTabsContext();
+
+	// Refs
+	const inputFileRef = useRef<HTMLInputElement>(null);
+
+	// Form
+	const FileForm = useForm<z.infer<typeof FileSchema>>({
+		resolver: zodResolver(FileSchema),
+		defaultValues: {
+			type: "import",
+			import: { file: undefined },
+		},
+	});
+
+	const file = FileForm.watch("import.file");
+
+	async function onSubmit() {
+		const isValid = await FileForm.trigger();
+		if (!isValid) return false;
+
+		await handleFile({ type: "file-import-upload", file: file });
+
+		setCurrentValue("import");
+		return true;
+	}
 
 	return (
 		<AlertDialog>
@@ -634,27 +667,144 @@ function ModalImport({
 						Easily import your project by uploading it in a compressed ZIP format.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
-				<form
-					onSubmit={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-					}}
-				>
-					<AlertDialogBody>
-						<div className="grid grid-cols-2">
-							{/* Import file */}
-							<div></div>
-						</div>
-					</AlertDialogBody>
+				<Form {...FileForm}>
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+						}}
+					>
+						<AlertDialogBody>
+							<SmoothAnimate>
+								{file ? (
+									<Item variant={"outline"}>
+										<ItemMedia variant="icon">
+											<Check />
+										</ItemMedia>
+										<ItemContent>
+											<ItemTitle>File ready to import</ItemTitle>
+											<ItemDescription>
+												{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+											</ItemDescription>
+										</ItemContent>
+										<ItemActions>
+											<Button
+												variant={"outline"}
+												type={"button"}
+												onClick={() => {
+													FileForm.resetField("import.file");
+												}}
+												disabled={loading}
+												className="group"
+											>
+												{loading ? (
+													<Loader2 className="animate-spin" />
+												) : (
+													<RefreshCcw className="group-hover:-rotate-180 transition-transform duration-300" />
+												)}
+												Reset
+											</Button>
+										</ItemActions>
+									</Item>
+								) : (
+									<FormField
+										control={FileForm.control}
+										name="import.file"
+										render={({ field }) => {
+											// Mandatory for a file input that cant take a value
+											const { value, ...rest } = field;
 
-					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction variant={"default"} type={"submit"}>
-							<FileUp />
-							Import ZIP File
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</form>
+											return (
+												<FormItem className="gap-0">
+													<FormLabel
+														htmlFor="file"
+														className={cn(
+															"flex items-center justify-center p-4 border-2 border-dashed rounded-lg bg-muted/50 hover:border-primary transition-colors cursor-pointer group",
+															isDragActive && "border-primary",
+														)}
+														onDragOver={(e) => {
+															e.preventDefault();
+															setIsDragActive(true);
+														}}
+														onDragLeave={(e) => {
+															e.preventDefault();
+															setIsDragActive(false);
+														}}
+														onDrop={async (e) => {
+															e.preventDefault();
+															setIsDragActive(false);
+															const file = e.dataTransfer.files?.[0];
+															if (!file) return;
+
+															field.onChange(file);
+															const isValid = await FileForm.trigger("import.file");
+
+															if (!isValid) return false;
+														}}
+													>
+														<div className="text-center">
+															<FileUp className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+															<p className="text-sm text-muted-foreground mb-2">
+																Drag and drop your zipped project here or click to select it.
+															</p>
+															<Button
+																type={"button"}
+																variant="outline"
+																size="sm"
+																onClick={() => inputFileRef.current?.click()}
+															>
+																Browse files
+															</Button>
+														</div>
+													</FormLabel>
+													<FormControl>
+														<Input
+															id="file"
+															type="file"
+															accept=".zip"
+															className="hidden"
+															ref={inputFileRef}
+															onChange={async (e) => {
+																const file = e.target.files?.[0] ?? null;
+																if (file) {
+																	// On met à jour le champ du formulaire
+																	field.onChange(file);
+																	// On déclenche la validation
+																	const isValid = await FileForm.trigger("import.file");
+
+																	if (!isValid) return false;
+																} else {
+																	field.onChange(null);
+																}
+															}}
+														/>
+													</FormControl>
+													<FormDescription className="mt-2">
+														Only .zip files are accepted, max size 100MB.
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											);
+										}}
+									/>
+								)}
+							</SmoothAnimate>
+						</AlertDialogBody>
+
+						<AlertDialogFooter className="mt-4">
+							<AlertDialogCancel>Cancel</AlertDialogCancel>
+							<AlertDialogAction
+								variant={"default"}
+								type={"submit"}
+								onAction={onSubmit}
+								disabled={loading}
+							>
+								{loading ? <Loader2 className="animate-spin" /> : <FileUp />}
+								Import ZIP File
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</form>
+				</Form>
 			</AlertDialogContent>
 		</AlertDialog>
 	);
