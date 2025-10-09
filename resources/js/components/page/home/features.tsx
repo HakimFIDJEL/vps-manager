@@ -10,6 +10,106 @@ import { Badge } from "@/components/ui/badge";
 // Icons
 import { Check, CircleDashed, CalendarCheck } from "lucide-react";
 
+type Feature = {
+	title: string;
+	description: string;
+	status: "done" | "wip" | "planned";
+};
+
+const features: Feature[] = [
+	{
+		title: "System Authentication",
+		description: "Login using the server's Unix user for secure, local auth.",
+		status: "done",
+	},
+	{
+		title: "Projects",
+		description: "Create and manage projects with .env, Makefile, and Compose.",
+		status: "done",
+	},
+	{
+		title: "Docker Compose",
+		description:
+			"Manage full Compose stacks including containers, volumes, and networks.",
+		status: "done",
+	},
+	{
+		title: "Landing Experience",
+		description: "A clean, focused landing to explain value and entry points.",
+		status: "done",
+	},
+	{
+		title: "Command Audit Log",
+		description: "Track every executed command with timestamp, user, and output.",
+		status: "done",
+	},
+	{
+		title: "Project Files",
+		description:
+			"Use local or repo files to run containers without external images.",
+		status: "wip",
+	},
+	{
+		title: "One-file Backup",
+		description:
+			"Export and restore full project configuration from a single file.",
+		status: "planned",
+	},
+	{
+		title: "Quick Tasks",
+		description: "One-click recipes for Traefik, Minecraft server, and more.",
+		status: "planned",
+	},
+	{
+		title: "Advanced Containers",
+		description: "Detailed views with logs, exec, and richer container insights.",
+		status: "planned",
+	},
+	{
+		title: "Code Refactor",
+		description: "Revamp codebase for clarity, tests, and long-term stability.",
+		status: "planned",
+	},
+	{
+		title: "UI/UX Polish",
+		description: "Refine animations and unify interface for consistent visuals.",
+		status: "planned",
+	},
+	{
+		title: "Update Helper",
+		description: "One-click intuitive update from GitHub repository.",
+		status: "planned",
+	},
+	{
+		title: "Guided Setup",
+		description:
+			"Step-by-step onboarding to configure projects with best practices.",
+		status: "planned",
+	},
+	{
+		title: "SSH Keys",
+		description: "Manage authorized SSH keys allowed to access your VPS.",
+		status: "planned",
+	},
+	{
+		title: "Web Terminal",
+		description: "Run commands on the VPS directly from the application.",
+		status: "planned",
+	},
+	{
+		title: "VPS Settings",
+		description:
+			"Configure SSH port, security hardening, and core system options.",
+		status: "planned",
+	},
+	{
+		title: "Responsive Design",
+		description:
+			"Ensure a seamless experience across desktop, tablet, and mobile.",
+		status: "planned",
+	},
+];
+
 export function Features() {
 	const { appearance } = useAppearance();
 
@@ -57,138 +157,56 @@ export function Features() {
 					</div>
 				</Card>
 				<div className="grid-cols-1 lg:grid-cols-3 grid">
-					<Feature
-						title="System Authentication"
-						description="Login using the server's Unix user for secure, local auth."
-						status="done"
-						className="lg:pl-0 lg:border-r border-b"
-					/>
-					<Feature
-						title="Projects"
-						description="Create and manage projects with .env, Makefile, and Compose."
-						status="done"
-						className="border-b"
-					/>
-					<Feature
-						title="Docker Compose"
-						description="Manage full Compose stacks including containers, volumes, and networks."
-						status="done"
-						className="lg:pr-0 lg:border-l border-b"
-					/>
-
-					<Feature
-						title="Landing Experience"
-						description="A clean, focused landing to explain value and entry points."
-						status="done"
-						className="lg:pl-0 lg:border-r border-b"
-					/>
-					<Feature
-						title="Command Audit Log"
-						description="Track every executed command with timestamp, user, and output."
-						status="done"
-						className="border-b"
-					/>
-					<Feature
-						title="Project Files"
-						description="Use local or repo files to run containers without external images."
-						status="wip"
-						className="lg:pr-0 lg:border-l border-b"
-					/>
-					<Feature
-						title="Guided Setup"
-						description="Step-by-step onboarding to configure projects with best practices."
-						status="planned"
-						className="lg:pl-0 lg:border-r border-b"
-					/>
-					<Feature
-						title="Quick Tasks"
-						description="One-click recipes for Traefik, Minecraft server, and more."
-						status="planned"
-						className="border-b"
-					/>
-					<Feature
-						title="One-file Backup"
-						description="Export and restore full project configuration from a single file."
-						status="planned"
-						className="lg:pr-0 lg:border-l border-b"
-					/>
-					<Feature
-						title="Advanced Containers"
-						description="Detailed views with logs, exec, and richer container insights."
-						status="planned"
-						className="lg:pl-0 lg:border-r border-b"
-					/>
-					<Feature
-						title="SSH Keys"
-						description="Manage authorized SSH keys allowed to access your VPS."
-						status="planned"
-						className="border-b"
-					/>
-					<Feature
-						title="Web Terminal"
-						description="Run commands on the VPS directly from the application."
-						status="planned"
-						className="lg:pr-0 lg:border-l border-b"
-					/>
-					<Feature
-						title="VPS Settings"
-						description="Configure SSH port, security hardening, and core system options."
-						status="planned"
-						className="lg:pl-0 lg:border-r border-b lg:border-b-0"
-					/>
-					<Feature
-						title="Responsive Design"
-						description="Ensure a seamless experience across desktop, tablet, and mobile."
-						status="planned"
-						className="border-b lg:border-b-0"
-					/>
-					<Feature
-						title="Update Helper"
-						description="One-click intuitive update from GitHub repository."
-						status="planned"
-						className="lg:pr-0 lg:border-l lg:border-b-0"
-					/>
+					{features.map((f) => (
+						<Feature key={f.title} feature={f} />
+					))}
 				</div>
 			</div>
 		</section>
 	);
 }
 
-function Feature({
-	title,
-	description,
-	status,
-	className,
-}: {
-	title: string;
-	description: string;
-	status: "done" | "wip" | "planned";
-	className?: string;
-}) {
+function Feature({ feature }: { feature: Feature }) {
 	return (
-		<div className={`space-y-2 lg:p-6 p-4 ${className}`}>
+		<div
+			className="
+			space-y-2 lg:p-6 p-4
+
+			border-b
+			last:border-b-0
+        	lg:[&:nth-last-child(-n+3)]:border-b-0
+
+			border-l-0
+			lg:[&:nth-child(3n+2)]:border-l
+			lg:[&:nth-child(3n+3)]:border-l	
+			"
+		>
 			<Badge
 				variant={
-					status === "done" ? "default" : status === "wip" ? "outline" : "secondary"
+					feature.status === "done"
+						? "default"
+						: feature.status === "wip"
+							? "outline"
+							: "secondary"
 				}
 			>
-				{status === "done" ? (
+				{feature.status === "done" ? (
 					<Check />
-				) : status === "wip" ? (
+				) : feature.status === "wip" ? (
 					<CircleDashed />
 				) : (
 					<CalendarCheck />
 				)}
-				{status === "done"
+				{feature.status === "done"
 					? "Completed"
-					: status === "wip"
+					: feature.status === "wip"
 						? "In Progress"
 						: "To Come"}
 			</Badge>
 			<div className="flex items-center justify-between">
-				<h3 className="text-xl font-medium">{title}</h3>
+				<h3 className="text-xl font-medium">{feature.title}</h3>
 			</div>
-			<p className="text-muted-foreground">{description}</p>
+			<p className="text-muted-foreground">{feature.description}</p>
 		</div>
 	);
 }
