@@ -1,5 +1,11 @@
 // lib/files/utils.tsx
 
+// Necessary imports
+import JSZip from "jszip";
+
+// Types
+import type { FS_Element, FS_FileStructure } from "@/lib/files/type";
+
 // Mocks
 import {
 	mock_repositories_github,
@@ -26,6 +32,9 @@ export async function fetchRepositories({ provider }: { provider: string }) {
 	}
 }
 
+/**
+ * Fetch targets for a given type
+ */
 export async function fetchTargets({ type }: { type: string }) {
 	await new Promise((r) => setTimeout(r, 2000));
 
@@ -38,7 +47,10 @@ export async function fetchTargets({ type }: { type: string }) {
 	}
 }
 
-export async function connectProvider({ provider } : { provider: string }) {
+/**
+ * Connect to a git provider
+ */
+export async function connectProvider({ provider }: { provider: string }) {
 	await new Promise((r) => setTimeout(r, 2000));
 
 	const success = provider === "github" ? true : false;
@@ -48,5 +60,81 @@ export async function connectProvider({ provider } : { provider: string }) {
 		username: mock_username.trim(),
 		name: mock_name.trim() || undefined,
 		avatar: mock_avatar.trim() || undefined,
+	};
+}
+
+/**
+ * Extract a zip file and return its file structure
+ */
+export async function extractZipFile(file: File): Promise<FS_FileStructure> {
+	const zip = await JSZip.loadAsync(file, { createFolders: true });
+	const entries = Object.values(zip.files);
+
+	const root: FS_FileStructure = { elements: [] };
+	const dirMap = new Map<string, FS_Element>();
+	dirMap.set("", {
+		name: "",
+		type: "directory",
+		status: "idle",
+		path: "",
+		date: new Date(0),
+		children: root.elements,
+	});
+
+	const norm = (p: string) => p.replace(/\/+$/, "");
+	const parentPathOf = (full: string) => {
+		const parts = full.replace(/\/+$/, "").split("/").filter(Boolean);
+		return parts.slice(0, -1).join("/");
+	};
+	const baseNameOf = (full: string) => {
+		const s = full.replace(/\/+$/, "");
+		const idx = s.lastIndexOf("/");
+		return idx >= 0 ? s.slice(idx + 1) : s;
+	};
+
+	const getOrCreateDir = (dirPath: string): FS_Element => {
+		const key = norm(dirPath);
+		if (dirMap.has(key)) return dirMap.get(key)!;
+		const parent = getOrCreateDir(parentPathOf(dirPath));
+		const node: FS_Element = {
+			name: baseNameOf(dirPath),
+			type: "directory",
+			status: "idle",
+			path: key ? key + "/" : "",
+			date: new Date(0),
+			children: [],
+		};
+		parent.children!.push(node);
+		dirMap.set(key, node);
+		return node;
+	};
+
+	for (const entry of entries) {
+		const full = entry.name;
+		if (entry.dir) {
+			const dirNode = getOrCreateDir(full);
+			dirNode.date = entry.date ?? dirNode.date;
+		} else {
+			const parent = getOrCreateDir(parentPathOf(full));
+			const node: FS_Element = {
+				name: baseNameOf(full),
+				type: "file",
+				path: full,
+				date: entry.date,
+			};
+			parent.children!.push(node);
+		}
 	}
+
+	return root;
+}
+
+/**
+ * Load the content of a file
+ */
+export async function loadFileContent(
+	fs: FS_FileStructure,
+	element: FS_Element,
+): Promise<string> {
+	return "";
 }

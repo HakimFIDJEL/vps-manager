@@ -8,6 +8,7 @@ import { useProject } from "@/contexts/project-context";
 // Types
 import type { ActionOf, Files } from "@/lib/files/type";
 import type { FileService, Registry } from "@/lib/files/type";
+import { extractZipFile } from "@/lib/files/utils";
 
 export function useLocalFileService(): FileService {
 	const { project, updateProject } = useProject();
@@ -16,6 +17,8 @@ export function useLocalFileService(): FileService {
 		"file-reset-type": file_reset_type,
 		"file-git-link": file_git_link,
 		"file-import-upload": file_import_upload,
+		"file-import-get-fs": file_import_get_fs,
+		"file-import-load-file-content": file_import_load_file_content,
 	};
 
 	return {
@@ -63,9 +66,47 @@ export function useLocalFileService(): FileService {
 	 * Import a file from local computer
 	 */
 	async function file_import_upload(a: ActionOf<"file-import-upload">) {
+		// Update project state
 		updateProject("files", { type: "import", import: { file: a.file } });
-
 		toast.success(`File ${a.file.name} successfully uploaded!`);
+
+		// Extract file
+		toast.loading('Extracting file...', { id: 'extracting-file' });
+		const fs = await extractZipFile(a.file);
+		updateProject("files", { type: "import", import: { file: a.file, file_structure: fs } });
+		toast.success(`File ${a.file.name} successfully extracted!`, { id: 'extracting-file' });
+
+		console.log(fs);
+
+		return true;
+	}
+
+	/**
+	 * Get the file structure from an imported file
+	 */
+	async function file_import_get_fs(a: ActionOf<"file-import-get-fs">) {
+
+		if(!a.file) {
+			toast.error("An error occured", {
+				description: `No file provided.`,
+			});
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Load the content of a file
+	 */
+	async function file_import_load_file_content(a: ActionOf<"file-import-load-file-content">) {
+
+		if(!a.fs) {
+			toast.error("An error occured", {
+				description: `No file structure provided.`,
+			});
+			return false;
+		}
 
 		return true;
 	}

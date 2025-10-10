@@ -33,15 +33,15 @@ export type FS_FileStructure = {
 }
 
 export type FS_Element = {
-	id: string;
-	parent_id?: string;
 	name: string;
 	type: "file" | "directory";
-	status : "loading" | "success" | "error";
+	status? : "loading" | "success" | "error" | "idle";
 	size?: number;
 	path: string;
 	extension?: string;
+	permissions?: string;
 	children?: FS_Element[];
+	date: Date;
 }
 
 // Constants
@@ -147,7 +147,9 @@ export const mock_avatar = "https://github.com/hakimfidjel.png";
 export type FileAction =
 	| { type: "file-reset-type" }
 	| { type: "file-git-link"; files: Files }
-	| { type: "file-import-upload"; file: File };
+	| { type: "file-import-upload"; file: File; }
+	| { type: "file-import-get-fs"; file: File; }
+	| { type: "file-import-load-file-content"; fs?: FS_FileStructure, element: FS_Element };
 
 export type ActionOf<T extends FileAction["type"]> = Extract<
 	FileAction,
