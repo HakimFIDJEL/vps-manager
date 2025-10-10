@@ -66,17 +66,13 @@ export function useLocalFileService(): FileService {
 	 * Import a file from local computer
 	 */
 	async function file_import_upload(a: ActionOf<"file-import-upload">) {
-		// Update project state
-		updateProject("files", { type: "import", import: { file: a.file } });
-		toast.success(`File ${a.file.name} successfully uploaded!`);
 
 		// Extract file
-		toast.loading('Extracting file...', { id: 'extracting-file' });
+		toast.loading('Uploading file...', { id: 'uploading-file' });
 		const fs = await extractZipFile(a.file);
 		updateProject("files", { type: "import", import: { file: a.file, file_structure: fs } });
-		toast.success(`File ${a.file.name} successfully extracted!`, { id: 'extracting-file' });
-
-		console.log(fs);
+		toast.dismiss('uploading-file');
+		toast.success(`File ${a.file.name} successfully uploaded!`);
 
 		return true;
 	}

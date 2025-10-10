@@ -4,6 +4,7 @@ import { cn, ucfirst, initials } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 // Custom components
 import { SmoothAnimate } from "@/components/ui/smooth-resized";
@@ -91,6 +92,7 @@ import { git_types, git_providers } from "@/lib/files/type";
 
 // Types
 import { type ComboboxOption } from "@/components/ui/combobox";
+import { FileExplorer } from "@/components/ui/file-explorer";
 
 export function AppFiles({
 	setValidate,
@@ -937,5 +939,26 @@ function AppImport({
 	handleFile: (action: FileAction) => Promise<boolean>;
 	loading?: boolean;
 }) {
-	return <></>;
+
+	// Contexts
+	const { setCurrentValue } = useTabsContext();
+	const { project } = useProject();
+
+	const file_structure = project.files.import?.file_structure;
+
+	if (!file_structure) {
+		toast.error('An error occured', {
+			description: "No file structure found. Please re-import your ZIP file.",
+		})
+		setCurrentValue("none");
+		return;
+	}
+
+	return (
+		<FileExplorer
+			file_structure={file_structure}
+			project_path={project.path}
+			disabled={loading}
+		/>
+	);
 }
