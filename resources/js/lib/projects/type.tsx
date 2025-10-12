@@ -5,7 +5,7 @@ import {
 	DockerComposeStateSchema,
 } from "@/lib/docker/type";
 import { CommandSchema, type Command } from "@/lib/commands/type";
-import { FileSchema, type Files } from "@/lib/files/type";
+import { FileSchema, mock_file_structure, type Files } from "@/lib/files/type";
 
 // Types
 export type Project = {
@@ -32,7 +32,8 @@ export type ProjectContextType = {
 
 export const DEFAULT_PROJECT: Project = {
 	path: "",
-	files: { type: "none" },
+	// files: { type: "none" },
+	files: { type: "import", import: { file_structure: mock_file_structure } },
 	variables: [],
 	docker: {
 		content: "",

@@ -139,6 +139,59 @@ export const mock_targets_tag = [
 	{ label: "v2.0.0", value: "v2.0.0" },
 ];
 
+export const mock_file_structure: FS_FileStructure = {
+	elements: [
+		{
+			name: "app",
+			path: "portfolio/app",
+			type: "directory",
+			date: new Date("2023-01-10"),
+			children: [
+			],
+		},
+		{
+			name: "resources",
+			path: "portfolio/resources",
+			type: "directory",
+			date: new Date("2023-01-10"),
+			children: [
+				{
+					name: "images",
+					path: "portfolio/resources/images",
+					type: "directory",
+					date: new Date("2023-01-10"),
+					children: [
+						{
+							name: "logo.png",
+							path: "portfolio/resources/images/logo.png",
+							type: "file",
+							date: new Date("2023-01-10"),
+						},
+						{
+							name: "background.jpg",
+							path: "portfolio/resources/images/background.jpg",
+							type: "file",
+							date: new Date("2023-01-10"),
+						},
+					],
+				},
+			],
+		},
+		{
+			name: "index.html",
+			path: "portfolio/index.html",
+			type: "file",
+			date: new Date("2023-01-10"),
+		},
+		{
+			name: ".env",
+			path: "portfolio/.env",
+			type: "file",
+			date: new Date("2023-01-10"),
+		}
+	]
+};
+
 export const mock_username = "hakimfidjel";
 export const mock_name = "Hakim Fidjel";
 export const mock_avatar = "https://github.com/hakimfidjel.png";

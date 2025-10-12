@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 // Custom components
 import { SmoothAnimate } from "@/components/ui/smooth-resized";
+import { FileExplorer } from "@/components/ui/file-explorer";
 
 // Shadcn UI components
 import {
@@ -92,7 +93,9 @@ import { git_types, git_providers } from "@/lib/files/type";
 
 // Types
 import { type ComboboxOption } from "@/components/ui/combobox";
-import { FileExplorer } from "@/components/ui/file-explorer";
+
+// Mocks
+import { mock_file_structure } from "@/lib/files/type";
 
 export function AppFiles({
 	setValidate,
@@ -100,7 +103,7 @@ export function AppFiles({
 	setValidate: Dispatch<SetStateAction<() => Promise<boolean>>>;
 }) {
 	// Custom hooks
-	const { project } = useProject();
+	const { project, updateProject } = useProject();
 	const { handleFile, loading } = useFile();
 
 	const validator = async () => {
@@ -112,7 +115,7 @@ export function AppFiles({
 	useEffect(() => {
 		setValidate(() => validator);
 	}, [setValidate, project.docker]);
-
+	
 	return (
 		<Tabs defaultValue={project.files.type}>
 			<TabsList className="hidden">
@@ -944,6 +947,14 @@ function AppImport({
 	const { setCurrentValue } = useTabsContext();
 	const { project } = useProject();
 
+	// Custom methods
+	async function handleReset() {
+		await handleFile({ type: "file-reset-type" });
+		setCurrentValue("none");
+		return true;
+	}
+
+	// Basic verification
 	const file_structure = project.files.import?.file_structure;
 
 	if (!file_structure) {
@@ -955,10 +966,42 @@ function AppImport({
 	}
 
 	return (
-		<FileExplorer
-			file_structure={file_structure}
-			project_path={project.path}
-			disabled={loading}
-		/>
+		<div className="flex flex-col gap-2">
+			<h3 className="text-sm font-medium">Import method</h3>
+			<Item variant={"outline"} className="col-span-2">
+				<ItemMedia variant="icon">
+					<FileArchive />
+				</ItemMedia>
+				<ItemContent>
+					<ItemTitle>ZIP File</ItemTitle>
+					<ItemDescription>
+						Import your project files from a ZIP file.
+					</ItemDescription>
+				</ItemContent>
+				<ItemActions>
+					<Button
+						variant={"outline"}
+						type={"button"}
+						onClick={handleReset}
+						disabled={loading}
+						className="group"
+					>
+						{loading ? (
+							<Loader2 className="animate-spin" />
+						) : (
+							<RefreshCcw className="group-hover:-rotate-180 transition-transform duration-300" />
+						)}
+						Reset
+					</Button>
+				</ItemActions>
+			</Item>
+
+			<h3 className="text-sm font-medium mt-2">File explorer</h3>
+			<FileExplorer
+				file_structure={file_structure}
+				project_path={project.path}
+				disabled={loading}
+			/>
+		</div>
 	);
 }
