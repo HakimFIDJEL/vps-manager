@@ -42,6 +42,8 @@ export type FS_Element = {
 	permissions?: string;
 	children?: FS_Element[];
 	date: Date;
+
+	content?: string;
 }
 
 // Constants
