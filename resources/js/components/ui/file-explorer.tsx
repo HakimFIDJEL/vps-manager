@@ -40,33 +40,66 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { 
+import {
 	Tabs,
 	TabsBody,
 	TabsContent,
 	TabsNavigation,
 	TabsTrigger,
 	TabsList,
-	useTabsContext
+	useTabsContext,
 } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Icons
-import { ChevronRight, File, FileX, Folder } from "lucide-react";
+import {
+	Check,
+	ChevronRight,
+	File,
+	FileX,
+	Folder,
+	Clipboard,
+} from "lucide-react";
+
+// Extension icons
+import { FaJsSquare, FaPhp, FaLaravel, FaHtml5, FaCss3 } from "react-icons/fa";
+import { BiLogoTypescript } from "react-icons/bi";
+import {
+	BsFiletypeSql,
+	BsFiletypeJson,
+	BsFiletypeSh,
+	BsFiletypeXml,
+	BsFiletypeYml,
+	BsFileEarmarkLock,
+	BsFiletypeJsx,
+	BsFiletypeMd,
+	BsFileEarmarkImage,
+} from "react-icons/bs";
 
 // Types
 import type { FS_FileStructure, FS_Element } from "@/lib/files/type";
+import { toast } from "sonner";
 
 // Sidebar
 type SidebarProps = ComponentProps<typeof Sidebar>;
 type FE_SidebarProps = SidebarProps & {
 	file_structure: FS_FileStructure;
 	active_element?: FS_Element;
-	set_pinned_elements?: React.Dispatch<React.SetStateAction<FS_Element[]>>;
+	set_active_element?: React.Dispatch<
+		React.SetStateAction<FS_Element | undefined>
+	>;
 	disabled?: boolean;
 };
 
 function FE_Sidebar({
 	file_structure,
+	active_element,
+	set_active_element,
 	disabled = false,
 	...sidebarProps
 }: FE_SidebarProps) {
@@ -78,7 +111,12 @@ function FE_Sidebar({
 					<SidebarGroupContent>
 						<SidebarMenu>
 							{file_structure.elements.map((element: FS_Element) => (
-								<FE_SidebarItem key={element.path} element={element} />
+								<FE_SidebarItem
+									key={element.path}
+									element={element}
+									active_element={active_element}
+									set_active_element={set_active_element}
+								/>
 							))}
 						</SidebarMenu>
 					</SidebarGroupContent>
@@ -88,13 +126,32 @@ function FE_Sidebar({
 	);
 }
 
-function FE_SidebarItem({ element }: { element: FS_Element }) {
+type FE_SidebarItemProps = {
+	element: FS_Element;
+	active_element?: FS_Element;
+	set_active_element?: React.Dispatch<
+		React.SetStateAction<FS_Element | undefined>
+	>;
+};
+
+function FE_SidebarItem({
+	element,
+	active_element,
+	set_active_element,
+}: FE_SidebarItemProps) {
+	function handleClick() {
+		if (set_active_element) {
+			set_active_element(element);
+		}
+	}
+
 	if (element.type === "file") {
 		return (
 			<SidebarMenuButton
-				className="data-[active=true]:bg-transparent px-2"
-				// isActive={name === "button.tsx"}
+				className="px-2"
+				isActive={element === active_element}
 				type={"button"}
+				onClick={handleClick}
 			>
 				<File />
 				<span className="min-w-0 flex-1 truncate">{element.name}</span>
@@ -118,7 +175,12 @@ function FE_SidebarItem({ element }: { element: FS_Element }) {
 						{element.children && element.children.length > 0 ? (
 							<SidebarMenuSub className="pr-0 mr-0">
 								{element.children.map((subItem, index) => (
-									<FE_SidebarItem key={index} element={subItem} />
+									<FE_SidebarItem
+										key={index}
+										element={subItem}
+										active_element={active_element}
+										set_active_element={set_active_element}
+									/>
 								))}
 							</SidebarMenuSub>
 						) : (
@@ -150,25 +212,80 @@ function FE_Header({
 }: FE_HeaderProps) {
 	return (
 		<header>
-				<FE_HeaderNav
+			<FE_HeaderNav active_element={active_element} />
+			{/* <FE_HeaderTabs
 					active_element={active_element}
 					pinned_elements={pinned_elements}
 					set_pinned_elements={set_pinned_elements}
-				/>
+				/> */}
 		</header>
 	);
 }
 
 type FE_HeaderNavProps = {
 	active_element?: FS_Element;
+};
+
+function FE_HeaderNav({ active_element }: FE_HeaderNavProps) {
+	const [copied, setCopied] = React.useState(false);
+
+	function handleCopy() {
+		if (active_element) {
+			navigator.clipboard.writeText(active_element.content || "");
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} else {
+			toast.error("Failed to copy file content");
+		}
+	}
+
+	return (
+		active_element && (
+			<div className="border-b px-4 py-2 bg-sidebar">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center space-x-2">
+						{/* Icon */}
+						{_get_icon(active_element.extension || "")}
+						<span className="text-sm text-muted-foreground">
+							{active_element.path}
+						</span>
+					</div>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								onClick={handleCopy}
+								size={"icon"}
+								variant={"ghost"}
+								type={"button"}
+							>
+								{copied ? (
+									<Check className="h-4 w-4 text-muted-foreground" />
+								) : (
+									<Clipboard className="h-4 w-4 text-muted-foreground" />
+								)}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							{copied ? "Copied!" : "Copy to clipboard"}
+						</TooltipContent>
+					</Tooltip>
+				</div>
+			</div>
+		)
+	);
+}
+
+type FE_HeaderTabsProps = {
+	active_element?: FS_Element;
 	pinned_elements?: FS_Element[];
 	set_pinned_elements?: React.Dispatch<React.SetStateAction<FS_Element[]>>;
 };
-function FE_HeaderNav({
+
+function FE_HeaderTabs({
 	active_element,
 	pinned_elements,
 	set_pinned_elements,
-}: FE_HeaderNavProps) {
+}: FE_HeaderTabsProps) {
 	const { currentValue } = useTabsContext();
 	const [hoverStyle, setHoverStyle] = React.useState({});
 	const [activeStyle, setActiveStyle] = React.useState({
@@ -200,7 +317,6 @@ function FE_HeaderNav({
 
 	// Animation of indicator
 	React.useEffect(() => {
-
 		if (!pinned_elements || pinned_elements.length === 0) {
 			setActiveStyle({
 				left: "0px",
@@ -209,7 +325,9 @@ function FE_HeaderNav({
 			return;
 		}
 
-		const activeIndex = pinned_elements.findIndex((element) => element.path === currentValue);
+		const activeIndex = pinned_elements.findIndex(
+			(element) => element.path === currentValue,
+		);
 
 		const activeElement = tabRefs.current[activeIndex];
 		if (activeElement) {
@@ -241,7 +359,6 @@ function FE_HeaderNav({
 			{!pinned_elements || pinned_elements.length === 0 ? (
 				<></>
 			) : (
-
 				<TabsList
 					className="!bg-transparent rounded-none h-auto space-x-[6px] relative border-0 px-2"
 					onMouseLeave={() => {
@@ -268,7 +385,6 @@ function FE_HeaderNav({
 					))}
 				</TabsList>
 			)}
-
 		</div>
 	);
 }
@@ -282,9 +398,7 @@ function FE_Content({ active_element, disabled }: FE_ContentProps) {
 	return (
 		<Tabs className="flex-1 h-full w-full overflow-auto">
 			{active_element ? (
-				<TabsContent value={active_element.path}>
-					{active_element.name}
-				</TabsContent>
+				<TabsContent value={active_element.path}>{active_element.name}</TabsContent>
 			) : (
 				<div className="flex h-full justify-center items-center flex-col">
 					<Empty>
@@ -341,10 +455,16 @@ export function FileExplorer({
 	file_structure,
 	disabled = false,
 }: FE_Props) {
-	const [pinnedElements, setPinnedElements] = React.useState<FS_Element[]>(file_structure.elements.length > 0 ? [file_structure.elements[0]] : []);
+	const [pinnedElements, setPinnedElements] = React.useState<FS_Element[]>(
+		file_structure.elements.length > 0 ? [file_structure.elements[0]] : [],
+	);
 	const [activeElement, setActiveElement] = React.useState<
 		FS_Element | undefined
 	>(undefined);
+
+	React.useEffect(() => {
+		console.log("Active element", activeElement?.extension);
+	}, [activeElement]);
 
 	return (
 		<SidebarProvider>
@@ -356,7 +476,7 @@ export function FileExplorer({
 					<FE_Sidebar
 						file_structure={file_structure}
 						active_element={activeElement}
-						set_pinned_elements={setPinnedElements}
+						set_active_element={setActiveElement}
 						disabled={disabled}
 					/>
 				</ResizablePanel>
@@ -375,4 +495,46 @@ export function FileExplorer({
 			</ResizablePanelGroup>
 		</SidebarProvider>
 	);
+}
+
+// Custom methods
+function _get_icon(extenstion: string) {
+	switch (extenstion) {
+		case "js":
+			return <FaJsSquare className="h-4 w-4 flex-shrink-0" />;
+		case "ts":
+			return <BiLogoTypescript className="h-4 w-4 flex-shrink-0" />;
+		case "php":
+			return <FaPhp className="h-4 w-4 flex-shrink-0" />;
+		case "html":
+			return <FaHtml5 className="h-4 w-4 flex-shrink-0" />;
+		case "css":
+			return <FaCss3 className="h-4 w-4 flex-shrink-0" />;
+		case "sql":
+			return <BsFiletypeSql className="h-4 w-4 flex-shrink-0" />;
+		case "yaml":
+		case "yml":
+			return <BsFiletypeYml className="h-4 w-4 flex-shrink-0" />;
+		case "laravel":
+			return <FaLaravel className="h-4 w-4 flex-shrink-0" />;
+		case "json":
+			return <BsFiletypeJson className="h-4 w-4 flex-shrink-0" />;
+		case "sh":
+			return <BsFiletypeSh className="h-4 w-4 flex-shrink-0" />;
+		case "xml":
+			return <BsFiletypeXml className="h-4 w-4 flex-shrink-0" />;
+		case "lock":
+			return <BsFileEarmarkLock className="h-4 w-4 flex-shrink-0" />;
+		case "jsx":
+			return <BsFiletypeJsx className="h-4 w-4 flex-shrink-0" />;
+		case "MD":
+		case "md":
+			return <BsFiletypeMd className="h-4 w-4 flex-shrink-0" />;
+		case "png":
+		case "jpg":
+		case "jpeg":
+			return <BsFileEarmarkImage className="h-4 w-4 flex-shrink-0" />;
+		default:
+			return <File className="h-4 w-4 flex-shrink-0" />;
+	}
 }

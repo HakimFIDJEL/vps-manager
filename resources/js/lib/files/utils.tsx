@@ -91,6 +91,10 @@ export async function extractZipFile(file: File): Promise<FS_FileStructure> {
 		const idx = s.lastIndexOf("/");
 		return idx >= 0 ? s.slice(idx + 1) : s;
 	};
+	const getExtension = (name: string): string | undefined => {
+		const idx = name.lastIndexOf(".");
+		return idx > 0 ? name.slice(idx + 1).toLowerCase() : undefined;
+	};
 
 	const getOrCreateDir = (dirPath: string): FS_Element => {
 		const key = norm(dirPath);
@@ -116,11 +120,13 @@ export async function extractZipFile(file: File): Promise<FS_FileStructure> {
 			dirNode.date = entry.date ?? dirNode.date;
 		} else {
 			const parent = getOrCreateDir(parentPathOf(full));
+			const name = baseNameOf(full);
 			const node: FS_Element = {
-				name: baseNameOf(full),
+				name,
 				type: "file",
 				path: full,
 				date: entry.date,
+				extension: getExtension(name),
 			};
 			parent.children!.push(node);
 		}
