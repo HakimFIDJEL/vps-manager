@@ -30,12 +30,12 @@ export type Files = {
 
 export type FS_FileStructure = {
 	elements: FS_Element[];
-}
+};
 
 export type FS_Element = {
 	name: string;
 	type: "file" | "directory";
-	status? : "loading" | "success" | "error" | "idle";
+	status?: "loading" | "success" | "error" | "idle";
 	size?: number;
 	path: string;
 	extension?: string;
@@ -43,8 +43,9 @@ export type FS_Element = {
 	children?: FS_Element[];
 	date: Date;
 
+	saved?: boolean;
 	content?: string;
-}
+};
 
 // Constants
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
@@ -148,8 +149,7 @@ export const mock_file_structure: FS_FileStructure = {
 			path: "portfolio/app",
 			type: "directory",
 			date: new Date("2023-01-10"),
-			children: [
-			],
+			children: [],
 		},
 		{
 			name: "resources",
@@ -166,13 +166,17 @@ export const mock_file_structure: FS_FileStructure = {
 						{
 							name: "logo.png",
 							path: "portfolio/resources/images/logo.png",
+							extension: "png",
 							type: "file",
+							saved: true,
 							date: new Date("2023-01-10"),
 						},
 						{
 							name: "background.jpg",
 							path: "portfolio/resources/images/background.jpg",
+							extension: "jpg",
 							type: "file",
+							saved: true,
 							date: new Date("2023-01-10"),
 						},
 					],
@@ -182,16 +186,20 @@ export const mock_file_structure: FS_FileStructure = {
 		{
 			name: "index.html",
 			path: "portfolio/index.html",
+			extension: "html",
 			type: "file",
+			saved: true,
 			date: new Date("2023-01-10"),
 		},
 		{
 			name: ".env",
 			path: "portfolio/.env",
+			extension: "env",
 			type: "file",
+			saved: true,
 			date: new Date("2023-01-10"),
-		}
-	]
+		},
+	],
 };
 
 export const mock_username = "hakimfidjel";
@@ -202,9 +210,13 @@ export const mock_avatar = "https://github.com/hakimfidjel.png";
 export type FileAction =
 	| { type: "file-reset-type" }
 	| { type: "file-git-link"; files: Files }
-	| { type: "file-import-upload"; file: File; }
-	| { type: "file-import-get-fs"; file: File; }
-	| { type: "file-import-load-file-content"; fs?: FS_FileStructure, element: FS_Element };
+	| { type: "file-import-upload"; file: File }
+	| { type: "file-import-get-fs"; file: File }
+	| {
+			type: "file-import-load-file-content";
+			fs?: FS_FileStructure;
+			element: FS_Element;
+	  };
 
 export type ActionOf<T extends FileAction["type"]> = Extract<
 	FileAction,

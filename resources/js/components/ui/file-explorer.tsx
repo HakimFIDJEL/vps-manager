@@ -3,6 +3,8 @@
 // Necessary imports
 import * as React from "react";
 import type { ComponentProps } from "react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 // Shadcn UI Components
 import {
@@ -40,50 +42,67 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import {
-	Tabs,
-	TabsBody,
-	TabsContent,
-	TabsNavigation,
-	TabsTrigger,
-	TabsList,
-	useTabsContext,
-} from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CodeEditor } from "@/components/ui/code-editor";
+import { Badge } from "@/components/ui/badge";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+	DropdownMenuGroup,
+} from "@/components/ui/dropdown-menu";
 
 // Icons
 import {
 	Check,
 	ChevronRight,
-	File,
 	FileX,
 	Folder,
 	Clipboard,
+	File,
+	FileLock,
+	FileImage,
+	FileVideo2,
+	Database,
+	X,
+	Ellipsis,
+	Save,
 } from "lucide-react";
 
 // Extension icons
-import { FaJsSquare, FaPhp, FaLaravel, FaHtml5, FaCss3 } from "react-icons/fa";
-import { BiLogoTypescript } from "react-icons/bi";
 import {
-	BsFiletypeSql,
-	BsFiletypeJson,
-	BsFiletypeSh,
-	BsFiletypeXml,
-	BsFiletypeYml,
-	BsFileEarmarkLock,
-	BsFiletypeJsx,
-	BsFiletypeMd,
-	BsFileEarmarkImage,
-} from "react-icons/bs";
+	SiHtml5,
+	SiCss3,
+	SiJavascript,
+	SiReact,
+	SiTypescript,
+	SiLess,
+	SiPhp,
+	SiPython,
+	SiGnubash,
+	SiLaravel,
+	SiGo,
+	SiVuedotjs,
+	SiSvelte,
+	SiAstro,
+	SiJson,
+	SiDotenv,
+	SiSqlite,
+	SiPrisma,
+	SiDocker,
+	SiSvg,
+	SiMarkdown,
+} from "react-icons/si";
 
 // Types
 import type { FS_FileStructure, FS_Element } from "@/lib/files/type";
-import { toast } from "sonner";
 
 // Sidebar
 type SidebarProps = ComponentProps<typeof Sidebar>;
@@ -94,6 +113,7 @@ type FE_SidebarProps = SidebarProps & {
 		React.SetStateAction<FS_Element | undefined>
 	>;
 	disabled?: boolean;
+	display_icons?: boolean;
 };
 
 function FE_Sidebar({
@@ -101,6 +121,7 @@ function FE_Sidebar({
 	active_element,
 	set_active_element,
 	disabled = false,
+	display_icons = false,
 	...sidebarProps
 }: FE_SidebarProps) {
 	return (
@@ -116,6 +137,7 @@ function FE_Sidebar({
 									element={element}
 									active_element={active_element}
 									set_active_element={set_active_element}
+									display_icons={display_icons}
 								/>
 							))}
 						</SidebarMenu>
@@ -132,12 +154,14 @@ type FE_SidebarItemProps = {
 	set_active_element?: React.Dispatch<
 		React.SetStateAction<FS_Element | undefined>
 	>;
+	display_icons?: boolean;
 };
 
 function FE_SidebarItem({
 	element,
 	active_element,
 	set_active_element,
+	display_icons,
 }: FE_SidebarItemProps) {
 	function handleClick() {
 		if (set_active_element) {
@@ -153,7 +177,11 @@ function FE_SidebarItem({
 				type={"button"}
 				onClick={handleClick}
 			>
-				<File />
+				{/* {display_icons ? (
+					<>{_get_icon({ extension: element.extension || "" })}</>
+				) : ( */}
+				<File className="h-4 w-4" />
+				{/* )} */}
 				<span className="min-w-0 flex-1 truncate">{element.name}</span>
 			</SidebarMenuButton>
 		);
@@ -201,244 +229,192 @@ function FE_SidebarItem({
 type FE_HeaderProps = {
 	file_structure: FS_FileStructure;
 	active_element?: FS_Element;
-	pinned_elements: FS_Element[];
-	set_pinned_elements: React.Dispatch<React.SetStateAction<FS_Element[]>>;
+	set_active_element?: React.Dispatch<
+		React.SetStateAction<FS_Element | undefined>
+	>;
+	display_icons?: boolean;
 };
 
 function FE_Header({
 	active_element,
-	pinned_elements,
-	set_pinned_elements,
+	set_active_element,
+	display_icons,
 }: FE_HeaderProps) {
-	return (
-		<header>
-			<FE_HeaderNav active_element={active_element} />
-			{/* <FE_HeaderTabs
-					active_element={active_element}
-					pinned_elements={pinned_elements}
-					set_pinned_elements={set_pinned_elements}
-				/> */}
-		</header>
-	);
-}
-
-type FE_HeaderNavProps = {
-	active_element?: FS_Element;
-};
-
-function FE_HeaderNav({ active_element }: FE_HeaderNavProps) {
-	const [copied, setCopied] = React.useState(false);
-
-	function handleCopy() {
-		if (active_element) {
-			navigator.clipboard.writeText(active_element.content || "");
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		} else {
-			toast.error("Failed to copy file content");
-		}
-	}
-
 	return (
 		active_element && (
 			<div className="border-b px-4 py-2 bg-sidebar">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center space-x-2">
 						{/* Icon */}
-						{_get_icon(active_element.extension || "")}
+						{display_icons ? (
+							<>
+								{_get_icon({
+									extension: active_element.extension || "",
+									className: "text-muted-foreground",
+								})}
+							</>
+						) : (
+							<File className="h-4 w-4 text-muted-foreground" />
+						)}
+
+						{/* Name */}
 						<span className="text-sm text-muted-foreground">
 							{active_element.path}
 						</span>
 					</div>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button
-								onClick={handleCopy}
-								size={"icon"}
-								variant={"ghost"}
-								type={"button"}
-							>
-								{copied ? (
-									<Check className="h-4 w-4 text-muted-foreground" />
-								) : (
-									<Clipboard className="h-4 w-4 text-muted-foreground" />
-								)}
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							{copied ? "Copied!" : "Copy to clipboard"}
-						</TooltipContent>
-					</Tooltip>
+					<div className="flex items-center space-x-2">
+						{/* Saved */}
+						{active_element.saved ? (
+							<Badge variant="default" className="text-xs">
+								<Check className="h-4 w-4" />
+								Saved
+							</Badge>
+						) : (
+							<Badge variant="secondary" className="text-xs ">
+								<X className="h-4 w-4 text-muted-foreground" />
+								Not saved
+							</Badge>
+						)}
+
+						{/* Actions */}
+						<FE_HeaderDropdown active_element={active_element} />
+					</div>
 				</div>
 			</div>
 		)
 	);
 }
 
-type FE_HeaderTabsProps = {
+type FE_HeaderDropdownProps = {
 	active_element?: FS_Element;
-	pinned_elements?: FS_Element[];
-	set_pinned_elements?: React.Dispatch<React.SetStateAction<FS_Element[]>>;
 };
-
-function FE_HeaderTabs({
-	active_element,
-	pinned_elements,
-	set_pinned_elements,
-}: FE_HeaderTabsProps) {
-	const { currentValue } = useTabsContext();
-	const [hoverStyle, setHoverStyle] = React.useState({});
-	const [activeStyle, setActiveStyle] = React.useState({
-		left: "0px",
-		width: "0px",
-	});
-	const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
-	const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
-	const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-
-	// Animation of highlight
-	React.useEffect(() => {
-		if (hoveredIndex !== null) {
-			if (timeoutRef.current) {
-				clearTimeout(timeoutRef.current);
-				timeoutRef.current = null;
-			}
-
-			const hoveredElement = tabRefs.current[hoveredIndex];
-			if (hoveredElement) {
-				const { offsetLeft, offsetWidth } = hoveredElement;
-				setHoverStyle({
-					left: `${offsetLeft}px`,
-					width: `${offsetWidth}px`,
-				});
-			}
+function FE_HeaderDropdown({ active_element }: FE_HeaderDropdownProps) {
+	function handleFileCopy() {
+		if (active_element) {
+			navigator.clipboard.writeText(active_element.content || "");
+			toast.success("File content copied to clipboard");
+		} else {
+			toast.error("Failed to copy file content");
 		}
-	}, [hoveredIndex]);
-
-	// Animation of indicator
-	React.useEffect(() => {
-		if (!pinned_elements || pinned_elements.length === 0) {
-			setActiveStyle({
-				left: "0px",
-				width: "0px",
-			});
-			return;
-		}
-
-		const activeIndex = pinned_elements.findIndex(
-			(element) => element.path === currentValue,
-		);
-
-		const activeElement = tabRefs.current[activeIndex];
-		if (activeElement) {
-			const { offsetLeft, offsetWidth } = activeElement;
-			setActiveStyle({
-				left: `${offsetLeft}px`,
-				width: `${offsetWidth}px`,
-			});
-		}
-	}, [currentValue]);
+	}
 
 	return (
-		<div className="relative border-b">
-			{/* Hover Highlight */}
-			<div
-				className="absolute h-full duration-200 bg-accent rounded-md flex items-center pointer-events-none"
-				style={{
-					...hoverStyle,
-					opacity: hoveredIndex !== null ? 1 : 0,
-				}}
-			/>
-
-			{/* Active Indicator */}
-			<div
-				className="absolute bottom-[-2px] h-[3px] bg-primary duration-200 pointer-events-none z-2 rounded-md"
-				style={activeStyle}
-			/>
-
-			{!pinned_elements || pinned_elements.length === 0 ? (
-				<></>
-			) : (
-				<TabsList
-					className="!bg-transparent rounded-none h-auto space-x-[6px] relative border-0 px-2"
-					onMouseLeave={() => {
-						setHoveredIndex(null);
-						timeoutRef.current = setTimeout(() => {
-							setHoverStyle({});
-						}, 200);
-					}}
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant={"outline"}
+					size={"icon"}
+					type={"button"}
+					className="h-6 w-8"
+					// disabled={loading}
 				>
-					{pinned_elements.map((element, index) => (
-						<TabsTrigger
-							key={element.path}
-							value={element.path}
-							ref={(el) => (tabRefs.current[index] = el)}
-							className="px-2 py-1 text-sm whitespace-nowrap !shadow-none !bg-transparent data-[state=inactive]:!text-muted-foreground data-[state=active]:text-foreground hover:bg-transparent data-[state=inactive]:hover:!text-foreground rounded-sm relative"
-							onMouseEnter={() => {
-								setHoveredIndex(index);
-							}}
-							onMouseLeave={() => setHoveredIndex(null)}
-						>
-							{/* Function for icon */}
-							{element.name}
-						</TabsTrigger>
-					))}
-				</TabsList>
-			)}
-		</div>
+					<Ellipsis className="h-4 w-4" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="">
+				<DropdownMenuGroup>
+					<DropdownMenuItem
+						onClick={handleFileCopy}
+						className="flex items-center gap-2"
+					>
+						<Clipboard className="h-4 w-4 text-muted-foreground" />
+						<span className="text-sm text-muted-foreground">Copy</span>
+					</DropdownMenuItem>
+
+					<DropdownMenuItem
+						// onClick={handleFileSave}
+						disabled={!active_element || active_element.saved}
+						className="flex items-center gap-2"
+					>
+						<Save className="h-4 w-4 text-muted-foreground" />
+						<span className="text-sm text-muted-foreground">Save</span>
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+
+				<DropdownMenuSeparator />
+				<div className="p-2"></div>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }
 
 // Content
 type FE_ContentProps = {
 	active_element?: FS_Element;
+	set_active_element?: React.Dispatch<
+		React.SetStateAction<FS_Element | undefined>
+	>;
 	disabled?: boolean;
 };
-function FE_Content({ active_element, disabled }: FE_ContentProps) {
-	return (
-		<Tabs className="flex-1 h-full w-full overflow-auto">
-			{active_element ? (
-				<TabsContent value={active_element.path}>{active_element.name}</TabsContent>
-			) : (
-				<div className="flex h-full justify-center items-center flex-col">
-					<Empty>
-						<EmptyHeader>
-							<EmptyMedia variant="icon">
-								<FileX />
-							</EmptyMedia>
-							<EmptyTitle>No file opened</EmptyTitle>
-							<EmptyDescription>
-								You have no file opened. Open a file from the sidebar to view its
-								content.
-							</EmptyDescription>
-						</EmptyHeader>
-					</Empty>
-				</div>
-			)}
-		</Tabs>
+
+function FE_Content({
+	active_element,
+	set_active_element,
+	disabled,
+}: FE_ContentProps) {
+	const [temp, setTemp] = React.useState<string>("");
+
+	return active_element ? (
+		<CodeEditor
+			value={active_element.content || ""}
+			onChange={(newValue) =>
+				set_active_element?.((prev) =>
+					prev ? { ...prev, content: newValue, saved: false } : prev,
+				)
+			}
+			isSaved={!!active_element?.saved}
+			onSave={() =>
+				set_active_element?.((prev) => (prev ? { ...prev, saved: true } : prev))
+			}
+			className={`
+			rounded-none 
+			border-0 
+			focus-within:!ring-0	
+					`}
+			disabled={disabled}
+		/>
+	) : (
+		<div className="flex h-full justify-center items-center flex-col">
+			<Empty>
+				<EmptyHeader>
+					<EmptyMedia variant="icon">
+						<FileX />
+					</EmptyMedia>
+					<EmptyTitle>No file opened</EmptyTitle>
+					<EmptyDescription>
+						You have no file opened. Open a file from the sidebar to view its content.
+					</EmptyDescription>
+				</EmptyHeader>
+			</Empty>
+		</div>
 	);
 }
 
 // Body
 type FE_BodyProps = FE_HeaderProps & {
 	disabled?: boolean;
+	display_icons?: boolean;
 };
+
 function FE_Body({
 	file_structure,
 	active_element,
-	pinned_elements,
-	set_pinned_elements,
+	set_active_element,
 	disabled,
+	display_icons,
 }: FE_BodyProps) {
 	return (
 		<div className="flex flex-col w-full h-full">
 			<FE_Header
 				file_structure={file_structure}
 				active_element={active_element}
-				pinned_elements={pinned_elements}
-				set_pinned_elements={set_pinned_elements}
+				display_icons={display_icons}
 			/>
-			<FE_Content active_element={active_element} disabled={disabled} />
+			<FE_Content
+				active_element={active_element}
+				set_active_element={set_active_element}
+				disabled={disabled}
+			/>
 		</div>
 	);
 }
@@ -447,17 +423,16 @@ function FE_Body({
 type FE_Props = {
 	project_path: string;
 	file_structure: FS_FileStructure;
+	display_icons?: boolean;
 	disabled?: boolean;
 };
 
 export function FileExplorer({
 	project_path,
 	file_structure,
+	display_icons = true,
 	disabled = false,
 }: FE_Props) {
-	const [pinnedElements, setPinnedElements] = React.useState<FS_Element[]>(
-		file_structure.elements.length > 0 ? [file_structure.elements[0]] : [],
-	);
 	const [activeElement, setActiveElement] = React.useState<
 		FS_Element | undefined
 	>(undefined);
@@ -467,7 +442,7 @@ export function FileExplorer({
 	}, [activeElement]);
 
 	return (
-		<SidebarProvider>
+		<SidebarProvider className="!h-[100svh] !min-h-0">
 			<ResizablePanelGroup
 				className="w-full relative flex rounded-md border overflow-hidden h-auto"
 				direction={"horizontal"}
@@ -478,6 +453,7 @@ export function FileExplorer({
 						active_element={activeElement}
 						set_active_element={setActiveElement}
 						disabled={disabled}
+						display_icons={display_icons}
 					/>
 				</ResizablePanel>
 				<ResizableHandle withHandle />
@@ -486,9 +462,9 @@ export function FileExplorer({
 						<FE_Body
 							file_structure={file_structure}
 							active_element={activeElement}
-							pinned_elements={pinnedElements}
-							set_pinned_elements={setPinnedElements}
+							set_active_element={setActiveElement}
 							disabled={disabled}
+							display_icons={display_icons}
 						/>
 					</SidebarInset>
 				</ResizablePanel>
@@ -498,43 +474,82 @@ export function FileExplorer({
 }
 
 // Custom methods
-function _get_icon(extenstion: string) {
-	switch (extenstion) {
-		case "js":
-			return <FaJsSquare className="h-4 w-4 flex-shrink-0" />;
-		case "ts":
-			return <BiLogoTypescript className="h-4 w-4 flex-shrink-0" />;
-		case "php":
-			return <FaPhp className="h-4 w-4 flex-shrink-0" />;
+function _get_icon({
+	extension,
+	className,
+}: {
+	extension: string;
+	className?: string;
+}) {
+	const iconClassName = cn("h-4 w-4", className);
+
+	switch (extension) {
 		case "html":
-			return <FaHtml5 className="h-4 w-4 flex-shrink-0" />;
+			return <SiHtml5 className={iconClassName} />;
 		case "css":
-			return <FaCss3 className="h-4 w-4 flex-shrink-0" />;
-		case "sql":
-			return <BsFiletypeSql className="h-4 w-4 flex-shrink-0" />;
-		case "yaml":
-		case "yml":
-			return <BsFiletypeYml className="h-4 w-4 flex-shrink-0" />;
-		case "laravel":
-			return <FaLaravel className="h-4 w-4 flex-shrink-0" />;
-		case "json":
-			return <BsFiletypeJson className="h-4 w-4 flex-shrink-0" />;
-		case "sh":
-			return <BsFiletypeSh className="h-4 w-4 flex-shrink-0" />;
-		case "xml":
-			return <BsFiletypeXml className="h-4 w-4 flex-shrink-0" />;
-		case "lock":
-			return <BsFileEarmarkLock className="h-4 w-4 flex-shrink-0" />;
+		case "scss":
+			return <SiCss3 className={iconClassName} />;
+		case "js":
+			return <SiJavascript className={iconClassName} />;
 		case "jsx":
-			return <BsFiletypeJsx className="h-4 w-4 flex-shrink-0" />;
-		case "MD":
+		case "tsx":
+			return <SiReact className={iconClassName} />;
+		case "ts":
+			return <SiTypescript className={iconClassName} />;
+		case "json":
+			return <SiJson className={iconClassName} />;
+		case "less":
+			return <SiLess className={iconClassName} />;
+		case "php":
+			return <SiPhp className={iconClassName} />;
+		case "py":
+			return <SiPython className={iconClassName} />;
+		case "sh":
+		case "bash":
+			return <SiGnubash className={iconClassName} />;
+		case "blade.php":
+			return <SiLaravel className={iconClassName} />;
+		case "go":
+			return <SiGo className={iconClassName} />;
+		case "vue":
+			return <SiVuedotjs className={iconClassName} />;
+		case "svelte":
+			return <SiSvelte className={iconClassName} />;
+		case "astro":
+			return <SiAstro className={iconClassName} />;
+		case "json":
+			return <SiJson className={iconClassName} />;
+		case "env":
+			return <SiDotenv className={iconClassName} />;
+		case "lock":
+			return <FileLock className={iconClassName} />;
+		case "db":
+		case "sql":
+			return <Database className={iconClassName} />;
+		case "sqlite":
+			return <SiSqlite className={iconClassName} />;
+		case "prisma":
+			return <SiPrisma className={iconClassName} />;
+		case "dockerfile":
+		case "compose.yaml":
+		case "compose.yml":
+			return <SiDocker className={iconClassName} />;
 		case "md":
-			return <BsFiletypeMd className="h-4 w-4 flex-shrink-0" />;
-		case "png":
+			return <SiMarkdown className={iconClassName} />;
 		case "jpg":
 		case "jpeg":
-			return <BsFileEarmarkImage className="h-4 w-4 flex-shrink-0" />;
+		case "png":
+		case "gif":
+		case "webp":
+			return <FileImage className={iconClassName} />;
+
+		case "mp4":
+			return <FileVideo2 className={iconClassName} />;
+
+		case "svg":
+			return <SiSvg className={iconClassName} />;
+
 		default:
-			return <File className="h-4 w-4 flex-shrink-0" />;
+			return <File className={iconClassName} />;
 	}
 }

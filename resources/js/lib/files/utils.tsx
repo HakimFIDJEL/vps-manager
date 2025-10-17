@@ -91,9 +91,29 @@ export async function extractZipFile(file: File): Promise<FS_FileStructure> {
 		const idx = s.lastIndexOf("/");
 		return idx >= 0 ? s.slice(idx + 1) : s;
 	};
+
 	const getExtension = (name: string): string | undefined => {
-		const idx = name.lastIndexOf(".");
-		return idx > 0 ? name.slice(idx + 1).toLowerCase() : undefined;
+		const knownDoubleExt = [
+			"blade.php",
+			"compose.yaml",
+			"compose.yml",
+			// "spec.ts",
+			// "spec.js",
+			// "test.ts",
+			// "test.js",
+			// "d.ts",
+			// "module.css",
+			// "module.scss",
+		];
+
+		const lower = name.toLowerCase();
+
+		for (const ext of knownDoubleExt) {
+			if (lower.endsWith(`.${ext}`)) return ext;
+		}
+
+		const idx = lower.lastIndexOf(".");
+		return idx > 0 ? lower.slice(idx + 1) : undefined;
 	};
 
 	const getOrCreateDir = (dirPath: string): FS_Element => {
@@ -126,6 +146,7 @@ export async function extractZipFile(file: File): Promise<FS_FileStructure> {
 				type: "file",
 				path: full,
 				date: entry.date,
+				saved: true,
 				extension: getExtension(name),
 			};
 			parent.children!.push(node);

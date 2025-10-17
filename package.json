@@ -102,6 +102,7 @@
         "react-animate-height": "^3.2.3",
         "react-day-picker": "^8.10.1",
         "react-dom": "^18.3.1",
+        "react-file-icon": "^1.6.0",
         "react-flip-move": "^3.0.5",
         "react-flip-toolkit": "^7.2.4",
         "react-hook-form": "^7.56.1",

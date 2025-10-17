@@ -26,30 +26,31 @@ import { Button } from "@/components/ui/button";
 import { EditorView } from "@codemirror/view";
 import { motion, AnimatePresence } from "framer-motion";
 
-type CodeBlockProps = {
-	language: string;
-	filename: string;
-	highlightLines?: number[];
-	defaultValue?: string;
-	onCodeChange?: (code: string) => void;
-	onSave?: (code: string) => void;
-} & (
-	| {
-			code: string;
-			tabs?: never;
-	  }
-	| {
-			code?: never;
-			tabs: Array<{
-				name: string;
-				code: string;
-				language?: string;
-				highlightLines?: number[];
-			}>;
-	  }
-);
+// type CodeBlockProps = {
+// 	language: string;
+// 	filename: string;
+// 	highlightLines?: number[];
+// 	defaultValue?: string;
+// 	onCodeChange?: (code: string) => void;
+// 	onSave?: (code: string) => void;
+// } & (
+// 	| {
+// 			code: string;
+// 			tabs?: never;
+// 	  }
+// 	| {
+// 			code?: never;
+// 			tabs: Array<{
+// 				name: string;
+// 				code: string;
+// 				language?: string;
+// 				highlightLines?: number[];
+// 			}>;
+// 	  }
+// );
 
 // Helper function to get the appropriate language extension for CodeMirror
+
 const getLanguageExtension = (lang: string | null) => {
 	if (!lang) return null;
 
@@ -79,133 +80,133 @@ const getLanguageExtension = (lang: string | null) => {
 	return languageMap[lang.toLowerCase()] || null;
 };
 
-export const CodeBlock = ({
-	language,
-	filename,
-	code: initialCode = "",
-	highlightLines = [],
-	tabs = [],
-	defaultValue = "",
-	onCodeChange,
-	onSave,
-}: CodeBlockProps) => {
-	// const [copied, setCopied] = React.useState(false)
-	const [activeTab, setActiveTab] = React.useState(0);
-	const [code, setCode] = React.useState(initialCode || defaultValue);
-	const [tabsContent, setTabsContent] = React.useState(tabs);
+// export const CodeBlock = ({
+// 	language,
+// 	filename,
+// 	code: initialCode = "",
+// 	highlightLines = [],
+// 	tabs = [],
+// 	defaultValue = "",
+// 	onCodeChange,
+// 	onSave,
+// }: CodeBlockProps) => {
+// 	// const [copied, setCopied] = React.useState(false)
+// 	const [activeTab, setActiveTab] = React.useState(0);
+// 	const [code, setCode] = React.useState(initialCode || defaultValue);
+// 	const [tabsContent, setTabsContent] = React.useState(tabs);
 
-	const tabsExist = tabsContent.length > 0;
+// 	const tabsExist = tabsContent.length > 0;
 
-	const [theme, setTheme] =
-		React.useState<ReactCodeMirrorProps["theme"]>("light");
-	const { appearance } = useAppearance();
+// 	const [theme, setTheme] =
+// 		React.useState<ReactCodeMirrorProps["theme"]>("light");
+// 	const { appearance } = useAppearance();
 
-	React.useEffect(() => {
-		if (appearance == "light") {
-			setTheme("light");
-		} else {
-			setTheme("dark");
-		}
-	}, [appearance]);
+// 	React.useEffect(() => {
+// 		if (appearance == "light") {
+// 			setTheme("light");
+// 		} else {
+// 			setTheme("dark");
+// 		}
+// 	}, [appearance]);
 
-	const handleCodeChange = (newCode: string) => {
-		if (tabsExist) {
-			const newTabs = [...tabsContent];
-			newTabs[activeTab].code = newCode;
-			setTabsContent(newTabs);
-		} else {
-			setCode(newCode);
-		}
+// 	const handleCodeChange = (newCode: string) => {
+// 		if (tabsExist) {
+// 			const newTabs = [...tabsContent];
+// 			newTabs[activeTab].code = newCode;
+// 			setTabsContent(newTabs);
+// 		} else {
+// 			setCode(newCode);
+// 		}
 
-		if (onCodeChange) {
-			onCodeChange(newCode);
-		}
-	};
+// 		if (onCodeChange) {
+// 			onCodeChange(newCode);
+// 		}
+// 	};
 
-	const handleSave = () => {
-		const currentCode = tabsExist ? tabsContent[activeTab].code : code;
-		if (onSave) {
-			onSave(currentCode);
-		}
-	};
+// 	const handleSave = () => {
+// 		const currentCode = tabsExist ? tabsContent[activeTab].code : code;
+// 		if (onSave) {
+// 			onSave(currentCode);
+// 		}
+// 	};
 
-	const activeCode = tabsExist ? tabsContent[activeTab].code : code;
-	const activeLanguage = tabsExist
-		? tabsContent[activeTab].language || language
-		: language;
+// 	const activeCode = tabsExist ? tabsContent[activeTab].code : code;
+// 	const activeLanguage = tabsExist
+// 		? tabsContent[activeTab].language || language
+// 		: language;
 
-	return (
-		<div className="relative w-full rounded-lg bg-slate-900 p-4 font-mono text-sm">
-			<div className="flex flex-col gap-2">
-				{tabsExist && (
-					<div className="flex overflow-x-auto">
-						{tabsContent.map((tab, index) => (
-							<button
-								key={index}
-								onClick={() => setActiveTab(index)}
-								className={`px-3 !py-2 text-xs transition-colors font-sans ${
-									activeTab === index
-										? "text-white"
-										: "text-zinc-400 hover:text-zinc-200"
-								}`}
-							>
-								{tab.name}
-							</button>
-						))}
-					</div>
-				)}
-				<div className="flex justify-between items-center py-2">
-					<div className="text-xs text-zinc-400">{filename}</div>
-					<div className="flex items-center gap-2">
-						<button
-							onClick={handleSave}
-							className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors font-sans"
-						>
-							<Save size={14} />
-							Sauvegarder
-						</button>
+// 	return (
+// 		<div className="relative w-full rounded-lg bg-slate-900 p-4 font-mono text-sm">
+// 			<div className="flex flex-col gap-2">
+// 				{tabsExist && (
+// 					<div className="flex overflow-x-auto">
+// 						{tabsContent.map((tab, index) => (
+// 							<button
+// 								key={index}
+// 								onClick={() => setActiveTab(index)}
+// 								className={`px-3 !py-2 text-xs transition-colors font-sans ${
+// 									activeTab === index
+// 										? "text-white"
+// 										: "text-zinc-400 hover:text-zinc-200"
+// 								}`}
+// 							>
+// 								{tab.name}
+// 							</button>
+// 						))}
+// 					</div>
+// 				)}
+// 				<div className="flex justify-between items-center py-2">
+// 					<div className="text-xs text-zinc-400">{filename}</div>
+// 					<div className="flex items-center gap-2">
+// 						<button
+// 							onClick={handleSave}
+// 							className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors font-sans"
+// 						>
+// 							<Save size={14} />
+// 							Sauvegarder
+// 						</button>
 
-						{/* Commented out copy button as requested
-            <button
-              onClick={copyToClipboard}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors font-sans"
-            >
-              {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
-              {copied ? "Copied" : "Copy"}
-            </button>
-            */}
-					</div>
-				</div>
-			</div>
+// 						{/* Commented out copy button as requested
+//             <button
+//               onClick={copyToClipboard}
+//               className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors font-sans"
+//             >
+//               {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+//               {copied ? "Copied" : "Copy"}
+//             </button>
+//             */}
+// 					</div>
+// 				</div>
+// 			</div>
 
-			<div className="border border-slate-700 rounded">
-				<CodeMirror
-					value={activeCode}
-					height="auto"
-					theme={theme}
-					extensions={[
-						getLanguageExtension(activeLanguage),
-						lintGutter(),
-						linter(yamlLinter),
-					].filter(Boolean)}
-					onChange={handleCodeChange}
-					basicSetup={{
-						lineNumbers: true,
-						highlightActiveLine: true,
-						highlightSelectionMatches: true,
-						autocompletion: true,
-						bracketMatching: true,
-						closeBrackets: true,
-						crosshairCursor: true,
-						foldGutter: true,
-						indentOnInput: true,
-						syntaxHighlighting: true,
-					}}
-				/>
-			</div>
-		</div>
-	);
-};
+// 			<div className="border border-slate-700 rounded">
+// 				<CodeMirror
+// 					value={activeCode}
+// 					height="auto"
+// 					theme={theme}
+// 					extensions={[
+// 						getLanguageExtension(activeLanguage),
+// 						lintGutter(),
+// 						linter(yamlLinter),
+// 					].filter(Boolean)}
+// 					onChange={handleCodeChange}
+// 					basicSetup={{
+// 						lineNumbers: true,
+// 						highlightActiveLine: true,
+// 						highlightSelectionMatches: true,
+// 						autocompletion: true,
+// 						bracketMatching: true,
+// 						closeBrackets: true,
+// 						crosshairCursor: true,
+// 						foldGutter: true,
+// 						indentOnInput: true,
+// 						syntaxHighlighting: true,
+// 					}}
+// 				/>
+// 			</div>
+// 		</div>
+// 	);
+// };
 
 type CodeEditorProps = {
 	comment?: string;
@@ -362,33 +363,6 @@ export const CodeEditor = ({
 						} as React.CSSProperties
 					}
 				/>
-
-				{/* <AnimatePresence>
-					{getLanguageExtension(language) == null &&
-						showError &&
-						 (
-							<motion.div
-								initial={{ opacity: 0, y: -10 }}
-								animate={{ opacity: 1, y: 0 }}
-								exit={{ opacity: 0, y: -10 }}
-								transition={{ duration: 0.2 }}
-								className="absolute flex items-center justify-center text-sm bg-card border top-[1rem] left-1/2 -translate-x-1/2 py-2 px-4 w-auto rounded-lg"
-							>
-								<p className="whitespace-nowrap">
-									The format is currently not supported
-								</p>
-								<Button
-									variant={"outline"}
-									size={"icon"}
-									type={"button"}
-									onClick={() => setShowError(false)}
-									className="absolute top-1/2 right-[-0.5rem] translate-x-[100%] translate-y-[-50%] rounded-full !bg-card"
-								>
-									<X size={14} />
-								</Button>
-							</motion.div>
-						)}
-				</AnimatePresence> */}
 			</div>
 			{comment && <p className="mt-1 text-xs text-muted-foreground">{comment}</p>}
 		</>

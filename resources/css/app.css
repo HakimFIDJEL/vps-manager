@@ -284,4 +284,18 @@
 
 .cm-gutters {
 	background-color: var(--card) !important;
+	border-right: 1px solid transparent !important
+}
+
+.cm-gutter-lint {
+	width: 0 !important;
+}
+
+.cm-content {
+	padding : 0 !important;
+}
+
+.cm-lineNumbers .cm-gutterElement {
+	min-width: 3rem !important;
+	text-align: center !important;
 }
